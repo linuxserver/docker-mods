@@ -105,8 +105,8 @@ Here we are leveraging a multi stage DockerFile to run custom logic and pull dow
 ## Full loop - getting a Mod to Dockerhub
 
 First and foremost to publish a Mod you will need the following accounts: 
-Github- https://github.com/join
-DockerHub- https://hub.docker.com/signup
+* Github- https://github.com/join
+* DockerHub- https://hub.docker.com/signup
 
 We reccomend using this repositroy as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into Travis/Dockerhub. 
 
