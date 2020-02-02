@@ -4,16 +4,16 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - openssh-server-rsync
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - DOCKERHUB="linuxserver/mods"
+    - BASEIMAGE="openssh-server"
+    - MODNAME="rsync"
 
 jobs:
   include:
