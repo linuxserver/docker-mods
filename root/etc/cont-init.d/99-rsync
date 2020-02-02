@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing rsync ****"
+apk add --no-cache rsync
