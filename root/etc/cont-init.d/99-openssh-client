@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing openssh-client ****"
+apk add --no-cache openssh-client
