@@ -1,6 +1,9 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** installing nodejs dev environment ****"
+if ! dpkg -l | grep gnupg > /dev/null; then
+  apt-get update && apt-get install -y gnupg
+fi
 [[ ! -f "/etc/apt/sources.list.d/nodesource.list" ]] && \
   curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
   echo 'deb https://deb.nodesource.com/node_12.x bionic main' \
