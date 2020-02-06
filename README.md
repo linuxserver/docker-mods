@@ -13,6 +13,12 @@ It is important to note to end users of this system that there are not only extr
 
 Again, when pulling in logic from external sources practice caution and trust the sources/community you get them from.
 
+## LinuxServer.io Hosted Mods
+
+We host and publish official Mods at the [linuxserver/mods](https://hub.docker.com/r/linuxserver/mods/tags) endpoint as separate tags. Each tag is in the format of `<imagename>-<modname>` for the latest versions, and `<imagename>-<modname>-<commitsha>` for the specific versions.
+
+Here's a list of the official Mods we host: https://github.com/linuxserver/docker-mods/blob/master/mod-list.yml 
+
 ## Using a Docker Mod
 
 Before consuming a Docker Mod ensure that the source code for it is publicly posted along with it's build pipeline pushing to Dockerhub.
@@ -108,7 +114,7 @@ First and foremost to publish a Mod you will need the following accounts:
 * Github- https://github.com/join
 * DockerHub- https://hub.docker.com/signup
 
-We reccomend using this repositroy as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into Travis/Dockerhub. 
+We recommend using this repository as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into Travis/Dockerhub. 
 
 The only code change you need to make to the build logic file `.travis.yml` will be to modify the DOCKERHUB endpoint to your own image: 
 ```
@@ -141,6 +147,17 @@ Once these are set click on the "Current" tab and "Activate repository":
 
 Travis will trigger a build off of your repo and will push to Dockerhub on success. This Dockerhub endpoint is the Mod variable you can use to customize your container now. 
 
+## Submitting a PR for a Mod to be added to the official LinuxServer.io repo
+
+* Ask the team to create a new branch named `<baseimagename>-<modname>` in this repo. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the [template branch](https://github.com/linuxserver/docker-mods/tree/template).
+* Fork the repo, checkout the template branch.
+* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
+* Inspect the `root` folder contents. Edit, add and remove as necessary.
+* Edit this readme with pertinent info, delete these instructions.
+* Finally edit the `travis.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
+* Submit PR against the branch created by the team.
+* Make sure that the commits in the PR are squashed.
+* Also make sure that the commit and PR titles are in the format of `<imagename>: <modname> <very brief description like "initial release" or "update">`. Detailed description and further info should be provided in the body (ie. `code-server: python2 add python-pip`).
 
 ## Appendix
 

@@ -1,6 +1,6 @@
-sudo: true
+os: linux
 
-language: bash
+language: shell
 
 services:
   - docker
