@@ -10,4 +10,15 @@ fi
   echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $UBUNTU_CODENAME stable" > /etc/apt/sources.list.d/docker-ce.list
 apt-get update && apt-get install -y --no-install-recommends \
   docker-ce
-usermod -aG docker abc
+echo "**** fixing permissions ****"
+DOCKER_GID=$(stat -c '%g' "/var/run/docker.sock")
+if id -G abc | grep -qw "$DOCKER_GID"; then
+  exit 0
+else
+  DOCKER_NAME=$(getent group "${DOCKER_GID}" | awk -F: '{print $1}')
+  if [ -z "${DOCKER_NAME}" ]; then
+    DOCKER_NAME="dockergroup"
+    groupadd -g "${DOCKER_GID}" "${DOCKER_NAME}"
+  fi
+  usermod -aG "${DOCKER_NAME}" abc
+fi
