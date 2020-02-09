@@ -1,7 +1,8 @@
 mods:
   code-server:
-    mod_count: 3
+    mod_count: 4
     container_mods:
+      - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
