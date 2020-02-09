@@ -4,16 +4,16 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - code-server-docker
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - DOCKERHUB="linuxserver/mods"
+    - BASEIMAGE="code-server"
+    - MODNAME="docker"
 
 jobs:
   include:
@@ -25,11 +25,13 @@ jobs:
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:
+        # Set version
+        - COMPOSE_VERSION=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]')
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
-        - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
+        - docker build --no-cache --build-arg COMPOSE_VERSION=${COMPOSE_VERSION} -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${COMPOSE_VERSION}-${TRAVIS_COMMIT} .
+        - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${COMPOSE_VERSION}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
         # Login to DockerHub
         - echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
         # Push all of the tags
-        - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT}
+        - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${COMPOSE_VERSION}-${TRAVIS_COMMIT}
         - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}

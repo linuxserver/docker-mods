@@ -1,0 +1,13 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing docker environment ****"
+if ! dpkg -l | grep gnupg > /dev/null; then
+  apt-get update && apt-get install -y gnupg
+fi
+[[ ! -f "/etc/apt/sources.list.d/docker-ce.list" ]] && \
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
+  source /etc/os-release && \
+  echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $UBUNTU_CODENAME stable" > /etc/apt/sources.list.d/docker-ce.list
+apt-get update && apt-get install -y --no-install-recommends \
+  docker-ce
+usermod -aG docker abc
