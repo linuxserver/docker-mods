@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing git ****"
+apk add --no-cache git
