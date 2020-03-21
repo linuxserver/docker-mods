@@ -1,15 +1,35 @@
 # Docker mod for openssh-server
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds ssh tunnelling to openssh-server, by enabling tcp forwarding during container start.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel`
 
-# Mod creation instructions
+Note: `GatewayPorts` is set to `clientspecified`, this moves the responsibility to define the gateway host of the port to the client that opens the tunnel, e.g. `*:8080` to forward 8080 to all connection, default is localhost only.
+In addition it is still necessary to expose the same port on the container level, using either the `--expose` (only to other containers) or the `--port` (expose on host level/internet) run options (or the counterparts in docker-compose).
 
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Fork the repo, checkout the template branch.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete thse instructions.
-* Finally edit the `travis.yml`. Customize the build branch,and the vars for `BASEIMAGE` and `MODNAME`
-* Submit PR against the branch created by the team
+Example:
+
+When creating the container with the following setup:
+```
+version: '2'
+services:
+  ssh-tunnel:
+    image: linuxserver/openssh-server
+    environment:
+      - PUBLIC_KEY_FILE=/config/id_rsa.pub
+      - TCP_FORWARDING=true
+      - DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel
+    volumes:
+      - ./id_rsa.pub:/config/id_rsa.pub
+    expose:
+      - 30000
+    ports:
+      - 2222:2222
+```
+
+It's possible to expose the clients port 8080 through the containers port 30000 like this:
+```
+ssh -R *:30000:localhost:8080 example.com -p 2222
+```
+
+Port 30000 will then only be available to other containers (e.g. a web server acting as a reverse proxy), when using `ports` instead of `expose` the port would be accessible from the host (and the network it resides in, e.g. the internet). The client command can be automated using autossh.
