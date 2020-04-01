@@ -1,4 +1,4 @@
-# Docker mod for openssh-server
+# Rsync - Docker mod for openssh-server
 
 This mod adds rsync to openssh-server, to be installed/updated during container start.
 
