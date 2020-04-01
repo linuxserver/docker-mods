@@ -1,4 +1,4 @@
-# Docker mod for openssh-server
+# SSH-Tunnel - Docker mod for openssh-server
 
 This mod adds ssh tunnelling to openssh-server, by enabling tcp forwarding during container start.
 
