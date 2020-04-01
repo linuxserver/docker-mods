@@ -1,4 +1,4 @@
-# Docker mod for openssh-server
+# OpenSSH-Client - Docker mod for openssh-server
 
 This mod adds openssh-client to openssh-server, to be installed/updated during container start.
 
