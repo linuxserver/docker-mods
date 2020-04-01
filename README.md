@@ -72,7 +72,7 @@ For most users this will suffice and anything in the root/ folder of the reposit
 
 The most common paths to leverage for Linuxserver images will be: 
 
-* root/etc/cont-init.d/<25-script-name> - Contains init logic scripts that run before the services in the container start these should exit 0 and are ordered by filename
+* root/etc/cont-init.d/<98-script-name> - Contains init logic scripts that run before the services in the container start these should exit 0 and are ordered by filename
 * root/etc/services.d/<yourservice>/run - Contains scripts that run in the foreground for persistent services IE NGINX
 * root/defaults - Contains base config files that are copied/modified on first spinup
 
