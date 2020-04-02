@@ -1,4 +1,4 @@
-# Docker mod for openssh-server
+# Git - Docker mod for openssh-server
 
 This mod adds git to openssh-server, to be installed/updated during container start.
 
