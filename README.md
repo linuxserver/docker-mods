@@ -1,17 +1,38 @@
-# Rsync - Docker mod for openssh-server
+# F2B Discord Notification - Docker mod which allows Fail2Ban Discord embeds
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod enhances the Letsencrypt container adding better Fail2Ban notifications for discord.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+## Configuration
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+### Enable
 
-# Mod creation instructions
+In letsencrypt docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:letsencrypt-f2bdiscord` to enable.
 
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Fork the repo, checkout the newly created branch.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `travis.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Submit PR against the branch created by the team.
+### Mod configuration
+
+**Environment variables used by this mod:**
+
+[Discord webhook](https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks), it just need the last parts. `-e DISC_HOOK=40832456738934/7DcEpWr5V24OIEIELjg-KkHky86SrOgTqA`  
+[Your discord ID](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-). `-e DISC_ME=120970603556503552`  
+[Map API Key](https://developer.mapquest.com/), get a key from mapquest. `-e DISC_API=YourKey`
+
+#### Jail configuration example
+
+```ini
+[bitwarden]
+
+filter  = bitwarden
+enabled = true
+logpath = /fail2ban/bw/bitwarden.log
+action  = discordEmbed[bantime=24]
+          iptables-allports[name=Bitwarden]
+
+```
+
+Action arguments:
+
+`bantime`(hour) is optional, but defaults to 24 when not set. Just reflects in the message, does not change the ban time
+
+## Example
+
+![Example picture](.assets/Example.png)
