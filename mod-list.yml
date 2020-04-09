@@ -8,6 +8,9 @@ mods:
       - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
+  letsencrypt:
+    mod_count: 1
+      - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
   openssh-server:
     mod_count: 4
     container_mods:
