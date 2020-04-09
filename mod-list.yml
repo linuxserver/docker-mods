@@ -10,6 +10,7 @@ mods:
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
   letsencrypt:
     mod_count: 1
+    container_mods:
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
   openssh-server:
     mod_count: 4
