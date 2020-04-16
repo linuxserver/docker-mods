@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+if [ -f "/powershell.deb" ]; then
+  echo "Installing PowerShell"
+  apt-get update
+  apt-get install -y /powershell.deb
+  rm /powershell.deb
+else
+  echo "PowerShell already installed, skipping"
+fi
