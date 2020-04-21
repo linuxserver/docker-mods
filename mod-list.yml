@@ -1,10 +1,11 @@
 mods:
   code-server:
-    mod_count: 6
+    mod_count: 7
     container_mods:
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
+      - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
       - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
