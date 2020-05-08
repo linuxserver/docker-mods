@@ -1,8 +1,9 @@
 mods:
   code-server:
-    mod_count: 7
+    mod_count: 8
     container_mods:
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
+      - golang: https://github.com/linuxserver/docker-mods/tree/code-server-golang
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
