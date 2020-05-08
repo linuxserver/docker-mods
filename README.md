@@ -1,17 +1,21 @@
-# Rsync - Docker mod for openssh-server
+# Golang - Docker mod for code-server
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds golang/go to code-server.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-golang`
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-golang|linuxserver/mods:code-server-mod2`
 
-# Mod creation instructions
+## Available Image Tags
+- `code-server-golang` : installs the latest stable version
+- `code-server-golang-X` : installs the latest major `X` version
+- `code-server-golang-X.X` : installs the latest minor `X.X` version
+- `code-server-golang-X.X.X` : installs the specific `X.X.X` version
 
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Fork the repo, checkout the newly created branch.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `travis.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Submit PR against the branch created by the team.
+### Examples
+- `linuxserver/mods:code-server-golang-1.13` will install the latest `1.13` release, which is `1.13.10` as of 2020/05/07
+- `linuxserver/mods:code-server-golang-1` will install the latest `1` release, which is `1.14.2` as of 2020/05/07
+- `linuxserver/mods:code-server-golang` will install the latest stable release, which is `1.14.2` as of 2020/05/07
+- `linuxserver/mods:code-server-golang-1.14.2` will install the specific `1.14.2` release
+
+Visit https://hub.docker.com/r/linuxserver/mods/tags?page=1&name=code-server-golang to see all available tags
