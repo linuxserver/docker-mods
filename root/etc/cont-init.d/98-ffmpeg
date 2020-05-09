@@ -1,4 +1,4 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** installing ffmpeg ****"
-apt update && apt install -y ffmpeg
+apt-get update && apt-get install -y ffmpeg
