@@ -1,10 +1,19 @@
 #!/usr/bin/with-contenv bash
 
-if [ -f "/powershell.deb" ]; then
+ARCH=$(uname -m)
+
+if [ -f "/powershell/powershell_${ARCH}.tar.gz" ]; then
   echo "Installing PowerShell"
   apt-get update
-  apt-get install -y /powershell.deb
-  rm /powershell.deb
+  apt-get install -y \
+    libicu60 \
+    libunwind8
+  tar xf "/powershell/powershell_${ARCH}.tar.gz" -C /powershell
+  rm -rf \
+    /powershell/powershell_x86_64.tar.gz \
+    /powershell/powershell_armv7l.tar.gz \
+    /powershell/powershell_aarch64.tar.gz
+  ln -s /powershell/pwsh /usr/bin/pwsh
 else
   echo "PowerShell already installed, skipping"
 fi
