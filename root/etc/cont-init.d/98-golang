@@ -1,8 +1,8 @@
 #!/usr/bin/with-contenv bash
 
 echo "ensuring golang is in PATH"
-if grep -q '^PATH=' /etc/services.d/code-server/run; then
-  if ! grep -q '^PATH=.*/usr/local/go/bin.*' /etc/services.d/code-server/run; then
+if grep -q -E '^(export )?PATH=' /etc/services.d/code-server/run; then
+  if ! grep -q -E '^(export )?PATH=.*/usr/local/go/bin.*' /etc/services.d/code-server/run; then
     sed -i '/PATH/ s/$/:\/usr\/local\/go\/bin/' /etc/services.d/code-server/run
   fi
 else
