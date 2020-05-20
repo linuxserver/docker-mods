@@ -7,7 +7,7 @@ fi
 [[ ! -f "/etc/apt/sources.list.d/docker-ce.list" ]] && \
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
   source /etc/os-release && \
-  echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $UBUNTU_CODENAME stable" > /etc/apt/sources.list.d/docker-ce.list
+  echo "deb https://download.docker.com/linux/ubuntu $UBUNTU_CODENAME stable" > /etc/apt/sources.list.d/docker-ce.list
 apt-get update && apt-get install -y --no-install-recommends \
   docker-ce
 echo "**** fixing permissions ****"
@@ -21,4 +21,13 @@ else
     groupadd -g "${DOCKER_GID}" "${DOCKER_NAME}"
   fi
   usermod -aG "${DOCKER_NAME}" abc
+fi
+echo "**** installing docker compose ****"
+ARCH=$(uname -m)
+if [ -f "/docker-compose/docker-compose_${ARCH}" ]; then
+  mv "/docker-compose/docker-compose_${ARCH}" /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
+  rm -rf /docker-compose
+else
+  echo "docker-compose already installed, skipping"
 fi
