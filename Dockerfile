@@ -9,12 +9,16 @@ RUN \
  if [ -z ${GO_VERSION+x} ]; then \
     GO_VERSION=$(curl -sX GET https://golang.org/dl/ | grep -o '<span.*>.*linux-amd64.*</span>' | grep -oP '(?<=go).*(?=.linux)'); \
  fi && \
- mkdir -p /root-layer/usr/local && \
+ mkdir -p /root-layer/golang && \
  curl -o \
-    /tmp/golang.tar.gz -L \
+    /root-layer/golang/golang_x86_64.tar.gz -L \
     https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
- tar xzf /tmp/golang.tar.gz -C \
-    /root-layer/usr/local
+ curl -o \
+    /root-layer/golang/golang_armv7l.tar.gz -L \
+    https://dl.google.com/go/go${GO_VERSION}.linux-armv6l.tar.gz && \
+ curl -o \
+    /root-layer/golang/golang_aarch64.tar.gz -L \
+    https://dl.google.com/go/go${GO_VERSION}.linux-arm64.tar.gz
 
 COPY root/ /root-layer/
 
