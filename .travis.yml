@@ -15,6 +15,10 @@ env:
     - BASEIMAGE="code-server"
     - MODNAME="powershell"
 
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install jq
+
 jobs:
   include:
     - stage: PR-BuildImage
@@ -26,7 +30,7 @@ jobs:
       if: (NOT (type IN (pull_request)))
       script:
         # Set version
-        - PS_VERSION=$(curl -sX GET "https://api.github.com/repos/PowerShell/PowerShell/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | awk '{print substr($1,2); }')
+        - PS_VERSION=$(curl -sX GET "https://api.github.com/repos/PowerShell/PowerShell/releases/latest" | jq -r .tag_name | awk '{print substr($1,2); }')
         # Build image
         - docker build --no-cache --build-arg PS_VERSION=${PS_VERSION} -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${PS_VERSION}-${TRAVIS_COMMIT} .
         - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${PS_VERSION}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
