@@ -1,17 +1,41 @@
-# Rsync - Docker mod for openssh-server
+# Healtchecks Apprise mod layer
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This is a docker mod layer adding [Apprise](https://github.com/caronc/apprise) to the [linuxserver/docker-healthchecks](https://github.com/linuxserver/docker-healthchecks) docker image.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+To use this docker mod set the environment variable `DOCKER_MODS` to `linuxserver/mods:healthchecks-apprise`. If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:healtchecks-mod1|linuxserver/mods:healthcheck-apprise`.
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+Example with docker-compose:
 
-# Mod creation instructions
+```yaml
+version: "2.1"
+services:
+  healthchecks:
+    image: linuxserver/healthchecks
+    container_name: healthchecks
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - DOCKER_MODS=linuxserver/mods:healthchecks-apprise
+      - SITE_ROOT=SITE_ROOT
+      - SITE_NAME=SITE_NAME
+      - DEFAULT_FROM_EMAIL=DEFAULT_FROM_EMAIL
+      - EMAIL_HOST=EMAIL_HOST
+      - EMAIL_PORT=EMAIL_PORT
+      - EMAIL_HOST_USER=EMAIL_HOST_USER
+      - EMAIL_HOST_PASSWORD=EMAIL_HOST_PASSWORD
+      - EMAIL_USE_TLS=True or False
+      - ALLOWED_HOSTS=ALLOWED_HOSTS
+      - SUPERUSER_EMAIL=SUPERUSER_EMAIL
+      - SUPERUSER_PASSWORD=SUPERUSER_PASSWORD
+    volumes:
+      - path to data on host:/config
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+```
 
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Fork the repo, checkout the newly created branch.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `travis.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Submit PR against the branch created by the team.
+Note that you will also have to enable Apprise in the [Healthchecks](https://github.com/healthchecks/healthchecks#apprise) application. To do so add the following line to the file `local_settings.py`:
+
+```python
+APPRISE_ENABLED=True
+```

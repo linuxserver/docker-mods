@@ -1,0 +1,7 @@
+#!/usr/bin/with-contenv bash
+
+# Install Apprise
+if [ ! -f /usr/bin/apprise ]; then
+  echo "Running Custom installation of Apprise"
+  pip3 install --no-cache-dir apprise
+fi
