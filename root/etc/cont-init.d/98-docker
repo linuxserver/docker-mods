@@ -1,33 +1,29 @@
 #!/usr/bin/with-contenv bash
 
-echo "**** installing docker environment ****"
-if ! dpkg -l | grep gnupg > /dev/null; then
-  apt-get update && apt-get install -y gnupg
-fi
-[[ ! -f "/etc/apt/sources.list.d/docker-ce.list" ]] && \
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-  source /etc/os-release && \
-  echo "deb https://download.docker.com/linux/ubuntu $UBUNTU_CODENAME stable" > /etc/apt/sources.list.d/docker-ce.list
-apt-get update && apt-get install -y --no-install-recommends \
-  docker-ce
-echo "**** fixing permissions ****"
-DOCKER_GID=$(stat -c '%g' "/var/run/docker.sock")
-if id -G abc | grep -qw "$DOCKER_GID"; then
-  exit 0
-else
-  DOCKER_NAME=$(getent group "${DOCKER_GID}" | awk -F: '{print $1}')
-  if [ -z "${DOCKER_NAME}" ]; then
-    DOCKER_NAME="dockergroup"
-    groupadd -g "${DOCKER_GID}" "${DOCKER_NAME}"
-  fi
-  usermod -aG "${DOCKER_NAME}" abc
-fi
-echo "**** installing docker compose ****"
+echo "**** installing docker and docker compose ****"
 ARCH=$(uname -m)
 if [ -f "/docker-compose/docker-compose_${ARCH}" ]; then
+  echo "Copying over docker and docker-compose binaries"
   mv "/docker-compose/docker-compose_${ARCH}" /usr/local/bin/docker-compose
+  mv "/docker-compose/docker_${ARCH}" /usr/local/bin/docker
   chmod +x /usr/local/bin/docker-compose
   rm -rf /docker-compose
 else
-  echo "docker-compose already installed, skipping"
+  echo "**** docker and docker-compose already installed, skipping ****"
+fi
+
+if [ -S /var/run/docker.sock ]; then
+  DOCKER_GID=$(stat -c '%g' "/var/run/docker.sock")
+  if id -G abc | grep -qw "$DOCKER_GID"; then
+    exit 0
+  else
+    DOCKER_NAME=$(getent group "${DOCKER_GID}" | awk -F: '{print $1}')
+    if [ -z "${DOCKER_NAME}" ]; then
+      DOCKER_NAME="dockergroup"
+      groupadd -g "${DOCKER_GID}" "${DOCKER_NAME}"
+    fi
+    usermod -aG "${DOCKER_NAME}" abc
+  fi
+else
+  echo "**** Please map /var/run/docker.sock or docker won't work inside this container ****"
 fi

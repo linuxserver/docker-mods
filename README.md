@@ -1,6 +1,6 @@
 # Docker - Docker mod for code-server
 
-This mod adds docker and docker-compose to code-server, to be installed/updated during container start.
+This mod adds docker and docker-compose binaries to code-server.
 
 **IMPORTANT NOTE**: For docker access inside code-server, a volume mapping needs to be added for `/var/run/docker.sock:/var/run/docker.sock` in code-server docker run/create/compose.
 
