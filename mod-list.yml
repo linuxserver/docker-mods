@@ -23,9 +23,14 @@ mods:
     container_mods:
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/lazylibrarian-ffmpeg
   letsencrypt:
-    mod_count: 1
+    mod_count: 2
     container_mods:
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
+      - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
+  nginx:
+    mod_count: 1
+    container_mods:
+      - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
   openssh-server:
     mod_count: 4
     container_mods:
