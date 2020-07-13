@@ -2,7 +2,7 @@ mods:
   calibre-web:
     mod_count: 1
     container_mods:
-      - calibre: https://github.com/linuxserver/docker-calibre-mod
+      - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
     mod_count: 8
     container_mods:
