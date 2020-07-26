@@ -7,7 +7,7 @@ if [ ! -d /usr/lib/python3.8/site-packages/geoip2 ]; then
   pip3 install --no-cache-dir -U \
     requests \
     argparse \
-    geoip2
+    geoip2==3.0.0
 fi
 
 if [ ! -f /config/fail2ban/Fail2Ban.py ]; then
