@@ -4,24 +4,19 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - code-server-flutter
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - DOCKERHUB="flavio20002/mods"
+    - BASEIMAGE="code-server"
+    - MODNAME="python3"
 
 jobs:
   include:
-    - stage: PR-BuildImage
-      if: (type IN (pull_request))
-      script:
-        # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:

@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+
+ARCH=$(uname -m)
+
+if [ ! -f "/flutter/bin/flutter" ]; then
+  echo "Installing Flutter"
+    apt-get update
+    apt-get install -y \
+      unzip
+  git clone https://github.com/flutter/flutter.git -b beta --depth 1 /flutter
+  ln -s /flutter/bin/flutter /usr/bin/flutter
+  flutter doctor
+else
+  echo "PowerShell already installed, skipping"
+fi
