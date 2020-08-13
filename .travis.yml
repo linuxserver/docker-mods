@@ -13,7 +13,7 @@ env:
   global:
     - DOCKERHUB="flavio20002/mods"
     - BASEIMAGE="code-server"
-    - MODNAME="python3"
+    - MODNAME="flutter"
 
 jobs:
   include:
