@@ -11,6 +11,7 @@ if [ ! -f "/flutter/bin/flutter" ]; then
   ln -s /flutter/bin/flutter /usr/bin/flutter
   flutter doctor
   flutter config --enable-web
+  flutter config --no-analytics
 else
   echo "Flutter already installed, skipping"
 fi
