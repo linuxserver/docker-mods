@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing ffmpeg ****"
+apk add --no-cache \
+  ffmpeg
