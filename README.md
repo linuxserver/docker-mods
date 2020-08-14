@@ -1,17 +1,21 @@
-# Rsync - Docker mod for openssh-server
+# Flutter Beta - Docker mod for code-server
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds a Flutter beta dev environment to code-server, to be installed/updated during container start. The enviornment is already configured to run browser apps.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+```
+flutter create myapp
+cd myapp
+flutter run --web-port=8989 
+```
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+Open a browser pointing to:
 
-# Mod creation instructions
+```
+https://my-code-server-host/proxy/8989
+```
 
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Fork the repo, checkout the newly created branch.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `travis.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Submit PR against the branch created by the team.
+When edit the code, press r and refresh the web page, or install the Flutter extension for code-server.
+
+In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-flutter`
+
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-flutter|linuxserver/mods:code-server-mod2`
