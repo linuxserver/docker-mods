@@ -4,9 +4,10 @@ mods:
     container_mods:
       - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
-    mod_count: 8
+    mod_count: 9
     container_mods:
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
+      - flutter: https://github.com/linuxserver/docker-mods/tree/code-server-flutter
       - golang: https://github.com/linuxserver/docker-mods/tree/code-server-golang
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
@@ -23,9 +24,10 @@ mods:
     container_mods:
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/lazylibrarian-ffmpeg
   letsencrypt:
-    mod_count: 2
+    mod_count: 3
     container_mods:
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
+      - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
   nginx:
     mod_count: 1
@@ -39,8 +41,9 @@ mods:
       - openssh-client: https://github.com/linuxserver/docker-mods/tree/openssh-server-openssh-client
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   swag:
-    mod_count: 2
+    mod_count: 3
     container_mods:
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
+      - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
       
