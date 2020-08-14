@@ -11,12 +11,17 @@ services:
 
 env:
   global:
-    - DOCKERHUB="flavio20002/mods"
+    - DOCKERHUB="linuxserver/mods"
     - BASEIMAGE="code-server"
     - MODNAME="flutter"
 
 jobs:
   include:
+    - stage: PR-BuildImage
+      if: (type IN (pull_request))
+      script:
+        # Build image
+        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:
