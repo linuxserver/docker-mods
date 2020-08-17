@@ -1,0 +1,9 @@
+# min   hour    day     month   weekday command
+
+# Export all databases every day at 4am
+# Automatically rotate from mariadb_day-0 to mariadb_day-6
+0       4       *       *       *       /config/mysqldump.sh > /config/dumps/mariadb_day-$(date +\%w).sql
+
+# Export all databases every week at 2am on Sunday
+# Automatically rotate from mariadb_week-0 to mariadb_week-3
+0       2       *       *       0       /config/mysqldump.sh > /config/dumps/mariadb_week-$(expr $(date +\%U) \% 4).sql

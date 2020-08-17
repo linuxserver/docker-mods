@@ -1,0 +1,30 @@
+#!/usr/bin/with-contenv bash
+
+# install cron
+apt-get update
+apt-get install -y cron
+
+# make folders
+mkdir -p \
+	/config/crontabs \
+	/config/dumps
+
+# copy crontab if needed
+[[ ! -f /config/crontabs/mysqldump ]] && \
+	cp /defaults/crontabs/mysqldump /config/crontabs/
+
+# copy mysqldump.sh if needed
+[[ ! -f /config/mysqldump.sh ]] && \
+	cp /defaults/mysqldump.sh /config/
+
+# make mysqldump.sh executable
+chmod +x /config/mysqldump.sh
+
+# import user crontabs
+crontab -u abc /config/crontabs/mysqldump
+
+# cleanup
+rm -rf \
+	/tmp/* \
+	/var/lib/apt/lists/* \
+	/var/tmp/*
