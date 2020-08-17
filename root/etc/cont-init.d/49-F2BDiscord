@@ -2,7 +2,7 @@
 
 if [ ! -d /usr/lib/python3.8/site-packages/geoip2 ]; then
   echo '------------------------------------------------------------------------'
-  echo '| Running installation of required modules for letsencrypt-f2bdiscord'
+  echo '| Running installation of required modules for swag-f2bdiscord'
   echo '------------------------------------------------------------------------'
   pip3 install --no-cache-dir -U \
     requests \
