@@ -1,0 +1,35 @@
+#!/usr/bin/with-contenv bash
+
+# make folders
+mkdir -p \
+	/config/crontabs
+
+# copy crontab from system if needed
+[[ ! -f /config/crontabs/root ]] && \
+	cp /var/spool/cron/crontabs/root /config/crontabs/
+
+# copy crontab from included defaults if needed (if they did not exist in the system)
+[[ ! -f /config/crontabs/root ]] && \
+	cp /defaults/crontabs/root /config/crontabs/
+
+# import user crontabs
+rm /var/spool/cron/crontabs/*
+cp /config/crontabs/* /var/spool/cron/crontabs/
+
+# determine if setup is needed for ubuntu
+if [ ! -f /usr/sbin/cron ] && \
+[ -f /usr/bin/apt ]; then
+  # install cron
+  apt-get update
+  apt-get install --no-install-recommends -y \
+    cron
+
+  # import user crontabs
+  crontab -u root /config/crontabs/root
+
+  # cleanup
+  rm -rf \
+    /tmp/* \
+    /var/lib/apt/lists/* \
+    /var/tmp/*
+fi

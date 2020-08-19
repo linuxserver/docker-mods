@@ -4,7 +4,7 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - cron #replace variables, omit brackets
 
 services:
   - docker
@@ -12,8 +12,8 @@ services:
 env:
   global:
     - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    # - BASEIMAGE="baseimagename" #not used
+    - MODNAME="cron" #replace
 
 jobs:
   include:
@@ -21,15 +21,15 @@ jobs:
       if: (type IN (pull_request))
       script:
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
+        - docker build --no-cache -t ${DOCKERHUB}:${MODNAME}-${TRAVIS_COMMIT} .
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
-        - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
+        - docker build --no-cache -t ${DOCKERHUB}:${MODNAME}-${TRAVIS_COMMIT} .
+        - docker tag ${DOCKERHUB}:${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${MODNAME}
         # Login to DockerHub
         - echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
         # Push all of the tags
-        - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT}
-        - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
+        - docker push ${DOCKERHUB}:${MODNAME}-${TRAVIS_COMMIT}
+        - docker push ${DOCKERHUB}:${MODNAME}
