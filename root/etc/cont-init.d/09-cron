@@ -10,7 +10,7 @@ mkdir -p \
 
 # copy crontab from included defaults if needed (if they did not exist in the system)
 [[ ! -f /config/crontabs/root ]] && \
-	cp /defaults/crontabs/root /config/crontabs/
+	cp /defaults/crontabs-mod/root /config/crontabs/
 
 # import user crontabs
 rm /var/spool/cron/crontabs/*
