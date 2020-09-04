@@ -4,13 +4,25 @@
 mkdir -p \
 	/config/crontabs
 
-# copy crontab from system if needed
+# if root crontabs do not exist in config
+# copy root crontab from system
 [[ ! -f /config/crontabs/root ]] && \
 	cp /var/spool/cron/crontabs/root /config/crontabs/
 
-# copy crontab from included defaults if needed (if they did not exist in the system)
+# if root crontabs still do not exist in config (were not copied from system)
+# copy root crontab from included defaults
 [[ ! -f /config/crontabs/root ]] && \
 	cp /defaults/crontabs-mod/root /config/crontabs/
+
+# if abc crontabs do not exist in config
+# copy abc crontab from system
+[[ ! -f /config/crontabs/abc ]] && \
+	cp /var/spool/cron/crontabs/abc /config/crontabs/
+
+# if abc crontabs still do not exist in config (were not copied from system)
+# copy abc crontab from included defaults
+[[ ! -f /config/crontabs/abc ]] && \
+	cp /defaults/crontabs-mod/abc /config/crontabs/
 
 # import user crontabs
 rm /var/spool/cron/crontabs/*
@@ -26,6 +38,7 @@ if [ ! -f /usr/sbin/cron ] && \
 
   # import user crontabs
   crontab -u root /config/crontabs/root
+  crontab -u abc /config/crontabs/abc
 
   # cleanup
   rm -rf \
