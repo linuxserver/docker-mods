@@ -24,6 +24,8 @@ if [ -S /var/run/docker.sock ]; then
     fi
     usermod -aG "${DOCKER_NAME}" abc
   fi
+elif [ -n "$DOCKER_HOST" ]; then
+  echo "**** /var/run/docker.sock is not mapped, therefore, docker client will only work with a remote docker service ****"
 else
-  echo "**** Please map /var/run/docker.sock or docker won't work inside this container ****"
+  echo "**** Please map /var/run/docker.sock for access to docker service on host. Alternatively you can manually define a remote host address with the docker cli option -H ****"
 fi
