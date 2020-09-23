@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+  exec \
+        python3 /config/geoip2db/geoip2influx.py

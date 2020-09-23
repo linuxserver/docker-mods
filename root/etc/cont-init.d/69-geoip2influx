@@ -1,0 +1,56 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -d /usr/lib/python3.8/site-packages/influxdb ]; then
+  echo '-------------------------------------------------------------'
+  echo '| Mod by Gilbn                                              |'
+  echo '| Running installation of required modules for Geoip2Influx |'
+  echo '-------------------------------------------------------------'
+  pip3 install --no-cache-dir -U \
+    geoip2==3.0.0 \
+    geohash2==1.1 \
+    influxdb==5.3.0 \
+    IPy==1.0
+fi
+
+if [ ! -d /config/geoip2db ]; then
+    echo '-------------------------------------'
+    echo '| Creating /config/geoip2db/ folder |'
+    echo '-------------------------------------'
+    mkdir  /config/geoip2db
+fi
+
+# Fetch latest or update existing
+if [[ ! -d geoip2influx/.git ]]; then
+  echo '---------------------------'
+  echo '| Installing Geoip2Influx |'
+  echo '---------------------------'
+  git clone --progress --verbose https://github.com/gilbN/geoip2influx.git
+  cp geoip2influx/geoip2influx.py /config/geoip2db/
+  chown -R abc:abc /config/geoip2db
+  chmod +x /config/geoip2db/geoip2influx.py
+  
+elif [[ -d geoip2influx/.git ]]; then
+  echo '-------------------------'
+  echo '| Updating Geoip2Influx |'
+  echo '-------------------------'
+  cd geoip2influx/
+  git pull
+  cp geoip2influx.py /config/geoip2db/
+  chown -R abc:abc /config/geoip2db
+  chmod +x /config/geoip2db/geoip2influx.py
+fi
+
+# Display variables for troubleshooting
+echo -e "Variables set:\\n\
+NGINX_LOG_PATH=${NGINX_LOG_PATH}\\n\
+INFLUX_HOST=${INFLUX_HOST}\\n\
+INFLUX_HOST_PORT=${INFLUX_HOST_PORT}\\n\
+INFLUX_DATABASE=${INFLUX_DATABASE}\\n\
+INFLUX_USER=${INFLUX_USER}\\n\
+INFLUX_PASS=${INFLUX_PASS}\\n\
+INFLUX_RETENTION=${INFLUX_RETENTION}\\n\
+INFLUX_SHARD=${INFLUX_SHARD}\\n\
+GEO_MEASUREMENT=${GEO_MEASUREMENT}\\n\
+LOG_MEASUREMENT=${LOG_MEASUREMENT}\\n\
+SEND_NGINX_LOGS=${SEND_NGINX_LOGS}\\n\
+GEOIP2INFLUX_LOG_LEVEL=${GEOIP2INFLUX_LOG_LEVEL}\\n"
