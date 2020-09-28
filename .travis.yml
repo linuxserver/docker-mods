@@ -4,7 +4,7 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - universal-git #replace variables, omit brackets
 
 services:
   - docker
@@ -12,8 +12,8 @@ services:
 env:
   global:
     - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - BASEIMAGE="universal" #replace
+    - MODNAME="git" #replace
 
 jobs:
   include:

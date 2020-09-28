@@ -1,0 +1,21 @@
+#!/usr/bin/with-contenv bash
+
+# Determine if setup is needed
+if [[ -n "$(command -v git)" ]]; then
+  ## Ubuntu
+  if [ -f /usr/bin/apt ]; then
+    apt-get update
+    apt-get install --no-install-recommends -y \
+      git
+  fi
+  # Alpine
+  if [ -f /sbin/apk ]; then
+    apk add --no-cache \
+      git
+  fi
+  # cleanup
+  rm -rf \
+    /tmp/* \
+    /var/lib/apt/lists/* \
+    /var/tmp/*
+fi
