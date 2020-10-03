@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bash
 
 # Determine if setup is needed
-if [[ -n "$(command -v git)" ]]; then
+if ! command -v git; then
   ## Ubuntu
   if [ -f /usr/bin/apt ]; then
     apt-get update
