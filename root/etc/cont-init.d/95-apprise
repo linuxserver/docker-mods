@@ -6,18 +6,20 @@ if ! command -v apprise; then
   if [ -f /usr/bin/apt ]; then
     apt-get update
     apt-get install --no-install-recommends -y \
-      python3
+      python3 \
+      python3-pip
   fi
   # Alpine
   if [ -f /sbin/apk ]; then
     apk add --no-cache \
-      python3
+      python3 \
+      py3-pip
   fi
 
-  # ensurepip
-  python3 -m ensurepip --upgrade
+  # setuptools
+  python3 -m pip install --upgrade pip setuptools
 
   # apprise
-  python3 -m pip install apprise
+  python3 -m pip install --upgrade apprise
 
 fi
