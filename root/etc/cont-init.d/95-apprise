@@ -1,0 +1,23 @@
+#!/usr/bin/with-contenv bash
+
+# Determine if setup is needed
+if ! command -v apprise; then
+  ## Ubuntu
+  if [ -f /usr/bin/apt ]; then
+    apt-get update
+    apt-get install --no-install-recommends -y \
+      python3
+  fi
+  # Alpine
+  if [ -f /sbin/apk ]; then
+    apk add --no-cache \
+      python3
+  fi
+
+  # ensurepip
+  python3 -m ensurepip --upgrade
+
+  # apprise
+  python3 -m pip install apprise
+
+fi
