@@ -1,4 +1,4 @@
-/config/geoip2db/geoip2influx.log {
+/config/log/geoip2influx/geoip2influx.log {
  daily
  rotate 7
  size 25M

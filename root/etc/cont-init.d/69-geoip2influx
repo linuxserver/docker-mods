@@ -12,33 +12,20 @@ if [ ! -d /usr/lib/python3.8/site-packages/influxdb ]; then
     IPy==1.0
 fi
 
-if [ ! -d /config/geoip2db ]; then
-    echo '-------------------------------------'
-    echo '| Creating /config/geoip2db/ folder |'
-    echo '-------------------------------------'
-    mkdir  /config/geoip2db
+# Create log folder
+mkdir -p \
+	/config/log/geoip2influx
+# move old log if needed
+if [ -f /config/geoip2db/geoip2influx.log ]; then
+  mv /config/geoip2db/geoip2influx.log /config/log/geoip2influx
 fi
 
-# Fetch latest or update existing
-if [[ ! -d geoip2influx/.git ]]; then
-  echo '---------------------------'
-  echo '| Installing Geoip2Influx |'
-  echo '---------------------------'
-  git clone --progress --verbose https://github.com/gilbN/geoip2influx.git
-  cp geoip2influx/geoip2influx.py /config/geoip2db/
-  chown -R abc:abc /config/geoip2db
-  chmod +x /config/geoip2db/geoip2influx.py
-  
-elif [[ -d geoip2influx/.git ]]; then
-  echo '-------------------------'
-  echo '| Updating Geoip2Influx |'
-  echo '-------------------------'
-  cd geoip2influx/
-  git pull
-  cp geoip2influx.py /config/geoip2db/
-  chown -R abc:abc /config/geoip2db
-  chmod +x /config/geoip2db/geoip2influx.py
-fi
+# permissions
+chown -R abc:abc \
+	/geoip2influx \
+  /config/log/geoip2influx
+
+chmod +x /geoip2influx/geoip2influx.py
 
 # Display variables for troubleshooting
 echo -e "Variables set:\\n\
