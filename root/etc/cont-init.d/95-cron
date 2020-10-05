@@ -1,0 +1,42 @@
+#!/usr/bin/with-contenv bash
+
+# determine if setup is needed for ubuntu
+if [ ! -f /usr/sbin/cron ] && \
+[ -f /usr/bin/apt ]; then
+    # install cron
+    apt-get update
+    apt-get install --no-install-recommends -y \
+        cron
+fi
+
+# make folders
+mkdir -p \
+	/config/crontabs
+
+# if root crontabs do not exist in config
+# copy root crontab from system
+if [[ ! -f /config/crontabs/root ]] && \
+crontab -l -u root; then
+	crontab -l -u root > /config/crontabs/root
+fi
+
+# if root crontabs still do not exist in config (were not copied from system)
+# copy root crontab from included defaults
+[[ ! -f /config/crontabs/root ]] && \
+	cp /defaults/crontabs-mod/root /config/crontabs/
+
+# if abc crontabs do not exist in config
+# copy abc crontab from system
+if [[ ! -f /config/crontabs/abc ]] && \
+crontab -l -u abc; then
+	crontab -l -u abc > /config/crontabs/abc
+fi
+
+# if abc crontabs still do not exist in config (were not copied from system)
+# copy abc crontab from included defaults
+[[ ! -f /config/crontabs/abc ]] && \
+	cp /defaults/crontabs-mod/abc /config/crontabs/
+
+# import user crontabs
+crontab -u root /config/crontabs/root
+crontab -u abc /config/crontabs/abc
