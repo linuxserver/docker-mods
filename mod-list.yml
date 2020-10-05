@@ -47,6 +47,7 @@ mods:
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
   universal:
-    mod_count: 1
+    mod_count: 2
     container_mods:
       - git: https://github.com/linuxserver/docker-mods/tree/universal-git
+      - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
