@@ -1,12 +1,6 @@
-FROM lsiobase/nginx:3.12 as buildstage
+FROM lsiobase/alpine:3.12 as buildstage
 
-RUN \
- apk add --no-cache \
-    git && \
-    mkdir -p /root-layer/geoip2influx && \
-    git clone https://github.com/gilbN/geoip2influx.git /root-layer/geoip2influx
-
-
+ADD https://raw.githubusercontent.com/gilbN/geoip2influx/master/geoip2influx.py /root-layer/geoip2influx/geoip2influx.py
 COPY root/ /root-layer/
 
 # runtime stage

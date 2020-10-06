@@ -14,7 +14,7 @@ fi
 
 # Create log folder
 mkdir -p \
-	/config/log/geoip2influx
+  /config/log/geoip2influx
 # move old log if needed
 if [ -f /config/geoip2db/geoip2influx.log ]; then
   mv /config/geoip2db/geoip2influx.log /config/log/geoip2influx
@@ -22,7 +22,7 @@ fi
 
 # permissions
 chown -R abc:abc \
-	/geoip2influx \
+  /geoip2influx \
   /config/log/geoip2influx
 
 chmod +x /geoip2influx/geoip2influx.py
