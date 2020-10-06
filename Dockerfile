@@ -1,4 +1,12 @@
+FROM lsiobase/alpine:3.12 as buildstage
+
+ADD https://raw.githubusercontent.com/gilbN/geoip2influx/master/geoip2influx.py /root-layer/geoip2influx/geoip2influx.py
+COPY root/ /root-layer/
+
+# runtime stage
 FROM scratch
 
-# copy local files
-COPY root/ /
+LABEL maintainer="GilbN"
+
+# Add files from buildstage
+COPY --from=buildstage /root-layer/ /

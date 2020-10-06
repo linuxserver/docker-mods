@@ -4,16 +4,16 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - swag-geoip2influx
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - DOCKERHUB="linuxserver/mods"
+    - BASEIMAGE="swag"
+    - MODNAME="geoip2influx"
 
 jobs:
   include:

@@ -1,0 +1,14 @@
+/config/log/geoip2influx/geoip2influx.log {
+ daily
+ rotate 7
+ size 25M
+ compress
+ delaycompress
+ nodateext
+ missingok
+ notifempty
+ postrotate
+    s6-svc -r /var/run/s6/services/geoip2influx
+ endscript
+ su abc abc
+}
