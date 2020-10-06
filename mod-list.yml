@@ -41,10 +41,11 @@ mods:
       - openssh-client: https://github.com/linuxserver/docker-mods/tree/openssh-server-openssh-client
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   swag:
-    mod_count: 3
+    mod_count: 4
     container_mods:
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
+      - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
   universal:
     mod_count: 2
