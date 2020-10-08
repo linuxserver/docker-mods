@@ -34,7 +34,7 @@ if [ ! -f /usr/bin/mkvmerge ]; then
 fi
 
 # Change ownership
-if [ $(stat -c '%G' /usr/local/bin/striptracks.sh) != "users" ]; then
+if [ $(stat -c '%G' /usr/local/bin/striptracks.sh) != "abc" ]; then
   echo "Changing ownership on scripts."
   chown abc:abc /usr/local/bin/striptracks*.sh
 fi
