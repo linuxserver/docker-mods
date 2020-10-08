@@ -22,32 +22,18 @@ jobs:
       script:
         # Build variables
         - VERSION=$(git describe --tags --always)
-        - VCS_REF=$(git rev-parse --short HEAD)
-        - BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         # Build image
         - docker build --no-cache
           --build-arg VERSION=${VERSION}
-          --build-arg VCS_REF=${VCS_REF}
-          --build-arg BUILD_DATE=${BUILD_DATE}
-          --build-arg DOCKERHUB=${DOCKERHUB}
-          --build-arg BASEIMAGE=${BASEIMAGE}
-          --build-arg MODNAME=${MODNAME}
           -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:
         # Build variables
         - VERSION=$(git describe --tags --always)
-        - VCS_REF=$(git rev-parse --short HEAD)
-        - BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         # Build image
         - docker build --no-cache
           --build-arg VERSION=${VERSION}
-          --build-arg VCS_REF=${VCS_REF}
-          --build-arg BUILD_DATE=${BUILD_DATE}
-          --build-arg DOCKERHUB=${DOCKERHUB}
-          --build-arg BASEIMAGE=${BASEIMAGE}
-          --build-arg MODNAME=${MODNAME}
           -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
         - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
         # Login to DockerHub
