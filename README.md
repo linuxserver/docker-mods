@@ -6,7 +6,6 @@ Chapters, if they exist, are preserved. The Title attribute in the MKV is set to
 
 Container info:
 ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/linuxserver/mods/radarr-striptracks)
-![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/mods/radarr-striptracks "Container Pulls")   
 
 # Installation
 >**NOTE:** See the [Sonarr/Radarr v3 Builds](./README.md#sonarrradarr-v3-builds) section below for important differences to these instructions for v3 builds.   

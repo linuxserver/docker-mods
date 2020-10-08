@@ -22,7 +22,7 @@ if [ ! -f /usr/bin/mkvmerge ]; then
   elif [ -f /sbin/apk ]; then
     # Alpine
     echo "Installing MKVToolNix using apk"
-    apk add mkvtoolnix && \
+    apk add --no-cache mkvtoolnix && \
     rm -rf /var/lib/apt/lists/*
   else
     # Unknown
@@ -36,7 +36,7 @@ fi
 # Change ownership
 if [ $(stat -c '%G' /usr/local/bin/striptracks.sh) != "users" ]; then
   echo "Changing ownership on scripts."
-  chown root:users /usr/local/bin/striptracks*.sh
+  chown abc:abc /usr/local/bin/striptracks*.sh
 fi
 
 # Make executable
