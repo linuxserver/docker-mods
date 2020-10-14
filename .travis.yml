@@ -4,7 +4,7 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - universal-tshoot #set this to your main git branch
 
 services:
   - docker
@@ -12,8 +12,8 @@ services:
 env:
   global:
     - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - BASEIMAGE="universal" #replace
+    - MODNAME="tshoot" #replace
 
 jobs:
   include:
