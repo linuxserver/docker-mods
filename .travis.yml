@@ -4,7 +4,7 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - radarr-striptracks #replace variables, omit brackets
 
 services:
   - docker
@@ -12,21 +12,29 @@ services:
 env:
   global:
     - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - BASEIMAGE="radarr" #replace
+    - MODNAME="striptracks" #replace
 
 jobs:
   include:
     - stage: PR-BuildImage
       if: (type IN (pull_request))
       script:
+        # Build variables
+        - VERSION=$(git describe --tags --always)
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
+        - docker build --no-cache
+          --build-arg VERSION=${VERSION}
+          -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:
+        # Build variables
+        - VERSION=$(git describe --tags --always)
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
+        - docker build --no-cache
+          --build-arg VERSION=${VERSION}
+          -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
         - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
         # Login to DockerHub
         - echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
