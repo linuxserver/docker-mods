@@ -1,6 +1,6 @@
 FROM scratch
 
-LABEL maintainer="nemchik"
+LABEL maintainer="driz"
 
 # copy local files
 COPY root/ /
