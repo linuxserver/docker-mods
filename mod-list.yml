@@ -44,6 +44,14 @@ mods:
     mod_count: 1
     container_mods:
       - multilangocr: https://github.com/linuxserver/docker-mods/tree/papermerge-multilangocr
+  radarr:
+    mod_count: 1
+    container_mods:
+      - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
+  sonarr:
+    mod_count: 1
+    container_mods:
+      - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
   swag:
     mod_count: 4
     container_mods:
