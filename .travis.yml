@@ -4,14 +4,16 @@ language: shell
 
 branches:
   only:
-    - my-branch #set this to your main git branch
+    - universal-tshoot #set this to your main git branch
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="user/endpoint"
+    - DOCKERHUB="linuxserver/mods" #don't modify
+    - BASEIMAGE="universal" #replace
+    - MODNAME="tshoot" #replace
 
 jobs:
   include:
