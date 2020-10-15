@@ -6,7 +6,9 @@
     apt-get update
     apt-get install --no-install-recommends -y \
       dnsutils \
-      net-tools
+      net-tools \
+      iputils-ping \
+      traceroute
   fi
   # Alpine
   if [ -f /sbin/apk ]; then
