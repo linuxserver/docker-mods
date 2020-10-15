@@ -60,7 +60,9 @@ mods:
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
   universal:
-    mod_count: 2
+    mod_count: 4
     container_mods:
-      - git: https://github.com/linuxserver/docker-mods/tree/universal-git
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
+      - cron: https://github.com/linuxserver/docker-mods/tree/universal-cron
+      - git: https://github.com/linuxserver/docker-mods/tree/universal-git
+      - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
