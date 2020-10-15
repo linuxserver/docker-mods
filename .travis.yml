@@ -4,7 +4,7 @@ language: shell
 
 branches:
   only:
-    - universal-tshoot #set this to your main git branch
+    - universal-tshoot #replace variables, omit brackets
 
 services:
   - docker
