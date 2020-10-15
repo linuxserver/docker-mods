@@ -1,5 +1,5 @@
 ## Buildstage ##
-FROM lsiobase/alpine:3.9 as buildstage
+FROM lsiobase/alpine:3.12 as buildstage
 
 RUN \
  echo "**** install packages ****" && \
@@ -16,6 +16,8 @@ COPY root/ /root-layer/
 
 ## Single layer deployed image ##
 FROM scratch
+
+LABEL maintainer="username"
 
 # Add files from buildstage
 COPY --from=buildstage /root-layer/ /
