@@ -4,16 +4,16 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - code-server-dotnet
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - DOCKERHUB="linuxserver/mods"
+    - BASEIMAGE="code-server"
+    - MODNAME="dotnet"
 
 jobs:
   include:
@@ -21,15 +21,22 @@ jobs:
       if: (type IN (pull_request))
       script:
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
+        - DOTNET_JSON="$(curl --retry 5 -sX GET https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases-index.json)"
+        - DOTNET_VERSIONS="$(echo $DOTNET_JSON | jq -r '."releases-index"[] | select(."support-phase"=="lts") | ."latest-sdk"' | tr '\n' ' ' | head -c -1)"
+        - docker build --no-cache --build-arg DOTNET_VERSIONS="${DOTNET_VERSIONS}" -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
+        - DOTNET_JSON="$(curl --retry 5 -sX GET https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases-index.json)"
+        - DOTNET_VERSIONS="$(echo $DOTNET_JSON | jq -r '."releases-index"[] | select(."support-phase"=="lts") | ."latest-sdk"' | tr '\n' ' ' | head -c -1)"
+        - DOTNET_TAG="$(echo $DOTNET_VERSIONS | tr ' ' '_')"
+        - docker build --no-cache --build-arg DOTNET_VERSIONS="${DOTNET_VERSIONS}" -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
         - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
+        - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${DOTNET_TAG}
         # Login to DockerHub
         - echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
         # Push all of the tags
         - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT}
         - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
+        - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${DOTNET_TAG}
