@@ -15,6 +15,7 @@ mods:
       - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
+      - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet 
   healthchecks:
     mod_count: 1
     container_mods:
