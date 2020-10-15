@@ -4,7 +4,7 @@ language: shell
 
 branches:
   only:
-    - universal-tshoot #set this to your main git branch
+    - universal-tshoot #replace variables, omit brackets
 
 services:
   - docker
@@ -17,14 +17,19 @@ env:
 
 jobs:
   include:
+    - stage: PR-BuildImage
+      if: (type IN (pull_request))
+      script:
+        # Build image
+        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
     - stage: BuildImage
       if: (NOT (type IN (pull_request)))
       script:
         # Build image
-        - docker build --no-cache -t ${DOCKERHUB}:${TRAVIS_COMMIT} .
-        - docker tag ${DOCKERHUB}:${TRAVIS_COMMIT} ${DOCKERHUB}:latest
+        - docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} .
+        - docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
         # Login to DockerHub
         - echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
         # Push all of the tags
-        - docker push ${DOCKERHUB}:${TRAVIS_COMMIT}
-        - docker push ${DOCKERHUB}:latest
+        - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${TRAVIS_COMMIT}
+        - docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
