@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+# Install Prolog
+apt-get update && apt-get install -y \
+  gprolog
