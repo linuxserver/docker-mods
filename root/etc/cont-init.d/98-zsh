@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+
+# First install ZSH
+apt-get update && apt-get install -y \
+  zsh
+
+# Install oh-my-zsh
+sudo -u abc "git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh"
+sudo -u abc "cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc"
+
+# Setup shell as default
+chsh -s $(which zsh) abc
