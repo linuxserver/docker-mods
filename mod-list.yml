@@ -18,7 +18,7 @@ mods:
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
-      - zfs: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
+      - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
   healthchecks:
     mod_count: 1
     container_mods:
