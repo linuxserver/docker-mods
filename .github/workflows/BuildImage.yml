@@ -1,0 +1,30 @@
+name: Build Image
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    env:
+      DOCKERHUB: "linuxserver/mods" #don't modify
+      BASEIMAGE: "baseimagename" #replace
+      MODNAME: "modname" #replace
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.3
+
+      - name: Build image
+        id: build
+        run: |
+          docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} .
+
+      - name: Push image
+        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
+        run: |
+          # Tag image
+          docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
+          # Login to DockerHub
+          echo ${{ secrets.DOCKERPASS }} | docker login -u ${{ secrets.DOCKERUSER }} --password-stdin
+          # Push all of the tags
+          docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+          docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
