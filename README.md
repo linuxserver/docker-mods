@@ -1,15 +1,15 @@
 # Intro
 
-The purpose of the repository is to provide examples and guidance in creating and storing a user consumable modification layer for the Library of Linuxserver.io Dockerhub Containers. 
+The purpose of the repository is to provide examples and guidance in creating and storing a user consumable modification layer for the Library of Linuxserver.io Dockerhub Containers.
 At it's core a Docker Mod is a tarball of files stored on Dockerhub that is downloaded and extracted on container boot before any init logic is run.
-This allows: 
+This allows:
 
 * Developers and community users to modify base containers to suit their needs without the need to maintain a fork of the main docker repository
 * Mods to be shared with the Linuxserver.io userbase as individual independent projects with their own support channels and development ideologies
 * Zero cost hosting and build pipelines for these modifications leveraging Github and Dockerhub
 * Full custom configuration management layers for hooking containers into each other using environment variables contained in a compose file
 
-It is important to note to end users of this system that there are not only extreme security implications to consuming files from souces outside of our control, but by leveraging community Mods you essentially lose direct support from the core LinuxServer team. Our first and foremost troubleshooting step will be to remove the `DOCKER_MODS` environment variable when running into issues and replace the container with a clean LSIO one. 
+It is important to note to end users of this system that there are not only extreme security implications to consuming files from souces outside of our control, but by leveraging community Mods you essentially lose direct support from the core LinuxServer team. Our first and foremost troubleshooting step will be to remove the `DOCKER_MODS` environment variable when running into issues and replace the container with a clean LSIO one.
 
 Again, when pulling in logic from external sources practice caution and trust the sources/community you get them from.
 
@@ -17,20 +17,20 @@ Again, when pulling in logic from external sources practice caution and trust th
 
 We host and publish official Mods at the [linuxserver/mods](https://hub.docker.com/r/linuxserver/mods/tags) endpoint as separate tags. Each tag is in the format of `<imagename>-<modname>` for the latest versions, and `<imagename>-<modname>-<commitsha>` for the specific versions.
 
-Here's a list of the official Mods we host: https://github.com/linuxserver/docker-mods/blob/master/mod-list.yml 
+Here's a list of the official Mods we host: <https://github.com/linuxserver/docker-mods/blob/master/mod-list.yml>
 
 ## Using a Docker Mod
 
 Before consuming a Docker Mod ensure that the source code for it is publicly posted along with it's build pipeline pushing to Dockerhub.
 
-Consumption of a Docker Mod is intended to be as user friendly as possible and can be achieved with the following environment variables being passed to the container: 
+Consumption of a Docker Mod is intended to be as user friendly as possible and can be achieved with the following environment variables being passed to the container:
 
 * DOCKER_MODS- This can be a single endpoint `user/endpoint:tag` or an array of endpoints separated by `|` `user/endpoint:tag|user2/endpoint2:tag`
 * RUN_BANNED_MODS- If this is set to any value you will bypass our centralized filter of banned Dockerhub users and run Mods regardless of a ban
 
-Full example: 
+Full example:
 
-```
+```bash
 docker create \
   --name=nzbget \
   -e DOCKER_MODS=taisun/nzbget-mod:latest \
@@ -44,45 +44,45 @@ docker create \
   linuxserver/nzbget
 ```
 
-This will spinup an nzbget container and apply the custom logic found in the following repository: 
+This will spinup an nzbget container and apply the custom logic found in the following repository:
 
-https://github.com/Taisun-Docker/Linuxserver-Mod-Demo
+<https://github.com/Taisun-Docker/Linuxserver-Mod-Demo>
 
 This basic demo installs Pip and a couple dependencies for plugins some users leverage with nzbget.
 
 ## Creating and maintaining a Docker Mod
 
-We will always recommend to our users consuming Mods that they leverage ones from active community members or projects so transparency is key here. We understand that image layers can be pushed on the back end behind these pipelines, but every little bit helps. 
-In this repository we will be going over two basic methods of making a Mod along with an example of the Travis-CI.org build logic to get this into a Dockerhub endpoint. Though we are not officially endorsing Travis-CI here it is one of the most popular Open Source free build pipelines and only requires a Github account to get started. If you prefer others feel free to use them as long as build jobs are transparent.
+We will always recommend to our users consuming Mods that they leverage ones from active community members or projects so transparency is key here. We understand that image layers can be pushed on the back end behind these pipelines, but every little bit helps.
+In this repository we will be going over two basic methods of making a Mod along with an example of the GitHub Actions build logic to get this into a Dockerhub endpoint. Though we are not officially endorsing GitHub Actions here it is built in to GitHub repositories and forks making it very easy to get started. If you prefer others feel free to use them as long as build jobs are transparent.
 
-One of the core ideas to remember when creating a Mod is that it can only contain a single image layer, the examples below will show you how to add files standardly and how to run complex logic to assemble the files in a build layer to copy them over into this single layer. 
+One of the core ideas to remember when creating a Mod is that it can only contain a single image layer, the examples below will show you how to add files standardly and how to run complex logic to assemble the files in a build layer to copy them over into this single layer.
 
 ### Docker Mod Simple - just add scripts
 
 In this repository you will find the `Dockerfile` containing:
 
-```
+```Dockerfile
 FROM scratch
 
 # copy local files
 COPY root/ /
 ```
 
-For most users this will suffice and anything in the root/ folder of the repository will be added to the end users Docker container / path. 
+For most users this will suffice and anything in the root/ folder of the repository will be added to the end users Docker container / path.
 
-The most common paths to leverage for Linuxserver images will be: 
+The most common paths to leverage for Linuxserver images will be:
 
 * root/etc/cont-init.d/<98-script-name> - Contains init logic scripts that run before the services in the container start these should exit 0 and are ordered by filename
-* root/etc/services.d/<yourservice>/run - Contains scripts that run in the foreground for persistent services IE NGINX
+* root/etc/services.d/`yourservice`/run - Contains scripts that run in the foreground for persistent services IE NGINX
 * root/defaults - Contains base config files that are copied/modified on first spinup
 
-The example files in this repo contain a script to install sshutil and a service file to run the installed utility. 
+The example files in this repo contain a script to install sshutil and a service file to run the installed utility.
 
 ### Docker Mod Complex - Sky is the limit
 
 In this repository you will find the `Dockerfile.complex` containing:
 
-```
+```Dockerfile
 ## Buildstage ##
 FROM lsiobase/alpine:3.9 as buildstage
 
@@ -106,46 +106,30 @@ FROM scratch
 COPY --from=buildstage /root-layer/ /
 ```
 
-Here we are leveraging a multi stage DockerFile to run custom logic and pull down an Rclone deb from the Internet to include in our image layer for distribution. Any amount of logic can be run in this build stage or even multiple build stages as long as the files in the end are combined into a single folder for the COPY command in the final output. 
+Here we are leveraging a multi stage DockerFile to run custom logic and pull down an Rclone deb from the Internet to include in our image layer for distribution. Any amount of logic can be run in this build stage or even multiple build stages as long as the files in the end are combined into a single folder for the COPY command in the final output.
 
 ## Full loop - getting a Mod to Dockerhub
 
-First and foremost to publish a Mod you will need the following accounts: 
-* Github- https://github.com/join
-* DockerHub- https://hub.docker.com/signup
+First and foremost to publish a Mod you will need the following accounts:
 
-We recommend using this repository as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into Travis/Dockerhub. 
+* Github- <https://github.com/join>
+* DockerHub- <https://hub.docker.com/signup>
 
-The only code change you need to make to the build logic file `.travis.yml` will be to modify the DOCKERHUB endpoint to your own image: 
+We recommend using this repository as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into GitHub Actions/Dockerhub.
+
+The only code change you need to make to the build logic file `.github/workflows/BuildImage.yml` will be to modify the DOCKERHUB endpoint to your own image:
+
+```yaml
+      DOCKERHUB: "user/endpoint"
 ```
-env:
-  global:
-    - DOCKERHUB="user/endpoint"
-```
 
-User is your Dockerhub user and endpoint is your own custom name. You do not need to create this endpoint beforehand, the build logic will push it and create it on first run. 
+User is your Dockerhub user and endpoint is your own custom name. You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
 
-Head over to https://travis-ci.org/ and click on signup: 
+Head over to `https://github.com/user/endpoint/settings/secrets` and click on `New secret`
 
-![signup](https://s3-us-west-2.amazonaws.com/linuxserver-docs/images/signup.png)
+Add `DOCKERUSER` and `DOCKERPASS`. These will be your live Dockerhub credentials:
 
-This will use Github to auth you in. Once in the dashboard click on "Add new Repository":
-
-![addnew](https://s3-us-west-2.amazonaws.com/linuxserver-docs/images/addnew.png)
-
-Click on settings for the repo you want to add: 
-
-![settings](https://s3-us-west-2.amazonaws.com/linuxserver-docs/images/settings.png)
-
-Under the "Environment Variables" section add DOCKERUSER and DOCKERPASS as shown below, these will be your live Dockerhub credentials: 
-
-![env](https://s3-us-west-2.amazonaws.com/linuxserver-docs/images/env.png)
-
-Once these are set click on the "Current" tab and "Activate repository":
-
-![activate](https://s3-us-west-2.amazonaws.com/linuxserver-docs/images/activate.png)
-
-Travis will trigger a build off of your repo and will push to Dockerhub on success. This Dockerhub endpoint is the Mod variable you can use to customize your container now. 
+GitHub Actions will trigger a build off of your repo when you commit. The image will be pushed to Dockerhub on success. This Dockerhub endpoint is the Mod variable you can use to customize your container now.
 
 ## Submitting a PR for a Mod to be added to the official LinuxServer.io repo
 
@@ -163,13 +147,13 @@ Travis will trigger a build off of your repo and will push to Dockerhub on succe
 
 ### Inspecting mods
 
-To inspect the file contents of external Mods dive is a great CLI tool: 
+To inspect the file contents of external Mods dive is a great CLI tool:
 
-https://github.com/wagoodman/dive
+<https://github.com/wagoodman/dive>
 
-Basic usage: 
+Basic usage:
 
-```
+```bash
 docker run --rm -it \
     -v /var/run/docker.sock:/var/run/docker.sock \
     wagoodman/dive:latest <Image Name>
