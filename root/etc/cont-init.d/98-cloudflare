@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+# shellcheck disable=SC2046
+
+printf "set_real_ip_from %b;\n" $({
+  curl -s "https://www.cloudflare.com/ips-v4" &
+  curl -s "https://www.cloudflare.com/ips-v6"
+}) >/config/nginx/cf_real-ip.conf
+
+chown abc:abc /config/nginx/cf_real-ip.conf

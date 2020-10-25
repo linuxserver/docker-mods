@@ -6,8 +6,8 @@ jobs:
   build:
     env:
       DOCKERHUB: "linuxserver/mods" #don't modify
-      BASEIMAGE: "baseimagename" #replace
-      MODNAME: "modname" #replace
+      BASEIMAGE: "swag" #replace
+      MODNAME: "cloudflare-real-ip" #replace
 
     runs-on: ubuntu-latest
     steps:
