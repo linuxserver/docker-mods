@@ -6,8 +6,8 @@ jobs:
   build:
     env:
       DOCKERHUB: "linuxserver/mods" #don't modify
-      BASEIMAGE: "baseimagename" #replace
-      MODNAME: "modname" #replace
+      BASEIMAGE: "template" #replace
+      MODNAME: "gha" #replace
 
     runs-on: ubuntu-latest
     steps:
@@ -17,6 +17,8 @@ jobs:
         id: build
         run: |
           docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} .
+          echo ${{ format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
+          echo ${{ github.ref }}
 
       - name: Push image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
