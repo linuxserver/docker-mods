@@ -17,7 +17,7 @@ Again, when pulling in logic from external sources practice caution and trust th
 
 We host and publish official Mods at the [linuxserver/mods](https://hub.docker.com/r/linuxserver/mods/tags) endpoint as separate tags. Each tag is in the format of `<imagename>-<modname>` for the latest versions, and `<imagename>-<modname>-<commitsha>` for the specific versions.
 
-Here's a list of the official Mods we host: <https://github.com/linuxserver/docker-mods/blob/master/mod-list.yml>
+Here's a list of the official Mods we host: <https://mods.linuxserver.io/>
 
 ## Using a Docker Mod
 
@@ -84,7 +84,7 @@ In this repository you will find the `Dockerfile.complex` containing:
 
 ```Dockerfile
 ## Buildstage ##
-FROM lsiobase/alpine:3.9 as buildstage
+FROM lsiobase/alpine:3.12 as buildstage
 
 RUN \
  echo "**** install packages ****" && \
@@ -133,12 +133,12 @@ GitHub Actions will trigger a build off of your repo when you commit. The image 
 
 ## Submitting a PR for a Mod to be added to the official LinuxServer.io repo
 
-* Ask the team to create a new branch named `<baseimagename>-<modname>` in this repo. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the [template branch](https://github.com/linuxserver/docker-mods/tree/template).
-* Fork the repo, checkout the template branch.
+* Fork this repo, checkout the `template` branch.
 * Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
 * Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `travis.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
+* Edit the readme with pertinent info.
+* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`.
+* Ask the team to create a new branch named `<baseimagename>-<modname>` in this repo. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the [template branch](https://github.com/linuxserver/docker-mods/tree/template).
 * Submit PR against the branch created by the team.
 * Make sure that the commits in the PR are squashed.
 * Also make sure that the commit and PR titles are in the format of `<imagename>: <modname> <very brief description like "initial release" or "update">`. Detailed description and further info should be provided in the body (ie. `code-server: python2 add python-pip`).
