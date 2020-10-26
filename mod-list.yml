@@ -57,8 +57,9 @@ mods:
     container_mods:
       - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
   swag:
-    mod_count: 4
+    mod_count: 5
     container_mods:
+      - cloudflare-real-ip: https://github.com/linuxserver/docker-mods/tree/swag-cloudflare-real-ip
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
