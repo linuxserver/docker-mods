@@ -1,144 +1,57 @@
-A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Radarr/Sonarr Docker container that adds a script to automatically strip out unwanted audio and subtitle streams, keeping only the desired languages.
-Chapters, if they exist, are preserved. The Title attribute in the MKV is set to the movie title plus year (ex: `The Sting (1973)`) or the series title plus episode information (ex: `Happy! 01x01 - What Smiles Are For`).
+A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Lidarr Docker container that adds a script to automatically convert downloaded FLAC files to MP3s using ffmpeg.  Default quality is 320Kbps.
 
-**One unified script works in both Radarr and Sonarr.  Use this mod in either container!**
 >**NOTE:** This mod support Linux OSes only.
 
 Container info:
-![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/linuxserver/mods/radarr-striptracks)
+![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/linuxserver/mods/lidarr-flac2mp3))
 
 # Installation
->**NOTE:** See the [Sonarr/Radarr v3 Builds](./README.md#sonarrradarr-v3-builds) section below for important differences to these instructions for v3 builds.   
-
-1. Pull your selected container ([linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr "LinuxServer.io's Radarr container") or [linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr "LinuxServer.io's Sonarr container")) from Docker Hub:  
-  `docker pull linuxserver/radarr:latest`   OR  
-  `docker pull linuxserver/sonarr:latest`   
+1. Pull the [linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "LinuxServer.io's Lidarr container") docker image from Docker Hub:  
+  `docker pull linuxserver/lidarr:latest`
 
 2. Configure the Docker container with all the port, volume, and environment settings from the *original container documentation* here:  
-   **[linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr "Radarr Docker container")**  
-   **[linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr "Sonarr Docker container")**
+  **[linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "Docker container")**
    1. Add the **DOCKER_MODS** environment variable to the `docker create` command, as follows:  
-      `-e DOCKER_MODS=linuxserver/mods:radarr-striptracks`  
+      `-e DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3`  
 
       *Example Synology Configuration*  
-      ![striptracks](.assets/striptracks-synology.png "Synology container settings")
+      ![flac2mp3](.assets/lidarr-synology.png "Synology container settings")
 
    2. Start the container.
 
-3. After all of the above configuration is complete, to use mkvmerge:  
-   1. Configure a custom script from the Radarr/Sonnar Settings->Connect screen and type the following in the **Path** field:  
-      `/usr/local/bin/striptracks.sh`  
-
-   2. Add the codes for the audio and subtitle languages you want to keep as **Arguments** (details in the [Syntax](./README.md#syntax) section below):
-      <ins>Suggested Example</ins>  
-      **`:eng:und :eng`**
+3. After all of the above configuration is complete, to use ffmpeg, configure a custom script from the Settings->Connect screen and type the following in the **Path** field:  
+   `/usr/local/bin/flac2mp3.sh`
 
 ## Usage
->**NOTE:** See the [Sonarr/Radarr v3 Builds](./README.md#sonarrradarr-v3-builds) section below for important differences to these instructions for v3 builds.
+New file(s) with an MP3 extension will be placed in the same directory as the original FLAC file(s). Existing MP3 files with the same track name will be overwritten.
 
-The source video can be any mkvtoolnix supported video format. The output is an MKV file with the same name.
-
-If you've configured the Radarr/Sonarr Recycle Bin path correctly, the original video will be moved there.  
-![warning24] **NOTE:** If you have *not* configured the Recycle Bin, the original video file will be deleted/overwritten and permanently lost.
+If you've configured the Lidarr Recycle Bin path correctly, the original video will be moved there.  
+![warning24] **NOTE:** If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.
 
 ### Syntax
-The script accepts two arguments and one option in the **Arguments** field:
+>**Note:** The **Arguments** field for Custom Scripts was removed in Lidarr release [v0.7.0.1347](https://github.com/lidarr/Lidarr/commit/b9d240924f8965ebb2c5e307e36b810ae076101e "Lidarr commit notes") due to security concerns.
+To support options with this version and later, a wrapper script can be manually created that will call *flac2mp3.sh* with the required arguments.
 
-`[-d] <audio_languages> <subtitle_languages>`
+The script accepts two options which may be placed in the **Arguments** field:
 
-The arguments are language codes in [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes "List of ISO 639-2 codes") format.
-These are three letter abbreviations prefixed with a colon ':', such as:
+`[-d] [-b <bitrate>]`
 
-* :eng
-* :fre
-* :spa
-
-...etc.  
-
-Multiple codes may be concatenated, such as `:eng:spa` for both English and Spanish.  
-
-It is suggested to use `:eng:und :eng` if you are unsure of what to choose. This will keep English and Undetermined audio and English subtitles, if they exist.
->**NOTE:** The script is smart enough to not remove the last audio track. This way you don't have to specify every possible language if you are importing a
-foreign film, for example.
+The `-b bitrate` option, if specified, sets the output quality in bits per second.  If no `-b` option is specified, the script will default to 320Kbps.
 
 The `-d` option enables debug logging.
 
 ### Examples
 ```
-:eng:und :eng              # keep English and Undetermined audio and English subtitles
--d :eng ""                 # Enable debugging, keeping English audio and no subtitles
-:eng:kor:jpn :eng:spa      # Keep English, Korean, and Japanese audio, and English and 
-                             Spanish subtitles
+-b 320k        # Output 320 kilobits per second MP3 (same as default behavior)
+-d -b 160k     # Enable debugging, and output 160 kilobits per second MP3
 ```
 
-## Triggers
-The only events/notification triggers that have been tested are **On Download** and **On Upgrade**
-
-![striptracks](.assets/striptracks-v2-custom-script.png "Radarr/Sonarr custom script settings")
-
-## Logs
-A log file is created for the script activity called:
-
-`/config/logs/striptracks.txt`
-
-This log can be inspected or downloaded from the Radarr/Sonarr GUI under System->Logs->Files
-
-Script errors will show up in both the script log and the native Radarr/Sonarr log.
-
-Log rotation is performed with 5 log files of 512KB each being kept.  
->![warning24] **NOTE:** If debug logging is enabled, the log file can grow very large very quickly.  *Do not leave debug logging enabled permanently.*
-
-___
-
-## Sonarr/Radarr v3 Builds
->![warning] **Warning: Unstable Releases** ![warning]  
->The Sonarr/Radarr v3 Builds are the unstable releases (Aphrodite and Phantom) of Radarr and Sonarr. Though the mod works with all versions of the container, I cannot guarantee these releases are stable.
-
-<ins>Important differences for Sonarr/Radarr v3 Builds</ins>
-### Mod installation
-Substitute the following steps for those noted in the [Installation](./README.md#installation) section above.
-1. Pull your selected container ([linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr "LinuxServer.io's Radarr container") or [linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr "LinuxServer.io's Sonarr container")) from Docker Hub:  
-  `docker pull linuxserver/radarr:preview`  OR  
-  `docker pull linuxserver/sonarr:preview`
-
-2. Configure the Docker container with all the port, volume, and environment settings from the *original container documentation* here:  
-   **[linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr "Radarr Docker container")**  
-   **[linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr "Sonarr Docker container")**
-   1. Add the **DOCKER_MODS** environment variable to the `docker create` command, as follows:  
-      `-e DOCKER_MODS=linuxserver/mods:radarr-striptracks`  
-
-      *Example Synology Configuration*  
-      ![striptracks](.assets/striptracks-synology.png "Synology container settings")
-
-   2. Start the container.
-
-3. After the above configuration is complete, to use mkvmerge, configure a custom script from the Settings->Connect screen and type the following in the **Path** field:  
-
-      `/usr/local/bin/striptracks-eng.sh`  
-
-      <ins>This is a wrapper script that calls striptracks.sh with the following arguments, which keep English audio and subtitles only!</ins>  
-      `:eng:und :eng`
-
-      *For any other combinations of audio and subtitles you **must** either use one of the [included wrapper scripts](./README.md#included-wrapper-scripts) or
-      create a custom script with the codes for the languages you want to keep.  See the [Syntax](./README.md#syntax) section above.
-      Do not put `striptracks.sh` in the **Path** field!*
-
-### Included Wrapper Scripts
->**NOTE:** The **Arguments** field for Custom Scripts was removed in Radarr and Sonarr v3 due to security concerns. To support options with this version and later,
-a wrapper script can be manually created that will call *striptracks.sh* with the required arguments.
-
-For your convenience, several wrapper scripts are included in the `/usr/local/bin/` directory.  
-You may use any of these scripts in place of the `striptracks-eng.sh` mentioned in the [Mod installation](./README.md#mod-installation) section above.
+### Included Wrapper Script
+For your convenience, a wrapper script to enable debugging is included in the `/usr/local/bin/` directory.  
+Use this script in place of the `flac2mp3.sh` mentioned in the [Installation](./README.md#installation) section above.
 
 ```
-striptracks-dut.sh         # Keep Dutch audio and subtitles
-striptracks-eng.sh         # Keep English and Undetermined audio and English subtitles
-striptracks-eng-debug.sh   # Keep English and Undetermined audio and English subtitles, and enable debug logging
-striptracks-eng-jpn.sh     # Keep English, Japanese, and Undetermined audio and English subtitles
-striptracks-fre.sh         # Keep French audio and subtitles
-striptracks-fre-debug.sh   # Keep French audio and subtitles, and enable debug logging
-striptracks-ger.sh         # Keep German audio and subtitles
-striptracks-spa.sh         # Keep Spanish audio and subtitles
+flac2mp3-debug.sh        # Enable debugging
 ```
 
 ### Example Wrapper Script
@@ -146,31 +59,33 @@ To configure the last entry from the [Examples](./README.md#examples) section ab
 ```
 #!/bin/bash
 
-. /usr/local/bin/striptracks.sh :eng:kor:jpn :eng:spa
+. /usr/local/bin/flac2mp3.sh -d -b 160k
 ```
-Then put `/usr/local/bin/wrapper.sh` in the **Path** field in place of `/usr/local/bin/striptracks-eng.sh` mentioned in the [Mod installation](./README.md#mod-installation) section above.
+Then put `/usr/local/bin/wrapper.sh` in the **Path** field in place of `/usr/local/bin/flac2mp3.sh` mentioned in the [Installation](./README.md#installation) section above.
 
-### Preview Triggers
-The only events/notification triggers that have been tested are **On Import** and **On Upgrade**
+### Triggers
+The only events/notification triggers that have been tested are **On Release Import** and **On Upgrade**
 
-![striptracks](.assets/striptracks-v3-custom-script.png "Radarr/Sonarr custom script settings")
+![lidarr-flac2mp3](.assets/lidarr-custom-script.png "Lidarr Custom Script dialog")
 
-### Preview Logs
-The log can be inspected or downloaded from the Radarr/Sonarr GUI under System->Log Files
+### Logs
+A log file is created for the script activity called:
+
+`/config/logs/flac2mp3.txt`
+
+This log can be downloaded from the Lidarr GUI under System->Log Files
+
+Log rotation is performed, with 5 log files of 1MB each kept, matching Lidarr's log retention.
+>![warning24] **NOTE:** If debug logging is enabled, the log file can grow very large very quickly.  *Do not leave debug logging enabled permanently.*
 
 ___
-
 # Credits
-
 This would not be possible without the following:
 
-[Radarr](http://radarr.video/ "Radarr homepage")  
-[Sonarr](http://sonarr.tv/ "Sonarr homepage")  
-[LinuxServer.io Radarr](https://hub.docker.com/r/linuxserver/radarr "Radarr Docker container") container  
-[LinuxServer.io Sonarr](https://hub.docker.com/r/linuxserver/sonarr "Sonarr Docker container") container  
+[Lidarr](https://lidarr.audio/ "Lidarr homepage")  
+[LinuxServer.io Lidarr](https://hub.docker.com/r/linuxserver/lidarr "Lidarr Docker container") container  
 [LinuxServer.io Docker Mods](https://hub.docker.com/r/linuxserver/mods "Docker Mods containers") project  
-[MKVToolNix](https://mkvtoolnix.download/ "MKVToolNix homepage") by Moritz Bunkus  
-The AWK script parsing mkvmerge output is adapted from Endoro's post on [VideoHelp](https://forum.videohelp.com/threads/343271-BULK-remove-non-English-tracks-from-MKV-container#post2292889).
+[ffmpeg](https://ffmpeg.org/ "FFMpeg homepage")
 
 [warning]: http://files.softicons.com/download/application-icons/32x32-free-design-icons-by-aha-soft/png/32/Warning.png "Warning"
 [warning24]: http://files.softicons.com/download/toolbar-icons/24x24-free-pixel-icons-by-aha-soft/png/24x24/Warning.png "Warning"
