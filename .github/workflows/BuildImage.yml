@@ -5,7 +5,7 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     env:
-      DOCKERHUB: "linuxserver/mods" #don't modify
+      GHCR: "ghcr.io/linuxserver/mods" #don't modify
       BASEIMAGE: "baseimagename" #replace
       MODNAME: "modname" #replace
 
@@ -16,15 +16,15 @@ jobs:
       - name: Build image
         id: build
         run: |
-          docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} .
+          docker build --no-cache -t ${GHCR}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} .
 
       - name: Push image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
           # Tag image
-          docker tag ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
-          # Login to DockerHub
-          echo ${{ secrets.DOCKERPASS }} | docker login -u ${{ secrets.DOCKERUSER }} --password-stdin
+          docker tag ${GHCR}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} ${GHCR}:${BASEIMAGE}-${MODNAME}
+          # Login to ghcr
+          echo ${{ secrets.GHCRPASS }} | docker login -u ${{ secrets.GHCRUSER }} --password-stdin
           # Push all of the tags
-          docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
+          docker push ${GHCR}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+          docker push ${GHCR}:${BASEIMAGE}-${MODNAME}
