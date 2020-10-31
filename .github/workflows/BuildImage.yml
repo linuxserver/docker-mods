@@ -6,8 +6,8 @@ jobs:
   build:
     env:
       DOCKERHUB: "linuxserver/mods" #don't modify
-      BASEIMAGE: "baseimagename" #replace
-      MODNAME: "modname" #replace
+      BASEIMAGE: "lidarr" #replace
+      MODNAME: "flac2mp3" #replace
 
     runs-on: ubuntu-latest
     steps:
@@ -17,7 +17,6 @@ jobs:
         id: build
         run: |
           docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} .
-
       - name: Push image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
