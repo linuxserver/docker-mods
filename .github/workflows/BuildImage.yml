@@ -6,13 +6,8 @@ jobs:
   build:
     env:
       DOCKERHUB: "linuxserver/mods" #don't modify
-<<<<<<< HEAD
-      BASEIMAGE: "baseimagename" #replace
-      MODNAME: "modname" #replace
-=======
       BASEIMAGE: "lidarr" #replace
       MODNAME: "flac2mp3" #replace
->>>>>>> 38e21e1... Initial release
 
     runs-on: ubuntu-latest
     steps:
@@ -22,10 +17,6 @@ jobs:
         id: build
         run: |
           docker build --no-cache -t ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }} .
-<<<<<<< HEAD
-
-=======
->>>>>>> 38e21e1... Initial release
       - name: Push image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
@@ -35,8 +26,4 @@ jobs:
           echo ${{ secrets.DOCKERPASS }} | docker login -u ${{ secrets.DOCKERUSER }} --password-stdin
           # Push all of the tags
           docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-<<<<<<< HEAD
           docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
-=======
-          docker push ${DOCKERHUB}:${BASEIMAGE}-${MODNAME}
->>>>>>> 38e21e1... Initial release
