@@ -39,14 +39,10 @@ jobs:
             exit 1
           fi
 
-      - name: Login to GitHub Container Registry
-        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
-        run: |
-          echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.CR_USER }} --password-stdin
-
       - name: Push tags to GitHub Container Registry
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
+          echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.CR_USER }} --password-stdin
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
 
