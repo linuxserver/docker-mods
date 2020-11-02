@@ -1,5 +1,5 @@
 ## Buildstage ##
-FROM lsiobase/ubuntu:xenial as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
 
 # Build arguments
 ARG VERSION
