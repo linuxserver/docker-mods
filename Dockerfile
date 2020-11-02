@@ -1,4 +1,4 @@
-FROM lsiobase/alpine:3.11 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
 
 ARG GO_VERSION
 
