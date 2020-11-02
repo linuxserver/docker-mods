@@ -19,7 +19,7 @@ jobs:
           DOTNET_JSON="$(curl --retry 5 -sX GET https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases-index.json)"
           DOTNET_VERSIONS="$(echo $DOTNET_JSON | jq -r '."releases-index"[] | select(."support-phase"=="lts") | ."latest-sdk"' | tr '\n' ' ' | head -c -1)"
           DOTNET_TAG="$(echo $DOTNET_VERSIONS | tr ' ' '_')"
-          echo "DOTNET_TAG=${{ secrets.DOTNET_TAG }}" >> $GITHUB_ENV
+          echo "DOTNET_TAG=${DOTNET_TAG}" >> $GITHUB_ENV
           # Build image
           docker build --no-cache --build-arg DOTNET_VERSIONS="${DOTNET_VERSIONS}" -t ${{ github.sha }} .
 
