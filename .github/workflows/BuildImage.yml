@@ -15,14 +15,44 @@ jobs:
 
       - name: Build image
         run: |
-          docker build --no-cache -t ${{ github.sha }} .
+          # Set version
+          GO_WEBSITE=$(curl -sX GET https://golang.org/dl/)
+          GO_VERSION=${GO_VERSION:-$(echo "$GO_WEBSITE" | grep -o '<span.*>.*linux-amd64.*</span>' | grep -oP '(?<=go).*(?=.linux)')}
+          if [ $(echo "$GO_VERSION" | tr -d -c '.' | awk '{ print length; }') = "1" ]; then GO_TAG="${GO_VERSION}.0"; else GO_TAG="${GO_VERSION}"; fi
+          echo "GO_TAG=${GO_TAG}" >> $GITHUB_ENV
+          GO_TAG_MINOR=$(echo "$GO_TAG" | awk 'BEGIN{FS=OFS="."} NF--')
+          echo "GO_TAG_MINOR=${GO_TAG_MINOR}" >> $GITHUB_ENV
+          GO_TAG_MAJOR=$(echo "$GO_TAG_MINOR" | awk 'BEGIN{FS=OFS="."} NF--')
+          echo "GO_TAG_MAJOR=${GO_TAG_MAJOR}" >> $GITHUB_ENV
+          echo "GO_TAG is $GO_TAG GO_TAG_MINOR is $GO_TAG_MINOR GO_TAG_MAJOR is $GO_TAG_MAJOR"
+          if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o '<span.*>.*linux-amd64.*</span>' | grep -oP '(?<=go).*(?=.linux)') ]; then LATEST="true"; fi
+          echo "LATEST=${LATEST}" >> $GITHUB_ENV
+          if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o 'download" href=".*linux-amd64.tar.gz">' | grep -oP '(?<=go/go).*(?=.linux)' | grep -m 1 ^${GO_TAG_MINOR}) ]; then LATEST_MINOR="true"; fi
+          echo "LATEST_MINOR=${LATEST_MINOR}" >> $GITHUB_ENV
+          if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o 'download" href=".*linux-amd64.tar.gz">' | grep -oP '(?<=go/go).*(?=.linux)' | grep -m 1 ^${GO_TAG_MAJOR}) ]; then LATEST_MAJOR="true"; fi
+          echo "LATEST_MAJOR=${LATEST_MAJOR}" >> $GITHUB_ENV
+          echo "LATEST is ${LATEST:-not true}, LATEST_MINOR is ${LATEST_MINOR:-not true}, LATEST_MAJOR is ${LATEST_MAJOR:-not true}"
+          # Build image
+          docker build --no-cache --build-arg GO_VERSION=${GO_VERSION} -t ${{ github.sha }} .
 
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}-${{ github.sha }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}-${{ github.sha }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}-${{ github.sha }}
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}-${{ github.sha }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}-${{ github.sha }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
 
       - name: Credential check
@@ -47,8 +77,20 @@ jobs:
       - name: Push tags to GitHub Container Registry
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}-${{ github.sha }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}
+          if [ "${{ env.LATEST_MAJOR }}" == "true" ]; then
+            docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}-${{ github.sha }}
+            docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}
+          fi
+          if [ "${{ env.LATEST_MINOR }}" == "true" ]; then
+            docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}-${{ github.sha }}
+            docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}
+          fi
+          if [ "${{ env.LATEST }}" == "true" ]; then
+            docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+            docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          fi
 
       - name: Login to DockerHub
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
@@ -58,5 +100,17 @@ jobs:
       - name: Push tags to DockerHub
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
         run: |
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}-${{ github.sha }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG }}
+          if [ "${{ env.LATEST_MAJOR }}" == "true" ]; then
+            docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}-${{ github.sha }}
+            docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MAJOR }}
+          fi
+          if [ "${{ env.LATEST_MINOR }}" == "true" ]; then
+            docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}-${{ github.sha }}
+            docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.GO_TAG_MINOR }}
+          fi
+          if [ "${{ env.LATEST }}" == "true" ]; then
+            docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+            docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          fi
