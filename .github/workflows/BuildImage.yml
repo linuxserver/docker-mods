@@ -27,9 +27,9 @@ jobs:
           echo "GO_TAG is $GO_TAG GO_TAG_MINOR is $GO_TAG_MINOR GO_TAG_MAJOR is $GO_TAG_MAJOR"
           if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o '<span.*>.*linux-amd64.*</span>' | grep -oP '(?<=go).*(?=.linux)') ]; then LATEST="true"; fi
           echo "LATEST=${LATEST}" >> $GITHUB_ENV
-          if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o 'download" href=".*linux-amd64.tar.gz">' | grep -oP '(?<=go/go).*(?=.linux)' | grep -m 1 ^${GO_TAG_MINOR}) ]; then LATEST_MINOR="true"; fi
+          if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o 'download" href=".*linux-amd64.tar.gz">' | grep -oP '(?<=\/go)[1-9].*(?=.linux)' | grep -m 1 ^${GO_TAG_MINOR}) ]; then LATEST_MINOR="true"; fi
           echo "LATEST_MINOR=${LATEST_MINOR}" >> $GITHUB_ENV
-          if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o 'download" href=".*linux-amd64.tar.gz">' | grep -oP '(?<=go/go).*(?=.linux)' | grep -m 1 ^${GO_TAG_MAJOR}) ]; then LATEST_MAJOR="true"; fi
+          if [ "$GO_VERSION" == $(echo "$GO_WEBSITE" | grep -o 'download" href=".*linux-amd64.tar.gz">' | grep -oP '(?<=\/go)[1-9].*(?=.linux)' | grep -m 1 ^${GO_TAG_MAJOR}) ]; then LATEST_MAJOR="true"; fi
           echo "LATEST_MAJOR=${LATEST_MAJOR}" >> $GITHUB_ENV
           echo "LATEST is ${LATEST:-not true}, LATEST_MINOR is ${LATEST_MINOR:-not true}, LATEST_MAJOR is ${LATEST_MAJOR:-not true}"
           # Build image
