@@ -84,7 +84,7 @@ In this repository you will find the `Dockerfile.complex` containing:
 
 ```Dockerfile
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine::3.12 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
 
 RUN \
  echo "**** install packages ****" && \
