@@ -1,12 +1,12 @@
 # Intro
 
-The purpose of the repository is to provide examples and guidance in creating and storing a user consumable modification layer for the Library of Linuxserver.io Dockerhub Containers.
-At it's core a Docker Mod is a tarball of files stored on Dockerhub that is downloaded and extracted on container boot before any init logic is run.
+The purpose of the repository is to provide examples and guidance in creating and storing a user consumable modification layer for the Library of Linuxserver.io Containers.
+At it's core a Docker Mod is a tarball of files stored on Dockerhub and/or GitHub Container Registry that is downloaded and extracted on container boot before any init logic is run.
 This allows:
 
 * Developers and community users to modify base containers to suit their needs without the need to maintain a fork of the main docker repository
 * Mods to be shared with the Linuxserver.io userbase as individual independent projects with their own support channels and development ideologies
-* Zero cost hosting and build pipelines for these modifications leveraging Github and Dockerhub
+* Zero cost hosting and build pipelines for these modifications leveraging GitHub Container Registry and Dockerhub
 * Full custom configuration management layers for hooking containers into each other using environment variables contained in a compose file
 
 It is important to note to end users of this system that there are not only extreme security implications to consuming files from souces outside of our control, but by leveraging community Mods you essentially lose direct support from the core LinuxServer team. Our first and foremost troubleshooting step will be to remove the `DOCKER_MODS` environment variable when running into issues and replace the container with a clean LSIO one.
@@ -15,7 +15,7 @@ Again, when pulling in logic from external sources practice caution and trust th
 
 ## LinuxServer.io Hosted Mods
 
-We host and publish official Mods at the [linuxserver/mods](https://hub.docker.com/r/linuxserver/mods/tags) endpoint as separate tags. Each tag is in the format of `<imagename>-<modname>` for the latest versions, and `<imagename>-<modname>-<commitsha>` for the specific versions.
+We host and publish official Mods at the [linuxserver/mods](https://github.com/orgs/linuxserver/packages/container/mods/versions) endpoint as separate tags. Each tag is in the format of `<imagename>-<modname>` for the latest versions, and `<imagename>-<modname>-<commitsha>` for the specific versions.
 
 Here's a list of the official Mods we host: <https://mods.linuxserver.io/>
 
@@ -53,7 +53,7 @@ This basic demo installs Pip and a couple dependencies for plugins some users le
 ## Creating and maintaining a Docker Mod
 
 We will always recommend to our users consuming Mods that they leverage ones from active community members or projects so transparency is key here. We understand that image layers can be pushed on the back end behind these pipelines, but every little bit helps.
-In this repository we will be going over two basic methods of making a Mod along with an example of the GitHub Actions build logic to get this into a Dockerhub endpoint. Though we are not officially endorsing GitHub Actions here it is built in to GitHub repositories and forks making it very easy to get started. If you prefer others feel free to use them as long as build jobs are transparent.
+In this repository we will be going over two basic methods of making a Mod along with an example of the GitHub Actions build logic to get this into a Dockerhub and/or GitHub Container Registry endpoint. Though we are not officially endorsing GitHub Actions here it is built in to GitHub repositories and forks making it very easy to get started. If you prefer others feel free to use them as long as build jobs are transparent.
 
 One of the core ideas to remember when creating a Mod is that it can only contain a single image layer, the examples below will show you how to add files standardly and how to run complex logic to assemble the files in a build layer to copy them over into this single layer.
 
@@ -84,7 +84,7 @@ In this repository you will find the `Dockerfile.complex` containing:
 
 ```Dockerfile
 ## Buildstage ##
-FROM lsiobase/alpine:3.12 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
 
 RUN \
  echo "**** install packages ****" && \
@@ -108,28 +108,56 @@ COPY --from=buildstage /root-layer/ /
 
 Here we are leveraging a multi stage DockerFile to run custom logic and pull down an Rclone deb from the Internet to include in our image layer for distribution. Any amount of logic can be run in this build stage or even multiple build stages as long as the files in the end are combined into a single folder for the COPY command in the final output.
 
-## Full loop - getting a Mod to Dockerhub
+## Getting a Mod to Dockerhub
 
-First and foremost to publish a Mod you will need the following accounts:
+To publish a Mod to DocherHub you will need the following accounts:
 
 * Github- <https://github.com/join>
 * DockerHub- <https://hub.docker.com/signup>
 
 We recommend using this repository as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into GitHub Actions/Dockerhub.
 
-The only code change you need to make to the build logic file `.github/workflows/BuildImage.yml` will be to modify the DOCKERHUB endpoint to your own image:
+The only code change you need to make to the build logic file `.github/workflows/BuildImage.yml` will be to modify the ENDPOINT to your own image:
 
 ```yaml
-      DOCKERHUB: "user/endpoint"
+  ENDPOINT: "user/endpoint"
+  BRANCH: "master"
 ```
 
-User is your Dockerhub user and endpoint is your own custom name. You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
+User is your Dockerhub user and endpoint is your own custom name (typically the name of the repository where your mod is). You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
 
 Head over to `https://github.com/user/endpoint/settings/secrets` and click on `New secret`
 
-Add `DOCKERUSER` and `DOCKERPASS`. These will be your live Dockerhub credentials:
+Add `DOCKERUSER` (your DockerHub username) and `DOCKERPASS` (your DockerHub password or token).
+
+You can create a token by visiting <https://hub.docker.com/settings/security>
 
 GitHub Actions will trigger a build off of your repo when you commit. The image will be pushed to Dockerhub on success. This Dockerhub endpoint is the Mod variable you can use to customize your container now.
+
+## Getting a Mod to GitHub Container Registry
+
+To publish a Mod to GitHub Container Registry you will need the following accounts:
+
+* Github- <https://github.com/join>
+
+We recommend using this repository as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into GitHub Actions/GitHub Container Registry.
+
+The only code change you need to make to the build logic file `.github/workflows/BuildImage.yml` will be to modify the ENDPOINT to your own image:
+
+```yaml
+  ENDPOINT: "user/endpoint"
+  BRANCH: "master"
+```
+
+User is your GutHub user and endpoint is your own custom name (typically the name of the repository where your mod is). You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
+
+Head over to `https://github.com/user/endpoint/settings/secrets` and click on `New secret`
+
+Add `CR_USER` (your GitHub username) and `CR_PAT` (a personal access token with `read:packages` and `write:packages` scopes).
+
+You can create a personal access token by visiting <https://github.com/settings/tokens>
+
+GitHub Actions will trigger a build off of your repo when you commit. The image will be pushed to GitHub Container Registry on success. This GitHub Container Registry endpoint is the Mod variable you can use to customize your container now.
 
 ## Submitting a PR for a Mod to be added to the official LinuxServer.io repo
 
