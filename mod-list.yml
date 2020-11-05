@@ -33,6 +33,10 @@ mods:
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
+  lidarr:
+    mod_count: 1
+    container_mods:
+      - flac2mp3: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
   nginx:
     mod_count: 1
     container_mods:
