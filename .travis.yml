@@ -4,7 +4,7 @@ language: shell
 
 branches:
   only:
-    - mariadb-maria-backup
+    - mariadb-mariadb-backup
 
 services:
   - docker
@@ -13,7 +13,7 @@ env:
   global:
     - DOCKERHUB="linuxserver/mods"
     - BASEIMAGE="mariadb"
-    - MODNAME="maria-backup"
+    - MODNAME="mariadb-backup"
 
 jobs:
   include:
