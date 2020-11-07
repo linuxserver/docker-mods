@@ -4,16 +4,16 @@ language: shell
 
 branches:
   only:
-    - <baseimagename>-<modname> #replace variables, omit brackets
+    - mariadb-maria-backup
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="linuxserver/mods" #don't modify
-    - BASEIMAGE="baseimagename" #replace
-    - MODNAME="modname" #replace
+    - DOCKERHUB="linuxserver/mods"
+    - BASEIMAGE="mariadb"
+    - MODNAME="maria-backup"
 
 jobs:
   include:
