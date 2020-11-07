@@ -1,6 +1,11 @@
 name: Build Image
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      GO_VERSION:
 
 env:
   ENDPOINT: "linuxserver/mods" #don't modify
@@ -17,6 +22,7 @@ jobs:
         run: |
           # Set version
           GO_WEBSITE=$(curl -sX GET https://golang.org/dl/)
+          GO_VERSION=${{ github.event.inputs.GO_VERSION }}
           GO_VERSION=${GO_VERSION:-$(echo "$GO_WEBSITE" | grep -o '<span.*>.*linux-amd64.*</span>' | grep -oP '(?<=go).*(?=.linux)')}
           if [ $(echo "$GO_VERSION" | tr -d -c '.' | awk '{ print length; }') = "1" ]; then GO_TAG="${GO_VERSION}.0"; else GO_TAG="${GO_VERSION}"; fi
           echo "GO_TAG=${GO_TAG}" >> $GITHUB_ENV
