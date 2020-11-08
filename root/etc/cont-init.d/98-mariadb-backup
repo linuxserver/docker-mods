@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing mariadb-backup ****"
+  apt-get update
+  apt-get install --no-install-recommends -y \
+    mariadb-backup
