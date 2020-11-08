@@ -64,10 +64,10 @@ mods:
     mod_count: 5
     container_mods:
       - cloudflare-real-ip: https://github.com/linuxserver/docker-mods/tree/swag-cloudflare-real-ip
-      - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
+      - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/swag-f2bdiscord
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
-      - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
+      - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
   universal:
     mod_count: 5
     container_mods:
