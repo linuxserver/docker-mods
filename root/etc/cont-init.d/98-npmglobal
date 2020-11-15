@@ -2,9 +2,12 @@
 
 # check npm exists
 if [ -f /usr/bin/npm ]; then
-  ## Ubuntu
-  mkdir /config/.npm-global
-  npm config set prefix '/config/.npm-global'
-  export PATH=/config/.npm-global/bin:$PATH
-  source ~/.profile
+  echo "creating npm global folder in /config"
+  mkdir -p /config/npm-global
+
+  echo "setting npm to global folder in /config"
+  npm config set prefix '/config/npm-global'
+
+  echo "ensuring npm-global is in PATH"
+  sed -i '/^#!\/usr\/bin/a \\n# Added by codeserver-npmglobal\nexport PATH=/config/npm-global/bin:$PATH' /etc/services.d/code-server/run
 fi
