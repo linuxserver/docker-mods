@@ -1,0 +1,18 @@
+#!/usr/bin/with-contenv bash
+
+# check npm exists
+if [ -f /usr/bin/npm ]; then
+  echo "creating npm global folder in /config"
+  mkdir -p /config/npm-global
+
+  echo "setting npm to global folder in /config"
+  npm config set prefix '/config/npm-global'
+
+  if grep -q "/config/npm-global/bin" "/etc/services.d/code-server/run"; then
+    echo "npm-global already in PATH"
+  else
+    echo "ensuring npm-global is in PATH"
+    sed -i '/^#!\/usr\/bin/a \\n# Added by codeserver-npmglobal\nexport PATH=/config/npm-global/bin:$PATH' /etc/services.d/code-server/run
+  fi
+  
+fi
