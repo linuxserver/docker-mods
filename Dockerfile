@@ -1,6 +1,5 @@
 FROM scratch
 
-LABEL maintainer="username"
+LABEL maintainer="ksurl"
 
-# copy local files
 COPY root/ /
