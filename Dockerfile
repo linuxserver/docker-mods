@@ -15,7 +15,7 @@ RUN \
  echo "**** grab debs ****" && \
  mkdir -p /root-layer/opencl-intel && \
  for i in $COMP_RT_URLS; do \
-    echo "downloading ${i%$'\r'}" && \
+    echo "**** downloading ${i%$'\r'} ****" && \
     curl -o /root-layer/opencl-intel/$(basename "${i%$'\r'}") \
         -L "${i%$'\r'}"; \
  done

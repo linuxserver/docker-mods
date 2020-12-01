@@ -2,25 +2,24 @@
 
 # Determine if setup is needed
 if [ ! -f "/usr/bin/apt" ]; then
-  echo "Image is not Ubuntu, skipping opencl-intel install"
+  echo "**** Image is not Ubuntu, skipping opencl-intel install ****"
   exit 0
 fi
 
 if [ $(uname -m) != "x86_64" ]; then
-  echo "Opencl-intel only works on X86_64, skipping"
+  echo "**** Opencl-intel only works on X86_64, skipping ****"
   exit 0
 fi
 
-echo "installing clinfo"
+echo "**** Installing clinfo ****"
 apt-get update
 apt-get install -y \
   clinfo
 
 if [ -d /opencl-intel ]; then
-  echo "Installing/updating opencl-intel debs"
-  cd /opencl-intel
+  echo "**** Installing/updating opencl-intel debs ****"
   dpkg -i /opencl-intel/*.deb
   rm -rf /opencl-intel
 else
-  echo "Opencl-intel already installed"
+  echo "**** Opencl-intel already installed ****"
 fi
