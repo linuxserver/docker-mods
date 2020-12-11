@@ -1,0 +1,28 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+###
+# SWAG LOGIC https://github.com/linuxserver/docker-swag/blob/master/root/etc/cont-init.d/50-config
+###
+
+# copy reverse proxy configs
+cp -R /defaults/proxy-confs /config/nginx/
+
+# copy proxy defaults
+[[ ! -f /config/nginx/proxy.conf ]] &&
+  cp /defaults/proxy.conf /config/nginx/proxy.conf
+[[ ! -f /config/nginx/ssl.conf ]] &&
+  cp /defaults/ssl.conf /config/nginx/ssl.conf
+
+# copy pre-generated dhparams or generate if needed
+if ! grep -q 'PARAMETERS' "/config/nginx/dhparams.pem"; then
+  curl -o /config/nginx/dhparams.pem -L "https://lsio.ams3.digitaloceanspaces.com/dhparams.pem"
+fi
+if ! grep -q 'PARAMETERS' "/config/nginx/dhparams.pem"; then
+  echo "Generating dhparams.pem. This will take a long time. Do not stop the container until this process is completed."
+  openssl dhparam -out /config/nginx/dhparams.pem 4096
+fi
+
+# permissions
+chown -R abc:abc \
+  /config/nginx/{proxy.conf,ssl.conf,dhparams.pem,proxy-confs/}
