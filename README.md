@@ -1,17 +1,16 @@
-# Rsync - Docker mod for openssh-server
+# Proxy-conf - Docker mod for Nginx
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds some of the [proxy-conf](https://github.com/linuxserver/reverse-proxy-confs) functionality that is baked into [SWAG](https://github.com/linuxserver/docker-swag), to Nginx.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+This mod does some reshuffling to the files that originally ships with our Nginx image.
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+| File | Change |
+| --- | --- |
+| site-confs/default | Added include directives to load the files from proxy-confs/ |
+| nginx.conf | Moved some directives to proxy.conf. Added the required map for websockets |
+| proxy.conf | Direct copy from SWAG |
+| ssl.conf | Based on the same file from SWAG, but changed certificate location |
 
-# Mod creation instructions
+In nginx docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:nginx-proxy-confs`
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:nginx-proxy-confs|linuxserver/mods:universal-git`
