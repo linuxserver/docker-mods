@@ -2,15 +2,15 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as grab-stage
 
 RUN \
  apk add --no-cache --upgrade \
-	curl \
+    curl \
     tar && \
  mkdir -p /root/defaults/proxy-confs && \
  curl -o \
-	/tmp/proxy.tar.gz -L \
-	"https://github.com/linuxserver/reverse-proxy-confs/tarball/master" && \
+    /tmp/proxy.tar.gz -L \
+    "https://github.com/linuxserver/reverse-proxy-confs/tarball/master" && \
  tar xf \
-	/tmp/proxy.tar.gz -C \
-	/root/defaults/proxy-confs \
+    /tmp/proxy.tar.gz -C \
+    /root/defaults/proxy-confs \
     --strip-components=1 \
     --exclude=linux*/.gitattributes \
     --exclude=linux*/.github \

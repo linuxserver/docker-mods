@@ -2,7 +2,7 @@
 
 This mod adds some of the [proxy-conf](https://github.com/linuxserver/reverse-proxy-confs) functionality that is baked into [SWAG](https://github.com/linuxserver/docker-swag), to Nginx.
 
-This mod does some reshuffling to the files that originally ships with our Nginx image. You have to track changes to these files yourself. If you are adding this mod to an exsisting install you have to modify, or replace these files yourself.
+This mod does some reshuffling to the files that originally ships with our Nginx image. You have to track changes to these files yourself. If you are adding this mod to an existing install you have to modify, or replace these files yourself.
 
 | File | Change |
 | --- | --- |
