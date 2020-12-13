@@ -8,7 +8,7 @@ RUN \
     jq && \
  DOTNET_JSON=$(curl -sX GET "https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases-index.json") && \
  if [ -z ${DOTNET_VERSIONS+x} ]; then \
-    DOTNET_VERSIONS=$(echo "$DOTNET_JSON" | jq -r '."releases-index"[] | select(."support-phase"=="lts") | ."latest-sdk"' | tr '\n' ' ' | head -c -1); \
+    DOTNET_VERSIONS=$(echo "$DOTNET_JSON" | jq -r '."releases-index"[] | select(."support-phase"=="lts" or ."support-phase"=="current") | ."latest-sdk"' | tr '\n' ' ' | head -c -1); \
  fi && \
  mkdir -p /root-layer/dotnet && \
  echo "$DOTNET_VERSIONS" > /root-layer/dotnet/versions.txt && \
