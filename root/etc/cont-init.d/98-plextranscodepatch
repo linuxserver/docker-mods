@@ -1,9 +1,16 @@
 #!/usr/bin/with-contenv bash
 
+# install git if needed
+if [ -z `command -v git` ]; then
+  echo "**** installing git ****" && \
+  apt-get update -y && \
+  apt-get install --no-install-recommends -y git
+fi
+
 # Determine if setup is needed
-if [ -f /usr/bin/apt ]; then
-  ## Ubuntu
-  apt update -y
+if [ -z `command -v apt` ]; then
+  echo "**** some packagest ****" && \
+  apt update -y && \
   apt-get install --no-install-recommends -y \
     cmake pkg-config \
     python ocl-icd-dev \
@@ -13,10 +20,11 @@ if [ -f /usr/bin/apt ]; then
     libxext-dev llvm-7-dev \
     clang-7 libclang-7-dev \
     libtinfo-dev libedit-dev \
-    zlib1g-dev build-essential git
+    zlib1g-dev build-essential
 fi
 # check if folder exist
 if [ ! -d "/tmp/beignet" ]; then
+  echo "**** installing git ****" && \
    git clone --branch comet-lake https://github.com/rcombs/beignet.git /tmp/beignet && \
    mkdir /tmp/beignet/build/ && \
    cd /tmp/beignet/build/ && \
