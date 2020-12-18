@@ -1,4 +1,5 @@
 FROM scratch
 
-# copy local files
+LABEL maintainer="doob187"
+
 COPY root/ /
