@@ -1,0 +1,26 @@
+#!/usr/bin/with-contenv bash
+
+# Determine if setup is needed
+if [ -f /usr/bin/apt ]; then
+  ## Ubuntu
+  apt update -y
+  apt-get install --no-install-recommends -y \
+    cmake pkg-config \
+    python ocl-icd-dev \
+    libegl1-mesa-dev \
+    ocl-icd-opencl-dev \
+    libdrm-dev libxfixes-dev \
+    libxext-dev llvm-7-dev \
+    clang-7 libclang-7-dev \
+    libtinfo-dev libedit-dev \
+    zlib1g-dev build-essential git
+fi
+# check if folder exist
+if [ ! -d "/tmp/beignet" ]; then
+   git clone --branch comet-lake https://github.com/rcombs/beignet.git /tmp/beignet && \
+   mkdir /tmp/beignet/build/ && \
+   cd /tmp/beignet/build/ && \
+   cmake -DLLVM_INSTALL_DIR=/usr/lib/llvm-7/bin .. && \
+   make -j8 && \
+   make install 
+fi
