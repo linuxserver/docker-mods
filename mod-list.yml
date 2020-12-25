@@ -47,6 +47,10 @@ mods:
     container_mods:
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
       - proxy-confs: https://github.com/linuxserver/docker-mods/tree/nginx-proxy-confs
+  nzbget:
+    mod_count: 1
+    container_mods:
+      - essentials: https://github.com/linuxserver/docker-mods/tree/nzbget-essentials
   openssh-server:
     mod_count: 4
     container_mods:
