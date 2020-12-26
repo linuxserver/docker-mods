@@ -42,4 +42,4 @@ else
 	make install
 	rm -rf /tmp/*
 fi
-echo "NZBGet Essentials - Installation Ended"
+echo "NZBGet Essentials - Installation Ended!"
