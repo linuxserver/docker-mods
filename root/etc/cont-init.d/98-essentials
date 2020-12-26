@@ -17,8 +17,8 @@ apk add --no-cache --virtual=build-dependencies \
 	build-base
 update-ca-certificates
 apk --update upgrade
-apk add --no-cache \
 echo "Binaries are being installed..."
+apk add --no-cache \
     --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
 	ffmpeg \
 	openssl \
