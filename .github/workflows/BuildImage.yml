@@ -3,9 +3,8 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "nzbget" #replace
-  MODNAME: "essentials" #replace
+  ENDPOINT: "hctancredi/docker-mods"
+  BRANCH: "nzbget"
 
 jobs:
   build:
