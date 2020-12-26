@@ -5,8 +5,8 @@ on: [push, pull_request, workflow_dispatch]
 
 env:
   ENDPOINT: "hctancredi/docker-mods" #don't modify
-  BASEIMAGE: "lazylibrarian" #replace
-  MODNAME: "lazylibrarian" #replace
+  BASEIMAGE: "nzbget" #replace
+  MODNAME: "essentials" #replace
 
 jobs:
   build:
