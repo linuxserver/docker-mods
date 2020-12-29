@@ -51,23 +51,21 @@ The InfluxDB database will be created automatically with the name you choose.
 
 ## Sending Nginx log metrics
 
-1. Add the following to the http block in your `nginx.conf`file:
+1. Uncomment the Geoip2 config in `nginx.conf`
+
+2. Add the following to the http block in your `nginx.conf`file:
 
 ```nginx
-geoip2 /config/geoip2db/GeoLite2-City.mmdb {
-auto_reload 5m;
-$geoip2_data_country_code country iso_code;
-$geoip2_data_city_name city names en;
-}
-
 log_format geoip2influx '$remote_addr - $remote_user [$time_local]'
            '"$request" $status $body_bytes_sent'
            '"$http_referer" $host "$http_user_agent"'
            '"$request_time" "$upstream_connect_time"'
-           '"$geoip2_data_city_name" "$geoip2_data_country_code"';
+           '"$geoip2_data_city_name" "$geoip2_data_country_iso_code"';
  ```
  
- 2. Set the access log use the `geoip2influx` log format. 
+ 3. Set the access log use the `geoip2influx` log format.
+ 
+ Note: The log_format block must be above the access_log context. 
  ```nginx
  access_log /config/log/nginx/access.log geoip2influx;
  ```
