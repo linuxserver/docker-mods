@@ -2,4 +2,4 @@
 
 This mod removes the codecs folder from Plex Media Server during container start.
 
-Thanks to iXNyNe for this script.
+Thanks to @iXNyNe for this script.
