@@ -4,7 +4,7 @@ PAR2_VERSION="0.8.1"
 PAR2_URL="https://github.com/Parchive/par2cmdline/releases/download/v0.8.1/par2cmdline-$PAR2_VERSION.tar.gz"
 echo "NZBGet Essentials - Installation Started"
 apk --update upgrade
-echo "Dependencies are being installed...."
+echo "Dependencies are being installed..."
 apk add --no-cache --virtual=build-dependencies \
 	make \
 	g++ \
@@ -40,5 +40,5 @@ else
 	make
 	make install
 	rm -rf /tmp/*
+	echo "NZBGet Essentials - Installation Ended"
 fi
-echo "NZBGet Essentials - Installation Ended!"
