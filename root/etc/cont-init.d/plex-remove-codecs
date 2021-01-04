@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+
+rm -rf "/config/Library/Application Support/Plex Media Server/Codecs"
+echo "Codecs removed."
