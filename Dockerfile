@@ -4,9 +4,9 @@ ARG COMPOSE_ALPINE_TAG="alpine"
 FROM ghcr.io/linuxserver/docker-compose:amd64-${COMPOSE_TAG} as compose-amd64
 FROM ghcr.io/linuxserver/docker-compose:arm32v7-${COMPOSE_TAG} as compose-arm32
 FROM ghcr.io/linuxserver/docker-compose:arm64v8-${COMPOSE_TAG} as compose-arm64
-FROM ghcr.io/linuxserver/docker-compose:amd64-${COMPOSE_ALPINE_TAG} as compose-alpine-amd64
-FROM ghcr.io/linuxserver/docker-compose:arm32v7-${COMPOSE_ALPINE_TAG} as compose-alpine-arm32
-FROM ghcr.io/linuxserver/docker-compose:arm64v8-${COMPOSE_ALPINE_TAG} as compose-alpine-arm64
+FROM ghcr.io/linuxserver/docker-compose:amd64-alpine-${COMPOSE_ALPINE_TAG} as compose-alpine-amd64
+FROM ghcr.io/linuxserver/docker-compose:arm32v7-alpine-${COMPOSE_ALPINE_TAG} as compose-alpine-arm32
+FROM ghcr.io/linuxserver/docker-compose:arm64v8-alpine-${COMPOSE_ALPINE_TAG} as compose-alpine-arm64
 
 FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
 
