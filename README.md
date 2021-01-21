@@ -22,7 +22,7 @@ include /config/nginx/cf_real-ip.conf;
 
 ~~I also recommend including your docker-network as a valid ip `set_real_ip_from 172.17.0.0/16;` in the snippet above.~~
 
-This mod now also *tries* to set the real ip from the default route in the contaier.
+This mod now also *tries* to set the real ip from the interfaces in the container.
 
 ## Versions
 
