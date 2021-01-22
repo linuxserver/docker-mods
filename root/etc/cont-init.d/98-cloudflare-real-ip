@@ -2,9 +2,28 @@
 # shellcheck shell=bash
 # shellcheck disable=SC2046
 
+internet_access=0
+retries_left=25
+
+while [[ ${internet_access} -eq 0 ]]; do
+	curl --connect-timeout 5 -I https://www.cloudflare.com/ips-v4 2> /dev/null
+	
+	rc=$?
+	
+	if [[ ${rc} -eq 0 ]]; then
+		internet_access=1
+	fi
+
+	if [[ ${retries_left} -eq 0 ]]; then
+		internet_access=2
+	fi
+
+	retries_left=$(( ${retries_left} - 1 ))
+done
+
 printf "set_real_ip_from %b;\n" $({
-  curl -s "https://www.cloudflare.com/ips-v4" &
-  curl -s "https://www.cloudflare.com/ips-v6" &
+  curl --connect-timeout 5 -s "https://www.cloudflare.com/ips-v4" &
+  curl --connect-timeout 5 -s "https://www.cloudflare.com/ips-v6" &
   ip route | grep -v default | awk '{print $1}'
 }) > /config/nginx/cf_real-ip.conf
 
