@@ -2,29 +2,20 @@
 # shellcheck shell=bash
 # shellcheck disable=SC2046
 
-internet_access=0
-retries_left=25
+conf_file="/config/nginx/cf_real-ip.conf"
 
-while [[ ${internet_access} -eq 0 ]]; do
-	curl --connect-timeout 5 -I https://www.cloudflare.com/ips-v4 2> /dev/null
-	
-	rc=$?
-	
-	if [[ ${rc} -eq 0 ]]; then
-		internet_access=1
-	fi
+curl --connect-timeout 5 --max-time 5 --retry 3 --retry-delay 0 --retry-max-time 20 https://www.cloudflare.com/ips-v4 &> /dev/null
 
-	if [[ ${retries_left} -eq 0 ]]; then
-		internet_access=2
-	fi
+rc=$?
 
-	retries_left=$(( ${retries_left} - 1 ))
-done
+if [[ ${rc} -eq 0 ]]; then
+	printf "set_real_ip_from %b;\n" $({
+		curl -s "https://www.cloudflare.com/ips-v4" &
+		curl -s "https://www.cloudflare.com/ips-v6" &
+		ip route | grep -v default | awk '{print $1}'
+	}) > ${conf_file}
+elif [ ! -f ${conf_file} ]; then
+	printf "set_real_ip_from %b;\n" $(ip route | grep -v default | awk '{print $1}') > ${conf_file}
+fi
 
-printf "set_real_ip_from %b;\n" $({
-  curl --connect-timeout 5 -s "https://www.cloudflare.com/ips-v4" &
-  curl --connect-timeout 5 -s "https://www.cloudflare.com/ips-v6" &
-  ip route | grep -v default | awk '{print $1}'
-}) > /config/nginx/cf_real-ip.conf
-
-chown abc:abc /config/nginx/cf_real-ip.conf
+chown abc:abc ${conf_file}
