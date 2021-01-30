@@ -25,7 +25,7 @@ Container info:
 ## Usage
 New file(s) with an MP3 extension will be placed in the same directory as the original FLAC file(s). Existing MP3 files with the same track name will be overwritten.
 
-If you've configured the Lidarr Recycle Bin path correctly, the original video will be moved there.  
+If you've configured the Lidarr Recycle Bin path correctly, the original audio file will be moved there.  
 ![warning24] **NOTE:** If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.
 
 ### Syntax
