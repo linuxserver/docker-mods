@@ -5,7 +5,7 @@ on: [push, pull_request, workflow_dispatch]
 env:
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "universal" #replace
-  MODNAME: "wait_for_internet" #replace
+  MODNAME: "wait-for-internet" #replace
 
 jobs:
   build:
