@@ -1,4 +1,4 @@
-## !/usr/bin/with-contenv bash
+#!/usr/bin/with-contenv bash
 
 # Loop until an active internet connection is established
 until $(curl --max-time 60 -s -o /dev/null https://www.linuxserver.io/); do
