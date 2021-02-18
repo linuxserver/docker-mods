@@ -20,7 +20,7 @@ jobs:
           if [ -z ${COMPOSE_ALPINE_TAG+x} ]; then COMPOSE_ALPINE_TAG=$(curl -sX GET "https://api.github.com/repos/linuxserver/docker-docker-compose/releases" | jq -r 'first(.[] | select(.prerelease==true)) | .tag_name'); fi
           COMPOSE_VERSION=$(echo "$COMPOSE_TAG" | sed 's|-ls.*||g')
           echo "COMPOSE_VERSION=${COMPOSE_VERSION}" >> $GITHUB_ENV
-          COMPOSE_ALPINE_VERSION="$(echo ${COMPOSE_ALPINE_TAG} | sed 's|-ls.*||g')"
+          COMPOSE_ALPINE_VERSION="$(echo ${COMPOSE_ALPINE_TAG} | sed 's|-ls.*||g' | sed 's|alpine-||g')"
           if [ "$COMPOSE_VERSION" != "$COMPOSE_ALPINE_VERSION" ]; then echo "ubuntu and alpine versions are different; exiting!" && exit 1; else echo "ubuntu and alpine versions are the same, continuing with build"; fi
           # Build image
           docker build --no-cache --build-arg COMPOSE_TAG=${COMPOSE_TAG} --build-arg COMPOSE_ALPINE_TAG=${COMPOSE_ALPINE_TAG} -t ${{ github.sha }} .
