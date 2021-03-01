@@ -5,7 +5,7 @@ apt-get update && apt-get install -y \
   software-properties-common
 ppa="ppa:ondrej/php"
 if ! grep -q "^deb .*${ppa}" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-    add-apt-repository ${ppa}
+    add-apt-repository ${ppa} -y
 fi
 
 echo "**** installing php and composer ****"
