@@ -4,7 +4,7 @@ mods:
     container_mods:
       - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
-    mod_count: 14
+    mod_count: 15
     container_mods:
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
       - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet 
@@ -13,6 +13,7 @@ mods:
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - npmglobal: https://github.com/linuxserver/docker-mods/tree/code-server-npmglobal
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
+      - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
       - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
