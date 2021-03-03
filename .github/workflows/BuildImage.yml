@@ -5,7 +5,7 @@ on: [push, pull_request, workflow_dispatch]
 env:
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "plex" #replace
-  MODNAME: "codecs" #replace
+  MODNAME: "remove-codecs" #replace
 
 jobs:
   build:
