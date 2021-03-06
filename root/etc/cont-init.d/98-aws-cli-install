@@ -1,0 +1,20 @@
+#!/usr/bin/with-contenv bash
+
+echo "*** AWSCLI Installer ***"
+echo "Checking if awscli is installed"
+
+if ! aws -v COMMAND &> /dev/null; then 
+
+  echo "aws not installed, installing now..." 
+    
+  if ! pip -v COMMAND &> /dev/null 
+  then
+    echo "pip3 not installed, installing now..." 
+    apt-get update
+    apt-get install python3 python3-pip -y
+    pip3 install awscli
+  fi
+
+else
+  echo "aws installed skipping!"
+fi
