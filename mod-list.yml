@@ -4,8 +4,9 @@ mods:
     container_mods:
       - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
-    mod_count: 15
+    mod_count: 16
     container_mods:
+      - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
       - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet 
       - flutter: https://github.com/linuxserver/docker-mods/tree/code-server-flutter
