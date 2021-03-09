@@ -45,8 +45,9 @@ mods:
     container_mods:
       - flac2mp3: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
   nginx:
-    mod_count: 2
+    mod_count: 3
     container_mods:
+      - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
       - proxy-confs: https://github.com/linuxserver/docker-mods/tree/nginx-proxy-confs
   openssh-server:
