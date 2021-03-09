@@ -3,9 +3,9 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  ENDPOINT: "linuxserver/mods"
+  BASEIMAGE: "swag"
+  MODNAME: "auto-reload"
 
 jobs:
   build:

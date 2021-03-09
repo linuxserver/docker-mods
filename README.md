@@ -1,17 +1,20 @@
-# Rsync - Docker mod for openssh-server
+# Auto-reload - Docker mod for Nginx based images
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod allows Nginx to be reloaded automatically whenever there are valid changes to the following files and folders:
+- /config/nginx/authelia-location.conf
+- /config/nginx/authelia-server.conf
+- /config/nginx/geoip2.conf
+- /config/nginx/ldap.conf
+- /config/nginx/nginx.conf
+- /config/nginx/proxy-confs
+- /config/nginx/proxy.conf
+- /config/nginx/site-confs
+- /config/nginx/ssl.conf
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+In the container's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-auto-reload`
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:swag-auto-reload|linuxserver/mods:swag-mod2`
 
-# Mod creation instructions
+If you'd like for Nginx to be reloaded when other files or folders are modified (not included in our default list above), set a new environment variable, `WATCHLIST`, and set it to a list of container relative paths separated by `|` like the below example:
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+`WATCHLIST="/config/nginx/custom.conf|/config/nginx/customfolder"`
