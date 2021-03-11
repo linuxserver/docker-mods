@@ -1,20 +1,22 @@
 #!/bin/bash
 
 # Script to convert FLAC files to MP3 using FFMpeg
-#  https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
-# Can also process MP3s and tag them appropriately
-# Resultant MP3s are fully tagged
+#  Dev/test: https://github.com/TheCaptain989/lidarr-flac2mp3
+#  Prod: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
+# Resultant MP3s are fully tagged and retain same permissions as original file
 
 # Dependencies:
 #  ffmpeg
 #  awk
 #  stat
 #  nice
+#  chmod
 
 # Exit codes:
 #  0 - success; or test
-#  1 - no tracks files specified on command line
+#  1 - no tracks files found in environment
 #  2 - mkvmerge not found
+#  3 - invalid command line arguments
 # 10 - awk script generated an error
 
 ### Variables
@@ -34,25 +36,25 @@ RET=$?; [ "$RET" != 0 ] && >&2 echo "WARNING[$RET]: Unable to read recyclebin in
 function usage {
   usage="
 $flac2mp3_script
-Audio conversion script designed for use with Bazarr
+Audio conversion script designed for use with Lidarr
 
 Source: https://github.com/TheCaptain989/lidarr-flac2mp3
 
 Usage:
-  $0 [-d] [-b <bitrate>]
-
-Arguments:
-  bitrate       # output quality in bits per second (SI units)
+  $0 [-d] [-b <bitrate> | -v <quality>]
 
 Options:
-  -d    # enable debug logging
-  -b    # set bitrate; default 320K
+  -d             enable debug logging
+  -b <bitrate>   set output quality in constant bits per second [default: 320k]
+                 Ex: 160k, 240k, 300000
+  -v <quality>   set variable bitrate; quality between 0-9
+                 0 is highest quality, 9 is lowest
+                 See https://trac.ffmpeg.org/wiki/Encode/MP3 for more details
 
 Examples:
-  $flac2mp3_script -b 320k              # Output 320 kilobits per second MP3
-                                     (same as default behavior)
-  $flac2mp3_script -d -b 160k           # Enable debugging, and output quality
-                                     160 kilobits per second
+  $flac2mp3_script -b 320k            # Output 320 kbit/s MP3 (non VBR; same as default behavior)
+  $flac2mp3_script -v 0               # Output variable bitrate, VBR 220-260 kbit/s
+  $flac2mp3_script -d -b 160k         # Enable debugging and set output to 160 kbit/s
 "
   >&2 echo "$usage"
 }
@@ -119,7 +121,7 @@ function check_rescan {
   return $RET
 }
 # Process options
-while getopts ":db:" opt; do
+while getopts ":db:v:" opt; do
   case ${opt} in
     d ) # For debug purposes only
       MSG="Debug|Enabling debug logging."
@@ -128,27 +130,57 @@ while getopts ":db:" opt; do
       flac2mp3_debug=1
       printenv | sort | sed 's/^/Debug|/' | log
       ;;
-    b ) # Set bitrate
-      flac2mp3_bitrate="$OPTARG"
+    b ) # Set constant bit rate
+      if [ -n "$flac2mp3_vbrquality" ]; then
+        MSG="Error|Both -b and -v options cannot be set at the same time."
+        echo "$MSG" | log
+        >&2 echo "$MSG"
+        usage
+        exit 3
+      else
+        flac2mp3_bitrate="$OPTARG"
+      fi
       ;;
-    : )
-      MSG="Error|Invalid option: -$OPTARG requires an argument"
+    v ) # Set variable quality
+      if [ -n "$flac2mp3_bitrate" ]; then
+        MSG="Error|Both -v and -b options cannot be set at the same time."
+        echo "$MSG" | log
+        >&2 echo "$MSG"
+        usage
+        exit 3
+      else
+        flac2mp3_vbrquality="$OPTARG"
+      fi
+      ;;
+    : ) # No required argument specified
+      MSG="Error|Invalid option: -${OPTARG} requires an argument"
       echo "$MSG" | log
       >&2 echo "$MSG"
+      usage
+      exit 3
+      ;;
+    * ) # Unknown option
+      MSG="Error|Unknown option: -${OPTARG}"
+      echo "$MSG" | log
+      >&2 echo "$MSG"
+      usage
+      exit 3
       ;;
   esac
 done
 shift $((OPTIND -1))
 
-# Set default bitrate
-[ -z "$flac2mp3_bitrate" ] && flac2mp3_bitrate="320k"
+# Set default bit rate
+[ -z "$flac2mp3_vbrquality" ] && [ -z "$flac2mp3_bitrate" ] && flac2mp3_bitrate="320k"
 
+# Handle Lidarr Test event
 if [[ "$lidarr_eventtype" = "Test" ]]; then
   echo "Info|Lidarr event: $lidarr_eventtype" | log
   echo "Info|Script was test executed successfully." | log
   exit 0
 fi
 
+# Check if called from within Lidarr
 if [ -z "$flac2mp3_tracks" ]; then
   MSG="Error|No track file(s) specified! Not called from Lidarr?"
   echo "$MSG" | log
@@ -157,6 +189,7 @@ if [ -z "$flac2mp3_tracks" ]; then
   exit 1
 fi
 
+# Check for required binaries
 if [ ! -f "/usr/bin/ffmpeg" ]; then
   MSG="Error|/usr/bin/ffmpeg is required by this script"
   echo "$MSG" | log
@@ -164,48 +197,67 @@ if [ ! -f "/usr/bin/ffmpeg" ]; then
   exit 2
 fi
 
-# Legacy one-liner script
+# Legacy one-liner script for posterity
 #find "$lidarr_artist_path" -name "*.flac" -exec bash -c 'ffmpeg -loglevel warning -i "{}" -y -acodec libmp3lame -b:a 320k "${0/.flac}.mp3" && rm "{}"' {} \;
 
 #### MAIN
-echo "Info|Lidarr event: $lidarr_eventtype, Artist: $lidarr_artist_name ($lidarr_artist_id), Album: $lidarr_album_title ($lidarr_album_id), Export bitrate: $flac2mp3_bitrate, Tracks: $flac2mp3_tracks" | log
+echo "Info|Lidarr event: $lidarr_eventtype, Artist: $lidarr_artist_name ($lidarr_artist_id), Album: $lidarr_album_title ($lidarr_album_id), Export bitrate: ${flac2mp3_bitrate:-$flac2mp3_vbrquality}, Tracks: $flac2mp3_tracks" | log
 echo "$flac2mp3_tracks" | awk -v Debug=$flac2mp3_debug \
 -v Recycle="$flac2mp3_recyclebin" \
--v Bitrate=$flac2mp3_bitrate '
+-v Bitrate=$flac2mp3_bitrate \
+-v VBR=$flac2mp3_vbrquality '
 BEGIN {
   FFMpeg="/usr/bin/ffmpeg"
   FS="|"
   RS="|"
   IGNORECASE=1
+  if (Bitrate) {
+    if (Debug) print "Debug|Using constant bitrate of "Bitrate
+    BrCommand="-b:a "Bitrate
+  } else {
+    if (Debug) print "Debug|Using variable quality of "VBR
+    BrCommand="-q:a "VBR
+  }
 }
 /\.flac/ {
+  # Get each FLAC file name and create a new MP3 name
   Track=$1
   sub(/\n/,"",Track)
   NewTrack=substr(Track, 1, length(Track)-5)".mp3"
   print "Info|Writing: "NewTrack
-  if (Debug) print "Debug|Executing: nice "FFMpeg" -loglevel error -i \""Track"\" "CoverCmds1"-map 0 -y -acodec libmp3lame -b:a "Bitrate" -write_id3v1 1 -id3v2_version 3 "CoverCmds2"\""NewTrack"\""
-  Result=system("nice "FFMpeg" -loglevel error -i \""Track"\" "CoverCmds1"-map 0 -y -acodec libmp3lame -b:a "Bitrate" -write_id3v1 1 -id3v2_version 3 "CoverCmds2"\""NewTrack"\" 2>&1")
+  # Convert the track
+  if (Debug) print "Debug|Executing: nice "FFMpeg" -loglevel error -i \""Track"\" -c:v copy -map 0 -y -acodec libmp3lame "BrCommand" -write_id3v1 1 -id3v2_version 3 \""NewTrack"\""
+  Result=system("nice "FFMpeg" -loglevel error -i \""Track"\" -c:v copy -map 0 -y -acodec libmp3lame "BrCommand" -write_id3v1 1 -id3v2_version 3 \""NewTrack"\" 2>&1")
   if (Result) {
-    print "Error|"Result" converting \""Track"\""
+    print "Error|Exit code "Result" converting \""Track"\""
   } else {
     if (Recycle=="") {
-      if (Debug) print "Debug|Deleting: \""Track"\""
-      system("[ -s \""NewTrack"\" ] && [ -f \""Track"\" ] && rm \""Track"\"")
+      # No Recycle Bin, so check for non-zero size new file and delete the old one
+      if (Debug) print "Debug|Deleting: \""Track"\" and setting permissions on \""NewTrack"\""
+      #Command="[ -s \""NewTrack"\" ] && [ -f \""Track"\" ] && chown --reference=\""Track"\" \""NewTrack"\" && chmod --reference=\""Track"\" \""NewTrack"\" && rm \""Track"\""
+      Command="if [ -s \""NewTrack"\" ]; then if [ -f \""Track"\" ]; then chown --reference=\""Track"\" \""NewTrack"\"; chmod --reference=\""Track"\" \""NewTrack"\"; rm \""Track"\"; fi; fi"
+      if (Debug) print "Debug|Executing: "Command
+      system(Command)
     } else {
+      # Recycle Bin is configured, so check if it exists, append a relative path to it from the track, check for non-zero size new file, and move the old one to the Recycle Bin
       match(Track,/^\/?[^\/]+\//)
       RecPath=substr(Track,RSTART+RLENGTH)
       sub(/[^\/]+$/,"",RecPath)
       RecPath=Recycle RecPath
-      if (Debug) print "Debug|Moving: \""Track"\" to \""RecPath"\""
-      system("[ ! -e \""RecPath"\" ] && mkdir -p \""RecPath"\"; [ -s \""NewTrack"\" ] && [ -f \""Track"\" ] && mv -t \""RecPath"\" \""Track"\"")
+      if (Debug) print "Debug|Moving: \""Track"\" to \""RecPath"\" and setting permissions on \""NewTrack"\""
+      Command="if [ ! -e \""RecPath"\" ]; then mkdir -p \""RecPath"\"; fi; if [ -s \""NewTrack"\" ]; then if [ -f \""Track"\" ]; then chown --reference=\""Track"\" \""NewTrack"\"; chmod --reference=\""Track"\" \""NewTrack"\"; mv -t \""RecPath"\" \""Track"\"; fi; fi"
+      if (Debug) print "Debug|Executing: "Command
+      system(Command)
     }
   }
 }
 ' | log
 
+#### END MAIN
+
+# Check for awk script completion
 RET="${PIPESTATUS[1]}"    # captures awk exit status
 if [ $RET != "0" ]; then
-  # Check for script completion and non-empty file
   MSG="Error|Script exited abnormally.  File permissions issue?"
   echo "$MSG" | log
   >&2 echo "$MSG"
@@ -241,11 +293,13 @@ if [ ! -z "$lidarr_artist_id" ]; then
       >&2 echo "$MSG"
     fi
   else
+    # No config file means we can't call the API
     MSG="Warn|Unable to locate Lidarr config file: '$flac2mp3_config'"
     echo "$MSG" | log
     >&2 echo "$MSG"
   fi
 else
+  # No Artist ID means we can't call the API
   MSG="Warn|Missing environment variable lidarr_artist_id"
   echo "$MSG" | log
   >&2 echo "$MSG"
