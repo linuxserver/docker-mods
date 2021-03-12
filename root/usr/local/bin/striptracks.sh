@@ -55,11 +55,6 @@ elif [[ "${striptracks_type,,}" = "sonarr" ]]; then
 else
   echo "Unknown environment: ${striptracks_type}"
   exit 7
-                                                                                      
-                                                                            
-                                          
-                                                                                                                                                                                                                                                                                         
-    
 fi
 export striptracks_api="Rescan${striptracks_video_type^}"
 export striptracks_json_key="${striptracks_video_type}Id"
@@ -87,12 +82,6 @@ Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
   $0 [-d] <audio_languages> <subtitle_languages>
-
-          
-                                                                      
-                                                                                 
-                                                                      
-                                                                                 
 
 Options and Arguments:
   -d                     enable debug logging
