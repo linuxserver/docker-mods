@@ -86,7 +86,7 @@ flac2mp3-vbr.sh          # Use variable bit rate, quality 0
 ```
 
 ### Example Wrapper Script
-To configure the last entry from the [Examples](./README.md#examples) section above, create and save a file called `striptracks-custom.sh` to `/config` containing the following text:
+To configure the last entry from the [Examples](./README.md#examples) section above, create and save a file called `flac2mp3-custom.sh` to `/config` containing the following text:
 ```shell
 #!/bin/bash
 
@@ -94,10 +94,10 @@ To configure the last entry from the [Examples](./README.md#examples) section ab
 ```
 Make it executable:
 ```shell
-chmod +x /config/striptracks-custom.sh
+chmod +x /config/flac2mp3-custom.sh
 ```
 
-Then put `/config/striptracks-custom.sh` in the **Path** field in place of `/usr/local/bin/flac2mp3.sh` mentioned in the [Installation](./README.md#installation) section above.
+Then put `/config/flac2mp3-custom.sh` in the **Path** field in place of `/usr/local/bin/flac2mp3.sh` mentioned in the [Installation](./README.md#installation) section above.
 
 >**Note:** If you followed the Linuxserver.io recommendations when configuring your container, the `/config` directory will be mapped to an external storage location.  It is therefore recommended to place custom scripts in the `/config` directory so they will survive container updates, but they may be placed anywhere that is accessible by Lidarr.
 
