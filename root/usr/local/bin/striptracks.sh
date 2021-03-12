@@ -2,7 +2,8 @@
 
 # Video remuxing script designed for use with Radarr and Sonarr
 # Automatically strips out unwanted audio and subtitle streams, keeping only the desired languages.
-#  https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
+#  Prod: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
+#  Dev/test: https://github.com/TheCaptain989/radarr-striptracks
 
 # Adapted and corrected from Endoro's post 1/5/2014:
 #  https://forum.videohelp.com/threads/343271-BULK-remove-non-English-tracks-from-MKV-container#post2292889
@@ -26,6 +27,7 @@
 #  4 - mkvmerge not found
 #  5 - specified video file not found
 #  6 - unable to rename video to temp video
+#  7 - unknown environment
 # 10 - remuxing completed, but no output file found
 # 20 - general error
 
@@ -44,14 +46,20 @@ if [[ "${striptracks_type,,}" = "radarr" ]]; then
   export striptracks_json_quality_root=".movieFile"
   export striptracks_video_type="movie"
   export striptracks_title="$radarr_movie_title ($radarr_movie_year)"
+elif [[ "${striptracks_type,,}" = "sonarr" ]]; then
+  export striptracks_video="$sonarr_episodefile_path"
+  export striptracks_api_endpoint="episodefile"
+  export striptracks_json_quality_root=""
+  export striptracks_video_type="series"
+  export striptracks_title="$sonarr_series_title $(numfmt --format "%02f" ${sonarr_episodefile_seasonnumber:-0})x$(numfmt --format "%02f" ${sonarr_episodefile_episodenumbers:-0}) - $sonarr_episodefile_episodetitles"
 else
-  if [[ "${striptracks_type,,}" = "sonarr" ]]; then
-    export striptracks_video="$sonarr_episodefile_path"
-    export striptracks_api_endpoint="episodefile"
-    export striptracks_json_quality_root=""
-    export striptracks_video_type="series"
-    export striptracks_title="$sonarr_series_title $(numfmt --format "%02f" $sonarr_episodefile_seasonnumber)x$(numfmt --format "%02f" $sonarr_episodefile_episodenumbers) - $sonarr_episodefile_episodetitles"
-  fi
+  echo "Unknown environment: ${striptracks_type}"
+  exit 7
+                                                                                      
+                                                                            
+                                          
+                                                                                                                                                                                                                                                                                         
+    
 fi
 export striptracks_api="Rescan${striptracks_video_type^}"
 export striptracks_json_key="${striptracks_video_type}Id"
@@ -80,22 +88,26 @@ Source: https://github.com/TheCaptain989/radarr-striptracks
 Usage:
   $0 [-d] <audio_languages> <subtitle_languages>
 
-Arguments:
-  audio_languages       # ISO639-2 code(s) prefixed with a colon \`:\`
-                          Multiple codes may be concatenated.
-  subtitle_languages    # ISO639-2 code(s) prefixed with a colon \`:\`
-                          Multiple codes may be concatenated.
+          
+                                                                      
+                                                                                 
+                                                                      
+                                                                                 
 
-Options:
-  -d    # enable debug logging
+Options and Arguments:
+  -d                     enable debug logging
+  <audio_languages>      ISO639-2 code(s) prefixed with a colon \`:\`
+                         Multiple codes may be concatenated.
+  <subtitle_languages>   ISO639-2 code(s) prefixed with a colon \`:\`
+                         Multiple codes may be concatenated.
 
 Examples:
   $striptracks_script :eng:und :eng              # keep English and Undetermined audio and
-                                              English subtitles
+                                            # English subtitles
   $striptracks_script :eng \"\"                    # keep English audio and no subtitles
   $striptracks_script -d :eng:kor:jpn :eng:spa   # Enable debugging, keeping English, Korean,
-                                              and Japanese audio, and English and
-                                              Spanish subtitles
+                                            # and Japanese audio, and English and
+                                            # Spanish subtitles
 "
   >&2 echo "$usage"
 }
@@ -188,6 +200,7 @@ while getopts ":d" opt; do
 done
 shift $((OPTIND -1))
 
+# Check for required command line options
 if [ -z "$1" ]; then
   MSG="Error|No audio languages specified!"
   echo "$MSG" | log
@@ -204,6 +217,7 @@ if [ -z "$2" ]; then
   exit 3
 fi
 
+# Check for required binaries
 if [ ! -f "/usr/bin/mkvmerge" ]; then
   MSG="Error|/usr/bin/mkvmerge is required by this script"
   echo "$MSG" | log
@@ -211,12 +225,14 @@ if [ ! -f "/usr/bin/mkvmerge" ]; then
   exit 4
 fi
 
+# Handle Test event
 if [[ "${!striptracks_eventtype}" = "Test" ]]; then
   echo "Info|${striptracks_type^} event: ${!striptracks_eventtype}" | log
   echo "Info|Script was test executed successfully." | log
   exit 0
 fi
 
+# Check if called from within Radarr/Sonarr
 if [ -z "$striptracks_video" ]; then
   MSG="Error|No video file specified! Not called from Radarr/Sonarr?"
   echo "$MSG" | log
@@ -225,6 +241,7 @@ if [ -z "$striptracks_video" ]; then
   exit 1
 fi
 
+# Check if source video exists
 if [ ! -f "$striptracks_video" ]; then
   MSG="Error|Input file not found: \"$striptracks_video\""
   echo "$MSG" | log
@@ -395,7 +412,7 @@ FILESIZE=$(numfmt --to iec --format "%.3f" $(stat -c %s "$striptracks_newvideo")
 MSG="Info|New size: $FILESIZE"
 echo "$MSG" | log
 
-# Call *arr API to RescanMovie/RescanSeries
+# Call Radarr/Sonarr API to RescanMovie/RescanSeries
 if [ -f "$striptracks_arr_config" ]; then
   # Read *arr config.xml
   while read_xml; do

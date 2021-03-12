@@ -172,7 +172,6 @@ The only events/notification triggers that have been tested are **On Download** 
 The log can be inspected or downloaded from Radarr/Sonarr under *System* > *Log Files*
 
 ___
-
 # Credits
 
 This would not be possible without the following:
