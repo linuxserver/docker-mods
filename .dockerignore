@@ -1,6 +1,9 @@
+# Docker ignore file
 .git
 .gitignore
 .github
 .gitattributes
+.assets
 READMETEMPLATE.md
 README.md
+SECURITY.md
