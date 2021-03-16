@@ -22,4 +22,4 @@ else
 fi
 
 echo "Installing gcc, to make CGO work"
-apt-get install -y gcc-8-base
+apt-get install -y gcc
