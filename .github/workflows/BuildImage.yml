@@ -8,7 +8,7 @@ on:
       GO_VERSION:
 
 env:
-  ENDPOINT: "caiych/mods" #don't modify
+  ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "code-server" #replace
   MODNAME: "golang" #replace
 
