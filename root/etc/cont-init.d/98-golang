@@ -20,3 +20,6 @@ if [ -f "/golang/golang_${ARCH}.tar.gz" ]; then
 else
   echo "Golang already installed, skipping"
 fi
+
+echo "Installing gcc, to make CGO work"
+apt-get install -y gcc-8-base
