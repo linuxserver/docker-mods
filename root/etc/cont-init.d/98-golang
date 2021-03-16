@@ -17,6 +17,9 @@ if [ -f "/golang/golang_${ARCH}.tar.gz" ]; then
   echo "Installing golang"
   tar xzf "/golang/golang_${ARCH}.tar.gz" -C /usr/local
   rm -rf /golang
+
+  echo "Installing gcc, to make CGO work"
+  apt-get update && apt-get install -y gcc
 else
   echo "Golang already installed, skipping"
 fi
