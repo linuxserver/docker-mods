@@ -40,6 +40,8 @@ Get your licence key here: https://www.maxmind.com/en/geolite2/signup
 
 ### InfluxDB 
 
+#### InfluxDB v2.x is not supported. Use v1.8.x. 
+
 The InfluxDB database will be created automatically with the name you choose.
 
 ***
