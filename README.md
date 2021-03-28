@@ -1,17 +1,61 @@
-# Rsync - Docker mod for openssh-server
+# jellyfin-amd - Docker mode for Jellyfin
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mode adds the mesa libraries (v20.1+) needed for hardware encoding (VAAPI) on AMD GPUs to the Jellyfin Docker container.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+## Docker compose
+The docker-compose file needs a `devices` entry for jellyfin ([Official Documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html))
+```
+---
+version: "2.1"
+services:
+  jellyfin:
+    image: linuxserver/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - UMASK=<022> #optional
+      - DOCKER_MODS=pascalminder/jellyfin-amd:jellyfin-amd
+    volumes:
+      - /path/to/library:/config
+      - /path/to/tvseries:/data/tvshows
+      - /path/to/movies:/data/movies
+      - /opt/vc/lib:/opt/vc/lib #optional
+    ports:
+      - 8096:8096
+      - 8920:8920 #optional
+      - 7359:7359/udp #optional
+      - 1900:1900/udp #optional
+    devices:
+      # VAAPI Devices
+      - "/dev/dri/renderD128:/dev/dri/renderD128"
+      - "/dev/dri/card0:/dev/dri/card0"
+    restart: unless-stopped
+```
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+## Docker cli
+```
+docker run -d \
+  --name=jellyfin \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Europe/London \
+  -e UMASK=<022> `#optional` \
+  -e DOCKER_MODS=pascalminder/jellyfin-amd:jellyfin-amd
+  -p 8096:8096 \
+  -p 8920:8920 `#optional` \
+  -p 7359:7359/udp `#optional` \
+  -p 1900:1900/udp `#optional` \
+  -v /path/to/library:/config \
+  -v /path/to/tvseries:/data/tvshows \
+  -v /path/to/movies:/data/movies \
+  -v /opt/vc/lib:/opt/vc/lib `#optional` \
+  --device /dev/dri/renderD128:/dev/dri/renderD128 \
+  --device /dev/dri/card0:/dev/dri/card0 \
+  --restart unless-stopped \
+  linuxserver/jellyfin
+```
 
-# Mod creation instructions
-
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+## Settings in Jellyfin
+Under server administration in `Server > Playback` the `Hardware acceleration` can be set to `Video Acceleration API (VAAPI)` and the `VA API Device` has to be set to the device given in the Docker configuration. For example `/dev/dri/renderD128`.
