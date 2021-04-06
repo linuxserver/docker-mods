@@ -1,17 +1,14 @@
-# Rsync - Docker mod for openssh-server
+# Docker-in-docker (dind) - Docker mod for Ubuntu and Alpine based images
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds docker-in-docker (dind) to Ubuntu and Alpine based images, to be installed/updated during container start.
+Main advantage is that all docker images, containers, volumes, etc. will reside inside the container and will be sandboxed from the host's docker environment.
+Main disadvantage is that it requires the container to run with `privileged`.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+## How to enable:
+In the container's docker arguments,
+* Set an environment variable `DOCKER_MODS=linuxserver/mods:universal-docker-in-docker`
+* Set the `privileged` option for the container
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+Docker data root will reside under `/config/var/lib/docker`.
 
-# Mod creation instructions
-
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:universal-docker-in-docker|linuxserver/mods:universal-mod2`
