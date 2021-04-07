@@ -46,7 +46,7 @@ COPY root/ /root-layer/
 ## Single layer deployed image ##
 FROM scratch
 
-LABEL maintainer="username"
+LABEL maintainer="aptalca"
 
 # Add files from buildstage
 COPY --from=buildstage /root-layer/ /
