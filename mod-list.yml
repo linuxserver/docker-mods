@@ -83,11 +83,12 @@ mods:
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
   universal:
-    mod_count: 6
+    mod_count: 7
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
       - cron: https://github.com/linuxserver/docker-mods/tree/universal-cron
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
+      - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
       - git: https://github.com/linuxserver/docker-mods/tree/universal-git
       - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
       - wait-for-internet: https://github.com/linuxserver/docker-mods/tree/universal-wait-for-internet
