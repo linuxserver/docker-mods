@@ -20,7 +20,7 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
    **[linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr "Radarr Docker container")**  
    **[linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr "Sonarr Docker container")**
    1. Add the **DOCKER_MODS** environment variable to the `docker run` command, as follows:  
-      - Dev/test release: `-e DOCKER_MODS=thecaptain989/radarr-striptracks:latest`  
+      
       - Stable release: `-e DOCKER_MODS=linuxserver/mods:radarr-striptracks`
 
       *Example Docker CLI Configuration*  
