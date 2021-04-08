@@ -16,7 +16,7 @@ jobs:
       - name: Build image
         run: |
           # Build variables
-          VERSION=$(git describe --tags --always)
+          VERSION=${GITHUB_SHA:0:7}
           cat <<EOF
           Building version $VERSION
           EOF
