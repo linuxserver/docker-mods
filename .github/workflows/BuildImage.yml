@@ -16,9 +16,14 @@ jobs:
       - name: Build image
         run: |
           # Build variables
-          VERSION=$(git describe --tags --always)
+          VERSION=${GITHUB_SHA:0:7}
+          cat <<EOF
+          Building version $VERSION
+          EOF
           # Build image
-          docker build --no-cache --build-arg VERSION=${VERSION} -t ${{ github.sha }} .
+          docker build --build-arg VERSION=${VERSION} \
+                       --no-cache \
+                       --tag ${{ github.sha }} .
 
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}

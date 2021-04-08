@@ -3,7 +3,9 @@
 cat <<EOF
 ----------------
 >>> Striptracks Mod by TheCaptain989 <<<
-Repo: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
+Repos:
+  Dev/test: https://github.com/TheCaptain989/radarr-striptracks
+  Prod: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
 
 Version: $(cat /etc/version.tc989)
 ----------------
