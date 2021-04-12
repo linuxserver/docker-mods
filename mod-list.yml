@@ -45,10 +45,11 @@ mods:
     container_mods:
       - flac2mp3: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
   nginx:
-    mod_count: 3
+    mod_count: 4
     container_mods:
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
+      - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - proxy-confs: https://github.com/linuxserver/docker-mods/tree/nginx-proxy-confs
   openssh-server:
     mod_count: 4
@@ -74,7 +75,7 @@ mods:
     container_mods:
       - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
   swag:
-    mod_count: 6
+    mod_count: 7
     container_mods:
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
       - cloudflare-real-ip: https://github.com/linuxserver/docker-mods/tree/swag-cloudflare-real-ip
@@ -82,6 +83,7 @@ mods:
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
+      - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
   universal:
     mod_count: 7
     container_mods:
