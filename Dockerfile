@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.13 as buildstage
 
 ARG DOTNET_VERSIONS
 
@@ -17,9 +17,9 @@ RUN \
     echo "processing version ${i}" && \
     DOTNET_RELEASE_URL=$(echo "${DOTNET_JSON}" | jq -r ".\"releases-index\"[] | select(.\"latest-sdk\"==\"${i}\") | .\"releases.json\"") && \
     DOTNET_RELEASE_JSON=$(curl -sX GET "${DOTNET_RELEASE_URL}") && \
-    AMD64_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-x64\")) | .url") && \
-    ARM32_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-arm.\")) | .url") && \
-    ARM64_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-arm64\")) | .url") && \
+    AMD64_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-x64.tar.gz\")) | .url") && \
+    ARM32_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-arm.tar.gz\")) | .url") && \
+    ARM64_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-arm64.tar.gz\")) | .url") && \
     curl -fS --retry 3 --retry-connrefused -o \
         /root-layer/dotnet/dotnetsdk_"${i}"_x86_64.tar.gz -L \
         "${AMD64_URL}" && \
