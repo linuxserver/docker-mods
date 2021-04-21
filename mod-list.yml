@@ -27,8 +27,9 @@ mods:
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/healthchecks-apprise
   jellyfin:
-    mod_count: 1
+    mod_count: 2
     container_mods:
+      - amd: https://github.com/linuxserver/docker-mods/tree/jellyfin-amd
       - opencl-intel: https://github.com/linuxserver/docker-mods/tree/jellyfin-opencl-intel
   lazylibrarian:
     mod_count: 1
