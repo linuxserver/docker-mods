@@ -21,6 +21,8 @@ COPY root/ root/
 
 ADD https://raw.githubusercontent.com/linuxserver/docker-swag/master/root/defaults/proxy.conf /root/defaults/proxy.conf
 
+ADD https://raw.githubusercontent.com/linuxserver/docker-swag/master/root/defaults/dhparams.pem /defaults/dhparams.pem
+
 FROM scratch
 
 LABEL maintainer="Roxedus"
