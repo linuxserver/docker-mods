@@ -6,6 +6,7 @@ echo "NZBGet Essentials - Installation Started"
 apk --update upgrade
 echo "Dependencies are being installed..."
 apk add --no-cache --virtual=build-dependencies \
+	tar \
 	make \
 	g++ \
 	ca-certificates \
