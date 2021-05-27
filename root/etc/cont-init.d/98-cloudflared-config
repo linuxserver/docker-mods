@@ -160,16 +160,6 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
         fi
       fi
     done
-
-    echo "**** Installing cloudflared service... ****"
-    cloudflared service install
-    
-    echo "**** Enabling cloudflared service... ****"
-    if $ALPINE; then
-      rc-service cloudflared start
-    elif $UBUNTU; then
-      systemctl start cloudflared
-    fi
   fi
 else
   echo "**** Optional parameters blank or missing, skipped cloudflare tunnel setup ****"
