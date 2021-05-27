@@ -2,7 +2,7 @@
 
 In docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:universal-cloudflared`
 
-If no additional parameters are supplied this mod builds `cloudflared` from [source](https://github.com/cloudflare/cloudflared) using the [latest release tag](https://github.com/cloudflare/cloudflared/releases/latest) and adds it to [any LSIO docker image](https://fleet.linuxserver.io/).
+If no additional parameters are supplied this mod adds [`cloudflared`](https://github.com/cloudflare/cloudflared) using the [latest release tag](https://github.com/cloudflare/cloudflared/releases/latest) to any [LSIO docker image](https://fleet.linuxserver.io/), to be installed/updated during container start.
 
 If all additional parameters are supplied this docker mod will also create/configure/route/enable a cloudflare tunnel via `cloudflared` and the cloudflare v4 API.
 
@@ -23,7 +23,7 @@ Here an example snippet to help you get started using this docker mod.
       PGID: 1000
       TZ: Europe/London
       URL: yourdomain.url
-      SUBDOMAINS: test,gitlab,gitlab-ssh,
+      SUBDOMAINS: test,
       VALIDATION: dns
       DNSPLUGIN: cloudflare #optional
       ONLY_SUBDOMAINS: true #optional
@@ -40,16 +40,9 @@ Here an example snippet to help you get started using this docker mod.
         ingress:
           - hostname: test.yourdomain.url
             service: hello_world
-          - hostname: gitlab.yourdomain.url
-            service: https://localhost:443
-          - hostname: gitlab-ssh.yourdomain.url
-            service: ssh://localhost:22
           - service: http_status:404
     volumes:
       - /path/to/appdata/config:/config
-    ports:
-      - 443:443
-      # - 80:80 #optional
     restart: unless-stopped
 ```
 
