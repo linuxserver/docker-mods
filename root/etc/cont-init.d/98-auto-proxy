@@ -1,0 +1,18 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -f /usr/local/bin/docker ]; then
+    echo "**** Docker mod not installed, skipping SWAG auto-proxy ****"
+    exit 0
+fi
+
+rm -rf /config/nginx/proxy-confs/auto-proxy*.conf
+cp /defaults/auto-proxy-readme /config/nginx/proxy-confs/auto-proxy-readme
+rm -rf /auto-proxy
+mkdir /auto-proxy
+
+if ! grep -q "/app/auto-proxy.sh" /config/crontabs/root; then
+    echo "*       *       *       *       *       /app/auto-proxy.sh" >> /config/crontabs/root
+    cp /config/crontabs/root /etc/crontabs/root
+fi
+
+/app/auto-proxy.sh
