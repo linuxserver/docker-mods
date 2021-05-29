@@ -1,17 +1,37 @@
-# Rsync - Docker mod for openssh-server
+# Auto-proxy - Docker mod for SWAG
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod gives SWAG the ability to auto-detect running containers via labels and automatically enable reverse proxy for them.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+## Requirements:
+- This mod needs the `universal-docker` mod installed and set up with either mapping `docker.sock` or setting the environment variable `DOCKER_HOST=remoteaddress`.
+- Other containers to be auto-detected and reverse proxied should be in the same [user defined bridge network](https://docs.linuxserver.io/general/swag#docker-networking) as SWAG.
+- Containers to be auto-detected and reverse proxied must have a label `swag=enable` at a minimum.
+- To benefit from curated preset proxy confs we provide, the container name must match the container names that are suggested in our readme examples (ie. `radarr` and not `Radarr-4K`).
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+## Labels:
+- `swag=enable` - required for auto-detection
+- `swag_port=80` - *optional* - overrides *internal* exposed port
+- `swag_proto=http` - *optional* - overrides internal proto (defaults to http)
+- `swag_url=containername.domain.com` - *optional* - overrides *server_name* (defaults to `containername.*`)
+- `swag_auth=authelia` - *optional* - enables auth methods (options are `authelia`, `ldap` and `http` for basic http auth)
+- `swag_auth_bypass=/api,/othersubfolder` - *optional* - bypasses auth for selected subfolders. Comma separated, no spaces.
 
-# Mod creation instructions
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+In SWAG docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:universal-docker|linuxserver/mods:swag-auto-proxy` and either add a volume mapping for `/var/run/docker.sock:/var/run/docker.sock:ro`, or set an environment var `DOCKER_HOST=remoteaddress`.
+
+## Security Consideration:
+Mapping the `docker.sock`, especially in a publicly accessible container is a security liability. Since this mod only needs read-only access to the docker api, the recommended method is to proxy the `docker.sock` via a solution like [tecnativa/docker-socket-proxy](https://hub.docker.com/r/tecnativa/docker-socket-proxy), limit the access, and set `DOCKER_HOST=` to point to the proxy address.
+
+Here's a sample compose yaml snippet for tecnativa/docker-socket-proxy:
+```yaml
+  dockerproxy:
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    container_name: dockerproxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - POST=0
+```
+Then the env var in SWAG can be set as `DOCKER_HOST=dockerproxy`. This will allow docker cli in SWAG to be able to retrieve info on other containers, but it won't be allowed to spin up new containers.
