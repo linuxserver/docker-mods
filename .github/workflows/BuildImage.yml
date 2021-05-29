@@ -4,8 +4,8 @@ on: [push, pull_request, workflow_dispatch]
 
 env:
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "universal" #replace
+  MODNAME: "cloudflared" #replace
 
 jobs:
   build:
@@ -15,14 +15,20 @@ jobs:
 
       - name: Build image
         run: |
-          docker build --no-cache -t ${{ github.sha }} .
+          CLOUDFLARED_TAG=$(curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | jq -rc ".tag_name")
+          echo "CLOUDFLARED_TAG=${CLOUDFLARED_TAG}" >> $GITHUB_ENV
+          docker build --no-cache --build-arg CLOUDFLARED_TAG=${CLOUDFLARED_TAG} -t ${{ github.sha }} .
 
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}-${{ github.sha }}
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
 
       - name: Credential check
@@ -48,6 +54,8 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}-${{ github.sha }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
 
       - name: Login to DockerHub
@@ -59,4 +67,6 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
         run: |
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}-${{ github.sha }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${CLOUDFLARED_TAG}
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
