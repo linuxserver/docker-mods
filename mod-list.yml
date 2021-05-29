@@ -86,9 +86,10 @@ mods:
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
   universal:
-    mod_count: 7
+    mod_count: 8
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
+      - cloudflared: https://github.com/linuxserver/docker-mods/tree/universal-cloudflared
       - cron: https://github.com/linuxserver/docker-mods/tree/universal-cron
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
       - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
