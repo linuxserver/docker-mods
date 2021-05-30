@@ -5,8 +5,9 @@ if [ ! -f /usr/local/bin/docker ]; then
     exit 0
 fi
 
-rm -rf /config/nginx/proxy-confs/auto-proxy*.conf
-cp /defaults/auto-proxy-readme /config/nginx/proxy-confs/auto-proxy-readme
+rm -rf /etc/nginx/http.d/auto-proxy*.conf /config/nginx/proxy-confs/auto-proxy*.conf
+sed -i 's|#include /etc/nginx/http.d|include /etc/nginx/http.d|' /config/nginx/nginx.conf
+cp /defaults/auto-proxy-readme /etc/nginx/http.d/auto-proxy-readme
 rm -rf /auto-proxy
 mkdir /auto-proxy
 
