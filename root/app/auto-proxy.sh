@@ -107,7 +107,7 @@ DUDE
         if [ -z "${swag_address}" ]; then
             swag_address="${CONTAINER}"
         fi
-        sed -i "s|<container_name>|${CONTAINER}|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+        sed -i "s|<container_name>|${swag_address}|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
         echo "**** Setting upstream address ${swag_address} for ${CONTAINER} ****"
         if [ -z "${swag_port}" ]; then
             swag_port=$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports | keys[0]' | sed 's|/.*||')
