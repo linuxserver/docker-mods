@@ -10,6 +10,7 @@ This mod gives SWAG the ability to auto-detect running containers via labels and
 
 ## Labels:
 - `swag=enable` - required for auto-detection
+- `swag_address=containername` - *optional* - overrides upstream app address. Can be set to an IP or a DNS hostname. Defaults to `container name`.
 - `swag_port=80` - *optional* - overrides *internal* exposed port
 - `swag_proto=http` - *optional* - overrides internal proto (defaults to http)
 - `swag_url=containername.domain.com` - *optional* - overrides *server_name* (defaults to `containername.*`)

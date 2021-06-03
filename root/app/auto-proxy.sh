@@ -13,7 +13,7 @@ else
             AUTO_GEN="${CONTAINER} ${AUTO_GEN}"
         else
             INSPECTION=$(docker inspect ${CONTAINER})
-            for VAR in swag_port swag_proto swag_url swag_auth swag_auth_bypass; do
+            for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass; do
                 VAR_VALUE=$(echo ${INSPECTION} | jq -r ".[0].Config.Labels[\"${VAR}\"]")
                 if [ "${VAR_VALUE}" == "null" ]; then
                     VAR_VALUE=""
@@ -40,7 +40,7 @@ fi
 for CONTAINER in ${AUTO_GEN}; do
     INSPECTION=$(docker inspect ${CONTAINER})
     rm -rf "/auto-proxy/${CONTAINER}.conf"
-    for VAR in swag_port swag_proto swag_url swag_auth swag_auth_bypass; do
+    for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass; do
         VAR_VALUE=$(echo ${INSPECTION} | jq -r ".[0].Config.Labels[\"${VAR}\"]")
         if [ "${VAR_VALUE}" == "null" ]; then
             VAR_VALUE=""
@@ -54,17 +54,21 @@ for CONTAINER in ${AUTO_GEN}; do
         if [ -n "${swag_auth_bypass}" ]; then
             echo "**** Swag auth bypass is auto managed via preset confs and cannot be overridden via env vars ****"
         fi
+        if [ -n "${swag_address}" ]; then
+            sed -i "s|set \$upstream_app .*|set \$upstream_app ${swag_address};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Overriding address as ${swag_address} for ${CONTAINER} ****"
+        fi
         if [ -n "${swag_port}" ]; then
             sed -i "s|set \$upstream_port .*|set \$upstream_port ${swag_port};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
-            echo "**** Overriding port for ${CONTAINER} ****"
+            echo "**** Overriding port as ${swag_port} for ${CONTAINER} ****"
         fi
         if [ -n "${swag_proto}" ]; then
             sed -i "s|set \$upstream_proto .*|set \$upstream_proto ${swag_proto};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
-            echo "**** Overriding proto for ${CONTAINER} ****"
+            echo "**** Overriding proto as ${swag_proto} for ${CONTAINER} ****"
         fi
         if [ -n "${swag_url}" ]; then
             sed -i "s|server_name .*|server_name ${swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
-            echo "**** Overriding url for ${CONTAINER} ****"
+            echo "**** Overriding url as ${swag_url} for ${CONTAINER} ****"
         fi
         if [ "${swag_auth}" == "authelia" ]; then
             sed -i "s|#include /config/nginx/authelia|include /config/nginx/authelia|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
@@ -100,7 +104,11 @@ DUDE
             done
             echo "}" >> "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
         fi
-        sed -i "s|<container_name>|${CONTAINER}|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+        if [ -z "${swag_address}" ]; then
+            swag_address="${CONTAINER}"
+        fi
+        sed -i "s|<container_name>|${swag_address}|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+        echo "**** Setting upstream address ${swag_address} for ${CONTAINER} ****"
         if [ -z "${swag_port}" ]; then
             swag_port=$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports | keys[0]' | sed 's|/.*||')
             if [ "${swag_port}" == "null" ]; then
