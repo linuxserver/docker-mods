@@ -1,7 +1,9 @@
 # About
-A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Radarr/Sonarr Docker container that adds a script to automatically strip out unwanted audio and subtitle streams, keeping only the desired languages.
+A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Radarr/Sonarr v3 Docker container that adds a script to automatically strip out unwanted audio and subtitle streams, keeping only the desired languages.
 
-**One unified script works in both Radarr and Sonarr.  Use this mod in either container!**
+**Beginning with version 2.0 of this mod, it only supports v3 or later of Radarr/Sonarr.  For legacy Radarr/Sonarr v2 please use mod release 1.3 or earlier**
+
+**This unified script works in both Radarr and Sonarr.  Use this mod in either container!**
 >**NOTE:** This mod supports Linux OSes only.
 
 Container info:
@@ -10,8 +12,6 @@ Container info:
 Production Container info: ![Docker Image Size](https://img.shields.io/docker/image-size/linuxserver/mods/radarr-striptracks "Container Size")
 
 # Installation
->**NOTE:** See the [Sonarr/Radarr v2 Builds](./README.md#sonarrradarr-v2-builds) section below for important differences to these instructions for v2 builds.  
-
 1. Pull your selected container ([linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr "LinuxServer.io's Radarr container") or [linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr "LinuxServer.io's Sonarr container")) from Docker Hub:  
   `docker pull linuxserver/radarr:latest`   OR  
   `docker pull linuxserver/sonarr:latest`   
@@ -20,7 +20,7 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
    **[linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr "Radarr Docker container")**  
    **[linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr "Sonarr Docker container")**
    1. Add the **DOCKER_MODS** environment variable to the `docker run` command, as follows:  
-      
+      - Dev/test release: `-e DOCKER_MODS=thecaptain989/radarr-striptracks:latest`  
       - Stable release: `-e DOCKER_MODS=linuxserver/mods:radarr-striptracks`
 
       *Example Docker CLI Configuration*  
@@ -44,17 +44,14 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
 
    2. Start the container.
 
-3. After the above configuration is complete, to use mkvmerge, configure a custom script from Radarr's or Sonarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
-   `/usr/local/bin/striptracks-eng.sh`  
+3. Configure a custom script from Radarr's or Sonarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
+   `/usr/local/bin/striptracks.sh`  
 
    *Example*  
    ![striptracks v3](.assets/striptracks-v3-custom-script.png "Radarr/Sonarr custom script settings")
 
-   <ins>This is a wrapper script that calls striptracks.sh with the following arguments, which keep English audio and subtitles only!</ins>  
-   `:eng:und :eng`
-
-   *For any other combinations of audio and subtitles you **must** either use one of the [included wrapper scripts](./README.md#included-wrapper-scripts) or create a custom script with the codes for the languages you want to keep.  See the [Syntax](./README.md#syntax) section below.*  
-   *Do not put `striptracks.sh` in the **Path** field!*
+   The script will detect the language defined in the video profile for the movie or TV show and only keep the audio and subtitles selected.  
+   Alternatively, a wrapper script may be used to more granularly define which tracks to keep.  See [wrapper scripts](./README.md#wrapper-scripts) for more details.
 
 ## Usage
 The source video can be any mkvtoolnix supported video format. The output is an MKV file with the same name.  
@@ -65,14 +62,27 @@ If you've configured the Radarr/Sonarr **Recycle Bin** path correctly, the origi
 ![danger] **NOTE:** If you have *not* configured the Recycle Bin, the original video file will be deleted/overwritten and permanently lost.
 
 ### Syntax
->**NOTE:** The **Arguments** field for Custom Scripts was removed in Radarr and Sonarr v3 due to security concerns. To support options with these versions and later,
-a wrapper script must be manually created that will call *striptracks.sh* with the required arguments.
+Beginning with version 2.0 of this mod, the script may be called with no arguments.  In this configuration it will detect the language(s) defined in the profile (Quality Profile for Radarr, Language Profile for Sonarr) configured on the particular movie or TV show.  
+
+#### Automatic Language Detection
+Both audio and subtitles that match the selected language(s) are kept.
+
+*Radarr Quality Profile Example*  
+![radarr profile](.assets/radarr-quality-profile.png "Radarr Quality Profile settings")
+
+*Sonarr Language Profile Example*  
+![sonarr profile](.assets/sonarr-language-profile.png "Sonarr Language Profile settings")
+
+>**Note:** The intent of the Radarr language selection 'Original' is not well documented.  For the purposes of this script, it has the same function as 'Any' and will preserve all languages in the video file.
+
+#### Manual Override
+The script still supports command line arguments that can override what is detected.  More granular control can be therefore be exerted or extended using tagging and defining multiple Connect scripts (this is outside the scope of this documentation).
 
 The script accepts two command line arguments and one option:
 
-`[-d] <audio_languages> <subtitle_languages>`
+`[-d] [<audio_languages> [<subtitle_languages>]]`
 
-The `<audio_languages>` and `<subtitle_languages>` arguments are colon (:) prepended language codes in [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes "List of ISO 639-2 codes") format.  
+The `<audio_languages>` and `<subtitle_languages>` are optional arguments that are colon (:) prepended language codes in [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes "List of ISO 639-2 codes") format.  
 For example:
 
 * :eng
@@ -82,9 +92,7 @@ For example:
 ...etc.
 
 Multiple codes may be concatenated, such as `:eng:spa` for both English and Spanish.  
-**These codes are mandatory.** There are no defaults.
 
-The wrapper script noted above uses `:eng:und :eng`, which will keep English and Undetermined audio and English subtitles.
 >**NOTE:** The script is smart enough to not remove the last audio track. This way you don't have to specify every possible language if you are importing a
 foreign film, for example.
 
@@ -98,11 +106,15 @@ The `-d` option enables debug logging.
                          # Spanish subtitles
 ```
 
-### Included Wrapper Scripts
+### Wrapper Scripts
+To supply arguments to the script, one of the included wrapper scripts may be used or a custom wrapper script must be created.
+
+#### Included Wrapper Scripts
 For your convenience, several wrapper scripts are included in the `/usr/local/bin/` directory.  
-You may use any of these scripts in place of the `striptracks-eng.sh` mentioned in the [Installation](./README.md#installation) section above.
+You may use any of these scripts in place of `striptracks.sh` mentioned in the [Installation](./README.md#installation) section above.
 
 ```
+striptracks-debug.sh       # Use detected languages, but enable debug logging
 striptracks-dut.sh         # Keep Dutch audio and subtitles
 striptracks-eng.sh         # Keep English and Undetermined audio and English subtitles
 striptracks-eng-debug.sh   # Keep English and Undetermined audio and English subtitles, and enable debug logging
@@ -114,7 +126,7 @@ striptracks-ger.sh         # Keep German audio and subtitles
 striptracks-spa.sh         # Keep Spanish audio and subtitles
 ```
 
-### Example Wrapper Script
+#### Example Wrapper Script
 To configure the last entry from the [Examples](./README.md#examples) section above, create and save a file called `striptracks-custom.sh` to `/config` containing the following text:
 ```shell
 #!/bin/bash
@@ -126,7 +138,7 @@ Make it executable:
 chmod +x /config/striptracks-custom.sh
 ```
 
-Then put `/config/striptracks-custom.sh` in the **Path** field in place of `/usr/local/bin/striptracks-eng.sh` mentioned in the [Installation](./README.md#installation) section above.
+Then put `/config/striptracks-custom.sh` in the **Path** field in place of `/usr/local/bin/striptracks.sh` mentioned in the [Installation](./README.md#installation) section above.
 
 >**Note:** If you followed the Linuxserver.io recommendations when configuring your container, the `/config` directory will be mapped to an external storage location.  It is therefore recommended to place custom scripts in the `/config` directory so they will survive container updates, but they may be placed anywhere that is accessible by Radarr or Sonarr.
 
@@ -147,31 +159,6 @@ Log rotation is performed with 5 log files of 512KB each being kept.
 
 ___
 
-## Sonarr/Radarr v2 Builds
->![warning] **Warning: Legacy Releases**  
->The Sonarr/Radarr v2 Builds of Radarr and Sonarr are no longer being developed and are considered legacy. However, this mod works with all versions of the container.
-
-<ins>Important differences for Sonarr/Radarr v2 Builds</ins>
-### Legacy Installation
-Substitute the following step for step #3 noted in the [Installation](./README.md#installation) section above.  
-3. After all of the above configuration is complete, to use mkvmerge:  
-   1. Configure a custom script from the Radarr/Sonnar *Settings* > *Connect* screen and type the following in the **Path** field:  
-      `/usr/local/bin/striptracks.sh`  
-
-   2. Add the codes for the audio and subtitle languages you want to keep as **Arguments** (details in the [Syntax](./README.md#syntax) section above):  
-      <ins>Suggested Example</ins>  
-      `:eng:und :eng`
-
-   *Example*  
-   ![striptracks v2](.assets/striptracks-v2-custom-script.png "Radarr/Sonarr custom script settings")
-
-### Legacy Triggers
-The only events/notification triggers that have been tested are **On Download** and **On Upgrade**
-
-### Legacy Logs
-The log can be inspected or downloaded from Radarr/Sonarr under *System* > *Log Files*
-
-___
 # Credits
 
 This would not be possible without the following:
