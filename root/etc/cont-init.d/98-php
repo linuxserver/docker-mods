@@ -3,4 +3,4 @@
 echo "**** installing php and composer ****"
 apt-get install -y \
     composer \
-    php7.2
+    php
