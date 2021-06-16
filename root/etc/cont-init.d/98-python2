@@ -1,9 +1,9 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** installing python2 dev environment ****"
-apt-get update && apt-get install -y \
-  build-essential \
-  libssl-dev \
-  libffi-dev \
-  python-dev \
-  python-pip
+apt-get install -y \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    python-dev \
+    python-pip
