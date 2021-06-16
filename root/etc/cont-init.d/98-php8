@@ -1,14 +1,6 @@
 #!/usr/bin/with-contenv bash
 
-echo "**** adding ppa ondrej/php ****"
-apt-get update && apt-get install -y \
-  software-properties-common
-ppa="ppa:ondrej/php"
-if ! grep -q "^deb .*${ppa}" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-    add-apt-repository ${ppa} -y
-fi
-
-echo "**** installing php and composer ****"
-apt-get update && apt-get install -y \
+echo "**** installing php8 and composer ****"
+apt-get install -y \
   composer \
   php8.0
