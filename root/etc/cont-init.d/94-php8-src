@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+ppa="ppa:ondrej/php"
+if ! grep -q "^deb .*${ppa}" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+    echo "**** adding ppa ondrej/php ****"
+    if ! dpkg -l | grep software-properties-common > /dev/null; then
+        apt-get update && apt-get install -y software-properties-common
+    fi
+    add-apt-repository ${ppa} -y
+fi
