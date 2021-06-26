@@ -5,15 +5,6 @@ NEEDS_UPDATE=false
 CURRENT_RELEASE=$(curl -s https://api.github.com/repos/WDaan/VueTorrent/releases/latest | jq -r ".assets[]")
 
 # ===============================================
-install_deps() {
-    if ! [[ -x "$(command -v jq)" ]]; then
-        echo '-------------------------'
-        echo '| Installing jq package |'
-        echo '-------------------------'
-        apt-get update &&
-            apt-get install -y jq
-    fi
-}
 check_updates() {
     if [[ ! -d ./vuetorrent ]]; then
         NEEDS_UPDATE=true
@@ -44,7 +35,6 @@ echo '------------------------------'
 echo '| qBittorrent vuetorrent Mod |'
 echo '------------------------------'
 
-install_deps
 check_updates
 
 if "$NEEDS_UPDATE" = "true"; then
