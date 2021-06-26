@@ -1,8 +1,6 @@
 # VueTorrent WebUi - Docker mod for qBittorrent
 
-This mod adds [VueTorrent](https://github.com/WDaan/VueTorrent), to be installed to [qBittorrent](https://github.com/linuxserver/docker-qbittorrent/) during container start. 
-
-Also this script automatically updates `vuetorrent` every time you restart your container.
+This mod adds [VueTorrent](https://github.com/WDaan/VueTorrent), to be installed/updated in [qBittorrent](https://github.com/linuxserver/docker-qbittorrent/) during container start.
 
 In qBittorrent docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:qbittorrent-vuetorrent` to enable.
 
