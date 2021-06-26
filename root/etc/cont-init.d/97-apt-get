@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+
+if ! [[ -x "$(command -v jq)" ]]; then
+    echo '-------------------------'
+    echo '| Installing jq package |'
+    echo '-------------------------'
+    apt-get update &&
+    apt-get install -y jq
+fi
