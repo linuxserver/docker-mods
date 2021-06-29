@@ -6,45 +6,44 @@ chown -R ${ABC_USER}:${ABC_USER} /config/logs
 
 echo "**** installing docker and docker compose ****"
 if [ -f /usr/bin/apt ]; then
-  DISTRONAME="ubuntu"
-  apt-get update && \
-  apt-get install -y \
-    btrfs-progs \
-    ca-certificates \
-    curl \
-    e2fsprogs \
-    iptables \
-    openssh-client \
-    openssl \
-    pigz \
-    xfsprogs \
-    xz-utils
+    DISTRONAME="ubuntu"
+    apt-get install -y \
+        btrfs-progs \
+        ca-certificates \
+        curl \
+        e2fsprogs \
+        iptables \
+        openssh-client \
+        openssl \
+        pigz \
+        xfsprogs \
+        xz-utils
 else
-  DISTRONAME="alpine"
-  apk add --no-cache \
-    btrfs-progs \
-    curl \
-		e2fsprogs \
-		e2fsprogs-extra \
-		ip6tables \
-		iptables \
-		openssl \
-    pigz \
-		xfsprogs \
-		xz
+    DISTRONAME="alpine"
+    apk add --no-cache \
+        btrfs-progs \
+        curl \
+        e2fsprogs \
+        e2fsprogs-extra \
+        ip6tables \
+        iptables \
+        openssl \
+        pigz \
+        xfsprogs \
+        xz
 fi
 ARCH=$(uname -m)
 if [ -f "/docker-compose-${DISTRONAME}/docker-compose_${ARCH}" ] ; then
-  echo "Copying over docker and docker-compose binaries"
-  mv "/docker-compose-${DISTRONAME}/docker-compose_${ARCH}" /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
-  rm -rf /docker-compose-ubuntu /docker-compose-alpine
-  tar xf /docker-tgz/docker_${ARCH}.tgz \
-    --strip-components=1 -C \
-    /usr/local/bin/
-  rm -rf /docker-tgz
+    echo "Copying over docker and docker-compose binaries"
+    mv "/docker-compose-${DISTRONAME}/docker-compose_${ARCH}" /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+    rm -rf /docker-compose-ubuntu /docker-compose-alpine
+    tar xf /docker-tgz/docker_${ARCH}.tgz \
+        --strip-components=1 -C \
+        /usr/local/bin/
+    rm -rf /docker-tgz
 else
-  echo "**** docker and docker-compose already installed, skipping ****"
+    echo "**** docker and docker-compose already installed, skipping ****"
 fi
 
 # delete PID if exists
@@ -53,5 +52,5 @@ find /run /var/run -iname 'docker*.pid' -delete || :
 # create docker group and add abc to it
 groupadd -f docker
 if ! id -nG ${ABC_USER} | grep -q "docker"; then 
-  usermod -aG docker ${ABC_USER}
+    usermod -aG docker ${ABC_USER}
 fi
