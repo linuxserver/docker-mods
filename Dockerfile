@@ -13,26 +13,26 @@ FROM ghcr.io/linuxserver/docker-compose:arm64v8-${COMPOSE_ALPINE_TAG} as compose
 FROM ghcr.io/linuxserver/baseimage-alpine:3.13 as buildstage
 
 RUN \
- echo "**** install packages ****" && \
- apk add --no-cache \
-	curl && \
- echo "**** retrieve latest version ****" && \
- if [ -z ${DOCKER_RELEASE+x} ]; then \
-	DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
-	| awk '/tag_name/{print $4;exit}' FS='[""]' \
-    | sed 's|^v||'); \
- fi && \
- echo "**** grab docker ****" && \
- mkdir -p /root-layer/docker-tgz && \
- curl -fo \
-	/root-layer/docker-tgz/docker_x86_64.tgz -L \
-	"https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_RELEASE}.tgz" && \
- curl -fo \
-	/root-layer/docker-tgz/docker_armv7l.tgz -L \
-	"https://download.docker.com/linux/static/stable/armhf/docker-${DOCKER_RELEASE}.tgz" && \
- curl -fo \
-	/root-layer/docker-tgz/docker_aarch64.tgz -L \
-	"https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz"
+  echo "**** install packages ****" && \
+  apk add --no-cache \
+    curl && \
+  echo "**** retrieve latest version ****" && \
+  if [ -z ${DOCKER_RELEASE+x} ]; then \
+    DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
+      | awk '/tag_name/{print $4;exit}' FS='[""]' \
+      | sed 's|^v||'); \
+  fi && \
+  echo "**** grab docker ****" && \
+  mkdir -p /root-layer/docker-tgz && \
+  curl -fo \
+    /root-layer/docker-tgz/docker_x86_64.tgz -L \
+    "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_RELEASE}.tgz" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker_armv7l.tgz -L \
+    "https://download.docker.com/linux/static/stable/armhf/docker-${DOCKER_RELEASE}.tgz" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker_aarch64.tgz -L \
+    "https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz"
 
 # copy local files
 COPY --from=compose-amd64 /usr/local/bin/docker-compose /root-layer/docker-compose-ubuntu/docker-compose_x86_64
