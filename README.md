@@ -76,7 +76,7 @@ Both audio and subtitles that match the selected language(s) are kept.
 >**Note:** The intent of the Radarr language selection 'Original' is not well documented.  For the purposes of this script, it has the same function as 'Any' and will preserve all languages in the video file.
 
 #### Manual Override
-The script still supports command line arguments that can override what is detected.  More granular control can be therefore be exerted or extended using tagging and defining multiple Connect scripts (this is outside the scope of this documentation).
+The script still supports command line arguments that will override what is detected.  More granular control can therefore be exerted or extended using tagging and defining multiple Connect scripts (this is native Radarr/Sonarr functionality outside the scope of this documentation).
 
 The script accepts two command line arguments and one option:
 

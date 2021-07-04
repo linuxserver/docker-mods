@@ -86,7 +86,7 @@ Video remuxing script designed for use with Radarr and Sonarr
 Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
-  $0 [-d] [<audio_languages> [<subtitle_languages>]]
+  $0 [-d] <audio_languages> <subtitle_languages>
 
 Options and Arguments:
   -d                     enable debug logging
@@ -103,7 +103,7 @@ Examples:
                                             # and Japanese audio, and English and
                                             # Spanish subtitles
 "
-  >&2 echo "$usage"
+  echo "$usage" >&2
 }
 # Can still go over striptracks_maxlog if read line is too long
 #  Must include whole function in subshell for read to work!
@@ -216,7 +216,7 @@ while getopts ":d" opt; do
     d ) # For debug purposes only
       striptracks_message="Debug|Enabling debug logging."
       echo "$striptracks_message" | log
-      >&2 echo "$striptracks_message"
+      echo "$striptracks_message" >&2
       striptracks_debug=1
       printenv | sort | sed 's/^/Debug|/' | log
     ;;
@@ -228,7 +228,7 @@ shift $((OPTIND -1))
 if [ ! -f "/usr/bin/mkvmerge" ]; then
   striptracks_message="Error|/usr/bin/mkvmerge is required by this script"
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
   exit 4
 fi
 
@@ -259,7 +259,7 @@ if [ -f "$striptracks_arr_config" ]; then
     # Radarr/Sonarr version 2
     striptracks_message="Error|This script does not support ${striptracks_type^} version ${striptracks_arr_version}. Please upgrade."
     echo "$striptracks_message" | log
-    >&2 echo "$striptracks_message"
+    echo "$striptracks_message" >&2
     exit 8
   fi
 
@@ -272,7 +272,7 @@ else
   # No config file means we can't call the API.  Best effort at this point.
   striptracks_message="Warn|Unable to locate ${striptracks_type^} config file: '$striptracks_arr_config'"
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
 fi
 
 # Handle Test event
@@ -286,7 +286,7 @@ fi
 if [ -z "$striptracks_video" ]; then
   striptracks_message="Error|No video file specified! Not called from Radarr/Sonarr?"
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
   usage 
   exit 1
 fi
@@ -295,7 +295,7 @@ fi
 if [ ! -f "$striptracks_video" ]; then
   striptracks_message="Error|Input file not found: \"$striptracks_video\""
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
   exit 5
 fi
 
@@ -318,7 +318,7 @@ if [ -n "$striptracks_api_url" ]; then
         # Should never fire due to previous check, but just in case
         striptracks_message "Error|Unknown environment: ${striptracks_type}"
         echo "$striptracks_message" | log
-        >&2 echo "$striptracks_message"
+        echo "$striptracks_message" >&2
         exit 7
       fi
       striptracks_profilename=$(echo $striptracks_profiles | jq -crM ".[] | select(.id == $striptracks_profileid).name")
@@ -333,26 +333,26 @@ if [ -n "$striptracks_api_url" ]; then
       # 'hasFile' is False in returned JSON.
       striptracks_message="Warn|The '$striptracks_video_api' API with id $striptracks_video_id returned a false hasFile."
       echo "$striptracks_message" | log
-      >&2 echo "$striptracks_message"
+      echo "$striptracks_message" >&2
     fi
   else
     # Get Profiles API failed
     striptracks_message="Warn|Unable to retrieve $striptracks_profile_type profiles from ${striptracks_type^} API"
     echo "$striptracks_message" | log
-    >&2 echo "$striptracks_message"
+    echo "$striptracks_message" >&2
   fi
 else
   # No URL means we can't call the API
   striptracks_message="Warn|Unable to determine ${striptracks_type^} API URL."
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
 fi
 
 # Check for command line options; will override the detected languages
 if [ -z "$1" -a -z "$striptracks_langcodes" ]; then
   striptracks_message="Error|No audio languages specified!"
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
   usage
   exit 2
 elif [ -z "$1" ]; then
@@ -363,7 +363,7 @@ fi
 if [ -z "$2" -a -z "$striptracks_langcodes" ]; then
   striptracks_message="Error|No subtitles languages specified!"
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
   usage
   exit 3
 elif [ -z "$2" ]; then
@@ -379,11 +379,11 @@ echo "$striptracks_message" | log
 
 # Rename the original video file to a temporary name
 [ $striptracks_debug -eq 1 ] && echo "Debug|Renaming: \"$striptracks_video\" to \"$striptracks_tempvideo\"" | log
-mv -f "$striptracks_video" "$striptracks_tempvideo" | log
+mv -f "$striptracks_video" "$striptracks_tempvideo" 2>&1 | log
 striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
   striptracks_message="ERROR[$striptracks_return]: Unable to rename video: \"$striptracks_video\" to temp video: \"$striptracks_tempvideo\". Halting."
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
   exit 6
 }
 
@@ -393,7 +393,7 @@ striptracks_json=$(/usr/bin/mkvmerge -J "$striptracks_tempvideo")
 striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
   striptracks_message="ERROR[$striptracks_return]: Error executing mkvmerge."
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
 }
 
 # This and the modified AWK script are a hack, and I know it.  JQ is crazy hard to learn, BTW.
@@ -517,17 +517,22 @@ if [ -s "$striptracks_newvideo" ]; then
   # Use Recycle Bin if configured
   if [ "$striptracks_recyclebin" ]; then
     [ $striptracks_debug -eq 1 ] && echo "Debug|Recycling: \"$striptracks_tempvideo\" to \"${striptracks_recyclebin%/}/$(basename "$striptracks_video")"\" | log
-    mv "$striptracks_tempvideo" "${striptracks_recyclebin%/}/$(basename "$striptracks_video")" | log
+    mv "$striptracks_tempvideo" "${striptracks_recyclebin%/}/$(basename "$striptracks_video")" 2>&1 | log
+    striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
+      striptracks_message="ERROR[$striptracks_return]: Unable to move video: \"$striptracks_tempvideo\" to Recycle Bin: \"${striptracks_recyclebin%/}\""
+      echo "$striptracks_message" | log
+      echo "$striptracks_message" >&2
+    }
   else
     [ $striptracks_debug -eq 1 ] && echo "Debug|Deleting: \"$striptracks_tempvideo\"" | log
-    rm "$striptracks_tempvideo" | log
+    rm "$striptracks_tempvideo" 2>&1 | log
   fi
 else
   striptracks_message="Error|Unable to locate or invalid remuxed file: \"$striptracks_newvideo\". Undoing rename."
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
   [ $striptracks_debug -eq 1 ] && echo "Debug|Renaming: \"$striptracks_tempvideo\" to \"$striptracks_video\"" | log
-  mv -f "$striptracks_tempvideo" "$striptracks_video" | log
+  mv -f "$striptracks_tempvideo" "$striptracks_video" 2>&1 | log
   exit 10
 fi
 
@@ -578,7 +583,7 @@ if [ -n "$striptracks_api_url" ]; then
                   else
                     striptracks_message="Warn|Unable to update ${striptracks_type^} $striptracks_video_api '$striptracks_title' to quality '$(echo $striptracks_original_quality | jq -crM .quality.name)'"
                     echo "$striptracks_message" | log
-                    >&2 echo "$striptracks_message"
+                    echo "$striptracks_message" >&2
                   fi
                 else
                   # The quality is already correct
@@ -589,44 +594,44 @@ if [ -n "$striptracks_api_url" ]; then
                 # No '.path' in returned JSON
                 striptracks_message="Warn|The '$striptracks_videofile_api' API with ${striptracks_video_api}File id $striptracks_videofile_id returned no path."
                 echo "$striptracks_message" | log
-                >&2 echo "$striptracks_message"
+                echo "$striptracks_message" >&2
               fi
             else
               # 'hasFile' is False in returned JSON.
               striptracks_message="Warn|The '$striptracks_video_api' API with id $striptracks_video_id returned a false hasFile (Normal with Radarr on try #1)."
               echo "$striptracks_message" | log
-              >&2 echo "$striptracks_message"
+              echo "$striptracks_message" >&2
             fi
           else
             # Timeout or failure
             striptracks_message="Warn|${striptracks_type^} job ID $striptracks_jobid timed out or failed."
             echo "$striptracks_message" | log
-            >&2 echo "$striptracks_message"
+            echo "$striptracks_message" >&2
           fi
         else
           # Error from API
           striptracks_message="Error|The '$striptracks_rescan_api' API with $striptracks_json_key $striptracks_video_id failed."
           echo "$striptracks_message" | log
-          >&2 echo "$striptracks_message"
+          echo "$striptracks_message" >&2
         fi
       done
     else
       # No '.path' in returned JSON
       striptracks_message="Warn|The '$striptracks_videofile_api' API with ${striptracks_video_api}File id $striptracks_videofile_id returned no path."
       echo "$striptracks_message" | log
-      >&2 echo "$striptracks_message"
+      echo "$striptracks_message" >&2
     fi
   else
     # No video ID means we can't call the API
     striptracks_message="Warn|Missing or empty environment variable: striptracks_video_id='$striptracks_video_id' or striptracks_videofile_id='$striptracks_videofile_id'"
     echo "$striptracks_message" | log
-    >&2 echo "$striptracks_message"
+    echo "$striptracks_message" >&2
   fi
 else
   # No URL means we can't call the API
   striptracks_message="Warn|Unable to determine ${striptracks_type^} API URL."
   echo "$striptracks_message" | log
-  >&2 echo "$striptracks_message"
+  echo "$striptracks_message" >&2
 fi
 
 # Cool bash feature
