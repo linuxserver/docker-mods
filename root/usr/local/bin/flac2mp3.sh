@@ -29,8 +29,6 @@ export flac2mp3_maxlog=4
 export flac2mp3_debug=0
 export flac2mp3_tracks="$lidarr_addedtrackpaths"
 [ -z "$flac2mp3_tracks" ] && flac2mp3_tracks="$lidarr_trackfile_path"      # For other event type
-export flac2mp3_recyclebin=$(sqlite3 /config/lidarr.db 'SELECT Value FROM Config WHERE Key="recyclebin"')
-RET=$?; [ "$RET" != 0 ] && >&2 echo "WARNING[$RET]: Unable to read recyclebin information from database \"/config/lidarr.db\""
 
 ### Functions
 function usage {
@@ -56,7 +54,7 @@ Examples:
   $flac2mp3_script -v 0               # Output variable bitrate, VBR 220-260 kbit/s
   $flac2mp3_script -d -b 160k         # Enable debugging and set output to 160 kbit/s
 "
-  >&2 echo "$usage"
+  echo "$usage" >&2
 }
 # Can still go over flac2mp3_maxlog if read line is too long
 #  Must include whole function in subshell for read to work!
@@ -64,14 +62,13 @@ function log {(
   while read
   do
     echo $(date +"%y-%-m-%-d %H:%M:%S.%1N")\|"[$flac2mp3_pid]$REPLY" >>"$flac2mp3_log"
-    local FILESIZE=$(stat -c %s "$flac2mp3_log")
-    if [ $FILESIZE -gt $flac2mp3_maxlogsize ]
+    local flac2mp3_filesize=$(stat -c %s "$flac2mp3_log")
+    if [ $flac2mp3_filesize -gt $flac2mp3_maxlogsize ]
     then
-      for i in `seq $((flac2mp3_maxlog-1)) -1 0`
-      do
+      for i in $(seq $((flac2mp3_maxlog-1)) -1 0); do
         [ -f "${flac2mp3_log::-4}.$i.txt" ] && mv "${flac2mp3_log::-4}."{$i,$((i+1))}".txt"
       done
-        [ -f "${flac2mp3_log::-4}.txt" ] && mv "${flac2mp3_log::-4}.txt" "${flac2mp3_log::-4}.0.txt"
+      [ -f "${flac2mp3_log::-4}.txt" ] && mv "${flac2mp3_log::-4}.txt" "${flac2mp3_log::-4}.0.txt"
       touch "$flac2mp3_log"
     fi
   done
@@ -79,62 +76,66 @@ function log {(
 # Inspired by https://stackoverflow.com/questions/893585/how-to-parse-xml-in-bash
 function read_xml {
   local IFS=\>
-  read -d \< ENTITY CONTENT
+  read -d \< flac2mp3_xml_entity flac2mp3_xml_content
 }
 # Initiate API Rescan request
 function rescan {
-  MSG="Info|Calling Lidarr API to rescan artist"
-  echo "$MSG" | log
-  [ $flac2mp3_debug -eq 1 ] && echo "Debug|Forcing rescan of artist '$lidarr_artist_id'. Calling Lidarr API 'RefreshArtist' using POST and URL 'http://$flac2mp3_bindaddress:$flac2mp3_port$flac2mp3_urlbase/api/v1/command?apikey=(removed)'" | log
-  RESULT=$(curl -s -d "{name: 'RefreshArtist', artistId: $lidarr_artist_id}" -H "Content-Type: application/json" \
-    -X POST http://$flac2mp3_bindaddress:$flac2mp3_port$flac2mp3_urlbase/api/v1/command?apikey=$flac2mp3_apikey)
-  [ $flac2mp3_debug -eq 1 ] && echo "API returned: $RESULT" | awk '{print "Debug|"$0}' | log
-  JOBID="$(echo $RESULT | jq -crM .id)"
-  if [ "$JOBID" != "null" ]; then
-    local RET=0
+  flac2mp3_message="Info|Calling Lidarr API to rescan artist"
+  echo "$flac2mp3_message" | log
+  [ $flac2mp3_debug -eq 1 ] && echo "Debug|Forcing rescan of artist '$lidarr_artist_id'. Calling Lidarr API 'RefreshArtist' using POST and URL '$flac2mp3_api_url/command'" | log
+  flac2mp3_result=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
+    -d "{\"name\": 'RefreshArtist', \"artistId\": $lidarr_artist_id}" \
+    -X POST "$flac2mp3_api_url/command")
+  [ $flac2mp3_debug -eq 1 ] && echo "API returned: $flac2mp3_result" | awk '{print "Debug|"$0}' | log
+  flac2mp3_jobid="$(echo $flac2mp3_result | jq -crM .id)"
+  if [ "$flac2mp3_jobid" != "null" ]; then
+    local flac2mp3_return=0
   else
-    local RET=1
+    local flac2mp3_return=1
   fi
-  return $RET
+  return $flac2mp3_return
 }
 # Check result of rescan job
 function check_rescan {
   local i=0
   for ((i=1; i <= 15; i++)); do
-    [ $flac2mp3_debug -eq 1 ] && echo "Debug|Checking job $JOBID completion, try #$i. Calling Lidarr API using GET and URL 'http://$flac2mp3_bindaddress:$flac2mp3_port$flac2mp3_urlbase/api/command/$JOBID?apikey=(removed)'" | log
-    RESULT=$(curl -s -H "Content-Type: application/json" \
-      -X GET http://$flac2mp3_bindaddress:$flac2mp3_port$flac2mp3_urlbase/api/v1/command/$JOBID?apikey=$flac2mp3_apikey)
-    [ $flac2mp3_debug -eq 1 ] && echo "API returned: $RESULT" | awk '{print "Debug|"$0}' | log
-    if [ "$(echo $RESULT | jq -crM .status)" = "completed" ]; then
-      local RET=0
+    [ $flac2mp3_debug -eq 1 ] && echo "Debug|Checking job $flac2mp3_jobid completion, try #$i. Calling Lidarr API using GET and URL '$flac2mp3_api_url/command/$flac2mp3_jobid'" | log
+    flac2mp3_result=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
+      -X GET "$flac2mp3_api_url/command/$flac2mp3_jobid")
+    [ $flac2mp3_debug -eq 1 ] && echo "API returned: $flac2mp3_result" | awk '{print "Debug|"$0}' | log
+    if [ "$(echo $flac2mp3_result | jq -crM .status)" = "completed" ]; then
+      local flac2mp3_return=0
       break
     else
-      if [ "$(echo $RESULT | jq -crM .status)" = "failed" ]; then
-        local RET=2
+      if [ "$(echo $flac2mp3_result | jq -crM .status)" = "failed" ]; then
+        local flac2mp3_return=2
         break
       else
-        local RET=1
+        # It may have timed out, so let's wait a second
+        local flac2mp3_return=1
+        [ $flac2mp3_debug -eq 1 ] && echo "Debug|Job not done.  Waiting 1 second." | log
         sleep 1
       fi
     fi
   done
-  return $RET
+  return $flac2mp3_return
 }
+
 # Process options
 while getopts ":db:v:" opt; do
   case ${opt} in
     d ) # For debug purposes only
-      MSG="Debug|Enabling debug logging."
-      echo "$MSG" | log
-      >&2 echo "$MSG"
+      flac2mp3_message="Debug|Enabling debug logging."
+      echo "$flac2mp3_message" | log
+      echo "$flac2mp3_message" >&2
       flac2mp3_debug=1
       printenv | sort | sed 's/^/Debug|/' | log
       ;;
     b ) # Set constant bit rate
       if [ -n "$flac2mp3_vbrquality" ]; then
-        MSG="Error|Both -b and -v options cannot be set at the same time."
-        echo "$MSG" | log
-        >&2 echo "$MSG"
+        flac2mp3_message="Error|Both -b and -v options cannot be set at the same time."
+        echo "$flac2mp3_message" | log
+        echo "$flac2mp3_message" >&2
         usage
         exit 3
       else
@@ -143,9 +144,9 @@ while getopts ":db:v:" opt; do
       ;;
     v ) # Set variable quality
       if [ -n "$flac2mp3_bitrate" ]; then
-        MSG="Error|Both -v and -b options cannot be set at the same time."
-        echo "$MSG" | log
-        >&2 echo "$MSG"
+        flac2mp3_message="Error|Both -v and -b options cannot be set at the same time."
+        echo "$flac2mp3_message" | log
+        echo "$flac2mp3_message" >&2
         usage
         exit 3
       else
@@ -153,16 +154,16 @@ while getopts ":db:v:" opt; do
       fi
       ;;
     : ) # No required argument specified
-      MSG="Error|Invalid option: -${OPTARG} requires an argument"
-      echo "$MSG" | log
-      >&2 echo "$MSG"
+      flac2mp3_message="Error|Invalid option: -${OPTARG} requires an argument"
+      echo "$flac2mp3_message" | log
+      echo "$flac2mp3_message" >&2
       usage
       exit 3
       ;;
     * ) # Unknown option
-      MSG="Error|Unknown option: -${OPTARG}"
-      echo "$MSG" | log
-      >&2 echo "$MSG"
+      flac2mp3_message="Error|Unknown option: -${OPTARG}"
+      echo "$flac2mp3_message" | log
+      echo "$flac2mp3_message" >&2
       usage
       exit 3
       ;;
@@ -173,6 +174,40 @@ shift $((OPTIND -1))
 # Set default bit rate
 [ -z "$flac2mp3_vbrquality" ] && [ -z "$flac2mp3_bitrate" ] && flac2mp3_bitrate="320k"
 
+# Check for config file
+if [ -f "$flac2mp3_config" ]; then
+  # Read Lidarr config.xml
+  [ $flac2mp3_debug -eq 1 ] && echo "Debug|Reading from Lidarr config file '$flac2mp3_config'" | log
+  while read_xml; do
+    [[ $flac2mp3_xml_entity = "Port" ]] && flac2mp3_port=$flac2mp3_xml_content
+    [[ $flac2mp3_xml_entity = "UrlBase" ]] && flac2mp3_urlbase=$flac2mp3_xml_content
+    [[ $flac2mp3_xml_entity = "BindAddress" ]] && flac2mp3_bindaddress=$flac2mp3_xml_content
+    [[ $flac2mp3_xml_entity = "ApiKey" ]] && flac2mp3_apikey=$flac2mp3_xml_content
+  done < $flac2mp3_config
+
+  [[ $flac2mp3_bindaddress = "*" ]] && flac2mp3_bindaddress=localhost
+
+  # Build URL to Lidarr API
+  flac2mp3_api_url="http://$flac2mp3_bindaddress:$flac2mp3_port$flac2mp3_urlbase/api/v1"
+
+  # Check Lidarr version
+  [ $flac2mp3_debug -eq 1 ] && echo "Debug|Getting Lidarr version. Calling Lidarr API using GET and URL '$flac2mp3_api_url/system/status'" | log
+  flac2mp3_version=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
+    -X GET "$flac2mp3_api_url/system/status" | jq -crM .version)
+  [ $flac2mp3_debug -eq 1 ] && echo "Debug|Detected Lidarr version $flac2mp3_version" | log
+
+  # Get RecycleBin
+  [ $flac2mp3_debug -eq 1 ] && echo "Debug|Getting Lidarr RecycleBin. Calling Lidarr API using GET and URL '$flac2mp3_api_url/config/mediamanagement'" | log
+  flac2mp3_recyclebin=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
+    -X GET "$flac2mp3_api_url/config/mediamanagement" | jq -crM .recycleBin)
+  [ $flac2mp3_debug -eq 1 ] && echo "Debug|Detected Lidarr RecycleBin '$flac2mp3_recyclebin'" | log
+else
+  # No config file means we can't call the API.  Best effort at this point.
+  flac2mp3_message="Warn|Unable to locate Lidarr config file: '$flac2mp3_config'"
+  echo "$flac2mp3_message" | log
+  echo "$flac2mp3_message" >&2
+fi
+
 # Handle Lidarr Test event
 if [[ "$lidarr_eventtype" = "Test" ]]; then
   echo "Info|Lidarr event: $lidarr_eventtype" | log
@@ -182,18 +217,18 @@ fi
 
 # Check if called from within Lidarr
 if [ -z "$flac2mp3_tracks" ]; then
-  MSG="Error|No track file(s) specified! Not called from Lidarr?"
-  echo "$MSG" | log
-  >&2 echo "$MSG"
+  flac2mp3_message="Error|No track file(s) specified! Not called from Lidarr?"
+  echo "$flac2mp3_message" | log
+  echo "$flac2mp3_message" >&2
   usage
   exit 1
 fi
 
 # Check for required binaries
 if [ ! -f "/usr/bin/ffmpeg" ]; then
-  MSG="Error|/usr/bin/ffmpeg is required by this script"
-  echo "$MSG" | log
-  >&2 echo "$MSG"
+  flac2mp3_message="Error|/usr/bin/ffmpeg is required by this script"
+  echo "$flac2mp3_message" | log
+  echo "$flac2mp3_message" >&2
   exit 2
 fi
 
@@ -244,7 +279,7 @@ BEGIN {
       RecPath=substr(Track,RSTART+RLENGTH)
       sub(/[^\/]+$/,"",RecPath)
       RecPath=Recycle RecPath
-      if (Debug) print "Debug|Moving: \""Track"\" to \""RecPath"\" and setting permissions on \""NewTrack"\""
+      if (Debug) print "Debug|Recycling: \""Track"\" to \""RecPath"\" and setting permissions on \""NewTrack"\""
       Command="if [ ! -e \""RecPath"\" ]; then mkdir -p \""RecPath"\"; fi; if [ -s \""NewTrack"\" ]; then if [ -f \""Track"\" ]; then chown --reference=\""Track"\" \""NewTrack"\"; chmod --reference=\""Track"\" \""NewTrack"\"; mv -t \""RecPath"\" \""Track"\"; fi; fi"
       if (Debug) print "Debug|Executing: "Command
       system(Command)
@@ -256,55 +291,45 @@ BEGIN {
 #### END MAIN
 
 # Check for awk script completion
-RET="${PIPESTATUS[1]}"    # captures awk exit status
-if [ $RET != "0" ]; then
-  MSG="Error|Script exited abnormally.  File permissions issue?"
-  echo "$MSG" | log
-  >&2 echo "$MSG"
+flac2mp3_return="${PIPESTATUS[1]}"    # captures awk exit status
+if [ $flac2mp3_return != "0" ]; then
+  flac2mp3_message="Error|Script exited abnormally.  File permissions issue?"
+  echo "$flac2mp3_message" | log
+  echo "$flac2mp3_message" >&2
   exit 10
 fi
 
 # Call Lidarr API to RescanArtist
-if [ ! -z "$lidarr_artist_id" ]; then
-  if [ -f "$flac2mp3_config" ]; then
-    # Read Lidarr config.xml
-    while read_xml; do
-      [[ $ENTITY = "Port" ]] && flac2mp3_port=$CONTENT
-      [[ $ENTITY = "UrlBase" ]] && flac2mp3_urlbase=$CONTENT
-      [[ $ENTITY = "BindAddress" ]] && flac2mp3_bindaddress=$CONTENT
-      [[ $ENTITY = "ApiKey" ]] && flac2mp3_apikey=$CONTENT
-    done < $flac2mp3_config
-    
-    [[ $flac2mp3_bindaddress = "*" ]] && flac2mp3_bindaddress=localhost
-    
+if [ -n "$flac2mp3_api_url" ]; then
+  if [ "$lidarr_artist_id" ]; then
     # Scan the disk for the new audio tracks
     if rescan; then
       # Check that the rescan completed
       if ! check_rescan; then
         # Timeout or failure
-        MSG="Warn|Lidarr job ID $JOBID timed out or failed."
-        echo "$MSG" | log
-        >&2 echo "$MSG"
+        flac2mp3_message="Warn|Lidarr job ID $flac2mp3_jobid timed out or failed."
+        echo "$flac2mp3_message" | log
+        echo "$flac2mp3_message" >&2
       fi
     else
       # Error from API
-      MSG="Error|The 'RefreshArtist' API with artist $lidarr_artist_id failed."
-      echo "$MSG" | log
-      >&2 echo "$MSG"
+      flac2mp3_message="Error|The 'RefreshArtist' API with artist $lidarr_artist_id failed."
+      echo "$flac2mp3_message" | log
+      echo "$flac2mp3_message" >&2
     fi
   else
-    # No config file means we can't call the API
-    MSG="Warn|Unable to locate Lidarr config file: '$flac2mp3_config'"
-    echo "$MSG" | log
-    >&2 echo "$MSG"
+    # No Artist ID means we can't call the API
+    flac2mp3_message="Warn|Missing environment variable lidarr_artist_id"
+    echo "$flac2mp3_message" | log
+    echo "$flac2mp3_message" >&2
   fi
 else
-  # No Artist ID means we can't call the API
-  MSG="Warn|Missing environment variable lidarr_artist_id"
-  echo "$MSG" | log
-  >&2 echo "$MSG"
+  # No URL means we can't call the API
+  flac2mp3_message="Warn|Unable to determine Lidarr API URL."
+  echo "$flac2mp3_message" | log
+  echo "$flac2mp3_message" >&2
 fi
 
 # Cool bash feature
-MSG="Info|Completed in $(($SECONDS/60))m $(($SECONDS%60))s"
-echo "$MSG" | log
+flac2mp3_message="Info|Completed in $(($SECONDS/60))m $(($SECONDS%60))s"
+echo "$flac2mp3_message" | log
