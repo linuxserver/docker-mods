@@ -15,6 +15,7 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
 2. Configure the Docker container with all the port, volume, and environment settings from the *original container documentation* here:  
   **[linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "Docker container")**
    1. Add a **DOCKER_MODS** environment variable to the `docker run` command, as follows:  
+      - Dev/test release: `-e DOCKER_MODS=thecaptain989/lidarr-flac2mp3:latest`  
       - Stable release: `-e DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3`
 
       *Example Docker CLI Configuration*  
