@@ -8,7 +8,7 @@ echo http://dl-cdn.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositori
 apk --update upgrade
 echo "Phase 1 - Dependencies are being installed...."
 apk add --no-cache --virtual=build-dependencies \
-    --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
 	tar \
 	make \
 	g++ \
@@ -24,7 +24,7 @@ echo "Phase 1 - DONE"
 echo " "
 echo "Phase 2 - Binaries are being installed..."
 apk add --no-cache \
-    --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
 	ffmpeg \
 	openssl \
 	p7zip \
