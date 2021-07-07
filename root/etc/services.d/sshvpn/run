@@ -1,3 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-sshuttle --dns --remote root@${HOST}:${PORT} 0/0 -x 172.17.0.0/16
