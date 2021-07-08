@@ -41,8 +41,8 @@ else
 	aclocal
 	automake --add-missing
 	autoconf
-	./configure
-	make
+	./configure -q
+	make -s
 	make install
 	rm -rf /tmp/*
 fi
