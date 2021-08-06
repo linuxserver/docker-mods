@@ -4,13 +4,14 @@ mods:
     container_mods:
       - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
-    mod_count: 16
+    mod_count: 17
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
       - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet 
       - flutter: https://github.com/linuxserver/docker-mods/tree/code-server-flutter
       - golang: https://github.com/linuxserver/docker-mods/tree/code-server-golang
+      - java11: https://github.com/linuxserver/docker-mods/tree/code-server-java11
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - npmglobal: https://github.com/linuxserver/docker-mods/tree/code-server-npmglobal
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
