@@ -3,8 +3,8 @@
 # shellcheck disable=SC2046
 
 printf "set_real_ip_from %b;\n" $({
-  curl -s "https://www.cloudflare.com/ips-v4" &
-  curl -s "https://www.cloudflare.com/ips-v6" &
+  curl -s -w '\n' "https://www.cloudflare.com/ips-v4" &
+  curl -s -w '\n' "https://www.cloudflare.com/ips-v6" &
   ip route | grep -v default | awk '{print $1}'
 }) > /config/nginx/cf_real-ip.conf
 
