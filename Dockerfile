@@ -10,7 +10,7 @@ FROM ghcr.io/linuxserver/docker-compose:amd64-${COMPOSE_ALPINE_TAG} as compose-a
 FROM ghcr.io/linuxserver/docker-compose:arm32v7-${COMPOSE_ALPINE_TAG} as compose-alpine-arm32
 FROM ghcr.io/linuxserver/docker-compose:arm64v8-${COMPOSE_ALPINE_TAG} as compose-alpine-arm64
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.13 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.14 as buildstage
 
 RUN \
  echo "**** install packages ****" && \
