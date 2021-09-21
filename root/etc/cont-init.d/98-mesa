@@ -19,8 +19,5 @@ done
 
 if "$install"; then
     echo "**** Installing mesa ****"
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F63F0F2B90935439
-    echo "deb http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu focal main" > /etc/apt/sources.list.d/kisak-mesa-focal.list
-    apt-get update
     apt-get install -y $pkgs
 fi
