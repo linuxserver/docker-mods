@@ -1,8 +1,8 @@
-# Multi Language OCR - Docker mod for papermerge
+# Multi Language OCR - Docker mod for papermerge and paperless-ng
 
-This mod adds multi language OCR packages to papermerge, to be installed/updated during container start.
+This mod adds multi language OCR packages to papermerge and paperless-ng, to be installed/updated during container start.
 
-In papermerge docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:papermerge-multilangocr` to enable this mod.
+In papermerge/paperless-ng docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:papermerge-multilangocr` to enable this mod.
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:papermerge-multilangocr|linuxserver/mods:papermerge-mod2`
 
