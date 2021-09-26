@@ -38,11 +38,12 @@ fi
 # Change ownership
 if [ $(stat -c '%G' /usr/local/bin/flac2mp3.sh) != "abc" ]; then
   echo "Changing ownership on scripts."
-  chown abc:abc /usr/local/bin/flac2mp3*.sh
+  chown abc:abc /usr/local/bin/flac2*.sh
 fi
 
 # Make executable
 if [ ! -x /usr/local/bin/flac2mp3.sh ]; then
   echo "Making scripts executable."
-  chmod +x /usr/local/bin/flac2mp3*.sh
+  chmod +x /usr/local/bin/flac2*.sh
 fi
+

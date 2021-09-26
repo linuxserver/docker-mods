@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to convert FLAC files to MP3 using FFMpeg
+# Script to convert FLAC files to MP3 using FFmpeg
 #  Dev/test: https://github.com/TheCaptain989/lidarr-flac2mp3
 #  Prod: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
 # Resultant MP3s are fully tagged and retain same permissions as original file
@@ -39,20 +39,32 @@ Audio conversion script designed for use with Lidarr
 Source: https://github.com/TheCaptain989/lidarr-flac2mp3
 
 Usage:
-  $0 [-d] [-b <bitrate> | -v <quality>]
+  $0 [-d] [-b <bitrate> | -v <quality> | -a \"<options>\" -e <extension>]
 
 Options:
-  -d             enable debug logging
-  -b <bitrate>   set output quality in constant bits per second [default: 320k]
-                 Ex: 160k, 240k, 300000
-  -v <quality>   set variable bitrate; quality between 0-9
-                 0 is highest quality, 9 is lowest
-                 See https://trac.ffmpeg.org/wiki/Encode/MP3 for more details
+  -d               enable debug logging
+  -b <bitrate>     set output quality in constant bits per second [default: 320k]
+                   Ex: 160k, 240k, 300000
+  -v <quality>     set variable bitrate; quality between 0-9
+                   0 is highest quality, 9 is lowest
+                   See https://trac.ffmpeg.org/wiki/Encode/MP3 for more details
+  -a \"<options>\"   advanced ffmpeg options enclosed in quotes
+                   Specified options replace all script defaults and are sent as
+                   entered to ffmpeg for processing.
+                   See https://ffmpeg.org/ffmpeg.html#Options for details on valid options.
+                   WARNING: You must specify an audio codec!
+                   WARNING: Invalid options could result in script failure!
+                   Requires -e option to also be specified
+                   See https://github.com/TheCaptain989/lidarr-flac2mp3 for more details
+  -e <extension>   file extension for output file, with or without dot
+                   Required when -a is specified!
 
 Examples:
-  $flac2mp3_script -b 320k            # Output 320 kbit/s MP3 (non VBR; same as default behavior)
-  $flac2mp3_script -v 0               # Output variable bitrate, VBR 220-260 kbit/s
-  $flac2mp3_script -d -b 160k         # Enable debugging and set output to 160 kbit/s
+  $flac2mp3_script -b 320k                # Output 320 kbit/s MP3 (non VBR; same as default behavior)
+  $flac2mp3_script -v 0                   # Output variable bitrate MP3, VBR 220-260 kbit/s
+  $flac2mp3_script -d -b 160k             # Enable debugging and set output a 160 kbit/s MP3
+  $flac2mp3_script -a \"-vn -c:a libopus -b:a 192K\" -e .opus     # Convert to Opus format, VBR 192 kbit/s, no cover art
+  $flac2mp3_script -a \"-y -map 0 -c:a aac -b:a 240K -c:v copy\" -e mp4     # Convert to MP4 format, using AAC 240 kbit/s audio, cover art, overwrite file
 "
   echo "$usage" >&2
 }
@@ -122,7 +134,7 @@ function check_rescan {
 }
 
 # Process options
-while getopts ":db:v:" opt; do
+while getopts ":db:v:a:e:" opt; do
   case ${opt} in
     d ) # For debug purposes only
       flac2mp3_message="Debug|Enabling debug logging."
@@ -138,6 +150,12 @@ while getopts ":db:v:" opt; do
         echo "$flac2mp3_message" >&2
         usage
         exit 3
+      elif [ -n "$flac2mp3_ffmpegadv" -o -n "$flac2mp3_extension" ]; then
+        flac2mp3_message="Error|The -a and -e options cannot be set at the same time as either -v or -b options."
+        echo "$flac2mp3_message" | log
+        echo "$flac2mp3_message" >&2
+        usage
+        exit 3
       else
         flac2mp3_bitrate="$OPTARG"
       fi
@@ -149,9 +167,39 @@ while getopts ":db:v:" opt; do
         echo "$flac2mp3_message" >&2
         usage
         exit 3
+      elif [ -n "$flac2mp3_ffmpegadv" -o -n "$flac2mp3_extension" ]; then
+        flac2mp3_message="Error|The -a and -e options cannot be set at the same time as either -v or -b options."
+        echo "$flac2mp3_message" | log
+        echo "$flac2mp3_message" >&2
+        usage
+        exit 3
       else
         flac2mp3_vbrquality="$OPTARG"
       fi
+      ;;
+    a ) # Set advanced options
+      if [ -n "$flac2mp3_vbrquality" -o -n "$flac2mp3_bitrate" ]; then
+        flac2mp3_message="Error|The -a and -e options cannot be set at the same time as either -v or -b options."
+        echo "$flac2mp3_message" | log
+        echo "$flac2mp3_message" >&2
+        usage
+        exit 3
+      else
+        flac2mp3_ffmpegadv="$OPTARG"
+      fi
+      ;;
+    e ) # Set file extension
+      if [ -n "$flac2mp3_vbrquality" -o -n "$flac2mp3_bitrate" ]; then
+        flac2mp3_message="Error|The -a and -e options cannot be set at the same time as either -v or -b options."
+        echo "$flac2mp3_message" | log
+        echo "$flac2mp3_message" >&2
+        usage
+        exit 3
+      else
+        flac2mp3_extension="$OPTARG"
+      fi
+      # Test for dot
+      [ "${flac2mp3_extension:0:1}" != "." ] && flac2mp3_extension=".${flac2mp3_extension}"
       ;;
     : ) # No required argument specified
       flac2mp3_message="Error|Invalid option: -${OPTARG} requires an argument"
@@ -169,10 +217,18 @@ while getopts ":db:v:" opt; do
       ;;
   esac
 done
+# Test for either -a and -e, but not both: logical XOR = non-equality
+if [ "${flac2mp3_ffmpegadv:+data}" != "${flac2mp3_extension:+data}" ]; then
+  flac2mp3_message="Error|The -a and -e options must be specified together."
+  echo "$flac2mp3_message" | log
+  echo "$flac2mp3_message" >&2
+  usage
+  exit 3
+fi
 shift $((OPTIND -1))
 
 # Set default bit rate
-[ -z "$flac2mp3_vbrquality" ] && [ -z "$flac2mp3_bitrate" ] && flac2mp3_bitrate="320k"
+[ -z "$flac2mp3_vbrquality" -a -z "$flac2mp3_bitrate" -a -z "$flac2mp3_ffmpegadv" -a -z "$flac2mp3_extension" ] && flac2mp3_bitrate="320k"
 
 # Check for config file
 if [ -f "$flac2mp3_config" ]; then
@@ -236,37 +292,54 @@ fi
 #find "$lidarr_artist_path" -name "*.flac" -exec bash -c 'ffmpeg -loglevel warning -i "{}" -y -acodec libmp3lame -b:a 320k "${0/.flac}.mp3" && rm "{}"' {} \;
 
 #### MAIN
-echo "Info|Lidarr event: $lidarr_eventtype, Artist: $lidarr_artist_name ($lidarr_artist_id), Album: $lidarr_album_title ($lidarr_album_id), Export bitrate: ${flac2mp3_bitrate:-$flac2mp3_vbrquality}, Tracks: $flac2mp3_tracks" | log
+flac2mp3_message="Info|Lidarr event: ${lidarr_eventtype}, Artist: ${lidarr_artist_name} (${lidarr_artist_id}), Album: ${lidarr_album_title} (${lidarr_album_id}), "
+if [ -z "$flac2mp3_ffmpegadv" ]; then
+  flac2mp3_message+="Export bitrate: ${flac2mp3_bitrate:-$flac2mp3_vbrquality}"
+else
+  flac2mp3_message+="Advanced options: '${flac2mp3_ffmpegadv}', File extension: ${flac2mp3_extension}"
+fi
+flac2mp3_message+=", Tracks: ${flac2mp3_tracks}"
+
+echo "${flac2mp3_message}" | log
 echo "$flac2mp3_tracks" | awk -v Debug=$flac2mp3_debug \
 -v Recycle="$flac2mp3_recyclebin" \
--v Bitrate=$flac2mp3_bitrate \
--v VBR=$flac2mp3_vbrquality '
+-v Bitrate="$flac2mp3_bitrate" \
+-v VBR="$flac2mp3_vbrquality" \
+-v FFmpegADV="$flac2mp3_ffmpegadv" \
+-v EXT="$flac2mp3_extension" '
 BEGIN {
-  FFMpeg="/usr/bin/ffmpeg"
+  FFmpeg="/usr/bin/ffmpeg"
   FS="|"
   RS="|"
   IGNORECASE=1
+  if (EXT == "") EXT=".mp3"
   if (Bitrate) {
     if (Debug) print "Debug|Using constant bitrate of "Bitrate
     BrCommand="-b:a "Bitrate
-  } else {
+  } else if (VBR) {
     if (Debug) print "Debug|Using variable quality of "VBR
     BrCommand="-q:a "VBR
+  } else if (FFmpegADV) {
+    if (Debug) print "Debug|Using advanced ffmpeg options: \""FFmpegADV"\""
+    if (Debug) print "Debug|Exporting with file extension "EXT
   }
 }
 /\.flac/ {
-  # Get each FLAC file name and create a new MP3 name
+  # Get each FLAC file name and create a new MP3 (or other) name
   Track=$1
   sub(/\n/,"",Track)
-  NewTrack=substr(Track, 1, length(Track)-5)".mp3"
+  NewTrack=substr(Track, 1, length(Track)-5) EXT
   print "Info|Writing: "NewTrack
+  # Check for advanced options
+  if (FFmpegADV) FFmpegOPTS=FFmpegADV
+  else FFmpegOPTS="-c:v copy -map 0 -y -acodec libmp3lame "BrCommand" -write_id3v1 1 -id3v2_version 3"
   # Convert the track
-  if (Debug) print "Debug|Executing: nice "FFMpeg" -loglevel error -i \""Track"\" -c:v copy -map 0 -y -acodec libmp3lame "BrCommand" -write_id3v1 1 -id3v2_version 3 \""NewTrack"\""
-  Result=system("nice "FFMpeg" -loglevel error -i \""Track"\" -c:v copy -map 0 -y -acodec libmp3lame "BrCommand" -write_id3v1 1 -id3v2_version 3 \""NewTrack"\" 2>&1")
+  if (Debug) print "Debug|Executing: nice "FFmpeg" -loglevel error -i \""Track"\" "FFmpegOPTS" \""NewTrack"\""
+  Result=system("nice "FFmpeg" -loglevel error -i \""Track"\" "FFmpegOPTS" \""NewTrack"\" 2>&1")
   if (Result) {
     print "Error|Exit code "Result" converting \""Track"\""
   } else {
-    if (Recycle=="") {
+    if (Recycle == "") {
       # No Recycle Bin, so check for non-zero size new file and delete the old one
       if (Debug) print "Debug|Deleting: \""Track"\" and setting permissions on \""NewTrack"\""
       #Command="[ -s \""NewTrack"\" ] && [ -f \""Track"\" ] && chown --reference=\""Track"\" \""NewTrack"\" && chmod --reference=\""Track"\" \""NewTrack"\" && rm \""Track"\""
