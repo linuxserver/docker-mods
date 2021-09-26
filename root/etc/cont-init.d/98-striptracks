@@ -13,37 +13,35 @@ EOF
 
 # Determine if setup is needed
 if [ ! -f /usr/bin/mkvmerge ]; then
-  echo "Running first time setup."
+    echo "Running first time setup."
 
-  if [ -f /usr/bin/apt ]; then
-    # Ubuntu
-    echo "Installing MKVToolNix using apt-get"
-    apt-get update && \
-    apt-get -y install mkvtoolnix && \
-    rm -rf /var/lib/apt/lists/*
-  elif [ -f /sbin/apk ]; then
-    # Alpine
-    echo "Installing MKVToolNix using apk"
-    apk add --no-cache mkvtoolnix && \
-    rm -rf /var/lib/apt/lists/*
-  else
-    # Unknown
-    echo "Unknown package manager.  Attempting to install MKVToolNix using apt-get"
-    apt-get update && \
-    apt-get -y install mkvtoolnix && \
-    rm -rf /var/lib/apt/lists/*
-  fi
+    if [ -f /usr/bin/apt ]; then
+        # Ubuntu
+        echo "Installing MKVToolNix using apt-get"
+        apt-get -y install mkvtoolnix && \
+        rm -rf /var/lib/apt/lists/*
+    elif [ -f /sbin/apk ]; then
+        # Alpine
+        echo "Installing MKVToolNix using apk"
+        apk add --no-cache mkvtoolnix && \
+        rm -rf /var/lib/apt/lists/*
+    else
+        # Unknown
+        echo "Unknown package manager.  Attempting to install MKVToolNix using apt-get"
+        apt-get -y install mkvtoolnix && \
+        rm -rf /var/lib/apt/lists/*
+    fi
 fi
 
 # Change ownership
 if [ $(stat -c '%G' /usr/local/bin/striptracks.sh) != "abc" ]; then
-  echo "Changing ownership on scripts."
-  chown abc:abc /usr/local/bin/striptracks*.sh
+    echo "Changing ownership on scripts."
+    chown abc:abc /usr/local/bin/striptracks*.sh
 fi
 
 # Make executable
 if [ ! -x /usr/local/bin/striptracks.sh ]; then
-  echo "Making scripts executable."
-  chmod +x /usr/local/bin/striptracks*.sh
+    echo "Making scripts executable."
+    chmod +x /usr/local/bin/striptracks*.sh
 fi
 
