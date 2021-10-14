@@ -23,6 +23,10 @@ mods:
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
+  firefox:
+    mod_count: 1
+    container_mods:
+      - fonts: https://github.com/linuxserver/docker-mods/tree/firefox-fonts
   healthchecks:
     mod_count: 1
     container_mods:
