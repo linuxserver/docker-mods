@@ -17,8 +17,9 @@ jobs:
           docker build --no-cache -t ${{ github.sha }} .
 
       - name: Tag image
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
+        # if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
         run: |
+          echo "env.BRANCH=${{ env.BRANCH }}"
           docker tag ${{ github.sha }} ${ENDPOINT}:
           docker tag ${{ github.sha }} ${ENDPOINT}:${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:
