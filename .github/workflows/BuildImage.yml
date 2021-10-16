@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "user/endpoint"
+  ENDPOINT: "hereisderek/wait-for-command"
   BRANCH: "master"
 
 jobs:

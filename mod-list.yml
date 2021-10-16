@@ -97,7 +97,7 @@ mods:
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
   universal:
-    mod_count: 8
+    mod_count: 9
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
       - cloudflared: https://github.com/linuxserver/docker-mods/tree/universal-cloudflared
@@ -107,3 +107,4 @@ mods:
       - git: https://github.com/linuxserver/docker-mods/tree/universal-git
       - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
       - wait-for-internet: https://github.com/linuxserver/docker-mods/tree/universal-wait-for-internet
+      - wait-for-command: https://github.com/linuxserver/docker-mods/tree/universal-wait-for-command

@@ -1,0 +1,46 @@
+#!/usr/bin/with-contenv bash
+
+[[ -z $PRE_LAUNCH_CHECK ]] && {
+  echo " PRE_LAUNCH_CHECK is empty, skipping pre-launch check"
+  exit 0
+}
+
+[[ -z $START_PERIOD ]] || sleep $START_PERIOD
+
+installDependencies() {
+  if [ -f /usr/bin/apt ]; then
+    apt-get update && \
+    apt-get install -y --no-install-recommends bash curl 
+     rm -rf \
+      /tmp/* \
+      /var/lib/apt/lists/* \
+      /var/tmp/*
+  else 
+    apk upgrade --update --no-cache \
+      && apk add --no-cache bash curl \
+      && rm -rf /var/cache/apk/* 
+  fi
+}
+
+check() {
+  echo "running check: $PRE_LAUNCH_CHECK ..."
+
+  until eval "$PRE_LAUNCH_CHECK"; do
+    echo "retrying..."
+    sleep 3
+  done
+}
+
+[ -z $PRE_CHECK_RUN_ONE_OFF ] || $PRE_CHECK_RUN_ONE_OFF
+
+
+
+check_timeout=${PRE_LAUNCH_CHECK_TIMEOUT:-"-1"}
+
+if [ $check_timeout -gt 0 ]; then
+  timeout $check_timeout check
+else
+  check
+fi
+
+
