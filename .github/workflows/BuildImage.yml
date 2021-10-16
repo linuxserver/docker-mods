@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "hereisderek/docker-mods"
+  ENDPOINT: "hereisderek/docker-mod-universal-wait-for-command"
   BRANCH: "universal-wait-for-command"
 
 jobs:
