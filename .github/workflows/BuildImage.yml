@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "hereisderek/docker-mods"
+  ENDPOINT: "hereisderek/universal-wait-for-command"
   BRANCH: "universal-wait-for-command"
 
 jobs:
@@ -17,12 +17,12 @@ jobs:
           docker build --no-cache -t ${{ github.sha }} .
 
       - name: Tag image
-        # if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
         run: |
-          echo "env.BRANCH=${{ env.BRANCH }}"
-          docker tag ${{ github.sha }} ${ENDPOINT}:
+          echo "env.BRANCH=${{ env.BRANCH }} github.ref: ${{ github.ref }}"
+          docker tag ${{ github.sha }} ${ENDPOINT}
           docker tag ${{ github.sha }} ${ENDPOINT}:${{ github.sha }}
-          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${{ github.sha }}
 
       - name: Credential check
