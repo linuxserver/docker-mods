@@ -87,7 +87,7 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
         --data "{\"name\":\"${CF_TUNNEL_NAME}\",\"tunnel_secret\":\"${CF_TUNNEL_SECRET}\"}")
     echo ${JSON_RESULT} | jq
 
-    JSON_CODE_VALUE=$(echo ${JSON_RESULT} | jq -rc ".code")
+    JSON_CODE_VALUE=$(echo ${JSON_RESULT} | jq -rc ".errors[].code")
     if [[ ${JSON_CODE_VALUE} -eq 1013 ]]; then
       echo "**** You already have a cloudflare tunnel named ${CF_TUNNEL_NAME} ****"
     
@@ -99,24 +99,27 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
       echo ${JSON_RESULT} | jq
 
       echo "**** Fetching existing cloudflare tunnel(${CF_TUNNEL_NAME}) via API... ****"
-      CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".[].id")
+      CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".result[].id")
       JSON_RESULT=$(curl -sX \
         GET "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/tunnels/${CF_TUNNEL_ID}?" \
           -H "Authorization: Bearer ${CF_API_TOKEN}" \
           -H "Content-Type: application/json")
 
-      JSON_RESULT=$(echo ${JSON_RESULT} | jq -rc ". + {\"credentials_file\": {\"AccountTag\": \"${CF_ACCOUNT_ID}\",\"TunnelID\": \"${CF_TUNNEL_ID}\",\"TunnelName\": \"${CF_TUNNEL_NAME}\",\"TunnelSecret\": \"${CF_TUNNEL_SECRET}\"}}")
+      JSON_RESULT=$(echo ${JSON_RESULT} | jq -rc ". |= .+ {\"credentials_file\": {\"AccountTag\": \"${CF_ACCOUNT_ID}\",\"TunnelID\": \"${CF_TUNNEL_ID}\",\"TunnelName\": \"${CF_TUNNEL_NAME}\",\"TunnelSecret\": \"${CF_TUNNEL_SECRET}\"}}")
       echo ${JSON_RESULT} | jq
     fi
 
-    CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".id")
+    CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".result.id")
     CREDENTIALS_FILE=$(echo ${JSON_RESULT} | jq -rc ".credentials_file")
+    if [ $CREDENTIALS_FILE = "null" ]; then # when created through POST, credentials_file is part of .results (maybe incomplete json response), check where it is
+      CREDENTIALS_FILE=$(echo ${JSON_RESULT} | jq -rc ".result.credentials_file")
+    fi
     echo "**** Saving cloudflare tunnel(${CF_TUNNEL_NAME}) credentials json... ****"
     if [ ! -d "/etc/cloudflared/" ]; then
       mkdir -p "/etc/cloudflared";
     fi
     printf "${CREDENTIALS_FILE}" > "/etc/cloudflared/${CF_TUNNEL_ID}.json"
-    echo ${JSON_RESULT} | jq -r ".credentials_file"
+    echo ${JSON_RESULT} | jq -r ".result.credentials_file"
     echo "**** Cloudflare tunnel(${CF_TUNNEL_NAME}) credentials saved to /etc/cloudflared/${CF_TUNNEL_ID}.json ****"
 
     echo "**** Generating config.yml for cloudflare tunnel(${CF_TUNNEL_NAME})... ****"
