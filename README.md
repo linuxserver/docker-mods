@@ -1,6 +1,6 @@
 # Translations - Docker mod for projectsend
 
-This mod adds installation options for adding translations to the [Docker image of LinuxServer.io](https://github.com/linuxserver/docker-projectsend) for [ProjectSend](http://www.projectsend.org/). The translations to be installed can be defined with ``PS_INSTALL_TRANSLATIONS`` as a comma-separated list and will be automatically downloaded from the [official translations website](https://www.projectsend.org/translations/). To help translating (and adding your preferred language to) ProjectSend, please follow [this link](https://www.transifex.com/subwaydesign/projectsend/).
+This mod adds installation options for adding translations to the [Docker image of LinuxServer.io](https://github.com/linuxserver/docker-projectsend) for [ProjectSend](http://www.projectsend.org/). The translations to be installed can be defined with ``TRANSLATIONS`` as a comma-separated list and will be automatically downloaded from the [official translations website](https://www.projectsend.org/translations/). To help translating (and adding your preferred language to) ProjectSend, please follow [this link](https://www.transifex.com/subwaydesign/projectsend/).
 
 ## Using this Docker Mod
 
