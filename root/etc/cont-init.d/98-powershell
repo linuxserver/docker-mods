@@ -1,12 +1,19 @@
 #!/usr/bin/with-contenv bash
 
 ARCH=$(uname -m)
+source /etc/lsb-release
 
 if [ -f "/powershell/powershell_${ARCH}.tar.gz" ]; then
     echo "Installing PowerShell"
-    apt-get install -y \
-        libicu60 \
-        libunwind8
+    if [ "${DISTRIB_CODENAME}" == "bionic" ]; then
+        apt-get install -y \
+            libicu60 \
+            libunwind8
+    elif [ "${DISTRIB_CODENAME}" == "focal" ]; then
+        apt-get install -y \
+            libicu66 \
+            libunwind8
+    fi
     tar xf "/powershell/powershell_${ARCH}.tar.gz" -C /powershell
     rm -rf \
         /powershell/powershell_x86_64.tar.gz \
