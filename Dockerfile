@@ -1,10 +1,15 @@
+FROM lsiobase/alpine:3.11 as buildstage
+
+# copy local files
+COPY root/ /root-layer/
+
+# runtime stage
 FROM scratch
 
 LABEL maintainer="alexschomb"
 
-# copy local files
-COPY root/ /
+# Add files from buildstage
+COPY --from=buildstage /root-layer/ /
 
-# install translations
-RUN chmod +x /install-translations.sh
-CMD /install-translations.sh
+# volumes
+VOLUME /translations

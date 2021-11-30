@@ -1,12 +1,12 @@
 # Translations - Docker mod for projectsend
 
-This mod adds installation options for adding translations to the [Docker image of LinuxServer.io](https://github.com/linuxserver/docker-projectsend) for [ProjectSend](http://www.projectsend.org/). The translations to be installed can be defined with ``TRANSLATIONS`` as a comma-separated list and will be automatically downloaded from the [official translations website](https://www.projectsend.org/translations/). To help translating (and adding your preferred language to) ProjectSend, please follow [this link](https://www.transifex.com/subwaydesign/projectsend/).
+This mod adds installation options for adding translations to the [Docker image of LinuxServer.io](https://github.com/linuxserver/docker-projectsend) for [ProjectSend](http://www.projectsend.org/). The translations to be installed can be defined with ``TRANSLATIONS`` as a comma-separated list and can be either be automatically installed from the [official translations website](https://www.projectsend.org/translations/) or the local ``/translations`` volume. To help translating (and adding your preferred language to) ProjectSend, please follow [this link](https://www.transifex.com/subwaydesign/projectsend/).
 
 ## Using this Docker Mod
 
 To add this Docker Mod to your installation of the ProjectSend [Docker image of LinuxServer.io](https://github.com/linuxserver/docker-projectsend), please add this endpoint ``linuxserver/mods:projectsend-translations`` to the ``DOCKER_MODS`` environment variable. You can install multiple Docker Mods by separating them by ``|``. [Read this page](https://github.com/linuxserver/docker-mods#using-a-docker-mod) for more information.
 
-Now, you can define the languages/translations to be installed with their "Lang. code" value from the before mentioned [official translations website](https://www.projectsend.org/translations/) to the ``TRANSLATIONS`` environment variable. You can choose to install multiple translations by separating them with commas. The English translation ``en`` is automatically installed by the ProjectSend image and does not have to be addressed by this Docker Mod or the ``TRANSLATIONS`` environment variable.
+Now, you can define the languages/translations to be installed with their name to the ``TRANSLATIONS`` environment variable. You can choose to install multiple translations by separating them with commas. You can either install them by providing the folder name of a subfolder in the new ``/translations`` volume, or the "Lang. code" value from the before mentioned [official translations website](https://www.projectsend.org/translations/). The English translation ``en`` is automatically installed by the ProjectSend image and does not have to be addressed by this Docker Mod or the ``TRANSLATIONS`` environment variable.
 
 Full example with ``docker-compose``:
 
@@ -27,10 +27,15 @@ services:
     volumes:
       - <path to data>:/config
       - <path to data>:/data
+      - <path to data>:/translations
     ports:
       - 80:80
     restart: unless-stopped
 ```
+
+### Known limitations
+
+* Translations will only update when rebuilding the base image (``docker-compose down && docker-compose up -d --rebuild``), a simple ``docker-compose restart`` is not sufficient. This is because the [Docker image of LinuxServer.io](https://github.com/linuxserver/docker-projectsend) does not work with mounted volumes inside ``/app/projectsend/``. As a result, translation development can be very uncomfortable using this approach. Sorry.
 
 ## Source / References
 I took inspiration from the Dockerfile of the [Grafana](https://github.com/grafana/grafana/) repository, especially [this file](https://github.com/grafana/grafana/blob/main/packaging/docker/run.sh). Thanks!
