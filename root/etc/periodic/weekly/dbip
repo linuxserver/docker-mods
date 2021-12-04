@@ -1,0 +1,9 @@
+#!/bin/sh
+
+DATE=$(date '+%Y-%m')
+FILE="https://download.db-ip.com/free/dbip-country-lite-${DATE}.mmdb.gz"
+
+wget -O /tmp/dbip-country-lite.mmdb.gz $FILE
+gzip -df /tmp/dbip-country-lite.mmdb.gz
+mv -f /tmp/dbip-country-lite.mmdb /config/geoip2db/dbip-country-lite.mmdb
+exit 0
