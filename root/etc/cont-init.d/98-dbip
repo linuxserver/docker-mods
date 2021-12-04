@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+
+echo "Applying the dbip mod..."
+
+chmod +x /etc/periodic/weekly/dbip
+
+# check GeoIP2 database
+if [ ! -f /config/geoip2db/dbip-country-lite.mmdb ]; then
+    echo "Downloading GeoIP2 City database."
+    /etc/periodic/weekly/dbip
+fi
+
+if [ ! -f /config/nginx/dbip.conf ]; then
+    cp /defaults/dbip.conf /config/nginx/dbip.conf
+fi
+
+echo "Applied the dbip mod"
