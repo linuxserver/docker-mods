@@ -107,16 +107,18 @@ mods:
     container_mods:
       - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
   swag:
-    mod_count: 8
+    mod_count: 10
     container_mods:
       - auto-proxy: https://github.com/linuxserver/docker-mods/tree/swag-auto-proxy
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
       - cloudflare-real-ip: https://github.com/linuxserver/docker-mods/tree/swag-cloudflare-real-ip
+      - dbip: https://github.com/linuxserver/docker-mods/tree/swag-dbip
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/swag-f2bdiscord
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
+      - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
   universal:
     mod_count: 8
     container_mods:
