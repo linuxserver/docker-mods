@@ -11,5 +11,5 @@ IFS='|'
 VSCODE_EXTENSION_IDS=(${VSCODE_EXTENSION_IDS})
 for ID in "${VSCODE_EXTENSION_IDS[@]}"; do
     echo "**** installing extension: ${ID} ****"
-    code-server --user-data-dir /config/data --extensions-dir /config/extensions --install-extension ${ID}
+    s6-setuidgid abc code-server --user-data-dir /config/data --extensions-dir /config/extensions --install-extension ${ID}
 done
