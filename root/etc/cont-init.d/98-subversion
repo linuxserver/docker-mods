@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+apt-get update
+
+echo "**** installing subversion ****"
+apt-get install -y subversion
