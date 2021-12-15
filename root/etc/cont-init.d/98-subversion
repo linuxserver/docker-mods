@@ -4,3 +4,6 @@ apt-get update
 
 echo "**** installing subversion ****"
 apt-get install -y subversion
+
+echo "**** installing SVN extension ****"
+s6-setuidgid abc code-server --user-data-dir /config/data --extensions-dir /config/extensions --install-extension johnstoncode.svn-scm
