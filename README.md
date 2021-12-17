@@ -6,4 +6,4 @@ In any container docker arguments, set an environment variable `DOCKER_MODS=linu
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:universal-stdout-logging|linuxserver/mods:universal-mod2`
 
-Simply set the environment variable `LOGS_TO_STDOUT` with a comman-delimited list of log files to include, such as `LOGS_TO_STDOUT="/config/logs/radarr.txt /config/logs/radarr.debug.txt"`. **NOTE**: If a comman exists in the path / filename of a log file, this will not work properly.
+Simply set the environment variable `LOGS_TO_STDOUT` with a pipe-delimited (`|`) list of log files to include, such as `LOGS_TO_STDOUT="/config/logs/radarr.txt /config/logs/radarr.debug.txt"`.
