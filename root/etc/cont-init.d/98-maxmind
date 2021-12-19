@@ -3,6 +3,8 @@
 echo "Applying the maxmind mod..."
 
 # create GeoIP2 folder symlink
+mkdir -p \
+    /config/geoip2db
 [[ -d /var/lib/libmaxminddb ]] && [[ ! -L /var/lib/libmaxminddb ]] && \
     rm -rf /var/lib/libmaxminddb
 [[ ! -d /var/lib/libmaxminddb ]] && \
