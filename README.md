@@ -94,8 +94,8 @@ ffmpeg -loglevel error -i "Original.flac" ${Options} "NewTrack${Extension}"
 -b 320k        # Output 320 kbit/s MP3 (non VBR; same as default behavior)
 -v 0           # Output variable bitrate MP3, VBR 220-260 kbit/s
 -d -b 160k     # Enable debugging, and output a 160 kbit/s MP3
--a "-vn -c:a libopus -b:a 192K" -e .opus     # Convert to Opus format, VBR 192 kbit/s, no cover art
--a "-y -map 0 -c:a aac -b:a 240K -c:v copy" -e mp4     # Convert to MP4 format, using AAC 240 kbit/s audio, cover art, overwrite file
+-a "-c:v libtheora -map 0 -q:v 10 -c:a libopus -b:a 192k" -e .opus     # Convert to Opus format, VBR 192 kbit/s, cover art
+-a "-y -map 0 -c:a aac -b:a 240k -c:v copy" -e mp4     # Convert to MP4 format, using AAC 240 kbit/s audio, cover art, overwrite file
 ```
 
 ### Included Wrapper Scripts
@@ -105,7 +105,7 @@ You may use any of these scripts in place of the `flac2mp3.sh` mentioned in the 
 ```
 flac2mp3-debug.sh        # Enable debugging
 flac2mp3-vbr.sh          # Use variable bit rate MP3, quality 0
-flac2opus.sh             # Convert to Opus format using .opus extension
+flac2opus.sh             # Convert to Opus format using .opus extension, 192 kbit/s, no covert art
 ```
 
 ### Example Wrapper Script
