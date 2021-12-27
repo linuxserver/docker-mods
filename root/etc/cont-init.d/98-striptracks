@@ -18,7 +18,6 @@ if [ ! -f /usr/bin/mkvmerge ]; then
   if [ -f /usr/bin/apt ]; then
     # Ubuntu
     echo "Installing MKVToolNix using apt-get"
-    apt-get update && \
     apt-get -y install mkvtoolnix && \
     rm -rf /var/lib/apt/lists/*
   elif [ -f /sbin/apk ]; then
@@ -29,7 +28,6 @@ if [ ! -f /usr/bin/mkvmerge ]; then
   else
     # Unknown
     echo "Unknown package manager.  Attempting to install MKVToolNix using apt-get"
-    apt-get update && \
     apt-get -y install mkvtoolnix && \
     rm -rf /var/lib/apt/lists/*
   fi
