@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+source /etc/lsb-release
+
+[[ ! -f "/etc/apt/sources.list.d/hashicorp.list" ]] &&
+  curl -s https://apt.releases.hashicorp.com/gpg | apt-key add - &&
+  echo "deb https://apt.releases.hashicorp.com ${DISTRIB_CODENAME} main" \
+    >/etc/apt/sources.list.d/hashicorp.list
