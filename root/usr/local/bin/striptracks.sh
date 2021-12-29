@@ -870,20 +870,20 @@ elif [ -n "$striptracks_api_url" ]; then
                         [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
                       else
                         # The languages are already correct
-                        [ $striptracks_debug -ge 1 ] && echo "Debug|Language '$(echo $striptracks_json_languages | jq -crM ".[0]")' remained unchanged." | log
+                        [ $striptracks_debug -ge 1 ] && echo "Debug|Language '$(echo $striptracks_json_languages | jq -crM ".[0].name")' remained unchanged." | log
                       fi
                     else
                       # Some unknown JSON formatting
-                      striptracks_message="Warn|$striptracks_videofile_api returned unknown JSON language location."
+                      striptracks_message="Warn|The '$striptracks_videofile_api' API returned unknown JSON language location."
                       echo "$striptracks_message" | log
                       echo "$striptracks_message" >&2
                     fi
-                else
-                  # Video language not in striptracks_isocodemap
-                  striptracks_message="Warn|Video language code(s) '${striptracks_newvideo_languages//$'\n'/,}' not found in the ISO Codemap. Cannot evaluate."
-                  echo "$striptracks_message" | log
-                  echo "$striptracks_message" >&2
-                fi
+                  else
+                    # Video language not in striptracks_isocodemap
+                    striptracks_message="Warn|Video language code(s) '${striptracks_newvideo_languages//$'\n'/,}' not found in the ISO Codemap. Cannot evaluate."
+                    echo "$striptracks_message" | log
+                    echo "$striptracks_message" >&2
+                  fi
                 else
                   # Get media info failed
                   striptracks_message="Error|Could not get media info from new video file. Can't check resulting languages."
