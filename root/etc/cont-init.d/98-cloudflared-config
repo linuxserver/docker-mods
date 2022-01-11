@@ -77,7 +77,7 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
     exit 1 
   else
     echo "**** Cloudflare tunnel parameters found, starting cloudflare tunnel setup... ****"
-    echo "**** Creating cloudflare tunnel(${CF_TUNNEL_NAME}) via API... ****"
+    echo "**** Creating cloudflare tunnel (${CF_TUNNEL_NAME}) via API... ****"
 
     CF_TUNNEL_SECRET="$(command echo ${CF_TUNNEL_PASSWORD} | base64)"
     JSON_RESULT=$(curl -sX \
@@ -87,7 +87,7 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
         --data "{\"name\":\"${CF_TUNNEL_NAME}\",\"tunnel_secret\":\"${CF_TUNNEL_SECRET}\"}")
     echo ${JSON_RESULT} | jq
 
-    JSON_CODE_VALUE=$(echo ${JSON_RESULT} | jq -rc ".errors[].code")
+    JSON_CODE_VALUE=$(echo ${JSON_RESULT} | jq -rc ".code // .errors[].code")
     if [[ ${JSON_CODE_VALUE} -eq 1013 ]]; then
       echo "**** You already have a cloudflare tunnel named ${CF_TUNNEL_NAME} ****"
     
@@ -98,8 +98,8 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
           -H "Content-Type: application/json")
       echo ${JSON_RESULT} | jq
 
-      echo "**** Fetching existing cloudflare tunnel(${CF_TUNNEL_NAME}) via API... ****"
-      CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".result[].id")
+      echo "**** Fetching existing cloudflare tunnel (${CF_TUNNEL_NAME}) via API... ****"
+      CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".[].id? // .result[].id")
       JSON_RESULT=$(curl -sX \
         GET "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/tunnels/${CF_TUNNEL_ID}?" \
           -H "Authorization: Bearer ${CF_API_TOKEN}" \
@@ -109,26 +109,23 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
       echo ${JSON_RESULT} | jq
     fi
 
-    CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".result.id")
-    CREDENTIALS_FILE=$(echo ${JSON_RESULT} | jq -rc ".credentials_file")
-    if [ $CREDENTIALS_FILE = "null" ]; then # when created through POST, credentials_file is part of .results (maybe incomplete json response), check where it is
-      CREDENTIALS_FILE=$(echo ${JSON_RESULT} | jq -rc ".result.credentials_file")
-    fi
-    echo "**** Saving cloudflare tunnel(${CF_TUNNEL_NAME}) credentials json... ****"
+    CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".id // .result.id")
+    CREDENTIALS_FILE=$(echo ${JSON_RESULT} | jq -rc ".credentials_file // .result.credentials_file")
+    echo "**** Saving cloudflare tunnel (${CF_TUNNEL_NAME}) credentials json... ****"
     if [ ! -d "/etc/cloudflared/" ]; then
       mkdir -p "/etc/cloudflared";
     fi
     printf "${CREDENTIALS_FILE}" > "/etc/cloudflared/${CF_TUNNEL_ID}.json"
     echo ${JSON_RESULT} | jq -r ".result.credentials_file"
-    echo "**** Cloudflare tunnel(${CF_TUNNEL_NAME}) credentials saved to /etc/cloudflared/${CF_TUNNEL_ID}.json ****"
+    echo "**** Cloudflare tunnel (${CF_TUNNEL_NAME}) credentials saved to /etc/cloudflared/${CF_TUNNEL_ID}.json ****"
 
-    echo "**** Generating config.yml for cloudflare tunnel(${CF_TUNNEL_NAME})... ****"
+    echo "**** Generating config.yml for cloudflare tunnel (${CF_TUNNEL_NAME})... ****"
     printf "tunnel: ${CF_TUNNEL_ID}\n" > "/etc/cloudflared/config.yml"
     printf "credentials-file: /etc/cloudflared/${CF_TUNNEL_ID}.json\n" >> "/etc/cloudflared/config.yml"
     printf "no-autoupdate: true\n\n" >> "/etc/cloudflared/config.yml"
     printf "${CF_TUNNEL_CONFIG}" >> "/etc/cloudflared/config.yml"
     /tmp/yq e /etc/cloudflared/config.yml
-    echo "**** Config for cloudflare tunnel(${CF_TUNNEL_NAME}) saved to /etc/cloudflared/config.yml ****"
+    echo "**** Config for cloudflare tunnel (${CF_TUNNEL_NAME}) saved to /etc/cloudflared/config.yml ****"
 
     echo "**** Validating cloudflared tunnel rules... ****"
     cloudflared tunnel ingress validate
@@ -136,7 +133,7 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
     echo "**** Updating cloudflare zone... ****"
     for HOSTNAME in $(/tmp/yq e ".ingress.[].hostname" /etc/cloudflared/config.yml); do
       if [ ! "${HOSTNAME}" = "null" ]; then
-        echo "**** Searching zone for hostname(${HOSTNAME}) via API... ****"
+        echo "**** Searching zone for hostname (${HOSTNAME}) via API... ****"
         JSON_RESULT=$(curl -sX \
           GET "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/dns_records?name=${HOSTNAME}&type=CNAME&match=all" \
             -H "Authorization: Bearer ${CF_API_TOKEN}" \
@@ -144,7 +141,7 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
 
         COUNT=$(echo ${JSON_RESULT} | jq -rc ".result_info.count")
         if [[ ${COUNT} -eq 0 ]]; then
-          echo "**** Creating new CNAME for hostname(${HOSTNAME}) via API... ****"
+          echo "**** Creating new CNAME for hostname (${HOSTNAME}) via API... ****"
           JSON_RESULT=$(curl -sX \
             POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/dns_records" \
               -H "Authorization: Bearer ${CF_API_TOKEN}" \
@@ -152,7 +149,7 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
               --data "{\"type\":\"CNAME\",\"name\":\"${HOSTNAME}\",\"content\":\"${CF_TUNNEL_ID}.cfargotunnel.com\",\"ttl\":1,\"proxied\":true}")
           echo ${JSON_RESULT} | jq
         else
-          echo "**** Updating existing CNAME for hostname(${HOSTNAME}) via API... ****"
+          echo "**** Updating existing CNAME for hostname (${HOSTNAME}) via API... ****"
           RECORD_ID=$(echo ${JSON_RESULT} | jq -rc ".result[].id")
           JSON_RESULT=$(curl -sX \
             PUT "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/dns_records/${RECORD_ID}" \
