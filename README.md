@@ -2,6 +2,8 @@
 
 This mod adds a dashboard to SWAG powered by [Goaccess](https://goaccess.io/).
 
+**Currently only works with a subdomain, not a subfolder.**
+
 # Enable
 
 In the container's docker arguments, set an environment variable DOCKER_MODS=linuxserver/mods:swag-dashboard
