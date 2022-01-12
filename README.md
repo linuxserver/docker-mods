@@ -13,6 +13,7 @@ If adding multiple mods, enter them in an array separated by |, such as DOCKER_M
 # Usage
 
 Navigate to `dashboard.domain.com` from your LAN to view the dashboard
+
 Note: The application discovery works best when the container names match the `proxy-conf` files
 
 # Example

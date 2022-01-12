@@ -81,7 +81,8 @@
             <div class="wrap-general">
         HTML;
     }
-    $access = shell_exec("cat /config/log/nginx/access.log | goaccess -a -o html --html-prefs='{\"theme\":\"darkGray\"}' --log-format COMBINED --geoip-database=/config/geoip2db/GeoLite2-City.mmdb -");
+    $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
+    $access = shell_exec("cat /config/log/nginx/access.log | goaccess -a -o html --html-prefs='{\"theme\":\"darkGray\"}' --log-format COMBINED ".$geodb." -");
     $status = GetStatus();
     echo str_replace("<div class='wrap-general'>", $status, $access);
 ?>
