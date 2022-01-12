@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+
+echo "Applying the SWAG dashboard mod..."
+
+apk add --no-cache --upgrade goaccess
+
+if [ ! -f /config/nginx/proxy-confs/dashboard.subdomain.conf ]; then
+  cp /dashboard/dashboard.subdomain.conf.sample /config/nginx/proxy-confs/dashboard/dashboard.subdomain.conf
+fi
+
+echo "Applied the SWAG dashboard mod"
