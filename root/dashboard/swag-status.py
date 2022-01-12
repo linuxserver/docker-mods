@@ -16,7 +16,7 @@ def find_apps():
             continue
         file = open(file_path, "r")
         content = file.read()
-        results = re.finditer(r"(\s+)set \$upstream_app (?P<name>\S+?);(\s+)set \$upstream_port (?P<port>\d+);\n(\s+)set \$upstream_proto (?P<proto>\w+);", content)
+        results = re.finditer(r"(\s+)set \$upstream_app (?P<name>\S+?);.*\n(\s+)set \$upstream_port (?P<port>\d+);.*\n(\s+)set \$upstream_proto (?P<proto>\w+);.*", content)
         for result in results:
             params = result.groupdict()
             app = f"{params['proto']}://{params['name']}:{params['port']}"
