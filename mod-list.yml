@@ -107,7 +107,7 @@ mods:
     container_mods:
       - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
   swag:
-    mod_count: 10
+    mod_count: 11
     container_mods:
       - auto-proxy: https://github.com/linuxserver/docker-mods/tree/swag-auto-proxy
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
@@ -119,6 +119,7 @@ mods:
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
+      - dashboard: https://github.com/linuxserver/docker-mods/tree/swag-dashboard
   universal:
     mod_count: 9
     container_mods:
