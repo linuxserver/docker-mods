@@ -29,8 +29,8 @@ def find_apps():
 
 def is_available(url):
     try:
-        ans = requests.head(url, timeout=5, verify=False)
-        return ans.status_code < 404
+        requests.head(url, timeout=5, verify=False)
+        return True
     except:
         return False
 
