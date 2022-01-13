@@ -15,7 +15,13 @@ If adding multiple mods, enter them in an array separated by |, such as DOCKER_M
 Navigate to `dashboard.domain.com` from your LAN to view the dashboard.
 
 ## Notes 
-- The application discovery works best when the container names match the `proxy-conf` files
+- The application discovery scans all the conf files and looks for the following structure in accordance with the samples, incorrect discovery results can be fixed by using the structure.
+  ```yaml
+    set $upstream_app something;
+    set $upstream_port 123;
+    set $upstream_proto http;
+    proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+    ```
 - [Swag Maxmind mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind) is required to enable the geo location graph
 
 # Example
