@@ -119,7 +119,7 @@
     }
 
     $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
-    $access = shell_exec("cat /config/log/nginx/access.log | goaccess -a -o html --html-prefs='{\"theme\":\"darkGray\"}' --log-format COMBINED ".$geodb." -");
+    $access = shell_exec("goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
     $status = GetHeader() . GetProxies() . GetF2B() . '<div class="wrap-general">';
     echo str_replace("<div class='wrap-general'>", $status, $access);
 ?>
