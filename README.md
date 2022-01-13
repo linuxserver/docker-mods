@@ -12,9 +12,11 @@ If adding multiple mods, enter them in an array separated by |, such as DOCKER_M
 
 # Usage
 
-Navigate to `dashboard.domain.com` from your LAN to view the dashboard
+Navigate to `dashboard.domain.com` from your LAN to view the dashboard.
 
-Note: The application discovery works best when the container names match the `proxy-conf` files
+## Notes 
+- The application discovery works best when the container names match the `proxy-conf` files
+- [Swag Maxmind mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind) is required to enable the geo location graph
 
 # Example
 ![Example](.assets/example.png)
