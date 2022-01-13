@@ -19,10 +19,10 @@ def find_apps():
         results = re.finditer(r"(\s+)set \$upstream_app (?P<name>\S+?);.*\n(\s+)set \$upstream_port (?P<port>\d+);.*\n(\s+)set \$upstream_proto (?P<proto>\w+);.*", content)
         for result in results:
             params = result.groupdict()
-            app = f"{params['proto']}://{params['name']}:{params['port']}"
+            app = f"{params['proto']}://{params['name']}:{params['port']}/"
             if app not in apps:
                 apps[app] = set()
-            if not file_path.endswith(".sample"):
+            if file_path.startswith("/config/nginx/site-confs/") or file_path.endswith(".conf"):
                 apps[app].add(file_path)
     return apps
 
