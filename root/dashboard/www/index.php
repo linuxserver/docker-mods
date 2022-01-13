@@ -4,19 +4,21 @@
             <style type="text/css">
                 .status-div {
                     display: inline-block;
-                    padding: 20px;
+                    padding: 10px;
                     text-align: center;
                     vertical-align: top;
                 }
                 .status-text {
                     font-size: 15px;
                 }
-                td {
-                    padding: 6px;
-                    text-align: center;
+                .link-text {
+                    font-weight: bold;
                 }
-                .align-td {
-                    text-align: center;
+                .left-text {
+                    text-align: left;
+                }
+                td {
+                    padding: 3px;
                 }
                 .green-circle {
                     padding: 2px 10px;
@@ -45,17 +47,17 @@
         $index = 0;
         foreach($results as $result => $data){
             $tr_class = ($index % 2 == 0) ? 'shaded' : '';
-            $status .= '<tr class="'.$tr_class.'"><td><span class="status-text">'.$result.'</span></td><td class="align-td">';
+            $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$result.'</span></td><td class="align-td">';
             if ($data->status == 1) {
                 $status .= '<span class="green-circle circle-empty"></span>';
             } else {
                 $status .= '<span class="red-circle"></span>';
             }
-            $status .= '</td><td class="align-td">';
+            $status .= '</td><td>';
             if (!empty($data->locations)) {
                 $locations = $data->locations;
                 $location = implode(",", $locations);
-                $status .= '<span class="green-circle circle-empty"></span></td><td><span class="status-text">'.$location.'</span></td>';
+                $status .= '<span class="green-circle circle-empty"></span></td><td class="left-text"><span class="status-text">'.$location.'</span></td>';
             } else {
                 $status .= '<span class="red-circle"></span></td><td></td>';
             }
@@ -93,7 +95,7 @@
         $index = 0;
         foreach($jails as $jail=>$bans){
             $tr_class = ($index % 2 == 0) ? 'shaded' : '';
-            $status .= '<tr class="'.$tr_class.'"><td><span class="status-text">'.$jail.'</span></td><td><span class="status-text">'.$bans.'</span></td></tr>';
+            $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$jail.'</span></td><td><span class="status-text">'.$bans.'</span></td></tr>';
             $index++;
         }
         return <<<HTML
@@ -118,8 +120,41 @@
         HTML;
     }
 
+    function GetAnnouncements() {
+        $feed_url = 'https://info.linuxserver.io/index.xml';
+        $max_entries = 8;
+        $xml = simplexml_load_string(file_get_contents($feed_url));
+        $output = "";
+        $entries = $xml->channel->item;
+        $counter = 1;
+
+        foreach($entries as $root) {
+            $date = date('Y-m-d', strtotime($root->pubDate));
+            $output .= '<tr><td><span class="status-text">'.htmlspecialchars($date).'</span></td>';
+            $output .= '<td class="link-text left-text"><span class="status-text"><a href="'.htmlspecialchars($root->link).'">'.htmlspecialchars($root->title).'</a></span></td></tr>';
+            if($counter >= $max_entries) {
+                break;
+            }
+            $counter++;
+        }
+        return <<<HTML
+            <div class="wrap-panel status-div">
+                <div>
+                    <h2>Announcements</h2>
+                    <table class="table-hover">
+                        <tbody class="tbody-data">
+                            {$output}
+                        </tbody>
+                    </table>
+                    <br/>
+                </div>
+                <br/>
+            </div>
+        HTML;
+    }
+
     $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
     $access = shell_exec("goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
-    $status = GetHeader() . GetProxies() . GetF2B() . '<div class="wrap-general">';
+    $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . '<div class="wrap-general">';
     echo str_replace("<div class='wrap-general'>", $status, $access);
 ?>
