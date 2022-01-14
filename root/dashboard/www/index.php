@@ -4,7 +4,7 @@
             <style type="text/css">
                 .status-div {
                     display: inline-block;
-                    padding: 10px;
+                    padding-right: 20px;
                     text-align: center;
                     vertical-align: top;
                 }
@@ -18,7 +18,7 @@
                     text-align: left;
                 }
                 td {
-                    padding: 3px;
+                    padding-right: 20px;
                 }
                 .green-circle {
                     padding: 2px 10px;
@@ -33,10 +33,6 @@
                     border: 1px solid black;
                 }
             </style>
-            <h1>Welcome to your <a target="_blank" href="https://github.com/linuxserver/docker-swag">SWAG</a> instance</h1>
-            <h4>A webserver and reverse proxy solution brought to you by <a target="_blank" href="https://www.linuxserver.io/">linuxserver.io</a> with php support and a built-in Certbot client.</h4>
-            <h4>We have an article on how to use swag here: <a target="_blank" href="https://docs.linuxserver.io/general/swag">docs.linuxserver.io</a></h4>
-            <h4>For help and support, please visit: <a target="_blank" href="https://www.linuxserver.io/support">linuxserver.io/support</a></h4>
         HTML;
     }
 
@@ -93,9 +89,11 @@
         $jails = json_decode($output, true);
         $status = "";
         $index = 0;
-        foreach($jails as $jail=>$bans){
+        foreach($jails as $jail){
             $tr_class = ($index % 2 == 0) ? 'shaded' : '';
-            $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$jail.'</span></td><td><span class="status-text">'.$bans.'</span></td></tr>';
+            $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$jail["name"].'</span></td>';
+            $status .= '<td><span class="status-text">'.$jail["bans"].'</span></td>';
+            $status .= '<td><span class="status-text" title="'.htmlspecialchars($jail["data"]).'">'.$jail["last_ban"].'</span></td></tr>';
             $index++;
         }
         return <<<HTML
@@ -107,6 +105,7 @@
                             <tr>
                                 <td><h3>Jail</h3></td>
                                 <td><h3>Bans</h3></td>
+                                <td><h3>Last</h3></td>
                             </tr>
                         </thead>
                         <tbody class="tbody-data">
@@ -153,8 +152,34 @@
         HTML;
     }
 
+    function GetLinks() {
+        return <<<HTML
+            <div class="wrap-panel status-div">
+                <div>
+                    <h2>Useful Links</h2>
+                    <table class="table-hover">
+                        <tbody class="tbody-data">
+                            <tr><td class="link-text left-text"><span class="status-text"><a href="https://www.linuxserver.io/">Linuxserver.io</a></span></td></tr>
+                            <tr><td class="link-text left-text"><span class="status-text"><a href="https://github.com/linuxserver/docker-swag">SWAG Container</a></span></td></tr>
+                            <tr><td class="link-text left-text"><span class="status-text"><a href="https://docs.linuxserver.io/general/swag">SWAG Setup</a></span></td></tr>
+                            <tr><td class="link-text left-text"><span class="status-text"><a href="https://www.linuxserver.io/support">Get Support</a></span></td></tr>
+                            <tr><td class="link-text left-text"><span class="status-text"><a href="https://opencollective.com/linuxserver/donate">Donate</a></span></td></tr>
+                        </tbody>
+                    </table>
+                    <br/>
+                </div>
+                <br/>
+            </div>
+        HTML;
+    }
+
     $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
-    $access = shell_exec("goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
-    $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . '<div class="wrap-general">';
-    echo str_replace("<div class='wrap-general'>", $status, $access);
+    $goaccess = shell_exec("goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
+    $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
+    $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
+    $page = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $page);
+    $page = str_replace("<h1 class='h-dashboard'>", "<h1>", $page);
+    $page = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $page);
+    $page = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $page);
+    echo $page;
 ?>
