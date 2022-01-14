@@ -162,7 +162,7 @@
                             <tr><td class="link-text left-text"><span class="status-text"><a href="https://www.linuxserver.io/">Linuxserver.io</a></span></td></tr>
                             <tr><td class="link-text left-text"><span class="status-text"><a href="https://github.com/linuxserver/docker-swag">SWAG Container</a></span></td></tr>
                             <tr><td class="link-text left-text"><span class="status-text"><a href="https://docs.linuxserver.io/general/swag">SWAG Setup</a></span></td></tr>
-                            <tr><td class="link-text left-text"><span class="status-text"><a href="https://www.linuxserver.io/support">Support</a></span></td></tr>
+                            <tr><td class="link-text left-text"><span class="status-text"><a href="https://www.linuxserver.io/support">Get Support</a></span></td></tr>
                             <tr><td class="link-text left-text"><span class="status-text"><a href="https://opencollective.com/linuxserver/donate">Donate</a></span></td></tr>
                         </tbody>
                     </table>
