@@ -1,4 +1,4 @@
-## Version 2022/01/12
+## Version 2022/01/14
 # Make sure that your dns has a cname set for dashboard
 
 server {
@@ -32,6 +32,14 @@ server {
         # enable for Authelia
         #include /config/nginx/authelia-location.conf;
 
+        allow 10.0.0.0/8;
+        allow 172.16.0.0/12;
+        allow 192.168.0.0/16;
+        deny all;
+        
+        try_files $uri $uri/ /index.php?$args =404;
+    }
+    location ~ \.php$ {
         allow 10.0.0.0/8;
         allow 172.16.0.0/12;
         allow 192.168.0.0/16;
