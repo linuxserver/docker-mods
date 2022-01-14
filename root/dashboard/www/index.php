@@ -18,7 +18,7 @@
                     text-align: left;
                 }
                 td {
-                    padding-right: 30px;
+                    padding-right: 20px;
                 }
                 .green-circle {
                     padding: 2px 10px;
@@ -157,7 +157,10 @@
     }
 
     $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
-    $access = shell_exec("goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
+    $goaccess = shell_exec("goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
     $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . '<div class="wrap-general">';
-    echo str_replace("<div class='wrap-general'>", $status, $access);
+    $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
+    $page = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $page);
+    $page = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $page);
+    echo $page;
 ?>
