@@ -4,7 +4,7 @@
             <style type="text/css">
                 .status-div {
                     display: inline-block;
-                    padding: 10px;
+                    padding-right: 20px;
                     text-align: center;
                     vertical-align: top;
                 }
@@ -18,7 +18,7 @@
                     text-align: left;
                 }
                 td {
-                    padding: 3px;
+                    padding-right: 30px;
                 }
                 .green-circle {
                     padding: 2px 10px;
@@ -93,9 +93,11 @@
         $jails = json_decode($output, true);
         $status = "";
         $index = 0;
-        foreach($jails as $jail=>$bans){
+        foreach($jails as $jail){
             $tr_class = ($index % 2 == 0) ? 'shaded' : '';
-            $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$jail.'</span></td><td><span class="status-text">'.$bans.'</span></td></tr>';
+            $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$jail["name"].'</span></td>';
+            $status .= '<td><span class="status-text">'.$jail["bans"].'</span></td>';
+            $status .= '<td><span class="status-text" title="'.htmlspecialchars($jail["data"]).'">'.$jail["last_ban"].'</span></td></tr>';
             $index++;
         }
         return <<<HTML
@@ -107,6 +109,7 @@
                             <tr>
                                 <td><h3>Jail</h3></td>
                                 <td><h3>Bans</h3></td>
+                                <td><h3>Last</h3></td>
                             </tr>
                         </thead>
                         <tbody class="tbody-data">
