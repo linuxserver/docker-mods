@@ -112,6 +112,7 @@ mods:
       - auto-proxy: https://github.com/linuxserver/docker-mods/tree/swag-auto-proxy
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
       - cloudflare-real-ip: https://github.com/linuxserver/docker-mods/tree/swag-cloudflare-real-ip
+      - dashboard: https://github.com/linuxserver/docker-mods/tree/swag-dashboard
       - dbip: https://github.com/linuxserver/docker-mods/tree/swag-dbip
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/swag-f2bdiscord
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
@@ -119,7 +120,6 @@ mods:
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
-      - dashboard: https://github.com/linuxserver/docker-mods/tree/swag-dashboard
   universal:
     mod_count: 9
     container_mods:
