@@ -174,7 +174,7 @@
     }
 
     $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
-    $goaccess = shell_exec("goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
+    $goaccess = shell_exec("/usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
     $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
     $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
     $page = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $page);
