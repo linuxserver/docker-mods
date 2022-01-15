@@ -85,7 +85,7 @@
     }
 
     function GetF2B() {
-        $output = exec("python3 /dashboard/swag-f2b.py");
+        $output = shell_exec("python3 /dashboard/swag-f2b.py");
         $jails = json_decode($output, true);
         $status = "";
         $index = 0;
@@ -110,6 +110,41 @@
                         </thead>
                         <tbody class="tbody-data">
                             {$status}
+                        </tbody>
+                    </table>
+                    <br/>
+                </div>
+                <br/>
+            </div>
+        HTML;
+    }
+
+    function GetTemplates() {
+        $tooltip = "";
+        $files = "";
+        $counter = 1;
+        $output = shell_exec("/etc/cont-init.d/70-templates");
+        foreach(explode(PHP_EOL, $output) as $line) {
+            if(substr($line, 0, 1) === "*"){
+                $tooltip .= str_replace("*", "", $line)."&#013;";
+            } elseif(substr($line, 0, 1) === "/") {
+                $tr_class = ($counter % 2 == 0) ? 'shaded' : '';
+                $files .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.htmlspecialchars($line).'</span></td>';
+                $file_name = substr($line, strrpos($line, '/') + 1);
+                $files .= '<td><a href="https://github.com/linuxserver/docker-swag/blob/master/root/defaults/'.$file_name.'">📝</a></td></tr>';
+                $counter++;
+            }
+        }
+        if(empty($files)) {
+            return "";
+        }
+        return <<<HTML
+            <div class="wrap-panel status-div">
+                <div title="{$tooltip}">
+                    <h2>Version Updates</h2>
+                    <table class="table-hover">
+                        <tbody class="tbody-data">
+                            {$files}
                         </tbody>
                     </table>
                     <br/>
@@ -193,9 +228,9 @@
         $goaccess = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $goaccess);
         return $goaccess;
     }
-
+    
     $goaccess = GetGoaccess();
-    $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
+    $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
     $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
     echo $page;
 ?>
