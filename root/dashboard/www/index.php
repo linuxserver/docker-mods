@@ -24,17 +24,21 @@
                 .far, .fas {
                 font-family: "Font Awesome 5 Free" !important;
                 }
-                .fa-exclamation-circle,.fa-check-circle, .fa-info-circle, .fa-edit {
+                .fa-exclamation-circle,.fa-check-circle, .fa-info-circle, .fa-edit, .fa-lock {
                     font-size:20px;
                     padding: 2px;
                 }
-                .fa-check-circle {
+                .fa-check-circle, .fa-lock {
                     color: #5DB56A;
                 }
                 .fa-exclamation-circle {
                     color: #FF303E;
                 }
                 .fa-info-circle:hover{
+                    color: gray;
+                    cursor: help;
+                }
+                .fa-exclamation-circle:hover{
                     color: gray;
                     cursor: help;
                 }
@@ -53,7 +57,7 @@
             if ($data->status == 1) {
                 $status .= '<i class="fas fa-check-circle"></i>';
             } else {
-                $status .= '<i class="fas fa-exclamation-circle"></i>';
+                $status .= '<i class="fas fa-exclamation-circle" title="The SWAG container can\'t reach '.$result.'"></i>';
             }
             $status .= '</td><td>';
             if (!empty($data->locations)) {
@@ -61,7 +65,12 @@
                 $location = implode(",", $locations);
                 $status .= '<i class="fas fa-check-circle"></i></td><td class="left-text"><span class="status-text">'.$location.'</span></td>';
             } else {
-                $status .= '<i class="fas fa-exclamation-circle"></i></td><td></td>';
+                $error = 'Unable to locate the proxy config for '.$result.', it must use the following structure:'.PHP_EOL;
+                $error .= '&#09;set $upstream_app <container/address>;'.PHP_EOL;
+                $error .= '&#09;set $upstream_port <port>;'.PHP_EOL;
+                $error .= '&#09;set $upstream_proto <protocol>;'.PHP_EOL;
+                $error .= '&#09;proxy_pass $upstream_proto://$upstream_app:$upstream_port;'.PHP_EOL;
+                $status .= '<i class="fas fa-exclamation-circle" title="'.$error.'"></i></td><td></td>';
             }
             $status .= '</tr>';
             $index++;
@@ -133,7 +142,7 @@
         $output = shell_exec("/etc/cont-init.d/70-templates");
         foreach(explode(PHP_EOL, $output) as $line) {
             if(substr($line, 0, 1) === "*"){
-                $tooltip .= str_replace("*", "", $line)."&#013;";
+                $tooltip .= str_replace("*", "", $line).PHP_EOL;
             } elseif(substr($line, 0, 1) === "/") {
                 $tr_class = ($counter % 2 == 0) ? 'shaded' : '';
                 $files .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.htmlspecialchars($line).'</span></td>';
@@ -236,8 +245,30 @@
         return $goaccess;
     }
     
+    function GetCertificate() {
+        $certdate = shell_exec("openssl x509 -in /config/keys/letsencrypt/fullchain.pem -noout -enddate | awk -F '=' '{print \$NF}'");
+        $certtime = strtotime($certdate);
+        $certdateshort = date('Y-m-d', $certtime );
+        if (time() < $certtime) {
+            $ssl = '<i class="fab fa-lock"></i> SSL certificate valid until '.$certdateshort;
+        } else {
+            $ssl = '<i class="fab fa-exclamation-circle" title="Check the container logs for more details"></i> SSL certificate expired on '.$certdateshort;
+        }
+        return <<<HTML
+            <div class="pull-right status-div">
+                <h4>
+                    <span class="label label-info" style="display:block">
+                        {$ssl}
+                    </span>
+                </h4>
+            </div>
+        HTML;
+    }
+    
     $goaccess = GetGoaccess();
-    $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
+    $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . "<div class='wrap-general'>";
     $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
+    $ssl = GetCertificate() . "<div class='pull-right hide'>";
+    $page = str_replace("<div class='pull-right'>", $ssl, $page);
     echo $page;
 ?>
