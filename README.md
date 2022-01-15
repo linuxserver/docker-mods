@@ -15,11 +15,11 @@ If adding multiple mods, enter them in an array separated by |, such as DOCKER_M
 Navigate to `dashboard.domain.com` from your LAN to view the dashboard.
 
 ## Notes 
-- The application discovery scans all the conf files and looks for the following structure in accordance with the samples, incorrect discovery results can be fixed by using the structure.
+- The application discovery scans the proxy configs and looks for the following structure in accordance with the samples:
   ```yaml
-    set $upstream_app something;
-    set $upstream_port 123;
-    set $upstream_proto http;
+    set $upstream_app <container/address>;
+    set $upstream_port <port>;
+    set $upstream_proto <protocol>;
     proxy_pass $upstream_proto://$upstream_app:$upstream_port;
     ```
 - Either [Swag Maxmind mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind) or [Swag DBIP mod](https://github.com/linuxserver/docker-mods/tree/swag-dbip) are required to enable the geo location graph.
