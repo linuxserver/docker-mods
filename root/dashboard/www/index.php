@@ -85,7 +85,7 @@
     }
 
     function GetF2B() {
-        $output = exec("python3 /dashboard/swag-f2b.py");
+        $output = shell_exec("python3 /dashboard/swag-f2b.py");
         $jails = json_decode($output, true);
         $status = "";
         $index = 0;
@@ -110,6 +110,41 @@
                         </thead>
                         <tbody class="tbody-data">
                             {$status}
+                        </tbody>
+                    </table>
+                    <br/>
+                </div>
+                <br/>
+            </div>
+        HTML;
+    }
+
+    function GetTemplates() {
+        $tooltip = "";
+        $files = "";
+        $counter = 1;
+        $output = shell_exec("/etc/cont-init.d/70-templates");
+        foreach(explode(PHP_EOL, $output) as $line) {
+            if(substr($line, 0, 1) === "*"){
+                $tooltip .= str_replace("*", "", $line)."&#013;";
+            } elseif(substr($line, 0, 1) === "/") {
+                $tr_class = ($counter % 2 == 0) ? 'shaded' : '';
+                $files .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.htmlspecialchars($line).'</span></td>';
+                $file_name = substr($line, strrpos($line, '/') + 1);
+                $files .= '<td><a href="https://github.com/linuxserver/docker-swag/blob/master/root/defaults/'.$file_name.'">📝</a></td></tr>';
+                $counter++;
+            }
+        }
+        if(empty($files)) {
+            return "";
+        }
+        return <<<HTML
+            <div class="wrap-panel status-div">
+                <div title="{$tooltip}">
+                    <h2>Version Updates</h2>
+                    <table class="table-hover">
+                        <tbody class="tbody-data">
+                            {$files}
                         </tbody>
                     </table>
                     <br/>
@@ -173,13 +208,29 @@
         HTML;
     }
 
-    $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
-    $goaccess = shell_exec("/usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
-    $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
+    function GetGoaccess() {
+        $dbip = '/config/geoip2db/dbip-country-lite.mmdb';
+        $maxmind = '/config/geoip2db/GeoLite2-City.mmdb';
+        if (file_exists($dbip) and file_exists($maxmind)):
+            $geodb = (filemtime($dbip) > filemtime($maxmind)) ? '--geoip-database='.$dbip : '--geoip-database='.$maxmind;
+        elseif (file_exists($dbip)):
+            $geodb = '--geoip-database='.$dbip;
+        elseif (file_exists($maxmind)):
+            $geodb = '--geoip-database='.$maxmind;
+        else:
+            $geodb = '';
+        endif;
+
+        $goaccess = shell_exec("/usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
+        $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
+        $goaccess = str_replace("<h1 class='h-dashboard'>", "<h1>", $goaccess);
+        $goaccess = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);
+        $goaccess = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $goaccess);
+        return $goaccess;
+    }
+    
+    $goaccess = GetGoaccess();
+    $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
     $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
-    $page = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $page);
-    $page = str_replace("<h1 class='h-dashboard'>", "<h1>", $page);
-    $page = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $page);
-    $page = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $page);
     echo $page;
 ?>
