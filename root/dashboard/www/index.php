@@ -173,13 +173,29 @@
         HTML;
     }
 
-    $geodb = file_exists('/config/geoip2db/GeoLite2-City.mmdb') ? '--geoip-database=/config/geoip2db/GeoLite2-City.mmdb' : '';
-    $goaccess = shell_exec("/usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
+    function GetGoaccess() {
+        $dbip = '/config/geoip2db/dbip-country-lite.mmdb';
+        $maxmind = '/config/geoip2db/GeoLite2-City.mmdb';
+        if (file_exists($dbip) and file_exists($maxmind)):
+            $geodb = (filemtime($dbip) > filemtime($maxmind)) ? '--geoip-database='.$dbip : '--geoip-database='.$maxmind;
+        elseif (file_exists($dbip)):
+            $geodb = '--geoip-database='.$dbip;
+        elseif (file_exists($maxmind)):
+            $geodb = '--geoip-database='.$maxmind;
+        else:
+            $geodb = '';
+        endif;
+
+        $goaccess = shell_exec("/usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
+        $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
+        $goaccess = str_replace("<h1 class='h-dashboard'>", "<h1>", $goaccess);
+        $goaccess = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);
+        $goaccess = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $goaccess);
+        return $goaccess;
+    }
+
+    $goaccess = GetGoaccess();
     $status = GetHeader() . GetProxies() . GetF2B() . GetAnnouncements() . GetLinks() . '<div class="wrap-general">';
     $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
-    $page = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $page);
-    $page = str_replace("<h1 class='h-dashboard'>", "<h1>", $page);
-    $page = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $page);
-    $page = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $page);
     echo $page;
 ?>

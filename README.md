@@ -22,7 +22,7 @@ Navigate to `dashboard.domain.com` from your LAN to view the dashboard.
     set $upstream_proto http;
     proxy_pass $upstream_proto://$upstream_app:$upstream_port;
     ```
-- [Swag Maxmind mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind) is required to enable the geo location graph
+- Either [Swag Maxmind mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind) or [Swag DBIP mod](https://github.com/linuxserver/docker-mods/tree/swag-dbip) are required to enable the geo location graph.
 
 # Example
 ![Example](.assets/example.png)
