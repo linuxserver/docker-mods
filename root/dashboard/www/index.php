@@ -24,7 +24,7 @@
                 .far, .fas {
                 font-family: "Font Awesome 5 Free" !important;
                 }
-                .fa-exclamation-circle,.fa-check-circle, .fa-info-circle {
+                .fa-exclamation-circle,.fa-check-circle, .fa-info-circle, .fa-edit {
                     font-size:20px;
                     padding: 2px;
                 }
@@ -138,7 +138,7 @@
                 $tr_class = ($counter % 2 == 0) ? 'shaded' : '';
                 $files .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.htmlspecialchars($line).'</span></td>';
                 $file_name = substr($line, strrpos($line, '/') + 1);
-                $files .= '<td><a href="https://github.com/linuxserver/docker-swag/blob/master/root/defaults/'.$file_name.'">📝</a></td></tr>';
+                $files .= '<td><a href="https://github.com/linuxserver/docker-swag/blob/master/root/defaults/'.$file_name.'"><i class="fas fa-edit"></i></a></td></tr>';
                 $counter++;
             }
         }
@@ -147,8 +147,8 @@
         }
         return <<<HTML
             <div class="wrap-panel status-div">
-                <div title="{$tooltip}">
-                    <h2>Version Updates</h2>
+                <div>
+                    <h2>Version Updates <i class="fas fa-info-circle" title="{$tooltip}"></i></h2>
                     <table class="table-hover">
                         <tbody class="tbody-data">
                             {$files}
