@@ -2,6 +2,7 @@
     function GetHeader() {
         return <<<HTML
             <style type="text/css">
+            @import url("https://use.fontawesome.com/releases/v5.15.0/css/all.css");
                 .status-div {
                     display: inline-block;
                     padding-right: 20px;
@@ -20,17 +21,22 @@
                 td {
                     padding-right: 20px;
                 }
-                .green-circle {
-                    padding: 2px 10px;
-                    border-radius: 100%;
-                    background-color: green;
-                    border: 1px solid black;
+                .far, .fas {
+                font-family: "Font Awesome 5 Free" !important;
                 }
-                .red-circle {
-                    padding: 2px 10px;
-                    border-radius: 50%;
-                    background-color: red;
-                    border: 1px solid black;
+                .fa-exclamation-circle,.fa-check-circle, .fa-info-circle {
+                    font-size:20px;
+                    padding: 2px;
+                }
+                .fa-check-circle {
+                    color: #5DB56A;
+                }
+                .fa-exclamation-circle {
+                    color: #FF303E;
+                }
+                .fa-info-circle:hover{
+                    color: gray;
+                    cursor: help;
                 }
             </style>
         HTML;
@@ -45,17 +51,17 @@
             $tr_class = ($index % 2 == 0) ? 'shaded' : '';
             $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$result.'</span></td><td class="align-td">';
             if ($data->status == 1) {
-                $status .= '<span class="green-circle circle-empty"></span>';
+                $status .= '<i class="fas fa-check-circle"></i>';
             } else {
-                $status .= '<span class="red-circle"></span>';
+                $status .= '<i class="fas fa-exclamation-circle"></i>';
             }
             $status .= '</td><td>';
             if (!empty($data->locations)) {
                 $locations = $data->locations;
                 $location = implode(",", $locations);
-                $status .= '<span class="green-circle circle-empty"></span></td><td class="left-text"><span class="status-text">'.$location.'</span></td>';
+                $status .= '<i class="fas fa-check-circle"></i></td><td class="left-text"><span class="status-text">'.$location.'</span></td>';
             } else {
-                $status .= '<span class="red-circle"></span></td><td></td>';
+                $status .= '<i class="fas fa-exclamation-circle"></i></td><td></td>';
             }
             $status .= '</tr>';
             $index++;
@@ -91,9 +97,10 @@
         $index = 0;
         foreach($jails as $jail){
             $tr_class = ($index % 2 == 0) ? 'shaded' : '';
+            $data = ($jail["data"]) ? ' <i title="'.htmlspecialchars($jail["data"]).'" class="fas fa-info-circle"></i>' : '';
             $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$jail["name"].'</span></td>';
             $status .= '<td><span class="status-text">'.$jail["bans"].'</span></td>';
-            $status .= '<td><span class="status-text" title="'.htmlspecialchars($jail["data"]).'">'.$jail["last_ban"].'</span></td></tr>';
+            $status .= '<td><span class="status-text">'.$jail["last_ban"].'</span>'.$data.'</td></tr>';
             $index++;
         }
         return <<<HTML
