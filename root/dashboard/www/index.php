@@ -22,7 +22,7 @@
                     padding-right: 20px;
                 }
                 .far, .fas {
-                font-family: "Font Awesome 5 Free" !important;
+                    font-family: "Font Awesome 5 Free" !important;
                 }
                 .fa-exclamation-circle,.fa-check-circle, .fa-info-circle, .fa-edit, .fa-lock {
                     font-size:20px;
@@ -139,7 +139,13 @@
         $tooltip = "";
         $files = "";
         $counter = 1;
+        $conf_locations = array(
+            "subdomain.conf" => "https://github.com/linuxserver/reverse-proxy-confs/blob/master/",
+            "subfolder.conf" => "https://github.com/linuxserver/reverse-proxy-confs/blob/master/",
+            "dashboard.subdomain.conf" => "https://github.com/linuxserver/docker-mods/blob/swag-dashboard/root/dashboard/",
+        );
         $output = shell_exec("/etc/cont-init.d/70-templates");
+
         foreach(explode(PHP_EOL, $output) as $line) {
             if(substr($line, 0, 1) === "*"){
                 $tooltip .= str_replace("*", "", $line).PHP_EOL;
@@ -147,7 +153,16 @@
                 $tr_class = ($counter % 2 == 0) ? 'shaded' : '';
                 $files .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.htmlspecialchars($line).'</span></td>';
                 $file_name = substr($line, strrpos($line, '/') + 1);
-                $files .= '<td><a href="https://github.com/linuxserver/docker-swag/blob/master/root/defaults/'.$file_name.'"><i class="fas fa-edit"></i></a></td></tr>';
+                $link = "https://github.com/linuxserver/docker-swag/blob/master/root/defaults/".$file_name;
+                foreach($conf_locations as $key=>$value) {
+                    if (strpos($file_name, $key) !== false) {
+                        $link = $value.$file_name;
+                    }
+                }           
+                if (strpos($file_name, 'subdomain.conf') !== false or strpos($file_name, 'subfolder.conf') !== false) {
+                    $link .= '.sample';
+                }
+                $files .= '<td><a href="'.$link.'"><i class="fas fa-edit"></i></a></td></tr>';
                 $counter++;
             }
         }
@@ -250,9 +265,9 @@
         $certtime = strtotime($certdate);
         $certdateshort = date('Y-m-d', $certtime );
         if (time() < $certtime) {
-            $ssl = '<i class="fab fa-lock"></i> SSL certificate valid until '.$certdateshort;
+            $ssl = '<i class="fas fa-lock"></i> SSL certificate valid until '.$certdateshort;
         } else {
-            $ssl = '<i class="fab fa-exclamation-circle" title="Check the container logs for more details"></i> SSL certificate expired on '.$certdateshort;
+            $ssl = '<i class="fas fa-exclamation-circle" title="Check the container logs for more details"></i> SSL certificate expired on '.$certdateshort;
         }
         return <<<HTML
             <div class="pull-right status-div">
