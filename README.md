@@ -54,7 +54,7 @@ Container images/mods are configured using parameters passed at runtime (such as
 | :----: | --- | --- |
 | `DOCKER_MODS` | Enabled this docker mod with `linuxserver/mods:universal-cloudflared` | If adding multiple mods, enter them in an array separated by `\|`, such as `DOCKER_MODS: linuxserver/mods:universal-cloudflared\|linuxserver/mods:universal-mod2` |
 
-### Optional tunnel parameters 
+### Optional tunnel parameters
 
 | Parameter | Function | Notes |
 | :----: | --- | --- |
@@ -64,3 +64,36 @@ Container images/mods are configured using parameters passed at runtime (such as
 | `CF_TUNNEL_NAME` | Cloudflare tunnel name |   |
 | `CF_TUNNEL_PASSWORD` | Cloudflare tunnel password | 32 char minimum |
 | `CF_TUNNEL_CONFIG` | Cloudflare tunnel config, please refer to cloudflares official tunnel docs. | Do not add `tunnel`/`credentials-file` headers, these are handled automatically. |
+| `FILE__<VARIABLE_NAME>`| Sources content of the file as value in case of multiline content | `FILE__CF_TUNNEL_CONFIG=/config/tunnelconfig.yml` |
+
+---
+
+### Unraid / Synology / Qnap / WebGUI
+
+You can optionally use function of setting a file content as a environment variable if you are not using docker directly, cannot use docker-compose or have to define multiline environment variables inside a webGUI or similar.
+
+You can include the content of `CF_TUNNEL_CONFIG` for example, which contains multiline content
+
+```yaml
+      CF_TUNNEL_CONFIG: | #optional
+        ingress:
+          - hostname: test.yourdomain.url
+            service: hello_world
+          - service: http_status:404
+```
+
+Create a yaml file in directory where you mounted `/config` folder of your container. It still has to ba a valid yaml file.
+
+```shell
+# cat /config/tunnelconfig.yml
+ingress:
+  - hostname: test.yourdomain.url
+    service: hello_world
+  - service: http_status:404
+```
+
+After you have created the file, use special `FILE__` prefix for the environmet variable which will source the content of the file as a value for the variable specified after `FILE__`
+
+#### Troubleshting
+
+If you are getting error `Json deserialize error: control character (\\u0000-\\u001F) found while parsing`, please make sure when copy/pasting environment varibales and their value from web sources that they do not contain new line characters.
