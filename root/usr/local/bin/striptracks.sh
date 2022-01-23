@@ -188,7 +188,7 @@ elif [[ "${striptracks_type,,}" = "radarr" ]]; then
   export striptracks_json_quality_root=".movieFile"
   export striptracks_video_type="movie"
   export striptracks_profile_type="quality"
-  export striptracks_title="$radarr_movie_title ($radarr_movie_year)"
+  export striptracks_title="${radarr_movie_title:-UNKNOWN} (${radarr_movie_year:-UNKNOWN})"
   export striptracks_language_api="language"
 elif [[ "${striptracks_type,,}" = "sonarr" ]]; then
   # Sonarr mode
@@ -201,7 +201,7 @@ elif [[ "${striptracks_type,,}" = "sonarr" ]]; then
   export striptracks_json_quality_root=".episodeFile"
   export striptracks_video_type="series"
   export striptracks_profile_type="language"
-  export striptracks_title="$sonarr_series_title $(numfmt --format "%02f" ${sonarr_episodefile_seasonnumber:-0})x$(numfmt --format "%02f" ${sonarr_episodefile_episodenumbers:-0}) - $sonarr_episodefile_episodetitles"
+  export striptracks_title="${sonarr_series_title:-UNKNOWN} $(numfmt --format "%02f" ${sonarr_episodefile_seasonnumber:-0})x$(numfmt --format "%02f" ${sonarr_episodefile_episodenumbers:-0}) - ${sonarr_episodefile_episodetitles:-UNKNOWN}"
   export striptracks_language_api="languageprofile"
 else
   # Called in an unexpected way
@@ -214,7 +214,7 @@ export striptracks_eventtype="${striptracks_type,,}_eventtype"
 export striptracks_tempvideo="${striptracks_video}.tmp"
 export striptracks_newvideo="${striptracks_video%.*}.mkv"
 # If this were defined directly in Radarr or Sonarr this would not be needed here
-striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["ara","bul","zho","chi","ces","cze","dan","nld","dut","eng","fin","fra","fre","deu","ger","ell","gre","heb","hin","hun","isl","ice","ita","jpn","kor","lit","nor","pol","por","ron","rom","rus","spa","swe","tha","tur","vie","und"]}},{"language":{"name":"Original","iso639-2":["ara","bul","zho","chi","ces","cze","dan","nld","dut","eng","fin","fra","fre","deu","ger","ell","gre","heb","hin","hun","isl","ice","ice","ita","jpn","kor","lit","nor","pol","por","ron","rom","rus","spa","swe","tha","tur","vie","und"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Norwegian","iso639-2":["nor"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
+striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["ara","bul","zho","chi","ces","cze","dan","nld","dut","eng","fin","fra","fre","deu","ger","ell","gre","heb","hin","hun","isl","ice","ita","jpn","kor","lit","nor","pol","por","ron","rom","rus","spa","swe","tha","tur","vie","und"]}},{"language":{"name":"Original","iso639-2":["ara","bul","zho","chi","ces","cze","dan","nld","dut","eng","fin","fra","fre","deu","ger","ell","gre","heb","hin","hun","isl","ice","ita","jpn","kor","lit","nor","pol","por","ron","rom","rus","spa","swe","tha","tur","vie","und"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Norwegian","iso639-2":["nor"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
 
 ### Functions
 
@@ -393,7 +393,7 @@ fi
 
 # Log Debug state
 if [ $striptracks_debug -ge 1 ]; then
-  striptracks_message="Debug|Enabling debug logging. Starting ${striptracks_type^} run for: $striptracks_title"
+  striptracks_message="Debug|Enabling debug logging level ${striptracks_debug}. Starting ${striptracks_type^} run for: $striptracks_title"
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
 fi
