@@ -14,6 +14,8 @@ If adding multiple mods, enter them in an array separated by |, such as DOCKER_M
 
 Navigate to `dashboard.domain.com` from your LAN to view the dashboard.
 
+You can remove the allow/deny in `/config/nginx/proxy-confs/dashboard.subdomain.com` to expose it (on a VPS for example), and instead protect it some other way (like Authelia for example).
+
 ## Notes 
 - The application discovery scans the proxy configs and looks for the following structure in accordance with the samples:
   ```yaml
