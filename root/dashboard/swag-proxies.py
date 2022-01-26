@@ -11,6 +11,8 @@ import urllib3
 def find_apps():
     apps = {}
     file_paths = glob.glob("/config/nginx/**/*", recursive=True)
+    auto_confs = glob.glob("/etc/nginx/http.d/*", recursive=True)
+    file_paths.extend(auto_confs)
     for file_path in file_paths:
         if not os.path.isfile(file_path):
             continue
@@ -23,6 +25,7 @@ def find_apps():
             if app not in apps:
                 apps[app] = set()
             if file_path.startswith("/config/nginx/site-confs/") or file_path.endswith(".conf"):
+                file_path = "auto-proxy" if file_path.startswith("/etc/nginx/http.d/") else file_path
                 apps[app].add(file_path)
     return apps
 
