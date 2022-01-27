@@ -34,7 +34,6 @@ def find_apps():
 def is_available(url):
     try:
         host, port = url.split("/")[2].split(":")
-        print(host + port)
         with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
             if sock.connect_ex((host, int(port))) == 0:
                 return True
