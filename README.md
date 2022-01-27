@@ -9,12 +9,13 @@ Follow these steps to enable the dbip mod:
 1. In the container's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-dbip`
    
    If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:swag-dbip|linuxserver/mods:swag-mod2`
-2. Add the following line to `/config/nginx/nginx.conf` under the `http` section:
+2. Recreate the container to apply the changes.
+3. Add the following line to `/config/nginx/nginx.conf` under the `http` section:
    
    ```nginx
    include /config/nginx/dbip.conf;
    ```
-3. Edit `/config/nginx/dbip.conf` and add countries to the blocklist / whitelist according to the comments, for example:
+4. Edit `/config/nginx/dbip.conf` and add countries to the blocklist / whitelist according to the comments, for example:
    
     ```nginx
     map $geoip2_data_country_iso_code $geo-whitelist {
@@ -27,7 +28,7 @@ Follow these steps to enable the dbip mod:
         US no;
     }
     ```
-4. Use the definitions in the following way:
+5. Use the definitions in the following way:
    ```nginx
     server {
         listen 443 ssl;
@@ -42,4 +43,4 @@ Follow these steps to enable the dbip mod:
 
         location / {
     ```
-5. Recreate the container to apply the changes.
+6. Restart the container to apply the changes.
