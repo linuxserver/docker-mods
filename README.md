@@ -13,7 +13,8 @@ Follow these steps to enable the maxmind mod:
    
    If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:swag-maxmind|linuxserver/mods:swag-mod2`
 3. In the container's docker arguments, set an environment variable `MAXMINDDB_LICENSE_KEY=<license-key>` with your license key.
-4. Add the following line to `/config/nginx/nginx.conf` under the `http` section:
+4. Recreate the container to apply the changes.
+5. Add the following line to `/config/nginx/nginx.conf` under the `http` section:
    
    ```nginx
    include /config/nginx/maxmind.conf;
@@ -46,4 +47,4 @@ Follow these steps to enable the maxmind mod:
 
         location / {
     ```
-7. Recreate the container to apply the changes.
+7. Restart the container to apply the changes.
