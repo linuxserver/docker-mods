@@ -1,5 +1,6 @@
 # About
 A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Lidarr Docker container that uses ffmpeg and a script to automatically convert downloaded FLAC files to MP3s.  Default output quality is 320Kbps constant bit rate.
+Advanced options act as a light wrapper to ffmpeg, allowing conversion to any supported audio format, including AAC, AC3, and Opus.
 
 >**NOTE:** This mod supports Linux OSes only.
 
@@ -15,6 +16,7 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
 2. Configure the Docker container with all the port, volume, and environment settings from the *original container documentation* here:  
   **[linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "Docker container")**
    1. Add a **DOCKER_MODS** environment variable to the `docker run` command, as follows:  
+      - Dev/test release: `-e DOCKER_MODS=thecaptain989/lidarr-flac2mp3:latest`  
       - Stable release: `-e DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3`
 
       *Example Docker CLI Configuration*  
@@ -58,22 +60,42 @@ If you've configured Lidarr's **Recycle Bin** path correctly, the original audio
 >**Note:** The **Arguments** field for Custom Scripts was removed in Lidarr release [v0.7.0.1347](https://github.com/lidarr/Lidarr/commit/b9d240924f8965ebb2c5e307e36b810ae076101e "Lidarr commit notes") due to security concerns.
 To support options with this version and later, a wrapper script can be manually created that will call *flac2mp3.sh* with the required arguments.
 
-The script accepts three command line options:
+The script accepts five command line options:
 
-`[-d] [-b <bitrate> | -v <quality>]`
+`[-d] [-b <bitrate> | -v <quality> | -a "<options>" -e <extension>]`
 
-The `-b bitrate` option sets the output quality in constant bits per second (CBR).  
+The `-b bitrate` option sets the output quality in constant bits per second (CBR).
+
 The `-v quality` option sets the output quality using a variable bit rate (VBR) where `quality` is a value between 0 and 9, with 0 being the highest quality.  
 See the [FFmpeg MP3 Encoding Guide](https://trac.ffmpeg.org/wiki/Encode/MP3) for more details.  
-If neither `-b` nor `-v` options are specified, the script will default to constant 320Kbps.
+
+The `-a "options"` setting is used in conjunction with `-e` to set advanced ffmpeg options.  The specified command line options replace all script defaults and are sent directly to ffmpeg.  The `options` value must be enclosed in quotes.  
+![danger] **WARNING:** When using `-a`, you must specify an audio codec (via `-c:a`) or the resulting file will contain no audio.  
+![danger] **WARNING:** Invalid `options` could result in script failure!  
+See [FFmpeg Options](https://ffmpeg.org/ffmpeg.html#Options) for details on valid options.  
+See [Guidelines for high quality audio encoding](https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio) for more information.
+
+The `-e extension` option sets the output file extension, and must be used in conjunction with `-a`.  The `extension` may be prefixed by a dot (".") or not.
+
+If neither `-b`, `-v`, `-a`, or `-e` options are specified, the script will default to a constant 320Kbps MP3.
 
 The `-d` option enables debug logging.
+
+#### Technical notes on `-a` advanced options
+The `-a` option effectively makes the script a somewhat generic wrapper for ffmpeg.  FFmpeg is executed once per track with only the loglevel, input filename, and output filename being set.  All other options are passed unparsed to the command line.  
+
+The exact format of the executed ffmpeg command is:
+```
+ffmpeg -loglevel error -i "Original.flac" ${Options} "NewTrack${Extension}"
+```
 
 ### Examples
 ```
 -b 320k        # Output 320 kbit/s MP3 (non VBR; same as default behavior)
--v 0           # Output variable bitrate, VBR 220-260 kbit/s
--d -b 160k     # Enable debugging, and output 160 kbit/s MP3
+-v 0           # Output variable bitrate MP3, VBR 220-260 kbit/s
+-d -b 160k     # Enable debugging, and output a 160 kbit/s MP3
+-a "-c:v libtheora -map 0 -q:v 10 -c:a libopus -b:a 192k" -e .opus     # Convert to Opus format, VBR 192 kbit/s, cover art
+-a "-y -map 0 -c:a aac -b:a 240k -c:v copy" -e mp4     # Convert to MP4 format, using AAC 240 kbit/s audio, cover art, overwrite file
 ```
 
 ### Included Wrapper Scripts
@@ -82,11 +104,12 @@ You may use any of these scripts in place of the `flac2mp3.sh` mentioned in the 
 
 ```
 flac2mp3-debug.sh        # Enable debugging
-flac2mp3-vbr.sh          # Use variable bit rate, quality 0
+flac2mp3-vbr.sh          # Use variable bit rate MP3, quality 0
+flac2opus.sh             # Convert to Opus format using .opus extension, 192 kbit/s, no covert art
 ```
 
 ### Example Wrapper Script
-To configure the last entry from the [Examples](./README.md#examples) section above, create and save a file called `flac2mp3-custom.sh` to `/config` containing the following text:
+To configure the middle entry from the [Examples](./README.md#examples) section above, create and save a file called `flac2mp3-custom.sh` to `/config` containing the following text:
 ```shell
 #!/bin/bash
 
@@ -120,7 +143,7 @@ This would not be possible without the following:
 [Lidarr](https://lidarr.audio/ "Lidarr homepage")  
 [LinuxServer.io Lidarr](https://hub.docker.com/r/linuxserver/lidarr "Lidarr Docker container") container  
 [LinuxServer.io Docker Mods](https://hub.docker.com/r/linuxserver/mods "Docker Mods containers") project  
-[ffmpeg](https://ffmpeg.org/ "FFMpeg homepage")  
+[ffmpeg](https://ffmpeg.org/ "FFmpeg homepage")  
 Icons made by [Freepik](https://www.freepik.com) from [Flaticon](https://www.flaticon.com/)
 
 [warning]: .assets/warning.png "Warning"
