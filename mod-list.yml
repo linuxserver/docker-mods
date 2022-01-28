@@ -4,7 +4,7 @@ mods:
     container_mods:
       - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
-    mod_count: 20
+    mod_count: 21
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
@@ -21,6 +21,7 @@ mods:
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
       - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
+      - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
       - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
@@ -69,7 +70,7 @@ mods:
       - openssh-client: https://github.com/linuxserver/docker-mods/tree/openssh-server-openssh-client
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   openvscode-server:
-    mod_count: 17
+    mod_count: 18
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
@@ -85,6 +86,7 @@ mods:
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
       - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
+      - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
