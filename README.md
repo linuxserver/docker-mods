@@ -81,7 +81,7 @@ ingress:
   - service: http_status:404
 ```
 
-After you have created the file, use the special `FILE__` prefix for the environmet variable which will source the content of the file as a value for the variable specified (`FILE__CF_TUNNEL_CONFIG=/config/tunnelconfig.yml`).
+After you have created the file, use the special `FILE__` prefix for the environment variable which will source the content of the file as a value for the variable specified (`FILE__CF_TUNNEL_CONFIG=/config/tunnelconfig.yml`).
 
 #### Troubleshooting
 
