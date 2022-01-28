@@ -1,6 +1,6 @@
-# R - Docker mod for code-server
+# R - Docker mod for code-server and openvscode-server
 
-This mod adds a R dev environment to code-server, to be installed/updated during container start.
+This mod adds a R dev environment to code-server/openvscode-server, to be installed/updated during container start.
 
 In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-r`
 
