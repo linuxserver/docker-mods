@@ -39,7 +39,7 @@ Here an example snippet to help you get started using this docker mod.
       CF_TUNNEL_CONFIG: | #optional
         ingress:
           - hostname: test.yourdomain.url
-            service: hello_world
+            service: http://localhost:80
           - service: http_status:404
     volumes:
       - /path/to/appdata/config:/config
@@ -52,7 +52,7 @@ Container images/mods are configured using parameters passed at runtime (such as
 
 | Parameter | Function | Notes |
 | :----: | --- | --- |
-| `DOCKER_MODS` | Enabled this docker mod with `linuxserver/mods:universal-cloudflared` | If adding multiple mods, enter them in an array separated by `\|`, such as `DOCKER_MODS: linuxserver/mods:universal-cloudflared\|linuxserver/mods:universal-mod2` |
+| `DOCKER_MODS` | Enable this docker mod with `linuxserver/mods:universal-cloudflared` | If adding multiple mods, enter them in an array separated by `\|`, such as `DOCKER_MODS: linuxserver/mods:universal-cloudflared\|linuxserver/mods:universal-mod2` |
 
 ### Optional tunnel parameters
 
@@ -60,40 +60,29 @@ Container images/mods are configured using parameters passed at runtime (such as
 | :----: | --- | --- |
 | `CF_ZONE_ID` | Cloudflare zone ID |   |
 | `CF_ACCOUNT_ID` | Cloudflare account ID |   |
-| `CF_API_TOKEN` | Cloudflare API token | Must have the `Account.Argo Tunnel:Edit` and `Zone.DNS:Edit` permissions. |
+| `CF_API_TOKEN` | Cloudflare API token | Must have the `Account.Cloudflare Tunnel:Edit` and `Zone.DNS:Edit` permissions. |
 | `CF_TUNNEL_NAME` | Cloudflare tunnel name |   |
-| `CF_TUNNEL_PASSWORD` | Cloudflare tunnel password | 32 char minimum |
-| `CF_TUNNEL_CONFIG` | Cloudflare tunnel config, please refer to cloudflares official tunnel docs. | Do not add `tunnel`/`credentials-file` headers, these are handled automatically. |
+| `CF_TUNNEL_PASSWORD` | Cloudflare tunnel password | 32 char minimum, 64 char maximum |
+| `CF_TUNNEL_CONFIG` | Cloudflare tunnel config, please refer to Cloudflare's [official tunnel docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress). | Do not add `tunnel`/`credentials-file` headers, these are handled automatically. |
 | `FILE__<VARIABLE_NAME>`| Sources content of the file as value in case of multiline content | `FILE__CF_TUNNEL_CONFIG=/config/tunnelconfig.yml` |
 
 ---
 
-### Unraid / Synology / Qnap / WebGUI
+### Alternative yaml formatting
 
-You can optionally use function of setting a file content as a environment variable if you are not using docker directly, cannot use docker-compose or have to define multiline environment variables inside a webGUI or similar.
+If you're using a method that doesn't allow you to enter a properly formatted yaml into an environment variable (e.g. `docker run`, or the compose yaml format we recommend in our samples, or a web gui manager) you can alternatively use a yaml file to set the `CF_TUNNEL_CONFIG` variable.
 
-You can include the content of `CF_TUNNEL_CONFIG` for example, which contains multiline content
-
-```yaml
-      CF_TUNNEL_CONFIG: | #optional
-        ingress:
-          - hostname: test.yourdomain.url
-            service: hello_world
-          - service: http_status:404
-```
-
-Create a yaml file in directory where you mounted `/config` folder of your container. It still has to ba a valid yaml file.
+Create a properly formatted yaml file in the `/config` folder of your container (e.g. `/config/tunnelconfig.yaml`):
 
 ```shell
-# cat /config/tunnelconfig.yml
 ingress:
   - hostname: test.yourdomain.url
-    service: hello_world
+    service: http://localhost:80
   - service: http_status:404
 ```
 
-After you have created the file, use special `FILE__` prefix for the environmet variable which will source the content of the file as a value for the variable specified after `FILE__`
+After you have created the file, use the special `FILE__` prefix for the environmet variable which will source the content of the file as a value for the variable specified (`FILE__CF_TUNNEL_CONFIG=/config/tunnelconfig.yml`).
 
-#### Troubleshting
+#### Troubleshooting
 
-If you are getting error `Json deserialize error: control character (\\u0000-\\u001F) found while parsing`, please make sure when copy/pasting environment varibales and their value from web sources that they do not contain new line characters.
+If you are getting error `Json deserialize error: control character (\\u0000-\\u001F) found while parsing`, please make sure when copy/pasting environment variables and their value from web sources that they do not contain new line characters.
