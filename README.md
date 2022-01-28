@@ -149,7 +149,7 @@ The only code change you need to make to the build logic file `.github/workflows
   BRANCH: "master"
 ```
 
-User is your GutHub user and endpoint is your own custom name (typically the name of the repository where your mod is). You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
+User is your GitHub user and endpoint is your own custom name (typically the name of the repository where your mod is). You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
 
 Head over to `https://github.com/user/endpoint/settings/secrets` and click on `New secret`
 
