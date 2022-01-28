@@ -1,10 +1,11 @@
 import collections
+import contextlib
 import concurrent.futures
 import glob
 import json
 import os
 import re
-import requests
+import socket
 import urllib3
 
 
@@ -32,10 +33,15 @@ def find_apps():
 
 def is_available(url):
     try:
-        requests.head(url, timeout=5, verify=False)
-        return True
+        host, port = url.split("/")[2].split(":")
+        with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+            if sock.connect_ex((host, int(port))) == 0:
+                return True
+            else:
+                return False
     except:
-        return False
+        return False    
+
 
 urllib3.disable_warnings()
 apps = find_apps()
