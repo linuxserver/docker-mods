@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing R dev environment ****"
+apt-get install -y \
+    build-essential \
+    r-base
