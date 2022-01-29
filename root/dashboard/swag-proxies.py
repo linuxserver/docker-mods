@@ -32,15 +32,17 @@ def find_apps():
 
 
 def is_available(url):
+    host, port = url.split("/")[2].split(":")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(1)
     try:
-        host, port = url.split("/")[2].split(":")
-        with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-            if sock.connect_ex((host, int(port))) == 0:
-                return True
-            else:
-                return False
+        s.connect((host, int(port)))
+        s.shutdown(socket.SHUT_RDWR)
+        return True
     except:
-        return False    
+        return False
+    finally:
+        s.close()
 
 
 urllib3.disable_warnings()
