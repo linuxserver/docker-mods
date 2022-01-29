@@ -32,10 +32,10 @@ def find_apps():
 
 
 def is_available(url):
-    host, port = url.split("/")[2].split(":")
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(1)
     try:
+        host, port = url.split("/")[2].split(":")
         s.connect((host, int(port)))
         s.shutdown(socket.SHUT_RDWR)
         return True
