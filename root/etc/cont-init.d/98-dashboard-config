@@ -22,6 +22,10 @@ if [ "$(sed -nE 's|## Version ([0-9]{4}\/[0-9]{2}\/[0-9]{2}).*|\1|p' /dashboard/
     echo "**** Compare the changes using the sample file: /config/nginx/proxy-confs/dashboard.subdomain.conf.sample"
 fi
 
+# preserve environment variables in PHP
+sed -E -i 's/^clear_env =.*$/clear_env = no/g' /config/php/www2.conf
+grep -qxF 'clear_env = no' /config/php/www2.conf || echo 'clear_env = no' >> /config/php/www2.conf
+
 # permissions
 chown -R abc:abc \
   /dashboard \

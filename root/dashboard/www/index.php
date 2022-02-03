@@ -252,6 +252,7 @@
             $geodb = '';
         endif;
 
+        $access_log = getenv("GOACCESS_LOG_FILE") ?: "/config/log/nginx/access.log";
         $goaccess = shell_exec("/usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
         $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
         $goaccess = str_replace("<h1 class='h-dashboard'>", "<h1>", $goaccess);
