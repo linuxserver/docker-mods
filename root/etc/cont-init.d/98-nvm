@@ -1,0 +1,24 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing nvm dev environment ****"
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+echo "**** activating nvm dev environment ****"
+export NVM_DIR="$HOME/.nvm"
+# This loads nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# This loads nvm bash_completion
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+echo "**** installing the current stable LTS release of Node.js ****"
+nvm install --lts
+
+echo "**** switching to the current stable LTS release of Node.js  ****"
+nvm use --lts
+
+echo "**** installing yarn  ****"
+npm install -g yarn
+
+mkdir -p /config/.config
+chown -R abc /config/.config
+chown -R abc /config/.nvm
