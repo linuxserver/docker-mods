@@ -425,14 +425,16 @@ elif [ -f "$striptracks_arr_config" ]; then
   striptracks_api_url="http://$striptracks_bindaddress:$striptracks_port$striptracks_urlbase/api"
 
   # Check Radarr/Sonarr version
-  [ $striptracks_debug -ge 1 ] && echo "Debug|Getting ${striptracks_type^} version. Calling ${striptracks_type^} API using GET and URL '$striptracks_api_url/system/status'" | log
-  striptracks_arr_version=$(curl -s -H "X-Api-Key: $striptracks_apikey" \
-    -X GET "$striptracks_api_url/system/status" | jq -crM .version)
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Getting ${striptracks_type^} version. Calling ${striptracks_type^} API using GET and URL '$striptracks_api_url/v3/system/status'" | log
+  striptracks_result=$(curl -s -H "X-Api-Key: $striptracks_apikey" \
+    -X GET "$striptracks_api_url/v3/system/status")
   striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
-    striptracks_message="Error|[$striptracks_return] curl or jq error when parsing: \"$striptracks_api_url/system/status\" | jq -crM .version"
+    striptracks_message="Error|[$striptracks_return] curl or jq error when parsing: \"$striptracks_api_url/v3/system/status\" | jq -crM .version"
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
+  [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+  striptracks_arr_version="$(echo $striptracks_result | jq -crM .version)"
   [ $striptracks_debug -ge 1 ] && echo "Debug|Detected ${striptracks_type^} version $striptracks_arr_version" | log
 
   # Requires API v3
@@ -446,13 +448,15 @@ elif [ -f "$striptracks_arr_config" ]; then
 
   # Get RecycleBin
   [ $striptracks_debug -ge 1 ] && echo "Debug|Getting ${striptracks_type^} RecycleBin. Calling ${striptracks_type^} API using GET and URL '$striptracks_api_url/v3/config/mediamanagement'" | log
-  striptracks_recyclebin=$(curl -s -H "X-Api-Key: $striptracks_apikey" \
-    -X GET "$striptracks_api_url/v3/config/mediamanagement" | jq -crM .recycleBin)
+  striptracks_result=$(curl -s -H "X-Api-Key: $striptracks_apikey" \
+    -X GET "$striptracks_api_url/v3/config/mediamanagement")
   striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
     striptracks_message="Error|[$striptracks_return] curl or jq error when parsing: \"$striptracks_api_url/v3/config/mediamanagement\" | jq -crM .recycleBin"
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
+  [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+  striptracks_recyclebin="$(echo $striptracks_result | jq -crM .recycleBin)"
   [ $striptracks_debug -ge 1 ] && echo "Debug|Detected ${striptracks_type^} RecycleBin '$striptracks_recyclebin'" | log
 else
   # No config file means we can't call the API.  Best effort at this point.
