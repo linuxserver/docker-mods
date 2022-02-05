@@ -18,3 +18,7 @@ nvm use --lts
 
 echo "**** installing yarn  ****"
 npm install -g yarn
+
+mkdir -p /config/.config
+chown -R abc /config/.config
+chown -R abc /config/.nvm
