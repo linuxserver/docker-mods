@@ -62,7 +62,7 @@ Container images/mods are configured using parameters passed at runtime (such as
 | `CF_ACCOUNT_ID` | Cloudflare account ID |   |
 | `CF_API_TOKEN` | Cloudflare API token | Must have the `Account.Cloudflare Tunnel:Edit` and `Zone.DNS:Edit` permissions. |
 | `CF_TUNNEL_NAME` | Cloudflare tunnel name |   |
-| `CF_TUNNEL_PASSWORD` | Cloudflare tunnel password | 32 char minimum, 64 char maximum |
+| `CF_TUNNEL_PASSWORD` | Cloudflare tunnel password | 32 char minimum |
 | `CF_TUNNEL_CONFIG` | Cloudflare tunnel config, please refer to Cloudflare's [official tunnel docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress). | Do not add `tunnel`/`credentials-file` headers, these are handled automatically. |
 | `FILE__<VARIABLE_NAME>`| Sources content of the file as value in case of multiline content | `FILE__CF_TUNNEL_CONFIG=/config/tunnelconfig.yml` |
 
