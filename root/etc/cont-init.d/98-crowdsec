@@ -1,0 +1,70 @@
+#!/usr/bin/with-contenv bash
+
+CONFIG_PATH="/config/crowdsec/"
+LIB_PATH="/usr/local/lua/crowdsec/"
+DATA_PATH="/var/lib/crowdsec/lua/"
+
+echo "**** Configuring CrowdSec nginx Bouncer ****"
+
+# If API keys are missing, disable mod and exit
+if [[ -z $CROWDSEC_API_KEY ]] || [[ -z $CROWDSEC_LAPI_URL ]]; then
+    echo "**** Missing API key or CrowdSec LAPI URL, cannot configure bouncer ****"
+    sed -i '/#Include CrowdSec Bouncer/d' /config/nginx/nginx.conf
+    sed -i '/include \/config\/nginx\/crowdsec_nginx.conf;/d' /config/nginx/nginx.conf
+    exit 1
+fi
+
+apk add -U --upgrade --no-cache \
+    gettext \
+    lua5.1 \
+    lua5.1-cjson \
+    lua-resty-http \
+    lua-sec \
+    nginx-mod-http-lua
+
+# Download nginx bouncer
+CROWDSEC_VERSION=$(curl -sX GET "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases" | awk '/tag_name/{print $4;exit}' FS='[""]');
+
+curl -so \
+    /tmp/crowdsec.tar.gz -L \
+    "https://github.com/crowdsecurity/cs-nginx-bouncer/releases/download/${CROWDSEC_VERSION}/crowdsec-nginx-bouncer.tgz"
+
+mkdir -p /tmp/crowdsec
+
+tar xf \
+    /tmp/crowdsec.tar.gz -C \
+    /tmp/crowdsec --strip-components=1
+
+# Inject API keys into config file
+mkdir -p "${CONFIG_PATH}"
+API_KEY=${CROWDSEC_API_KEY} CROWDSEC_LAPI_URL=${CROWDSEC_LAPI_URL} envsubst < /tmp/crowdsec/lua-mod/config_example.conf > "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+
+# Sed out resolver, change config path, fix version string
+sed -i "/resolver 8.8.8.8 ipv6=off;/d" /tmp/crowdsec/nginx/crowdsec_nginx.conf
+sed -i "s|/etc/crowdsec/bouncers/|${CONFIG_PATH}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
+sed -ir "s|crowdsec-nginx-bouncer/v[0-9].[0-9].[0-9][0-9]?|crowdsec-nginx-bouncer/${CROWDSEC_VERSION}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
+
+# Copy files
+mkdir -p ${DATA_PATH}/templates/
+cp -r /tmp/crowdsec/lua-mod/templates/* ${DATA_PATH}/templates/
+
+mkdir -p ${LIB_PATH}plugins/crowdsec
+cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /config/nginx
+
+cp -r /tmp/crowdsec/lua-mod/lib/* ${LIB_PATH}
+
+# Sed in ReCaptcha keys
+sed -ir "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -ir "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+
+# Sed in crowdsec include
+if ! grep -q 'include /config/nginx/crowdsec_nginx.conf;' '/config/nginx/nginx.conf'; then
+    sed -i '/^http {/,/^}/!b;/^}/i\\n    #Include CrowdSec Bouncer\n    include /config/nginx/crowdsec_nginx.conf;' /config/nginx/nginx.conf
+fi
+
+# Clean up
+rm -rf \
+    /tmp/crowdsec \
+    /tmp/crowdsec.tar.gz
+
+echo "**** Successfully configured CrowdSec nginx Bouncer ${CROWDSEC_VERSION} ****"

@@ -4,8 +4,8 @@ on: [push, pull_request, workflow_dispatch]
 
 env:
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "swag" #replace
+  MODNAME: "crowdsec" #replace
 
 jobs:
   build:
