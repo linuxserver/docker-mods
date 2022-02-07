@@ -16,19 +16,6 @@ else
 fi
 echo "**** Linux architecture found: ${ARCH} ****"
 
-UBUNTU=false
-ALPINE=false
-if [ -f /usr/bin/apt ]; then
-  UBUNTU=true
-  echo "**** Linux distro found: ubuntu ****"
-elif [ -f /sbin/apk ]; then
-  ALPINE=true
-  echo "**** Linux distro found: alpine ****"
-else
-  echo "**** Unknown Linux distro, exiting... ****"
-  exit 1
-fi
-
 echo "**** Checking for cloudflared setup script dependencies... ****"
 YQARCH="${ARCH}"
 if [ "${YQ_ARCH}" = "armhf" ]; then 
@@ -37,21 +24,6 @@ fi
 echo "**** Temporarily installing /tmp/yq... ****"
 curl -sLo /tmp/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQARCH}
 chmod +x /tmp/yq
-
-declare -A CLEANUP=( [curl]=false [jq]=false )
-for PKG in "${!CLEANUP[@]}"; do
-  if [ -x "$(command -v ${PKG})" ]; then
-    echo "**** ${PKG} already installed, skipping... ****"
-  else
-    CLEANUP[$PKG]=true
-    echo "**** Temporarily installing ${PKG}... ****"
-    if $ALPINE; then
-      apk add --no-cache ${PKG}
-    elif $UBUNTU; then
-      apt-get -qqy install --no-install-recommends ${PKG}
-    fi
-  fi
-done
 
 echo "**** Installing cloudflared...****"
 if [ -d "/cloudflared/" ]; then
