@@ -1,6 +1,6 @@
 # CrowdSec - Docker mod for SWAG
 
-This mod adds the CrowdSec nginx bouncer to SWAG, to be installed/updated during container start.
+This mod adds the [CrowdSec](https://crowdsec.net) [nginx bouncer](https://github.com/crowdsecurity/cs-nginx-bouncer/) to SWAG, to be installed/updated during container start.
 
 In SWAG docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-crowdsec`
 
