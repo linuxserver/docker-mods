@@ -10,7 +10,7 @@ If adding multiple mods, enter them in an array separated by `|`, such as `DOCKE
 
 If running CrowdSec in a container it must be on a common docker network with SWAG.
 
-Generate an API key for the bouncer with `cscli bouncers add bouncer-nginx` or `docker exec -t crowdsec cscli bouncers add bouncer-nginx`, if you're running CrowdSec in a container.
+Generate an API key for the bouncer with `cscli bouncers add bouncer-swag` or `docker exec -t crowdsec cscli bouncers add bouncer-swag`, if you're running CrowdSec in a container.
 
 Make a note of the API key as you can't retrieve it later without removing and re-adding the bouncer.
 
