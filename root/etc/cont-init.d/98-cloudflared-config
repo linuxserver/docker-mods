@@ -79,7 +79,7 @@ if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUN
     echo "**** Cloudflare tunnel parameters found, starting cloudflare tunnel setup... ****"
     echo "**** Creating cloudflare tunnel (${CF_TUNNEL_NAME}) via API... ****"
 
-    CF_TUNNEL_SECRET="$(command echo ${CF_TUNNEL_PASSWORD} | base64)"
+    CF_TUNNEL_SECRET="$(command echo ${CF_TUNNEL_PASSWORD} | base64 -w 0)"
     JSON_RESULT=$(curl -sX \
       POST "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/tunnels" \
         -H "Authorization: Bearer ${CF_API_TOKEN}" \
