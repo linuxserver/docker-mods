@@ -14,29 +14,19 @@ Here an example snippet to help you get started using this docker mod.
 
 ```yaml
   swag:
-    image: ghcr.io/linuxserver/swag
-    container_name: swag
-    cap_add:
-      - NET_ADMIN
+    image: lscr.io/linuxserver/nginx
+    container_name: nginx
     environment:
       PUID: 1000
       PGID: 1000
       TZ: Europe/London
-      URL: yourdomain.url
-      SUBDOMAINS: test,
-      VALIDATION: dns
-      DNSPLUGIN: cloudflare #optional
-      ONLY_SUBDOMAINS: true #optional
-      EMAIL: #optional
-      EXTRA_DOMAINS: #optional
-      STAGING: false #optional
       DOCKER_MODS: linuxserver/mods:universal-cloudflared
-      CF_ZONE_ID: #optional
-      CF_ACCOUNT_ID: #optional
-      CF_API_TOKEN: #optional
-      CF_TUNNEL_NAME: example #optional
-      CF_TUNNEL_PASSWORD: pleasedontusethisexamplepassword #optional
-      CF_TUNNEL_CONFIG: | #optional
+      CF_ZONE_ID: zone_id
+      CF_ACCOUNT_ID: acct_id
+      CF_API_TOKEN: token
+      CF_TUNNEL_NAME: example
+      CF_TUNNEL_PASSWORD: pleasedontusethisexamplepassword
+      CF_TUNNEL_CONFIG: |
         ingress:
           - hostname: test.yourdomain.url
             service: http://localhost:80
@@ -54,7 +44,7 @@ Container images/mods are configured using parameters passed at runtime (such as
 | :----: | --- | --- |
 | `DOCKER_MODS` | Enable this docker mod with `linuxserver/mods:universal-cloudflared` | If adding multiple mods, enter them in an array separated by `\|`, such as `DOCKER_MODS: linuxserver/mods:universal-cloudflared\|linuxserver/mods:universal-mod2` |
 
-### Optional tunnel parameters
+### Cloudflare tunnel parameters
 
 | Parameter | Function | Notes |
 | :----: | --- | --- |
@@ -72,7 +62,7 @@ Container images/mods are configured using parameters passed at runtime (such as
 
 If you're using a method that doesn't allow you to enter a properly formatted yaml into an environment variable (e.g. `docker run`, or the compose yaml format we recommend in our samples, or a web gui manager) you can alternatively use a yaml file to set the `CF_TUNNEL_CONFIG` variable.
 
-Create a properly formatted yaml file in the `/config` folder of your container (e.g. `/config/tunnelconfig.yaml`):
+Create a properly formatted yaml file in the `/config` folder of your container (e.g. `/config/tunnelconfig.yml`):
 
 ```shell
 ingress:
