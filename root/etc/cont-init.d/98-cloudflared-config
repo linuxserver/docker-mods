@@ -72,7 +72,7 @@ cloudflared -v
 
 echo "**** Checking for optional cloudflare tunnel parameters... ****"
 if [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUNNEL_NAME} -gt 0 ]]; then
-  if [[ ${#CF_TUNNEL_PASSWORD} -le 32 ]]; then
+  if [[ ${#CF_TUNNEL_PASSWORD} -lt 32 ]]; then
     echo "**** Cloudflare tunnel password must be at least 32 characters long, exiting... ****"
     exit 1 
   else
