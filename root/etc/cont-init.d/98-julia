@@ -1,29 +1,21 @@
 #!/usr/bin/with-contenv bash
 
-gh_latest() {
-  curl -s https://api.github.com/repos/$1/$2/releases/latest \
-    | grep "tag_name" \
-    | cut -d : -f 2,3 \
-    | tr -d '\"\ v,'
-}
+if [ -d "/julia-bins" ]; then
+  echo "**** Installing/updating Julia ****"
+  ARCH=$(uname -m)
+  mkdir -p /julia
+  tar xf "/julia-bins/julia-${ARCH}.tar.gz" -C \
+    /julia --strip-components=1
+  rm -rf /usr/local/bin/julia
+  ln -s /julia/bin/julia /usr/local/bin/julia
+  chmod +x /julia/bin/julia
+else
+  echo "**** Latest stable version of Julia already installed ****"
+fi
 
-# replace these with specific versions if needed (i.e 1.7.2 for Julia)
-JULIA_VERSION=$(gh_latest julialang julia)
-
-# Julia
-cd /home/root
-curl -so julia.tar.gz https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-tar fxz julia.tar.gz
-rm -R julia.tar.gz
-ln -s $(pwd)/julia-${JULIA_VERSION}/bin/julia /usr/local/bin/julia
-
-
+echo "**** Installing vscode extensions julia, julia-formatter and better-toml ****"
 # extensions
-install-extension julia-vscode.julia-vscode
-# latex-input
-install-extension yellpika.latex-input
-# vscode-format-context-menu
-install-extension lacroixdavid1.vscode-format-context-menu
+install-extension julialang.language-julia
 # vscode-julia-formatter
 install-extension singularitti.vscode-julia-formatter
 # better-toml
