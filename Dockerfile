@@ -14,16 +14,13 @@ RUN \
   JULIA_MIN_VERSION=$(echo "${JULIA_VERSION}" | cut -d. -f 1,2) && \
   mkdir -p /root-layer/julia-bins && \
   echo "**** Downloading x86_64 binary ****" && \
-  curl -f --retry 3 --retry-connrefused \
-    "https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz" -o \
+  curl -fL "https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz" -o \
     "/root-layer/julia-bins/julia-x86_64.tar.gz" && \
   echo "**** Downloading armv7l binary ****" && \
-  curl -f --retry 3 --retry-connrefused \
-    "https://julialang-s3.julialang.org/bin/linux/armv7l/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-armv7l.tar.gz" -o \
+  curl -fL "https://julialang-s3.julialang.org/bin/linux/armv7l/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-armv7l.tar.gz" -o \
     "/root-layer/julia-bins/julia-armv7l.tar.gz" && \
   echo "**** Downloading aarch64 binary ****" && \
-  curl -f --retry 3 --retry-connrefused \
-    "https://julialang-s3.julialang.org/bin/linux/aarch64/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-aarch64.tar.gz" -o \
+  curl -fL "https://julialang-s3.julialang.org/bin/linux/aarch64/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-aarch64.tar.gz" -o \
     "/root-layer/julia-bins/julia-aarch64.tar.gz"
 
 COPY root/ /root-layer/
