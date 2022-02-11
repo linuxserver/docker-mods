@@ -11,9 +11,9 @@ gh_latest() {
 JULIA_VERSION=$(gh_latest julialang julia)
 
 # Julia
-wget -q -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-tar fxz julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-rm -R julia-${JULIA_VERSION}-linux-x86_64.tar.gz
+curl -so julia.tar.gz https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
+tar fxz julia.tar.gz
+rm -R julia.tar.gz
 mv julia-${JULIA_VERSION}/bin/julia /usr/local/bin
 
 
