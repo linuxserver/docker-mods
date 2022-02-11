@@ -17,7 +17,7 @@ jobs:
           docker build --no-cache -t ${{ github.sha }} .
 
       - name: Tag image
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }} && ${{ env.ENDPOINT != 'user/endpoint' }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}
           docker tag ${{ github.sha }} ${ENDPOINT}:${{ github.sha }}
@@ -25,7 +25,7 @@ jobs:
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${{ github.sha }}
 
       - name: Credential check
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }} && ${{ env.ENDPOINT != 'user/endpoint' }}
         run: |
           echo "CR_USER=${{ secrets.CR_USER }}" >> $GITHUB_ENV
           echo "CR_PAT=${{ secrets.CR_PAT }}" >> $GITHUB_ENV
@@ -39,23 +39,23 @@ jobs:
           fi
 
       - name: Login to GitHub Container Registry
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.CR_USER && env.CR_PAT }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.CR_USER && env.CR_PAT }} && ${{ env.ENDPOINT != 'user/endpoint' }}
         run: |
           echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.CR_USER }} --password-stdin
 
       - name: Push tags to GitHub Container Registry
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.CR_USER && env.CR_PAT }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.CR_USER && env.CR_PAT }} && ${{ env.ENDPOINT != 'user/endpoint' }}
         run: |
           docker push ghcr.io/${ENDPOINT}:${{ github.sha }}
           docker push ghcr.io/${ENDPOINT}
 
       - name: Login to DockerHub
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.DOCKERUSER && env.DOCKERPASS }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.DOCKERUSER && env.DOCKERPASS }} && ${{ env.ENDPOINT != 'user/endpoint' }}
         run: |
           echo ${{ secrets.DOCKERPASS }} | docker login -u ${{ secrets.DOCKERUSER }} --password-stdin
 
       - name: Push tags to DockerHub
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.DOCKERUSER && env.DOCKERPASS }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.DOCKERUSER && env.DOCKERPASS }} && ${{ env.ENDPOINT != 'user/endpoint' }}
         run: |
           docker push ${ENDPOINT}:${{ github.sha }}
           docker push ${ENDPOINT}
