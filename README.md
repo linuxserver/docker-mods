@@ -1,6 +1,6 @@
-# Julia - Docker mod for code-server
+# Julia - Docker mod for code-server/openvscode-server
 
-This mod adds a Julia dev environment to code-server, to be installed/updated during container start.
+This mod adds a Julia dev environment to code-server/openvscode-server, to be installed/updated during container start.
 
 In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-julia`
 
