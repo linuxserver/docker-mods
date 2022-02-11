@@ -1,22 +1,14 @@
 #!/usr/bin/with-contenv bash
 
-gh_lates() {
+gh_latest() {
   curl -s https://api.github.com/repos/$1/$2/releases/latest \
     | grep "tag_name" \
     | cut -d : -f 2,3 \
     | tr -d '\"\ v,'
 }
 
-download_vsix() {
-  wget -qO $1.$2-$3.vsix https://$1.gallery.vsassets.io/_apis/public/gallery/publisher/$1/extension/$2/$3/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage
-}
-
 # replace these with specific versions if needed (i.e 1.7.2 for Julia)
 JULIA_VERSION=$(gh_latest julialang julia)
-JULIA_VSCODE_VERSION=$(gh_latest julia-vscode julia-vscode)
-VSCODE_FORMAT_VERSION=1.0.4
-JULIA_FORMATTER_VERSION=$(gh_latest singularitti vscode-julia-formatter)
-ANACONDA_VERSION=latest
 
 # Julia
 wget -q -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
@@ -26,22 +18,15 @@ mv julia-${JULIA_VERSION}/bin/julia /usr/local/bin
 
 
 # extensions
-cd /home/coder/project/
-wget -q https://github.com/julia-vscode/julia-vscode/releases/download/v${JULIA_VSCODE_VERSION}/language-julia-${JULIA_VSCODE_VERSION}.vsix \
-code-server --install-extension language-julia-${JULIA_VSCODE_VERSION}.vsix \
-rm language-julia-${JULIA_VSCODE_VERSION}.vsix \
+install-extension julia-vscode.julia-vscode
 # latex-input
-code-server --install-extension yellpika.latex-input \
+install-extension yellpika.latex-input
 # vscode-format-context-menu
-download_vsix lacroixdavid1 vscode-format-context-menu ${VSCODE_FORMAT_VERSION} \
-code-server --install-extension lacroixdavid1.vscode-format-context-menu-${VSCODE_FORMAT_VERSION}.vsix \
-rm lacroixdavid1.vscode-format-context-menu-${VSCODE_FORMAT_VERSION}.vsix \
+install-extension lacroixdavid1.vscode-format-context-menu
 # vscode-julia-formatter
-download_vsix singularitti vscode-julia-formatter ${JULIA_FORMATTER_VERSION} \
-code-server --install-extension singularitti.vscode-julia-formatter-${JULIA_FORMATTER_VERSION}.vsix \
-rm singularitti.vscode-julia-formatter-${JULIA_FORMATTER_VERSION}.vsix
+install-extension singularitti.vscode-julia-formatter
 # better-toml
-#code-server --install-extension bungcip.better-toml
+install-extension bungcip.better-toml
 
 
 chown -R root:root /root
