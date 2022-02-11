@@ -27,7 +27,3 @@ install-extension lacroixdavid1.vscode-format-context-menu
 install-extension singularitti.vscode-julia-formatter
 # better-toml
 install-extension bungcip.better-toml
-
-
-chown -R root:root /root
-chmod -R 600 /root/.ssh
