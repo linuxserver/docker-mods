@@ -1,0 +1,13 @@
+#!/usr/bin/with-contenv bash
+
+# Exit if no installable packages are provided
+if [ -z ${APT_PACKAGES+x} ]; then
+    echo "**** No APT packages to install ****"
+    exit 0
+fi
+
+if [ -f /usr/bin/apt ]; then
+    apt install -y --no-install-recommends ${APT_PACKAGES}
+else
+    echo "!!! apt not found !!!"
+fi
