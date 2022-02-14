@@ -110,7 +110,7 @@ Here we are leveraging a multi stage DockerFile to run custom logic and pull dow
 
 ## Getting a Mod to Dockerhub
 
-To publish a Mod to DocherHub you will need the following accounts:
+To publish a Mod to DockerHub you will need the following accounts:
 
 * Github- <https://github.com/join>
 * DockerHub- <https://hub.docker.com/signup>
