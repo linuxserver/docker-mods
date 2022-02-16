@@ -8,7 +8,7 @@ fi
 
 # Ubuntu
 if [ -f /usr/bin/apt ]; then
-    apt install -y --no-install-recommends ${INSTALL_PACKAGES}
+    apt-get install -y --no-install-recommends ${INSTALL_PACKAGES}
 fi
 
 # Alpine
