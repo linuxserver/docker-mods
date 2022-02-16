@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+
+# Exit if no installable packages are provided
+if [ -z ${INSTALL_PACKAGES+x} ]; then
+    echo "**** No packages to install ****"
+    exit 0
+fi
+
+# Ubuntu
+if [ -f /usr/bin/apt ]; then
+    apt install -y --no-install-recommends ${INSTALL_PACKAGES}
+fi
+
+# Alpine
+if [ -f /sbin/apk ]; then
+    apk add --no-cache ${INSTALL_PACKAGES}
+fi
