@@ -1,8 +1,8 @@
-# .NET Core SDK - Docker mod for code server
+# .NET Core SDK - Docker mod for code-server/openvscode-server
 
-This mod adds .NET CORE SDK to code server. 
+This mod adds .NET CORE SDK to code-server and openvscode-server. 
 
-In code server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-dotnet`
+In code-server/openvscode-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-dotnet`
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-dotnet|linuxserver/mods:code-server-mod2`
 

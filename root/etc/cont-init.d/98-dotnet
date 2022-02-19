@@ -2,6 +2,8 @@
 
 # Determine if setup is needed
 if [ -d /dotnet ]; then
+  # install deps
+  apt-get install -y libicu66
   # remove existing install if updating
   if ls -d /dotnet_* >/dev/null 2>&1; then
     echo "deleting" $(ls -d /dotnet_*)
