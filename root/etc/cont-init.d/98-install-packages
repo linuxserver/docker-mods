@@ -15,7 +15,7 @@ for PKG in "${INSTALL_PACKAGES[@]}"; do
 
     # Ubuntu
     if [ -f /usr/bin/apt ]; then
-        apt install -y --no-install-recommends ${PKG}
+        apt-get install -y --no-install-recommends ${PKG}
     fi
 
     # Alpine
