@@ -2,8 +2,8 @@
 # shellcheck shell=bash
 # shellcheck disable=SC2046
 
-printf "set_real_ip_from %b;\n" $(curl -s "https://www.cloudflare.com/ips-v4") > /config/nginx/cf_real-ip.conf
-printf "set_real_ip_from %b;\n" $(curl -s "https://www.cloudflare.com/ips-v6") >> /config/nginx/cf_real-ip.conf
+printf "set_real_ip_from %b;\n" $(curl -s "https://www.cloudflare.com/ips-v4/") > /config/nginx/cf_real-ip.conf
+printf "set_real_ip_from %b;\n" $(curl -s "https://www.cloudflare.com/ips-v6/") >> /config/nginx/cf_real-ip.conf
 printf "set_real_ip_from %b;\n" $(ip route | grep -v default | awk '{print $1}') >> /config/nginx/cf_real-ip.conf
 
 chown abc:abc /config/nginx/cf_real-ip.conf
