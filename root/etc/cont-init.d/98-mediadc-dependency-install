@@ -25,6 +25,7 @@ python3 -m pip install -U pip
 
 python3 -m pip install pillow_heif
 
+pip install hexhamming
 
 echo "**** Installing pywavelets if architecture is not ARM ****"
 
