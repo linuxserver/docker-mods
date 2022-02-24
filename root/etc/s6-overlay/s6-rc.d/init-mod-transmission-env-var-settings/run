@@ -1,0 +1,59 @@
+#!/usr/bin/with-contenv python3
+
+import json
+import os
+import sys
+
+from json.decoder import JSONDecodeError
+
+SETTINGS_FILE_PATH = "/config/settings.json"
+
+
+def setting_name_env_var_name(setting_name):
+    return "TRANSMISSION_{}".format(setting_name.replace("-", "_").upper())
+
+
+def main():
+    # check file exists and is writable, just in case..
+    if not os.path.exists(SETTINGS_FILE_PATH):
+        raise Exception(f"Settings file '{SETTINGS_FILE_PATH}' does not exist.")
+    if not os.path.isfile(SETTINGS_FILE_PATH):
+        raise Exception(f"Settings file '{SETTINGS_FILE_PATH}' is a directory.")
+    if not os.access(SETTINGS_FILE_PATH, os.W_OK):
+        raise Exception(f"Settings file '{SETTINGS_FILE_PATH}' is not writable.")
+
+    # read settings file
+    settings_json = None
+    with open(SETTINGS_FILE_PATH, "r") as f:
+        settings_json = json.loads(f.read())
+
+    # update settings with ENV vars
+    for setting_name in settings_json:
+        env_var_name = setting_name_env_var_name(setting_name)
+        env_var_value = os.getenv(env_var_name)
+
+        if env_var_value is not None:
+            setting_type = type(settings_json[setting_name])
+            if setting_type == bool:
+                setting_value = env_var_value.lower() == "true"
+            else:
+                setting_value = setting_type(env_var_value)
+
+            print(f"From ENV setting '{setting_name}'='{setting_value}'.")
+            settings_json[setting_name] = setting_value
+
+    with open(SETTINGS_FILE_PATH, "w", encoding="utf-8") as f:
+        json.dump(settings_json, f, ensure_ascii=False, indent=4)
+        print("Transmission settings file saved.")
+
+
+if __name__ == "__main__":
+    try:
+        print("Applying transmission env-var-settings mod...")
+        main()
+    except Exception as e:
+        print(f"Failed to apply transmission env-var-settings mod with error: '{e}'.", file=sys.stderr)
+    else:
+        print("Applied transmission env-var-settings mod successfully.")
+    finally:
+        sys.exit(0)
