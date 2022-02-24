@@ -127,7 +127,7 @@ mods:
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
   universal:
-    mod_count: 9
+    mod_count: 10
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
       - cloudflared: https://github.com/linuxserver/docker-mods/tree/universal-cloudflared
@@ -135,6 +135,7 @@ mods:
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
       - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
       - git: https://github.com/linuxserver/docker-mods/tree/universal-git
+      - package-install: https://github.com/linuxserver/docker-mods/tree/universal-package-install
       - stdout-logs: https://github.com/linuxserver/docker-mods/tree/universal-stdout-logs
       - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
       - wait-for-internet: https://github.com/linuxserver/docker-mods/tree/universal-wait-for-internet
