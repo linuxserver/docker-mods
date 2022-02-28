@@ -1,8 +1,12 @@
 import json
 import sqlite3
+import sys
 
+f2bdb = "/config/fail2ban/fail2ban.sqlite3"
+if sys.argv[1:]:
+    f2bdb = sys.argv[1]
 
-con = sqlite3.connect("/config/fail2ban/fail2ban.sqlite3")
+con = sqlite3.connect(f2bdb)
 cur = con.cursor()
 results = cur.execute("""
     SELECT jails.name, 
