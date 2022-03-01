@@ -99,8 +99,9 @@
         HTML;
     }
 
-    function GetF2B() {
-        $output = shell_exec("python3 /dashboard/swag-f2b.py");
+    function GetF2B($f2bdb='/config/fail2ban/fail2ban.sqlite3') {
+        if (!file_exist($f2bdb)) return '';
+        $output = shell_exec("python3 /dashboard/swag-f2b.py {$f2bdb}");
         $jails = json_decode($output, true);
         $status = "";
         $index = 0;
@@ -281,7 +282,14 @@
     }
     
     $goaccess = GetGoaccess();
-    $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . "<div class='wrap-general'>";
+    $status = GetHeader() 
+        . GetProxies() 
+        . GetF2B() 
+        . GetF2B('/var/lib/fail2ban/fail2ban.sqlite3') 
+        . GetTemplates() 
+        . GetAnnouncements() 
+        . GetLinks() 
+        . "<div class='wrap-general'>";
     $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
     $ssl = GetCertificate() . "<div class='pull-right hide'>";
     $page = str_replace("<div class='pull-right'>", $ssl, $page);
