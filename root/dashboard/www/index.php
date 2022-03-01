@@ -100,7 +100,7 @@
     }
 
     function GetF2B($f2bdb = '/config/fail2ban/fail2ban.sqlite3') {
-        if (!file_exists($f2bdb)) return false;
+        if (!file_exists($f2bdb)) return '';
         $output = shell_exec("python3 /dashboard/swag-f2b.py {$f2bdb}");
         $jails = json_decode($output, true);
         $status = "";
