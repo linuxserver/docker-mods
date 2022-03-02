@@ -42,7 +42,34 @@
                     color: gray;
                     cursor: help;
                 }
+              .fa-caret-square-down {
+                font-size:20px;
+                color: black;
+              }
+              .btn-xs {
+                padding: 2px;
+                margin-top: -3px;
+                margin-bottom: 3px;
+                border-radius: none;
+                outline: none;
+                background: none;
+              }
+              .hidden {
+                display: none;
+              }
+              [class*="jail-"] {
+                color: gray;
+              }
             </style>
+            <script>
+              function toggleHide(className) {
+              if (document.querySelectorAll(className).length > 0) {
+                for (let el of document.querySelectorAll(className)) el.classList.toggle('hidden');
+              } else {
+                for (let el of document.querySelectorAll(className)) el.classList.toggle('hidden');
+              }
+              }
+            </script>
         HTML;
     }
 
@@ -99,9 +126,8 @@
         HTML;
     }
 
-    function GetF2B($f2bdb='/config/fail2ban/fail2ban.sqlite3') {
-        if (!file_exist($f2bdb)) return '';
-        $output = shell_exec("python3 /dashboard/swag-f2b.py {$f2bdb}");
+    function GetF2B() {
+        $output = shell_exec("python3 /dashboard/swag-f2b.py");
         $jails = json_decode($output, true);
         $status = "";
         $index = 0;
@@ -117,6 +143,61 @@
             <div class="wrap-panel status-div">
                 <div>
                     <h2>Fail2Ban</h2>
+                    <table class="table-hover">
+                        <thead>
+                            <tr>
+                                <td><h3>Jail</h3></td>
+                                <td><h3>Bans</h3></td>
+                                <td><h3>Last</h3></td>
+                            </tr>
+                        </thead>
+                        <tbody class="tbody-data">
+                            {$status}
+                        </tbody>
+                    </table>
+                    <br/>
+                </div>
+                <br/>
+            </div>
+        HTML;
+    }
+
+    function GetF2Bhost() {
+        $output = shell_exec("python3 /dashboard/swag-f2b-host.py");
+        if (!$output) return '';
+        $jails = json_decode($output, true);
+        $status = "";
+        $index = 0;
+        foreach($jails as $jail){
+            $tr_class = ($index % 2 == 0) ? 'shaded' : '';
+            $data = '';
+            $expand_button = '';
+            $details = '';
+
+            if ($jail["data"]) {
+                $data = ' <i title="'.htmlspecialchars($jail["data"]).'" class="fas fa-info-circle"></i>';
+                $expand_button = ' <button class="btn btn-default btn-xs far fa-caret-square-down" onclick="toggleHide(\'.jail-'.$jail['name'].'\'); return false;"></button>';
+                
+                $output_ips = shell_exec("python3 /dashboard/swag-f2b-expand.py {$jail['name']}");
+                $array_ips = json_decode($output_ips, true);
+                // we reuse the same table structure, that's simpler
+                foreach($array_ips as $ip_line){
+                $details .= '<tr class="'.$tr_class.' jail-'.$jail['name'].' hidden"><td class="left-text"><span class="status-text">'.$ip_line["timeofban"].'</span></td>';
+                $details .= '<td><span class="status-text">'.$ip_line["bancount"].'</span></td>';
+                $details .= '<td><span class="status-text">'.$ip_line["ip"].'</span></td></tr>';
+                }
+                
+            }
+            $status .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.$jail["name"].'</span></td>';
+            $status .= '<td><span class="status-text">'.$jail["bans"].'</span></td>';
+            $status .= '<td><span class="status-text">'.$jail["last_ban"].'</span>'.$data.$expand_button.'</td></tr>';
+            $status .= $details;
+            $index++;
+        }
+        return <<<HTML
+            <div class="wrap-panel status-div">
+                <div>
+                    <h2>Fail2Ban {$host}</h2>
                     <table class="table-hover">
                         <thead>
                             <tr>
@@ -285,7 +366,7 @@
     $status = GetHeader() 
         . GetProxies() 
         . GetF2B() 
-        . GetF2B('/var/lib/fail2ban/fail2ban.sqlite3') 
+        . GetF2Bhost() 
         . GetTemplates() 
         . GetAnnouncements() 
         . GetLinks() 
