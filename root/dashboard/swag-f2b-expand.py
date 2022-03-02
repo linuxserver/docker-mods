@@ -26,14 +26,14 @@ if not os.path.exists(MOD_DASHBOARD_F2B_HOST_DB):
 
 con = sqlite3.connect(MOD_DASHBOARD_F2B_HOST_DB)
 cur = con.cursor()
-results = cur.execute("SELECT DISTINCT timeofban, 1 as num, ip from bans where jail = '%s' ORDER BY timeofban DESC LIMIT %s" % (jail, MOD_DASHBOARD_F2B_MAX_LINES)).fetchall()
+results = cur.execute("SELECT DISTINCT timeofban, bancount, ip from bans where jail = '%s' ORDER BY timeofban DESC LIMIT %s" % (jail, MOD_DASHBOARD_F2B_MAX_LINES)).fetchall()
 # results = cur.execute("SELECT * from bans where jail='sshd' limit 10").fetchall()
 con.close()
 formatted_results = [{
     "timeofban": datetime.fromtimestamp(timeofban, pytz.timezone(TZ)).strftime('%Y-%m-%d %H:%M:%S'),
-    "num": num,
+    "bancount": bancount,
     "ip": ip
-} for (timeofban, num, ip) in results]
+} for (timeofban, bancount, ip) in results]
 
 output = json.dumps(formatted_results, sort_keys=True)
 # output = results
