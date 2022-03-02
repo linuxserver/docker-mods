@@ -183,7 +183,7 @@
                 // we reuse the same table structure, that's simpler
                 foreach($array_ips as $ip_line){
                 $details .= '<tr class="'.$tr_class.' jail-'.$jail['name'].' hidden"><td class="left-text"><span class="status-text">'.$ip_line["timeofban"].'</span></td>';
-                $details .= '<td><span class="status-text">'.$ip_line["bancount"].'</span></td>';
+                $details .= '<td><span class="status-text">'.$ip_line["failures"].'</span></td>';
                 $details .= '<td><span class="status-text">'.$ip_line["ip"].'</span></td></tr>';
                 }
                 
