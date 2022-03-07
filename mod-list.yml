@@ -72,7 +72,7 @@ mods:
       - openssh-client: https://github.com/linuxserver/docker-mods/tree/openssh-server-openssh-client
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   openvscode-server:
-    mod_count: 19
+    mod_count: 20
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
@@ -92,6 +92,7 @@ mods:
       - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
+      - ssl: https://github.com/linuxserver/docker-mods/tree/code-server-ssl
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
   paperless-ng:
     mod_count: 1
