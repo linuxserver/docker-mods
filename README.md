@@ -1,6 +1,6 @@
-# SSL - Docker mod for code-server/openvscode-server
+# SSL - Docker mod for code-server
 
-This mod adds SSL capabilities to code-server/openvscode-server.
+This mod adds SSL capabilities to code-server
 
 In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-ssl`
 
