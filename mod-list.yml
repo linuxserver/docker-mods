@@ -4,7 +4,7 @@ mods:
     container_mods:
       - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
-    mod_count: 22
+    mod_count: 23
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
@@ -25,6 +25,7 @@ mods:
       - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
+      - ssl: https://github.com/linuxserver/docker-mods/tree/code-server-ssl
       - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
       - terraform: https://github.com/linuxserver/docker-mods/tree/code-server-terraform
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
