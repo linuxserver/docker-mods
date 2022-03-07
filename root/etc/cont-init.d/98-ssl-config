@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** adding --cert and --cert-key parameters to code-server startup ****"
+
+sed -i 's/\/bin\/code-server \\/\/bin\/code-server \\\n            --cert ${SSL_CERT_PATH} \\\n            --cert-key ${SSL_KEY_PATH} \\/g' /etc/services.d/code-server/run
