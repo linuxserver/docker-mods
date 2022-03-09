@@ -39,10 +39,8 @@ tar xf \
 mkdir -p "${CONFIG_PATH}"
 API_KEY=${CROWDSEC_API_KEY} CROWDSEC_LAPI_URL=${CROWDSEC_LAPI_URL} envsubst < /tmp/crowdsec/lua-mod/config_example.conf > "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
-# Sed out resolver, change config path, fix version string
-sed -i "/resolver 8.8.8.8 ipv6=off;/d" /tmp/crowdsec/nginx/crowdsec_nginx.conf
+# Change config path
 sed -i "s|/etc/crowdsec/bouncers/|${CONFIG_PATH}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
-sed -ir "s|crowdsec-nginx-bouncer/v[0-9].[0-9].[0-9][0-9]?|crowdsec-nginx-bouncer/${CROWDSEC_VERSION}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
 
 # Copy files
 mkdir -p ${DATA_PATH}/templates/
