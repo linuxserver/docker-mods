@@ -23,7 +23,7 @@ apk add -U --upgrade --no-cache \
     nginx-mod-http-lua
 
 # Download nginx bouncer
-CROWDSEC_VERSION=$(curl -sX GET "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases" | awk '/tag_name/{print $4;exit}' FS='[""]');
+CROWDSEC_VERSION=$(curl -sX GET "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]');
 
 curl -so \
     /tmp/crowdsec.tar.gz -L \
