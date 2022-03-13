@@ -34,7 +34,8 @@ if [ $(arch) = "armv7l" ]; then
         m4 \
         perl \
         alpine-sdk \
-        cmake
+        cmake \
+        aom-dev
 fi
 
 echo "**** Installing pillow_heif, hexhamming and pywavelets ****"
