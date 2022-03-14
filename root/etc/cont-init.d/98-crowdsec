@@ -47,9 +47,9 @@ mkdir -p ${DATA_PATH}/templates/
 cp -r /tmp/crowdsec/lua-mod/templates/* ${DATA_PATH}/templates/
 
 mkdir -p ${LIB_PATH}plugins/crowdsec
-cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /etc/nginx/http.d
-
 cp -r /tmp/crowdsec/lua-mod/lib/* ${LIB_PATH}
+
+cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /etc/nginx/http.d
 
 # Sed in ReCaptcha keys
 sed -ir "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
