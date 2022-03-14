@@ -61,9 +61,10 @@ mods:
     container_mods:
       - mediadc: https://github.com/linuxserver/docker-mods/tree/nextcloud-mediadc
   nginx:
-    mod_count: 4
+    mod_count: 5
     container_mods:
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
+      - crowdsec: https://github.com/linuxserver/docker-mods/tree/swag-crowdsec
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - proxy-confs: https://github.com/linuxserver/docker-mods/tree/nginx-proxy-confs
