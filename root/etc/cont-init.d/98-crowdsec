@@ -9,8 +9,6 @@ echo "**** Configuring CrowdSec nginx Bouncer ****"
 # If API keys are missing, disable mod and exit
 if [[ -z $CROWDSEC_API_KEY ]] || [[ -z $CROWDSEC_LAPI_URL ]]; then
     echo "**** Missing API key or CrowdSec LAPI URL, cannot configure bouncer ****"
-    sed -i '/#Include CrowdSec Bouncer/d' /config/nginx/nginx.conf
-    sed -i '/include \/config\/nginx\/crowdsec_nginx.conf;/d' /config/nginx/nginx.conf
     exit 1
 fi
 
@@ -49,7 +47,7 @@ mkdir -p ${DATA_PATH}/templates/
 cp -r /tmp/crowdsec/lua-mod/templates/* ${DATA_PATH}/templates/
 
 mkdir -p ${LIB_PATH}plugins/crowdsec
-cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /config/nginx
+cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /etc/nginx/http.d
 
 cp -r /tmp/crowdsec/lua-mod/lib/* ${LIB_PATH}
 
@@ -58,8 +56,8 @@ sed -ir "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}cro
 sed -ir "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 # Sed in crowdsec include
-if ! grep -q 'include /config/nginx/crowdsec_nginx.conf;' '/config/nginx/nginx.conf'; then
-    sed -i '/^http {/,/^}/!b;/^}/i\\n    #Include CrowdSec Bouncer\n    include /config/nginx/crowdsec_nginx.conf;' /config/nginx/nginx.conf
+if ! grep -q '#include /etc/nginx/http.d/*.conf;' '/config/nginx/nginx.conf'; then
+    sed -i 's|#include /etc/nginx/http.d/\*.conf;|include /etc/nginx/http.d/\*.conf;|' /config/nginx/nginx.conf
 fi
 
 # Clean up

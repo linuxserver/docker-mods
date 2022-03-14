@@ -26,14 +26,3 @@ Set the following environment variables on your SWAG container.
 | | | |
 
 The variables need to remain in place while you are using the mod. If you remove **required** variables the bouncer will be disabled the next time you recreate the container, if you remove **optional** variables the associated features will be disabled the next time you recreate the container.
-
-## Mod uninstall instructions
-
-Delete `/config/nginx/crowdsec_nginx.conf`
-
-In `/config/nginx/nginx.conf` remove the following lines
-
-```nginx
-    #Include CrowdSec Bouncer
-    include /config/nginx/crowdsec_nginx.conf;
-```
