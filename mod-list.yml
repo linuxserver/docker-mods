@@ -119,11 +119,12 @@ mods:
     container_mods:
       - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
   swag:
-    mod_count: 11
+    mod_count: 12
     container_mods:
       - auto-proxy: https://github.com/linuxserver/docker-mods/tree/swag-auto-proxy
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
       - cloudflare-real-ip: https://github.com/linuxserver/docker-mods/tree/swag-cloudflare-real-ip
+      - crowdsec: https://github.com/linuxserver/docker-mods/tree/swag-crowdsec
       - dashboard: https://github.com/linuxserver/docker-mods/tree/swag-dashboard
       - dbip: https://github.com/linuxserver/docker-mods/tree/swag-dbip
       - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/swag-f2bdiscord
