@@ -1,25 +1,28 @@
-# Rsync - Docker mod for openssh-server
+# CrowdSec - Docker mod for SWAG
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds the [CrowdSec](https://crowdsec.net) [nginx bouncer](https://github.com/crowdsecurity/cs-nginx-bouncer/) to SWAG, to be installed/updated during container start.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+In SWAG docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-crowdsec`
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:swag-crowdsec|linuxserver/mods:swag-dbip`
 
-# Mod creation instructions
+## Mod usage instructions
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the build branch, and the vars for `BASEIMAGE` and `MODNAME`.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+If running CrowdSec in a container it must be on a common docker network with SWAG.
 
+Generate an API key for the bouncer with `cscli bouncers add bouncer-swag` or `docker exec -t crowdsec cscli bouncers add bouncer-swag`, if you're running CrowdSec in a container.
 
-## Tips and tricks
+Make a note of the API key as you can't retrieve it later without removing and re-adding the bouncer.
 
-* To decrease startup times when multiple mods are used, we have consolidated `apt-get update` down to one file. As seen in the [nodejs mod](https://github.com/linuxserver/docker-mods/tree/code-server-nodejs/root/etc/cont-init.d)
-* Some images has helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+Set the following environment variables on your SWAG container.
+
+| | | |
+| --- | --- | --- |
+| `CROWDSEC_API_KEY` | **Required** | Your bouncer API key |
+| `CROWDSEC_LAPI_URL` | **Required** | Your local CrowdSec API endpoint, for example `http://crowdsec:8080` |
+| `CROWDSEC_SITE_KEY` | **Optional** | reCAPTCHA v2 Site Key |
+| `CROWDSEC_SECRET_KEY` | **Optional** | reCAPTCHA v2 Secret Key |
+| `CROWDSEC_VERSION` | **Optional** | Specify a version of the bouncer to install instead of using the latest release, for example `v1.0.0`. Must be a valid [release tag](https://github.com/crowdsecurity/cs-nginx-bouncer/tags). **Does not support versions older than v1.0.0**.
+| | | |
+
+The variables need to remain in place while you are using the mod. If you remove **required** variables the bouncer will be disabled the next time you recreate the container, if you remove **optional** variables the associated features will be disabled the next time you recreate the container.
