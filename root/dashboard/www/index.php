@@ -252,7 +252,8 @@
             $geodb = '';
         endif;
 
-        $goaccess = shell_exec("/usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf ".$geodb);
+        $access_log = file_exists("/dashboard/logs") ? "/dashboard/logs/*.log" : "/config/log/nginx/access.log";
+        $goaccess = shell_exec("cat $access_log | /usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf $geodb -");
         $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
         $goaccess = str_replace("<h1 class='h-dashboard'>", "<h1>", $goaccess);
         $goaccess = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);
