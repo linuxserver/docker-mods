@@ -63,14 +63,14 @@ if ! grep -q '[^#]include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf'
     else
         # Warn about missing http.d include
         echo "
-        ***************************************************************
-        *    Warning: Your nginx.conf is missing required settings    *
-        *    Please add:                                              *
-        *        include /etc/nginx/http.d/*.conf;                    *
-        *    to the http{} block and restart the container.           *
-        *                                                             *
-        *    The bouncer will not function until this is done.        *
-        ***************************************************************"
+        ********************************************************************
+        *    Warning: Your nginx.conf is missing required settings         *
+        *    Please add:                                                   *
+        *        include /etc/nginx/http.d/*.conf;                         *
+        *    to the http{} block and restart the container.                *
+        *                                                                  *
+        *    The CrowdSec bouncer will not function until this is done.    *
+        ********************************************************************"
     fi
 fi
 
