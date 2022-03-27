@@ -79,4 +79,10 @@ rm -rf \
     /tmp/crowdsec \
     /tmp/crowdsec.tar.gz
 
+# Disable f2b if requested
+if [[ $CROWDSEC_F2B_DISABLE == "true" ]]; then
+    echo "**** Disabling fail2ban Service ****"
+    touch /etc/services.d/fail2ban/down
+fi
+
 echo "**** Successfully configured CrowdSec nginx Bouncer ${CROWDSEC_VERSION} ****"
