@@ -103,6 +103,10 @@ mods:
     mod_count: 1
     container_mods:
       - multilangocr: https://github.com/linuxserver/docker-mods/tree/papermerge-multilangocr
+  paperless-ngx:
+    mod_count: 1
+    container_mods:
+      - multilangocr: https://github.com/linuxserver/docker-mods/tree/papermerge-multilangocr
   papermerge:
     mod_count: 1
     container_mods:
