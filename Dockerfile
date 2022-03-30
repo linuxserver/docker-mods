@@ -7,9 +7,9 @@ RUN \
     curl \
     jq && \
   if [ -z "${JULIA_VERSION}" ]; then \
-    JULIA_VERSION=$(curl -sX GET "https://api.github.com/repos/JuliaLang/julia/releases/latest" \
-    | jq -r '. | .tag_name' \
-    | sed 's|^v||'); \
+    JULIA_VERSION=$(curl -sL https://julialang.org/downloads/ \
+      | sed 's|.*Current stable release: v||' \
+      | sed 's| (.*||'); \
   fi && \
   JULIA_MIN_VERSION=$(echo "${JULIA_VERSION}" | cut -d. -f 1,2) && \
   mkdir -p /root-layer/julia-bins && \

@@ -16,7 +16,7 @@ jobs:
       - name: Build image
         run: |
           # Set version
-          JULIA_VERSION=$(curl -sfX GET "https://api.github.com/repos/JuliaLang/julia/releases/latest" | jq -r '. | .tag_name' | sed 's|^v||')
+          JULIA_VERSION=$(curl -sL https://julialang.org/downloads/ | sed 's|.*Current stable release: v||' | sed 's| (.*||')
           echo "JULIA_VERSION=${JULIA_VERSION}" >> $GITHUB_ENV
           docker build --no-cache --build-arg JULIA_VERSION="${JULIA_VERSION}" -t ${{ github.sha }} .
 
