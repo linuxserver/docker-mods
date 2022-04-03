@@ -27,3 +27,9 @@ Set the following environment variables on your SWAG container.
 | | | |
 
 The variables need to remain in place while you are using the mod. If you remove **required** variables the bouncer will be disabled the next time you recreate the container, if you remove **optional** variables the associated features will be disabled the next time you recreate the container.
+
+### reCAPTCHA Support Notes
+
+If you're using the reCAPTCHA capability and you're running in an IPv4-only environment then you need to edit your `/config/nginx/resolver.conf` and add `ipv6=off` to the end of the `resolver` statement otherwise the bouncer will attempt to contact the reCAPTCHA endpoint over IPv6 and fail.
+
+e.g. `resolver  127.0.0.11 valid=30s ipv6=off;`
