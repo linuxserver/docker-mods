@@ -2,15 +2,36 @@
 
 echo "**** installing docker and docker compose ****"
 ARCH=$(uname -m)
-if [ -f "/docker-compose/docker-compose_${ARCH}" ]; then
+if [ -d "/docker-bins" ] ; then
   echo "Copying over docker and docker-compose binaries"
-  mv "/docker-compose/docker-compose_${ARCH}" /usr/local/bin/docker-compose
-  mv "/docker-compose/docker_${ARCH}" /usr/local/bin/docker
-  chmod +x /usr/local/bin/docker-compose
-  rm -rf /docker-compose
+  mkdir -p /usr/local/lib/docker/cli-plugins
+  mv "/docker-bins/docker-compose_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-compose
+  mv "/docker-bins/docker_${ARCH}" /usr/local/bin/docker
+  mv "/docker-bins/compose-switch_${ARCH}" /usr/local/bin/docker-compose
+  rm -rf /docker-bins
 else
   echo "**** docker and docker-compose already installed, skipping ****"
 fi
+
+
+echo '
+***********************************************************
+***********************************************************
+****                                                   ****
+****                                                   ****
+**** This mod "linuxserver/mods:code-server-docker"    ****
+****                                                   ****
+****                                                   ****
+**** has been deprecated and will not receive updates  ****
+****                                                   ****
+****                                                   ****
+****     Please switch to the universal version:       ****
+****                                                   ****
+****       "linuxserver/mods:universal-docker"         ****
+****                                                   ****
+****                                                   ****
+***********************************************************
+***********************************************************'
 
 if [ -S /var/run/docker.sock ]; then
   DOCKER_GID=$(stat -c '%g' "/var/run/docker.sock")
@@ -25,7 +46,7 @@ if [ -S /var/run/docker.sock ]; then
     usermod -aG "${DOCKER_NAME}" abc
   fi
 elif [ -n "$DOCKER_HOST" ]; then
-  echo "**** /var/run/docker.sock is not mapped, therefore, docker client will only work with a remote docker service ****"
+  echo "**** Remote docker service $DOCKER_HOST will be used ****"
 else
   echo "**** Please map /var/run/docker.sock for access to docker service on host. Alternatively you can manually define a remote host address with the docker cli option -H ****"
 fi

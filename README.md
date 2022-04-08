@@ -1,3 +1,9 @@
+# **DEPRECATED**
+
+This mod has been deprecated and will not receive future updates. Please use the universal version instead:
+
+`linuxserver/mods:universal-docker`
+
 # Docker - Docker mod for code-server
 
 This mod adds docker and docker-compose binaries to code-server.
