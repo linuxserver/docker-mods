@@ -1,21 +1,15 @@
 ## Buildstage ##
+FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as buildstage
+
 ARG DOCKER_RELEASE
-ARG COMPOSE_TAG="latest"
-ARG COMPOSE_ALPINE_TAG="alpine"
-
-FROM ghcr.io/linuxserver/docker-compose:amd64-${COMPOSE_TAG} as compose-amd64
-FROM ghcr.io/linuxserver/docker-compose:arm32v7-${COMPOSE_TAG} as compose-arm32
-FROM ghcr.io/linuxserver/docker-compose:arm64v8-${COMPOSE_TAG} as compose-arm64
-FROM ghcr.io/linuxserver/docker-compose:amd64-${COMPOSE_ALPINE_TAG} as compose-alpine-amd64
-FROM ghcr.io/linuxserver/docker-compose:arm32v7-${COMPOSE_ALPINE_TAG} as compose-alpine-arm32
-FROM ghcr.io/linuxserver/docker-compose:arm64v8-${COMPOSE_ALPINE_TAG} as compose-alpine-arm64
-
-FROM ghcr.io/linuxserver/baseimage-alpine:3.14 as buildstage
+ARG COMPOSE_RELEASE
 
 RUN \
   echo "**** install packages ****" && \
   apk add --no-cache \
-    curl && \
+    curl \
+    git \
+    go && \
   echo "**** retrieve latest version ****" && \
   if [ -z ${DOCKER_RELEASE+x} ]; then \
     DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
@@ -32,15 +26,50 @@ RUN \
     "https://download.docker.com/linux/static/stable/armhf/docker-${DOCKER_RELEASE}.tgz" && \
   curl -fo \
     /root-layer/docker-tgz/docker_aarch64.tgz -L \
-    "https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz"
+    "https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz" && \
+  echo "**** retrieve latest compose version ****" && \
+  if [ -z ${COMPOSE_RELEASE+x} ]; then \
+    COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" \
+      | awk '/tag_name/{print $4;exit}' FS='[""]' \
+      | sed 's|^v||'); \
+  fi && \
+  echo "**** grab compose ****" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker-compose_x86_64 -L \
+    "https://github.com/docker/compose/releases/download/v${COMPOSE_RELEASE}/docker-compose-linux-x86_64" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker-compose_armv7l -L \
+    "https://github.com/docker/compose/releases/download/v${COMPOSE_RELEASE}/docker-compose-linux-armv7" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker-compose_aarch64 -L \
+    "https://github.com/docker/compose/releases/download/v${COMPOSE_RELEASE}/docker-compose-linux-aarch64" && \
+  echo "**** retrieve latest compose switch version ****" && \
+  if [ -z ${SWITCH_RELEASE+x} ]; then \
+    SWITCH_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose-switch/releases/latest" \
+      | awk '/tag_name/{print $4;exit}' FS='[""]' \
+      | sed 's|^v||'); \
+  fi && \
+  echo "**** grab compose switch ****" && \
+  curl -fo \
+    /root-layer/docker-tgz/compose-switch_x86_64 -L \
+    "https://github.com/docker/compose-switch/releases/download/v${SWITCH_RELEASE}/docker-compose-linux-amd64" && \
+  curl -fo \
+    /root-layer/docker-tgz/compose-switch_aarch64 -L \
+    "https://github.com/docker/compose-switch/releases/download/v${SWITCH_RELEASE}/docker-compose-linux-arm64" && \
+  echo "**** compile compose switch on armhf ****" && \
+  curl -fo \
+    /tmp/compose-switch.tar.gz -L \
+    "https://github.com/docker/compose-switch/archive/refs/tags/v${SWITCH_RELEASE}.tar.gz" && \
+  mkdir -p /tmp/compose-switch && \
+  tar xf \
+    /tmp/compose-switch.tar.gz -C \
+    /tmp/compose-switch --strip-components=1 && \
+  cd /tmp/compose-switch && \
+  CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -ldflags="-s -w -X github.com/docker/compose-switch/internal.Version=${SWITCH_RELEASE}" -o /root-layer/docker-tgz/compose-switch_armv7l ./main.go && \
+  chmod +x /root-layer/docker-tgz/* && \
+  rm -rf /tmp/*
 
 # copy local files
-COPY --from=compose-amd64 /usr/local/bin/docker-compose /root-layer/docker-compose-ubuntu/docker-compose_x86_64
-COPY --from=compose-arm32 /usr/local/bin/docker-compose /root-layer/docker-compose-ubuntu/docker-compose_armv7l
-COPY --from=compose-arm64 /usr/local/bin/docker-compose /root-layer/docker-compose-ubuntu/docker-compose_aarch64
-COPY --from=compose-alpine-amd64 /usr/local/bin/docker-compose /root-layer/docker-compose-alpine/docker-compose_x86_64
-COPY --from=compose-alpine-arm32 /usr/local/bin/docker-compose /root-layer/docker-compose-alpine/docker-compose_armv7l
-COPY --from=compose-alpine-arm64 /usr/local/bin/docker-compose /root-layer/docker-compose-alpine/docker-compose_aarch64
 COPY root/ /root-layer/
 
 ## Single layer deployed image ##

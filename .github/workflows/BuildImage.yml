@@ -16,27 +16,24 @@ jobs:
       - name: Build image
         run: |
           # Set version
-          if [ -z ${COMPOSE_TAG+x} ]; then COMPOSE_TAG=$(curl -sX GET "https://api.github.com/repos/linuxserver/docker-docker-compose/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]'); fi
-          if [ -z ${COMPOSE_ALPINE_TAG+x} ]; then COMPOSE_ALPINE_TAG=$(curl -sX GET "https://api.github.com/repos/linuxserver/docker-docker-compose/releases" | jq -r 'first(.[] | select(.prerelease==true)) | .tag_name'); fi
-          COMPOSE_VERSION=$(echo "$COMPOSE_TAG" | sed 's|-ls.*||g')
-          echo "COMPOSE_VERSION=${COMPOSE_VERSION}" >> $GITHUB_ENV
-          COMPOSE_ALPINE_VERSION="$(echo ${COMPOSE_ALPINE_TAG} | sed 's|-ls.*||g' | sed 's|alpine-||g')"
-          if [ "$COMPOSE_VERSION" != "$COMPOSE_ALPINE_VERSION" ]; then echo "ubuntu and alpine versions are different; exiting!" && exit 1; else echo "ubuntu and alpine versions are the same, continuing with build"; fi
+          if [ -z ${COMPOSE_RELEASE+x} ]; then COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||'); fi
           if [ -z ${DOCKER_RELEASE+x} ]; then DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||'); fi
           if curl -fSsL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_RELEASE}.tgz" >/dev/null && curl -fSsL "https://download.docker.com/linux/static/stable/armhf/docker-${DOCKER_RELEASE}.tgz" >/dev/null && curl -fSsL "https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz" >/dev/null; then echo "Docker tarballs exist, proceeding"; else echo "Docker tarballs are missing, exiting!" && exit 1; fi
-          echo "COMBINED_TAG=${DOCKER_RELEASE}-${COMPOSE_VERSION}" >> $GITHUB_ENV
+          COMBINED_VERSION=${DOCKER_RELEASE}-${COMPOSE_RELEASE}
+          echo "**** Combined version is ${COMBINED_VERSION} ****"
+          echo "COMBINED_VERSION=${COMBINED_VERSION}" >> $GITHUB_ENV
           # Build image
-          docker build --no-cache --build-arg COMPOSE_TAG=${COMPOSE_TAG} --build-arg COMPOSE_ALPINE_TAG=${COMPOSE_ALPINE_TAG} --build-arg DOCKER_RELEASE=${DOCKER_RELEASE} -t ${{ github.sha }} .
+          docker build --no-cache --build-arg COMPOSE_RELEASE=${COMPOSE_RELEASE} --build-arg DOCKER_RELEASE=${DOCKER_RELEASE} -t ${{ github.sha }} .
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}
-          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}-${{ github.sha }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}-${{ github.sha }}
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}
-          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}-${{ github.sha }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
       - name: Credential check
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
@@ -58,8 +55,8 @@ jobs:
       - name: Push tags to GitHub Container Registry
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}-${{ github.sha }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}-${{ github.sha }}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
       - name: Login to DockerHub
@@ -69,7 +66,7 @@ jobs:
       - name: Push tags to DockerHub
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
         run: |
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_TAG }}-${{ github.sha }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.COMBINED_VERSION }}-${{ github.sha }}
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
