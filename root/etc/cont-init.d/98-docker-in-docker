@@ -6,7 +6,6 @@ chown -R ${ABC_USER}:${ABC_USER} /config/logs
 
 echo "**** installing docker and docker compose ****"
 if [ -f /usr/bin/apt ]; then
-    DISTRONAME="ubuntu"
     apt-get install -y \
         btrfs-progs \
         ca-certificates \
@@ -19,7 +18,6 @@ if [ -f /usr/bin/apt ]; then
         xfsprogs \
         xz-utils
 else
-    DISTRONAME="alpine"
     apk add --no-cache \
         btrfs-progs \
         curl \
@@ -33,11 +31,11 @@ else
         xz
 fi
 ARCH=$(uname -m)
-if [ -f "/docker-compose-${DISTRONAME}/docker-compose_${ARCH}" ] ; then
+if [ -d "/docker-tgz" ] ; then
     echo "Copying over docker and docker-compose binaries"
-    mv "/docker-compose-${DISTRONAME}/docker-compose_${ARCH}" /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-    rm -rf /docker-compose-ubuntu /docker-compose-alpine
+    mkdir -p /usr/local/lib/docker/cli-plugins
+    mv "/docker-tgz/docker-compose_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-compose
+    mv "/docker-tgz/compose-switch_${ARCH}" /usr/local/bin/docker-compose
     tar xf /docker-tgz/docker_${ARCH}.tgz \
         --strip-components=1 -C \
         /usr/local/bin/
