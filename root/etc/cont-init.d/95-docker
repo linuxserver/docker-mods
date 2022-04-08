@@ -1,18 +1,14 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** installing docker and docker compose ****"
-if [ -f /usr/bin/apt ]; then
-  DISTRONAME="ubuntu"
-else
-  DISTRONAME="alpine"
-fi
 ARCH=$(uname -m)
-if [ -f "/docker-compose-${DISTRONAME}/docker-compose_${ARCH}" ] ; then
+if [ -d "/docker-bins" ] ; then
   echo "Copying over docker and docker-compose binaries"
-  mv "/docker-compose-${DISTRONAME}/docker-compose_${ARCH}" /usr/local/bin/docker-compose
-  mv "/docker-compose-${DISTRONAME}/docker_${ARCH}" /usr/local/bin/docker
-  chmod +x /usr/local/bin/docker-compose
-  rm -rf /docker-compose-ubuntu /docker-compose-alpine
+  mkdir -p /usr/local/lib/docker/cli-plugins
+  mv "/docker-bins/docker-compose_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-compose
+  mv "/docker-bins/docker_${ARCH}" /usr/local/bin/docker
+  mv "/docker-bins/compose-switch_${ARCH}" /usr/local/bin/docker-compose
+  rm -rf /docker-bins
 else
   echo "**** docker and docker-compose already installed, skipping ****"
 fi
@@ -30,7 +26,7 @@ if [ -S /var/run/docker.sock ]; then
     usermod -aG "${DOCKER_NAME}" abc
   fi
 elif [ -n "$DOCKER_HOST" ]; then
-  echo "**** /var/run/docker.sock is not mapped, therefore, docker client will only work with a remote docker service ****"
+  echo "**** Remote docker service $DOCKER_HOST will be used ****"
 else
   echo "**** Please map /var/run/docker.sock for access to docker service on host. Alternatively you can manually define a remote host address with the docker cli option -H ****"
 fi
