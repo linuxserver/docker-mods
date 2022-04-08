@@ -19,8 +19,9 @@ jobs:
           if [ -z ${COMPOSE_RELEASE+x} ]; then COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||'); fi
           if [ -z ${DOCKER_RELEASE+x} ]; then DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||'); fi
           COMBINED_VERSION=${DOCKER_RELEASE}-${COMPOSE_RELEASE}
+          echo "**** Combined version is ${COMBINED_VERSION} ****"
           echo "COMBINED_VERSION=${COMBINED_VERSION}" >> $GITHUB_ENV
-          if ! curl -fsL "https://download.docker.com/linux/static/stable/armhf/docker-${DOCKER_RELEASE}.tgz" > /dev/null; then echo "Docker binaries don't seem to be uploaded yet. Exiting." && exit 1; else echo "Docker binaries seem to be uploaded, continuing with build"; fi
+          if curl -fSsL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_RELEASE}.tgz" >/dev/null && curl -fSsL "https://download.docker.com/linux/static/stable/armhf/docker-${DOCKER_RELEASE}.tgz" >/dev/null && curl -fSsL "https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz" >/dev/null; then echo "Docker tarballs exist, proceeding"; else echo "Docker tarballs are missing, exiting!" && exit 1; fi
           # Build image
           docker build --no-cache --build-arg COMPOSE_RELEASE=${COMPOSE_RELEASE} --build-arg DOCKER_RELEASE=${DOCKER_RELEASE} -t ${{ github.sha }} .
 
