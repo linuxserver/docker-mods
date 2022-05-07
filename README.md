@@ -1,6 +1,7 @@
 # About
 A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Lidarr Docker container that uses ffmpeg and a script to automatically convert downloaded FLAC files to MP3s.  Default output quality is 320Kbps constant bit rate.
-Advanced options act as a light wrapper to ffmpeg, allowing conversion to any supported audio format, including AAC, AC3, and Opus.
+Advanced options act as a light wrapper to ffmpeg, allowing conversion to any supported audio format, including AAC, AC3, Opus, and many others.
+A [Batch Mode](./README.md#batch-mode) is also supported that allows usage outside of Lidarr.
 
 >**NOTE:** This mod supports Linux OSes only.
 
@@ -40,7 +41,7 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
 
    2. Start the container.
 
-3. After the above configuration is complete, to use ffmpeg, configure a custom script from Lidarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
+3. Configure a custom script from Lidarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
    `/usr/local/bin/flac2mp3.sh`
 
    *Example*  
@@ -51,65 +52,81 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
    *For any other setting, you **must** either use one of the [included wrapper scripts](./README.md#included-wrapper-scripts) or create a custom script with the command line options you desire.  See the [Syntax](./README.md#syntax) section below.*
 
 ## Usage
-New file(s) with an MP3 extension will be placed in the same directory as the original FLAC file(s) and have the same owner and permissions. Existing MP3 files with the same track name will be overwritten.
+New file(s) with will be placed in the same directory as the original FLAC file(s) (unless redirected with the `--output` option below) and have the same owner and permissions. Existing files with the same track name will be overwritten.
 
-If you've configured Lidarr's **Recycle Bin** path correctly, the original audio file will be moved there.  
-![danger] **NOTE:** If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.
+By default, if you've configured Lidarr's **Recycle Bin** path correctly, the original audio file will be moved there.  
+![danger] **NOTE:** If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.  This behavior may be modifed with the `--keep-file` option.
 
 ### Syntax
 >**Note:** The **Arguments** field for Custom Scripts was removed in Lidarr release [v0.7.0.1347](https://github.com/lidarr/Lidarr/commit/b9d240924f8965ebb2c5e307e36b810ae076101e "Lidarr commit notes") due to security concerns.
 To support options with this version and later, a wrapper script can be manually created that will call *flac2mp3.sh* with the required arguments.
 
-The script accepts five command line options:
+#### Command Line Options and Arguments
+The script may be called with optional command line arguments.
 
-`[-d] [-b <bitrate> | -v <quality> | -a "<options>" -e <extension>]`
+The syntax for the command line is:  
+`flac2mp3 [OPTIONS] [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} "<options>" {-e|--extension} <extension>]`  
+OR  
+`flac2mp3 [OPTIONS] {-f|--file} <audio_file>`
 
-The `-b bitrate` option sets the output quality in constant bits per second (CBR).
+Where:
 
-The `-v quality` option sets the output quality using a variable bit rate (VBR) where `quality` is a value between 0 and 9, with 0 being the highest quality.  
-See the [FFmpeg MP3 Encoding Guide](https://trac.ffmpeg.org/wiki/Encode/MP3) for more details.  
-
-The `-a "options"` setting is used in conjunction with `-e` to set advanced ffmpeg options.  The specified command line options replace all script defaults and are sent directly to ffmpeg.  The `options` value must be enclosed in quotes.  
-![danger] **WARNING:** When using `-a`, you must specify an audio codec (via `-c:a`) or the resulting file will contain no audio.  
-![danger] **WARNING:** Invalid `options` could result in script failure!  
-See [FFmpeg Options](https://ffmpeg.org/ffmpeg.html#Options) for details on valid options.  
-See [Guidelines for high quality audio encoding](https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio) for more information.
-
-The `-e extension` option sets the output file extension, and must be used in conjunction with `-a`.  The `extension` may be prefixed by a dot (".") or not.
+Option|Argument|Description
+---|---|---
+-d, --debug|\[\<level\>\]|Enables debug logging. Level is optional.<br/>Default of 1 (low).<br/>2 includes JSON output.
+-b, --bitrate|\<bitrate\>|Sets the output quality in constant bits per second (CBR).<br/>Examples: 160k, 240k, 300000<br/>**Note:** May not be specified with `-v`, `-a`, or `-e`.
+-v, --quality|\<quality\>|Sets the output variable bit rate (VBR).<br/>Specify a value between 0 and 9, with 0 being the highest quality.<br/>See the [FFmpeg MP3 Encoding Guide](https://trac.ffmpeg.org/wiki/Encode/MP3) for more details.<br/>**Note:** May not be specified with `-b`, `-a`, or `-e`.
+-a, --advanced|\"\<options\>\"|Advanced ffmpeg options.<br/>The specified `options` replace all script defaults and are sent directly to ffmpeg.<br/>The `options` value must be enclosed in quotes.<br/>See [FFmpeg Options](https://ffmpeg.org/ffmpeg.html#Options) for details on valid options, and [Guidelines for high quality audio encoding](https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio) for suggested usage.<br/>**Note:** Requires the `-e` option to also be specified. May not be specified with `-v` or `-b`.<br/>![danger] **WARNING:** You must specify an audio codec (by including a `-c:a <codec>` ffmpeg option) or the resulting file will contain no audio!<br/>![danger] **WARNING:** Invalid `options` could result in script failure!
+-e, --extension|\<extension\>|Sets the output file extension<br/>The extension may be prefixed by a dot (".") or not.<br/>**Note:** Requires the `-a` option to also be specified. May not be specified with `-v` or `-b`.
+-f, --file|<audio_file>|If included, the script enters **[Batch Mode](./README.md#batch-mode)** and converts the specified audio file.<br/>![danger] **WARNING:** Do not use this argument when called from Lidarr!
+-o, --output|\<directory\>|Converted audio file(s) are saved to `directory` instead of being located in the same directory as the source audio file.<br/>The path will be created if it does not exist.
+-k, --keep-file| |Do not delete the source file or move it to the Lidarr Recycle bin.<br/>**Note:** This also disables triggering a Lidarr rescan after conversion.
+--help| |Display help and exit.
+--version| |Display version and exit.
 
 If neither `-b`, `-v`, `-a`, or `-e` options are specified, the script will default to a constant 320Kbps MP3.
 
-The `-d` option enables debug logging.
-
-#### Technical notes on `-a` advanced options
-The `-a` option effectively makes the script a somewhat generic wrapper for ffmpeg.  FFmpeg is executed once per track with only the loglevel, input filename, and output filename being set.  All other options are passed unparsed to the command line.  
+#### Technical notes on advanced options
+The `-a` option effectively makes the script a generic wrapper for ffmpeg.  FFmpeg is executed once per track with only the loglevel, input filename, and output filename being set.  All other options are passed unparsed to the command line.  
 
 The exact format of the executed ffmpeg command is:
 ```
-ffmpeg -loglevel error -i "Original.flac" ${Options} "NewTrack${Extension}"
+ffmpeg -loglevel error -i "input.flac" ${options} "output.${extension}"
 ```
 
 ### Examples
 ```
--b 320k        # Output 320 kbit/s MP3 (non VBR; same as default behavior)
+-b 320k        # Output 320 kbit/s MP3 (non-VBR; same as default behavior)
 -v 0           # Output variable bitrate MP3, VBR 220-260 kbit/s
--d -b 160k     # Enable debugging, and output a 160 kbit/s MP3
--a "-c:v libtheora -map 0 -q:v 10 -c:a libopus -b:a 192k" -e .opus     # Convert to Opus format, VBR 192 kbit/s, cover art
--a "-y -map 0 -c:a aac -b:a 240k -c:v copy" -e mp4     # Convert to MP4 format, using AAC 240 kbit/s audio, cover art, overwrite file
+-d -b 160k     # Enable debugging level 1, and output a 160 kbit/s MP3
+-a "-c:v libtheora -map 0 -q:v 10 -c:a libopus -b:a 192k" -e .opus
+               # Convert to Opus format, VBR 192 kbit/s, cover art, no overwright
+-a "-y -map 0 -c:a aac -b:a 240k -c:v copy" -e mp4
+               # Convert to MP4 format, using AAC 240 kbit/s audio, cover art, overwrite file
+--file "/path/to/audio/a-ha/Hunting High and Low/01 Take on Me.flac"
+               # Batch Mode
+               # Output 320kbit/s MP3
+-o "/path/to/audio" -k
+               # Place the converted file(s) in the specified directory and do not delete the original audio file(s).
 ```
 
-### Included Wrapper Scripts
+### Wrapper Scripts
+To supply arguments to the script, one of the included wrapper scripts may be used or a custom wrapper script must be created.
+
+#### Included Wrapper Scripts
 For your convenience, several wrapper scripts are included in the `/usr/local/bin/` directory.  
 You may use any of these scripts in place of the `flac2mp3.sh` mentioned in the [Installation](./README.md#installation) section above.
 
 ```
-flac2mp3-debug.sh        # Enable debugging
+flac2mp3-debug.sh        # Enable debugging, level 1
+flac2mp3-debug-2.sh      # Enable debugging, level 2
 flac2mp3-vbr.sh          # Use variable bit rate MP3, quality 0
 flac2opus.sh             # Convert to Opus format using .opus extension, 192 kbit/s, no covert art
+flac2alac.sh             # Convert to Apple Lossless using an .m4a extension
 ```
 
-### Example Wrapper Script
-To configure the middle entry from the [Examples](./README.md#examples) section above, create and save a file called `flac2mp3-custom.sh` to `/config` containing the following text:
+#### Example Wrapper Script
+To configure an entry from the [Examples](./README.md#examples) section above, create and save a file called `flac2mp3-custom.sh` to `/config` containing the following text:
 ```shell
 #!/bin/bash
 
@@ -125,7 +142,24 @@ Then put `/config/flac2mp3-custom.sh` in the **Path** field in place of `/usr/lo
 >**Note:** If you followed the Linuxserver.io recommendations when configuring your container, the `/config` directory will be mapped to an external storage location.  It is therefore recommended to place custom scripts in the `/config` directory so they will survive container updates, but they may be placed anywhere that is accessible by Lidarr.
 
 ### Triggers
-The only events/notification triggers that have been tested are **On Release Import** and **On Upgrade**
+The only events/notification triggers that are supported are **On Release Import** and **On Upgrade**
+
+### Batch Mode
+Batch mode allows the script to be executed independently of Lidarr.  It converts the file specified on the command line and ignores any environment variables that are normally expected to be set by the music management program.
+
+Using this function, you can easily process all of your audio files in any subdirectory at once.  See the [Batch Example](./README.md#batch-example) below.
+
+#### Script Execution Differences in Batch Mode
+Because the script is not called from within Lidarr, expect the following behavior while in Batch Mode:
+* *The file name must be specified on the command line*<br/>(The `-f` option places the script in Batch Mode)
+* *Lidarr APIs are not called and its database is not updated.*<br/>This may require a manual rescan of converted music files.
+* *Original audio files are deleted.*<br/>The Recycle Bin function is not available. (Modifiable using the `-k` option.)
+
+#### Batch Example
+To convert all .FLAC files in the `/music` directory to Apple Lossless Audio Codec (ALAC), enter the following at the Linux command line:
+```shell
+find /music/ -type f -name "*.flac" | while read file; do /usr/local/bin/flac2mp3.sh -f "$file" -a "-c:a alac" -e m4a; done
+```
 
 ### Logs
 A log file is created for the script activity called:
@@ -135,7 +169,7 @@ A log file is created for the script activity called:
 This log can be downloaded from Lidarr under *System* > *Log Files*
 
 Log rotation is performed, with 5 log files of 1MB each kept, matching Lidarr's log retention.
->![danger] **NOTE:** If debug logging is enabled, the log file can grow very large very quickly.  *Do not leave debug logging enabled permanently.*
+>![danger] **NOTE:** If debug logging is enabled with a level above 1, the log file can grow very large very quickly.  *Do not leave high-level debug logging enabled permanently.*
 
 ## Credits
 This would not be possible without the following:
