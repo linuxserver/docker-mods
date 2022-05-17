@@ -93,6 +93,7 @@ for CONTAINER in ${AUTO_GEN}; do
     location ~ ${location} {
         include /config/nginx/proxy.conf;
         include /config/nginx/resolver.conf;
+        proxy_ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
         set \$upstream_app <container_name>;
         set \$upstream_port <port_number>;
         set \$upstream_proto <http or https>;
