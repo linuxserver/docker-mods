@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.13 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.14 as buildstage
 
 ARG PS_VERSION
 
@@ -7,8 +7,8 @@ RUN \
     curl \
     jq && \
   if [ -z ${PS_VERSION+x} ]; then \
-    PS_VERSION=$(curl -sX GET "https://api.github.com/repos/PowerShell/PowerShell/releases/latest" \
-      | jq -r .tag_name | awk '{print substr($1,2); }'); \
+    PS_VERSION=$(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/powershell-release?tag=stable \
+      | sed 's|.*tag/v||g'); \
   fi && \
   mkdir -p /root-layer/powershell && \
   curl -o \

@@ -16,7 +16,7 @@ jobs:
       - name: Build image
         run: |
           # Set version
-          PS_VERSION=$(curl -sX GET "https://api.github.com/repos/PowerShell/PowerShell/releases/latest" | jq -r .tag_name | awk '{print substr($1,2); }')
+          PS_VERSION=$(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/powershell-release?tag=stable | sed 's|.*tag/v||g')
           echo "PS_VERSION=${PS_VERSION}" >> $GITHUB_ENV
           # Build image
           docker build --no-cache --build-arg PS_VERSION=${PS_VERSION} -t ${{ github.sha }} .
