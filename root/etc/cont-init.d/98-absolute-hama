@@ -9,11 +9,12 @@ fi
 # clone or update Absolute Series Scanner repo
 if [ ! -d /config/absolute ]; then
     echo "**** no scanner repo found, cloning. ****"
-    git clone --depth 1 https://github.com/ZeroQI/Absolute-Series-Scanner /config/absolute
+    s6-setuidgid abc git clone --depth 1 https://github.com/ZeroQI/Absolute-Series-Scanner /config/absolute
 else
     echo "**** updating scanner repo ****"
-    git -C /config/absolute pull
+    s6-setuidgid abc git -C /config/absolute pull
 fi
+chown -R abc:abc /config/absolute
 
 scannerdir="/config/Library/Application Support/Plex Media Server/Scanners/Series"
 mkdir -p "$scannerdir"
@@ -35,9 +36,9 @@ plugindir="/config/Library/Application Support/Plex Media Server/Plug-ins"
 # clone or update Hama.bundle repo
 if [ ! -d "$plugindir/Hama.bundle" ]; then
     echo "**** no agent found, cloning ****"
-    git clone --depth 1 https://github.com/ZeroQI/Hama.bundle "$plugindir/Hama.bundle"
+    s6-setuidgid abc git clone --depth 1 https://github.com/ZeroQI/Hama.bundle "$plugindir/Hama.bundle"
 else
     echo "**** pulling latest update ****"
-    git -C "$plugindir/Hama.bundle" pull
+    s6-setuidgid abc git -C "$plugindir/Hama.bundle" pull
 fi
 chown -R abc:abc "$plugindir/Hama.bundle"
