@@ -4,7 +4,7 @@ mods:
     container_mods:
       - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
   code-server:
-    mod_count: 23
+    mod_count: 24
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
@@ -16,6 +16,7 @@ mods:
       - julia: https://github.com/linuxserver/docker-mods/tree/code-server-julia
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - npmglobal: https://github.com/linuxserver/docker-mods/tree/code-server-npmglobal
+      - nvm: https://github.com/linuxserver/docker-mods/tree/code-server-nvm
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
       - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
@@ -77,7 +78,7 @@ mods:
       - openssh-client: https://github.com/linuxserver/docker-mods/tree/openssh-server-openssh-client
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   openvscode-server:
-    mod_count: 20
+    mod_count: 21
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
@@ -88,6 +89,7 @@ mods:
       - julia: https://github.com/linuxserver/docker-mods/tree/code-server-julia
       - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
       - npmglobal: https://github.com/linuxserver/docker-mods/tree/code-server-npmglobal
+      - nvm: https://github.com/linuxserver/docker-mods/tree/code-server-nvm
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
       - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
