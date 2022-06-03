@@ -12,7 +12,7 @@ If adding multiple mods, enter them in an array separated by `|`, such as `DOCKE
 
 The file gets placed in your persistant data, at `/config/nginx/cf_real-ip.conf`
 
-To enable nginx to read the ips from this file, you need the following in your nginx.conf:
+To enable nginx to read the ips from this file, you need the following in your nginx.conf (http section):
 
 ```nginx
 real_ip_header X-Forwarded-For;
@@ -23,6 +23,29 @@ include /config/nginx/cf_real-ip.conf;
 ~~I also recommend including your docker-network as a valid ip `set_real_ip_from 172.17.0.0/16;` in the snippet above.~~
 
 This mod now also *tries* to set the real ip from the interfaces in the container.
+
+## Cloudflare tunnels
+
+In case you use cloudflare tunnels, real IP might be reported in containers as 127.0.0.1
+In this case, please add below to HTTP section of nginx.conf.
+
+From:
+
+
+```nginx
+real_ip_header X-Forwarded-For;
+real_ip_recursive on;
+include /config/nginx/cf_real-ip.conf;
+```
+
+to:
+
+```nginx
+real_ip_header X-Forwarded-For;
+real_ip_recursive on;
+include /config/nginx/cf_real-ip.conf;
+set_real_ip_from 127.0.0.1;
+```
 
 ## Versions
 
