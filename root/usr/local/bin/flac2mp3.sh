@@ -292,7 +292,8 @@ function rescan {
   echo "$flac2mp3_message" | log
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Forcing rescan of artist '$lidarr_artist_id'. Calling Lidarr API 'RefreshArtist' using POST and URL '$flac2mp3_api_url/command'" | log
   flac2mp3_result=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
-    -d "{\"name\": 'RefreshArtist', \"artistId\": $lidarr_artist_id}" \
+    -H "Content-Type: application/json" \
+    -d "{\"name\": \"RefreshArtist\", \"artistId\": $lidarr_artist_id}" \
     -X POST "$flac2mp3_api_url/command")
   [ $flac2mp3_debug -ge 2 ] && echo "API returned: $flac2mp3_result" | awk '{print "Debug|"$0}' | log
   flac2mp3_jobid="$(echo $flac2mp3_result | jq -crM .id)"
@@ -309,6 +310,7 @@ function check_rescan {
   for ((i=1; i <= 15; i++)); do
     [ $flac2mp3_debug -ge 1 ] && echo "Debug|Checking job $flac2mp3_jobid completion, try #$i. Calling Lidarr API using GET and URL '$flac2mp3_api_url/command/$flac2mp3_jobid'" | log
     flac2mp3_result=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
+      -H "Content-Type: application/json" \
       -X GET "$flac2mp3_api_url/command/$flac2mp3_jobid")
     [ $flac2mp3_debug -ge 2 ] && echo "API returned: $flac2mp3_result" | awk '{print "Debug|"$0}' | log
     if [ "$(echo $flac2mp3_result | jq -crM .status)" = "completed" ]; then
@@ -373,6 +375,7 @@ elif [ -f "$flac2mp3_config" ]; then
   # Check Lidarr version
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Getting Lidarr version. Calling Lidarr API using GET and URL '$flac2mp3_api_url/system/status'" | log
   flac2mp3_result=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
+    -H "Content-Type: application/json" \
     -X GET "$flac2mp3_api_url/system/status")
   flac2mp3_return=$?; [ "$flac2mp3_return" != 0 ] && {
     flac2mp3_message="Error|[$flac2mp3_return] curl error when parsing: \"$flac2mp3_api_url/system/status\""
@@ -386,6 +389,7 @@ elif [ -f "$flac2mp3_config" ]; then
   # Get RecycleBin
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Getting Lidarr RecycleBin. Calling Lidarr API using GET and URL '$flac2mp3_api_url/config/mediamanagement'" | log
   flac2mp3_result=$(curl -s -H "X-Api-Key: $flac2mp3_apikey" \
+    -H "Content-Type: application/json" \
     -X GET "$flac2mp3_api_url/config/mediamanagement")
   flac2mp3_return=$?; [ "$flac2mp3_return" != 0 ] && {
     flac2mp3_message="Error|[$flac2mp3_return] curl error when parsing: \"$flac2mp3_api_url/v3/config/mediamanagement\""
@@ -467,6 +471,9 @@ BEGIN {
   RS="|"
   IGNORECASE=1
   if (EXT == "") EXT=".mp3"
+  if (Debug == 0) FFmpegLOG="error"
+  else if (Debug == 1) FFmpegLOG="warning"
+  else if (Debug >= 2) FFmpegLOG="info"
   if (Bitrate) {
     if (Debug >= 1) print "Debug|Using constant bitrate of "Bitrate
     BrCommand="-b:a "Bitrate
@@ -489,8 +496,9 @@ BEGIN {
   if (FFmpegADV) FFmpegOPTS=FFmpegADV
   else FFmpegOPTS="-c:v copy -map 0 -y -acodec libmp3lame "BrCommand" -write_id3v1 1 -id3v2_version 3"
   # Convert the track
-  if (Debug >= 1) print "Debug|Executing: nice "FFmpeg" -loglevel error -i \""Track"\" "FFmpegOPTS" \""NewTrack"\""
-  Result=system("nice "FFmpeg" -loglevel error -i \""Track"\" "FFmpegOPTS" \""NewTrack"\" 2>&1")
+  if (Debug >= 1) print "Debug|Executing: nice "FFmpeg" -loglevel "FFmpegLOG" -nostdin -i \""Track"\" "FFmpegOPTS" \""NewTrack"\""
+  Result=system("nice "FFmpeg" -loglevel "FFmpegLOG" -nostdin -i \""Track"\" "FFmpegOPTS" \""NewTrack"\" 2>&1")
+  if (Debug >= 2) print "Debug|ffmpeg exited"
   if (Result) {
     print "Error|Exit code "Result" converting \""Track"\""
   } else {
@@ -523,6 +531,7 @@ BEGIN {
 
 # Check for awk script completion
 flac2mp3_return="${PIPESTATUS[1]}"    # captures awk exit status
+[ $flac2mp3_debug -ge 2 ] && echo "Debug|awk exited with code: $flac2mp3_return" | log
 if [ "$flac2mp3_return" != 0 ]; then
   flac2mp3_message="Error|[$flac2mp3_return] Script exited abnormally.  File permissions issue?"
   echo "$flac2mp3_message" | log
