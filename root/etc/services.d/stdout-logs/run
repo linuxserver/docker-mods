@@ -2,5 +2,5 @@
 
 TAIL_LOGS=$(echo "$LOGS_TO_STDOUT" | sed 's#|# -f #g')
 
-echo "Executing: tail -f $TAIL_LOGS"
-tail -f $TAIL_LOGS
+echo "Executing: tail -F $TAIL_LOGS"
+tail -F $TAIL_LOGS
