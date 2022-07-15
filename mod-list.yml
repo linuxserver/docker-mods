@@ -2,7 +2,7 @@ mods:
   calibre-web:
     mod_count: 1
     container_mods:
-      - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
+      - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
   code-server:
     mod_count: 24
     container_mods:
@@ -141,9 +141,10 @@ mods:
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
   universal:
-    mod_count: 10
+    mod_count: 11
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
+      - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
       - cloudflared: https://github.com/linuxserver/docker-mods/tree/universal-cloudflared
       - cron: https://github.com/linuxserver/docker-mods/tree/universal-cron
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
