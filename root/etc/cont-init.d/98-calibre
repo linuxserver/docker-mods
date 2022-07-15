@@ -1,0 +1,60 @@
+#!/usr/bin/with-contenv bash
+
+if [[ ! "$(uname -m)" == "x86_64" ]]; then
+cat <<-EOF
+    ********************************************************
+    ********************************************************
+    *                                                      *
+    *                         !!!!                         *
+    *        This mod is only supported on x86_64.         *
+    *                                                      *
+    ********************************************************
+    ********************************************************
+EOF
+exit 0
+fi
+
+if [ ! -f /usr/bin/apt ]; then
+cat <<-EOF
+    ********************************************************
+    ********************************************************
+    *                                                      *
+    *                         !!!!                         *
+    *    This mod is only supported on images using an     *
+    *                  Ubuntu base image.                  *
+    *                                                      *
+    ********************************************************
+    ********************************************************
+EOF
+exit 0
+fi
+
+export DEBIAN_FRONTEND="noninteractive"
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libGL.so.1 ]; then
+  PACKAGES+=("libgl1-mesa-glx")
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libxdamage.so.1 ]; then
+  PACKAGES+=("libxdamage1")
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libEGL.so.1 ]; then
+  PACKAGES+=("libegl1")
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0 ]; then
+  PACKAGES+=("libxkbcommon0")
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libOpenGL.so.0 ]; then
+  PACKAGES+=("libopengl0")
+fi
+
+if [ -v "PACKAGES[@]" ]; then
+  apt-get install -y "${PACKAGES[@]}"
+fi
+
+if [ ! -e /usr/bin/calibre-server ]; then
+  /app/calibre/calibre_postinstall
+fi
