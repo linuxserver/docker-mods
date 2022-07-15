@@ -2,7 +2,7 @@ mods:
   calibre-web:
     mod_count: 1
     container_mods:
-      - calibre: https://github.com/linuxserver/docker-calibre-web/tree/calibre
+      - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
   code-server:
     mod_count: 24
     container_mods:
@@ -44,8 +44,9 @@ mods:
       - amd: https://github.com/linuxserver/docker-mods/tree/jellyfin-amd
       - opencl-intel: https://github.com/linuxserver/docker-mods/tree/jellyfin-opencl-intel
   lazylibrarian:
-    mod_count: 1
+    mod_count: 2
     container_mods:
+      - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/lazylibrarian-ffmpeg
   letsencrypt:
     mod_count: 3
