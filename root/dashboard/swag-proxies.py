@@ -10,7 +10,7 @@ import urllib3
 
 def find_apps():
     apps = {}
-    file_paths = glob.glob("/config/nginx/**/**", recursive=True)
+    file_paths = glob.glob("/config/nginx/**/**.conf", recursive=True)
     auto_confs = glob.glob("/etc/nginx/http.d/*", recursive=True)
     file_paths.extend(auto_confs)
     for file_path in file_paths:
