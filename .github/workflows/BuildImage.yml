@@ -15,16 +15,22 @@ jobs:
 
       - name: Build image
         run: |
-          docker build --no-cache -t ${{ github.sha }} .
-
+          # Set version
+          CALIBRE_RELEASE=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]')
+          echo "CALIBRE_RELEASE=${CALIBRE_RELEASE}" >> $GITHUB_ENV
+          # Build image
+          docker build --no-cache --build-arg CALIBRE_RELEASE=${CALIBRE_RELEASE} -t ${{ github.sha }} .
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}-${{ github.sha }}
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-
       - name: Credential check
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
@@ -38,25 +44,25 @@ jobs:
             echo "::error::See https://github.com/linuxserver/docker-mods/blob/master/README.md for more information/instructions."
             exit 1
           fi
-
       - name: Login to GitHub Container Registry
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
           echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.CR_USER }} --password-stdin
-
       - name: Push tags to GitHub Container Registry
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}-${{ github.sha }}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-
       - name: Login to DockerHub
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
         run: |
           echo ${{ secrets.DOCKERPASS }} | docker login -u ${{ secrets.DOCKERUSER }} --password-stdin
-
       - name: Push tags to DockerHub
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
         run: |
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ env.CALIBRE_RELEASE }}-${{ github.sha }}
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
