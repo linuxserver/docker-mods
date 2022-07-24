@@ -1,12 +1,12 @@
 #!/usr/bin/with-contenv bash
 
-if [[ ! "$(uname -m)" == "x86_64" ]]; then
+if [[ "$(uname -m)" == "armv7l" ]]; then
 cat <<-EOF
     ********************************************************
     ********************************************************
     *                                                      *
     *                         !!!!                         *
-    *        This mod is only supported on x86_64.         *
+    *         This mod is not supported on armhf.          *
     *                                                      *
     ********************************************************
     ********************************************************
@@ -31,30 +31,59 @@ fi
 
 export DEBIAN_FRONTEND="noninteractive"
 
+PACKAGES+=("xz-utils")
+
 if [ ! -L /usr/lib/x86_64-linux-gnu/libGL.so.1 ]; then
-  PACKAGES+=("libgl1-mesa-glx")
+    PACKAGES+=("libgl1-mesa-glx")
 fi
 
 if [ ! -L /usr/lib/x86_64-linux-gnu/libxdamage.so.1 ]; then
-  PACKAGES+=("libxdamage1")
+    PACKAGES+=("libxdamage1")
 fi
 
 if [ ! -L /usr/lib/x86_64-linux-gnu/libEGL.so.1 ]; then
-  PACKAGES+=("libegl1")
+    PACKAGES+=("libegl1")
 fi
 
 if [ ! -L /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0 ]; then
-  PACKAGES+=("libxkbcommon0")
+    PACKAGES+=("libxkbcommon0")
 fi
 
 if [ ! -L /usr/lib/x86_64-linux-gnu/libOpenGL.so.0 ]; then
-  PACKAGES+=("libopengl0")
+    PACKAGES+=("libopengl0")
 fi
 
 if [ -v "PACKAGES[@]" ]; then
-  apt-get install -y "${PACKAGES[@]}"
+    apt-get install -y "${PACKAGES[@]}"
 fi
 
+echo "**** Fetching calibre bin ****" 
+if [ -z ${CALIBRE_RELEASE+x} ]; then
+    CALIBRE_RELEASE=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" \
+    | awk '/tag_name/{print $4;exit}' FS='[""]'); \
+fi 
+
+CALIBRE_RELEASE=$(echo "${CALIBRE_RELEASE}" | sed 's/^v//g' )
+
+mkdir -p \
+    /app/calibre
+
+if [ "$(uname -m)" == "x86_64" ]; then
+    curl -o \
+        /tmp/calibre.txz -L \
+        "https://download.calibre-ebook.com/${CALIBRE_RELEASE}/calibre-${CALIBRE_RELEASE}-x86_64.txz"
+fi
+
+if [ "$(uname -m)" == "aarch64" ]; then
+    curl -o \
+        /tmp/calibre.txz -L \
+        "https://download.calibre-ebook.com/${CALIBRE_RELEASE}/calibre-${CALIBRE_RELEASE}-arm64.txz"
+fi
+
+tar xf \
+    /tmp/calibre.txz \
+    -C /app/calibre  
+
 if [ ! -e /usr/bin/calibre-server ]; then
-  /app/calibre/calibre_postinstall
+    /app/calibre/calibre_postinstall
 fi

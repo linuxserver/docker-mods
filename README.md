@@ -1,6 +1,6 @@
-# Calibre - Docker mod for Ubuntu-based x86_64 containers
+# Calibre - Docker mod for 64-bit Ubuntu-based containers
 
-This mod adds the calibre binary to calibre-web, or other *Ubuntu-based* containers (**x86_64 only**), for ebook conversions.
+This mod adds the calibre binary to calibre-web, or other *64-bit Ubuntu-based* containers, for ebook conversions.
 
 In calibre-web docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:universal-calibre` to enable.
 
