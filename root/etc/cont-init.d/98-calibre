@@ -31,6 +31,7 @@ fi
 
 export DEBIAN_FRONTEND="noninteractive"
 
+CALIBRE_RELEASE="$(cat /CALIBRE_RELEASE)"
 PACKAGES+=("xz-utils")
 
 if [ ! -L /usr/lib/x86_64-linux-gnu/libGL.so.1 ]; then
@@ -60,10 +61,8 @@ fi
 echo "**** Fetching calibre bin ****" 
 if [ -z ${CALIBRE_RELEASE+x} ]; then
     CALIBRE_RELEASE=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" \
-    | awk '/tag_name/{print $4;exit}' FS='[""]'); \
+    | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's/^v//g'); \
 fi 
-
-CALIBRE_RELEASE=$(echo "${CALIBRE_RELEASE}" | sed 's/^v//g' )
 
 mkdir -p \
     /app/calibre
