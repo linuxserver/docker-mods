@@ -81,7 +81,9 @@ fi
 
 tar xf \
     /tmp/calibre.txz \
-    -C /app/calibre  
+    -C /app/calibre
+
+rm /tmp/calibre.txz
 
 if [ ! -e /usr/bin/calibre-server ]; then
     /app/calibre/calibre_postinstall
