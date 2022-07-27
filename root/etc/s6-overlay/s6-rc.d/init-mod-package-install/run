@@ -4,6 +4,7 @@ if [ -f "/mod-repo-packages-to-install.list" ]; then
     echo "**** Installing all mod packages ****"
     if [ -f /usr/bin/apt ]; then
         DEBIAN_FRONTEND="noninteractive"
+        apt-get update
         apt-get install -y \
             $(cat /mod-repo-packages-to-install.list)
     elif [ -f /usr/bin/apk ]; then
