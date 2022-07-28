@@ -6,7 +6,8 @@ chown -R ${ABC_USER}:${ABC_USER} /config/logs
 
 echo "**** installing docker and docker compose ****"
 if [ -f /usr/bin/apt ]; then
-    apt-get install -y \
+    echo "**** Adding docker-in-docker dependency packages to install list ****"
+    echo "\
         btrfs-progs \
         ca-certificates \
         curl \
@@ -16,9 +17,10 @@ if [ -f /usr/bin/apt ]; then
         openssl \
         pigz \
         xfsprogs \
-        xz-utils
+        xz-utils" >> /mod-repo-packages-to-install.list
 else
-    apk add --no-cache \
+    echo "**** Adding docker-in-docker dependency packages to install list ****"
+    echo "\
         btrfs-progs \
         curl \
         e2fsprogs \
@@ -28,7 +30,7 @@ else
         openssl \
         pigz \
         xfsprogs \
-        xz
+        xz" >> /mod-repo-packages-to-install.list
 fi
 ARCH=$(uname -m)
 if [ -d "/docker-tgz" ] ; then
