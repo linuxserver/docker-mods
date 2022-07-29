@@ -1,0 +1,88 @@
+#!/usr/bin/with-contenv bash
+
+CONFIG_PATH="/config/crowdsec/"
+LIB_PATH="/usr/local/lua/crowdsec/"
+DATA_PATH="/var/lib/crowdsec/lua/"
+
+echo "**** Configuring CrowdSec nginx Bouncer ****"
+
+# If API keys are missing, disable mod and exit
+if [[ -z $CROWDSEC_API_KEY ]] || [[ -z $CROWDSEC_LAPI_URL ]]; then
+    echo "**** Missing API key or CrowdSec LAPI URL, cannot configure bouncer ****"
+    exit 1
+fi
+
+echo "\
+    gettext \
+    lua5.1 \
+    lua5.1-cjson \
+    lua-resty-http \
+    lua-sec \
+    nginx-mod-http-lua" >> /mod-repo-packages-to-install.list
+
+# Download nginx bouncer
+if [ -z ${CROWDSEC_VERSION+x} ]; then \
+    CROWDSEC_VERSION=$(curl -sX GET "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]');
+fi
+
+curl -so \
+    /tmp/crowdsec.tar.gz -L \
+    "https://github.com/crowdsecurity/cs-nginx-bouncer/releases/download/${CROWDSEC_VERSION}/crowdsec-nginx-bouncer.tgz"
+
+mkdir -p /tmp/crowdsec
+
+tar xf \
+    /tmp/crowdsec.tar.gz -C \
+    /tmp/crowdsec --strip-components=1
+
+# Inject API keys into config file
+mkdir -p "${CONFIG_PATH}"
+API_KEY=${CROWDSEC_API_KEY} CROWDSEC_LAPI_URL=${CROWDSEC_LAPI_URL} envsubst < /tmp/crowdsec/lua-mod/config_example.conf > "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+
+# Change config path
+sed -i "s|/etc/crowdsec/bouncers/|${CONFIG_PATH}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
+
+# Copy files
+mkdir -p ${DATA_PATH}/templates/
+cp -r /tmp/crowdsec/lua-mod/templates/* ${DATA_PATH}/templates/
+
+mkdir -p ${LIB_PATH}plugins/crowdsec
+cp -r /tmp/crowdsec/lua-mod/lib/* ${LIB_PATH}
+
+cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /etc/nginx/http.d
+
+# Sed in ReCaptcha keys
+sed -i -r "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -i -r "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+
+# Sed in crowdsec include
+if ! grep -q '[^#]include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf' && ! grep -q '[^#]include /etc/nginx/conf.d/\*.conf;' '/config/nginx/nginx.conf'; then
+    if grep -q '#include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf'; then
+        # Enable http.d include
+        sed -i 's|#include /etc/nginx/http.d/\*.conf;|include /etc/nginx/http.d/\*.conf;|' /config/nginx/nginx.conf
+    else
+        # Warn about missing http.d include
+        echo "
+        ********************************************************************
+        *    Warning: Your nginx.conf is missing required settings         *
+        *    Please add:                                                   *
+        *        include /etc/nginx/http.d/*.conf;                         *
+        *    to the http{} block and restart the container.                *
+        *                                                                  *
+        *    The CrowdSec bouncer will not function until this is done.    *
+        ********************************************************************"
+    fi
+fi
+
+# Clean up
+rm -rf \
+    /tmp/crowdsec \
+    /tmp/crowdsec.tar.gz
+
+# Disable f2b if requested
+if [[ $CROWDSEC_F2B_DISABLE == "true" ]]; then
+    echo "**** Disabling fail2ban Service ****"
+    touch /etc/services.d/fail2ban/down
+fi
+
+echo "**** Successfully configured CrowdSec nginx Bouncer ${CROWDSEC_VERSION} ****"
