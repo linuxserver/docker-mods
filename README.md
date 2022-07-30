@@ -1,8 +1,8 @@
-# Golang - Docker mod for code-server
+# Golang - Docker mod for code-server and openvscode-server
 
-This mod adds golang/go to code-server.
+This mod adds golang/go to code-server and openvscode-server.
 
-In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-golang`
+In code-server or openvscode-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-golang`
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-golang|linuxserver/mods:code-server-mod2`
 
