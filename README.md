@@ -81,6 +81,7 @@ The most common paths to leverage for Linuxserver images are as follows. Assumin
 ```text
 .
 └── root
+    ├── defaults                      -- Any default config files you need to copy as part of the mod can be placed here
     └── etc
         ├── cont-init.d
         │   ├── 95-apt-get
@@ -90,10 +91,6 @@ The most common paths to leverage for Linuxserver images are as follows. Assumin
                 └── run               -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
 ```
 
-* root/etc/cont-init.d/<98-script-name> - Contains init logic scripts that run before the services in the container start these should exit 0 and are ordered by filename
-* root/etc/services.d/yourservice/run - Contains scripts that run in the foreground for persistent services IE NGINX
-* root/defaults - Contains base config files that are copied/modified on first spinup
-
 #### New (v3) mods
 
 The most common paths to leverage for Linuxserver images are as follows. Assuming a mod name of `universal-mymod`:
@@ -101,6 +98,7 @@ The most common paths to leverage for Linuxserver images are as follows. Assumin
 ```text
 .
 └── root
+    ├── defaults                              -- Any default config files you need to copy as part of the mod can be placed here
     └── etc
         └── s6-overlay
             └── s6-rc.d
