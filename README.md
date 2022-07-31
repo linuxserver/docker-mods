@@ -57,6 +57,10 @@ In this repository we will be going over two basic methods of making a Mod along
 
 One of the core ideas to remember when creating a Mod is that it can only contain a single image layer, the examples below will show you how to add files standardly and how to run complex logic to assemble the files in a build layer to copy them over into this single layer.
 
+### Mod Types
+
+We now support "hybrid" mods, targeting both s6 v2 and v3. All currently supported Linuxserver base images are using s6 v3, however, older pinned images, forked versions, etc. may still be using v2. To support both cases, simply include both sets of files (as below) in your mod, the built-in mod logic will pick the appropriate files to run. v2 mods will run on v3 base images for the forseeable future but we will not provide support for that configuration.
+
 ### Docker Mod Simple - just add scripts
 
 In this repository you will find the `Dockerfile` containing:
@@ -70,11 +74,102 @@ COPY root/ /
 
 For most users this will suffice and anything in the root/ folder of the repository will be added to the end users Docker container / path.
 
-The most common paths to leverage for Linuxserver images will be:
+#### Legacy (v2) mods
+
+The most common paths to leverage for Linuxserver images are as follows. Assuming a mod name of `universal-mymod`:
+
+```text
+.
+└── root
+    └── etc
+        ├── cont-init.d
+        │   ├── 95-apt-get
+        │   └── 98-universal-mymod    -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x` and is run ordered by filename.
+        └── services.d
+            └── mymod
+                └── run               -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
+```
 
 * root/etc/cont-init.d/<98-script-name> - Contains init logic scripts that run before the services in the container start these should exit 0 and are ordered by filename
-* root/etc/services.d/`yourservice`/run - Contains scripts that run in the foreground for persistent services IE NGINX
+* root/etc/services.d/yourservice/run - Contains scripts that run in the foreground for persistent services IE NGINX
 * root/defaults - Contains base config files that are copied/modified on first spinup
+
+#### New (v3) mods
+
+The most common paths to leverage for Linuxserver images are as follows. Assuming a mod name of `universal-mymod`:
+
+```text
+.
+└── root
+    └── etc
+        └── s6-overlay
+            └── s6-rc.d
+                ├── init-mods-end
+                │   └── dependencies.d
+                │       └── init-mods-universal-mymod
+                ├── init-mods-package-install
+                │   └── dependencies.d
+                │       └── init-mods-universal-mymod
+                ├── init-mods-universal-mymod
+                │   ├── dependencies.d
+                │   │   └── init-mods
+                │   ├── run                   -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x`.
+                │   ├── type                  -- This should container the string `oneshot`.
+                │   └── up                    -- This should contain the absolute path to `run` e.g. `/etc/s6-overlay/s6-rc.d/init-mods-universal-mymod/run`.
+                ├── svc-mods-universal-mymod
+                │   ├── dependencies.d
+                │   │   └── init-services
+                │   ├── run                   -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
+                │   └── type                  -- This should contain the string `longrun`.
+                └── user
+                    └── contents.d
+                        ├── init-mods-universal-mymod
+                        └── svc-mods-universal-mymod
+```
+
+Note: For `oneshot` scripts you can alternatively omit the `run` file entirely and use the [execlineb](https://skarnet.org/software/execline/execlineb.html) syntax in `up` if your requirements are simple enough.
+
+#### Installing Packages
+
+v3 mods make use of a single package install process for all mods to minimise the amount of calls to external endpoints and speed up the mod init process. If you need to install repo packages you should append them to `/mod-repo-packages-to-install.list` for repo packages or `/mod-pip-packages-to-install.list` for pip packages and the mod handler will install them for you. Make sure to handle both Ubuntu and Alpine package names if your mod needs to support both e.g.
+
+```bash
+#!/usr/bin/with-contenv bash
+
+## Ubuntu
+if [ -f /usr/bin/apt ]; then
+    echo "\
+        dnsutils \
+        net-tools \
+        iputils-ping \
+        traceroute" >> /mod-repo-packages-to-install.list
+
+fi
+# Alpine
+if [ -f /sbin/apk ]; then
+    echo "\
+        bind-tools \
+        net-tools" >> /mod-repo-packages-to-install.list
+fi
+```
+
+If your mod needs to take additional config steps *after* the packages have been installed, add a second `oneshot` script and make it depend on `init-mods-package-install` e.g.
+
+```text
+.
+└── root
+    └── etc
+        └── s6-overlay
+            └── s6-rc.d
+                └── init-mods-universal-mymod-postinstall
+                    ├── dependencies.d
+                    │   └── init-mods-package-install
+                    ├── run
+                    ├── type
+                    └── up
+```
+
+Services will always run last, controlled by their dependency on `init-services`.
 
 The example files in this repo contain a script to install sshutil and a service file to run the installed utility.
 
@@ -87,14 +182,14 @@ In this repository you will find the `Dockerfile.complex` containing:
 FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
 
 RUN \
- echo "**** install packages ****" && \
- apk add --no-cache \
-	curl && \
- echo "**** grab rclone ****" && \
- mkdir -p /root-layer && \
- curl -o \
-	/root-layer/rclone.deb -L \
-	"https://downloads.rclone.org/v1.47.0/rclone-v1.47.0-linux-amd64.deb"
+  echo "**** install packages ****" && \
+  apk add --no-cache \
+    curl && \
+  echo "**** grab rclone ****" && \
+  mkdir -p /root-layer && \
+  curl -o \
+    /root-layer/rclone.deb -L \
+    "https://downloads.rclone.org/v1.47.0/rclone-v1.47.0-linux-amd64.deb"
 
 # copy local files
 COPY root/ /root-layer/
