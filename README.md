@@ -104,25 +104,25 @@ The most common paths to leverage for Linuxserver images are as follows. Assumin
             └── s6-rc.d
                 ├── init-mods-end
                 │   └── dependencies.d
-                │       └── init-mods-universal-mymod
+                │       └── init-mod-universal-mymod
                 ├── init-mods-package-install
                 │   └── dependencies.d
-                │       └── init-mods-universal-mymod
-                ├── init-mods-universal-mymod
+                │       └── init-mod-universal-mymod
+                ├── init-mod-universal-mymod
                 │   ├── dependencies.d
                 │   │   └── init-mods
                 │   ├── run                   -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x`.
                 │   ├── type                  -- This should container the string `oneshot`.
-                │   └── up                    -- This should contain the absolute path to `run` e.g. `/etc/s6-overlay/s6-rc.d/init-mods-universal-mymod/run`.
-                ├── svc-mods-universal-mymod
+                │   └── up                    -- This should contain the absolute path to `run` e.g. `/etc/s6-overlay/s6-rc.d/init-mod-universal-mymod/run`.
+                ├── svc-mod-universal-mymod
                 │   ├── dependencies.d
                 │   │   └── init-services
                 │   ├── run                   -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
                 │   └── type                  -- This should contain the string `longrun`.
                 └── user
                     └── contents.d
-                        ├── init-mods-universal-mymod
-                        └── svc-mods-universal-mymod
+                        ├── init-mod-universal-mymod
+                        └── svc-mod-universal-mymod
 ```
 
 Note: For `oneshot` scripts you can alternatively omit the `run` file entirely and use the [execlineb](https://skarnet.org/software/execline/execlineb.html) syntax in `up` if your requirements are simple enough.
@@ -159,7 +159,7 @@ If your mod needs to take additional config steps *after* the packages have been
     └── etc
         └── s6-overlay
             └── s6-rc.d
-                └── init-mods-universal-mymod-postinstall
+                └── init-mod-universal-mymod-postinstall
                     ├── dependencies.d
                     │   └── init-mods-package-install
                     ├── run
