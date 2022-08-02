@@ -1,0 +1,22 @@
+#!/usr/bin/with-contenv bash
+
+if [ -d "/julia-bins" ]; then
+  echo "**** Installing/updating Julia ****"
+  ARCH=$(uname -m)
+  mkdir -p /julia
+  tar xf "/julia-bins/julia-${ARCH}.tar.gz" -C \
+    /julia --strip-components=1
+  rm -rf /usr/local/bin/julia
+  ln -s /julia/bin/julia /usr/local/bin/julia
+  chmod +x /julia/bin/julia
+else
+  echo "**** Latest stable version of Julia already installed ****"
+fi
+
+echo "**** Installing vscode extensions julia, julia-formatter and better-toml ****"
+# extensions
+install-extension julialang.language-julia
+# vscode-julia-formatter
+install-extension singularitti.vscode-julia-formatter
+# better-toml
+install-extension bungcip.better-toml
