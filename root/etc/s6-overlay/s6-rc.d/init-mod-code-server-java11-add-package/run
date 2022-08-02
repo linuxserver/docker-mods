@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** Adding java11 packages to install list ****"
+echo "openjdk-11-jdk" >> /mod-repo-packages-to-install.list
