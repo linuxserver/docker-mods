@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -s composer >/dev/null 2>&1 || ! dpkg -s php >/dev/null 2>&1; then
+    echo "**** adding php and composer to package install list ****"
+    echo "\
+        composer \
+        php" >> /mod-repo-packages-to-install.list
+else
+    echo "**** php already installed, skipping ****"
