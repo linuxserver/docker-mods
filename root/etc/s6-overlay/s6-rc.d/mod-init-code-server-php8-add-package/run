@@ -1,0 +1,25 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing nodejs dev environment ****"
+
+
+source /etc/lsb-release
+if [ "${DISTRIB_CODENAME}" = "bionic" ] || [ "${DISTRIB_CODENAME}" = "focal" ]; then
+    if ! dpkg -l | grep gnupg > /dev/null; then
+        apt-get update && apt-get install -y --no-install-recommends gnupg
+    fi
+    if [ ! -f "/etc/apt/sources.list.d/php8source.list" ]; then
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 14aa40ec0831756756d7f66c4f4ea0aae5267a6c
+        echo "deb https://ppa.launchpadcontent.net/ondrej/php/ubuntu ${DISTRIB_CODENAME} main" \
+            > /etc/apt/sources.list.d/php8source.list
+        echo "**** Adding php8.1 and composer to package install list ****"
+        echo "\
+            php8.1 \
+            composer" >> /mod-repo-packages-to-install.list
+    fi
+elif ! dpkg -l | grep php > /dev/null || ! dpkg -l | grep composer > /dev/null; then
+    echo "**** Adding php and composer to package install list ****"
+    echo "\
+        php \
+        composer" >> /mod-repo-packages-to-install.list
+fi
