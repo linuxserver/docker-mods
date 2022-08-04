@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -l | grep prolog > /dev/null; then
+    echo "**** Adding prolog to package install list ****"
+    echo "prolog" >> /mod-repo-packages-to-install.list
+else
+    echo "**** prolog already installed ****"
+fi    
