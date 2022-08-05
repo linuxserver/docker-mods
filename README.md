@@ -1,3 +1,5 @@
+# This mod is deprecated since Python2 is EOL.
+
 # Python2 - Docker mod for code-server
 
 This mod adds a python2 dev environment to code-server, to be installed/updated during container start.
