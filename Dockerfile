@@ -1,9 +1,9 @@
-FROM lsiobase/alpine:3.12 as buildstage
+FROM lsiobase/alpine:3.15 as buildstage
 
 RUN \
- apk add --no-cache \
+  apk add --no-cache \
     git && \
- git clone https://github.com/ohmyzsh/ohmyzsh.git /root-layer/.oh-my-zsh
+  git clone https://github.com/ohmyzsh/ohmyzsh.git /root-layer/.oh-my-zsh
 
 COPY root/ /root-layer/
 
