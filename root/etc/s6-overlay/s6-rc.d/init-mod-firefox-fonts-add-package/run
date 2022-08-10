@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+
+if ! apk info --installed ttf-dejavu >/dev/null; then
+    echo "**** Adding firefox-fonts packages to install list ****"
+    echo "\
+        ttf-dejavu \
+        font-noto-emoji \
+        font-croscore" >> /mod-repo-packages-to-install.list
+else
+    echo "**** Firefox-fonts packages already installed, skipping ****"
+fi
