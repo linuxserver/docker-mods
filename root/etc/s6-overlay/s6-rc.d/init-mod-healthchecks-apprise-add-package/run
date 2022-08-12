@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -f /usr/bin/apprise ]; then
+    echo "**** apprise not installed, adding to packages to be installed ****" 
+    echo "apprise" >> /mod-pip-packages-to-install.list
+    if ! pip3 -v COMMAND &> /dev/null; then
+        echo "*** Pip not installed, adding to packages to be installed ****" 
+        echo "python3 python3-pip" >> /mod-repo-packages-to-install.list
+    fi
+else
+    echo "**** apprise already installed, skipping ****"
+fi
