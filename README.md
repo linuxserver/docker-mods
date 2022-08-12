@@ -1,3 +1,6 @@
+# THIS MOD HAS BEEN DEPRECATED - Please use [swag-f2bdiscord](https://github.com/linuxserver/docker-mods/tree/swag-f2bdiscord) instead
+
+
 # F2B Discord Notification - Docker mod which allows Fail2Ban Discord embeds
 
 This mod enhances the Letsencrypt container adding better Fail2Ban notifications for discord.
