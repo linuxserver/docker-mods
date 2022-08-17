@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if [ -z `command -v autossh` ]; then
+    echo "**** Adding autossh to package install list ****"
+    echo "autossh" >> /mod-repo-packages-to-install.list
+else
+    echo "**** autossh already installed ****"
+fi
