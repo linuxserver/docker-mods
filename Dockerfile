@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as grab-stage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as grab-stage
 
 RUN \
  apk add --no-cache --upgrade \
