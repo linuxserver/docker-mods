@@ -1,0 +1,86 @@
+#!/usr/bin/with-contenv bash
+
+#Install dependancies
+apt install -y python3-click python3-yaml openssh-client
+
+#Grab Config
+mkdir -p /etc/rffmpeg
+mkdir -p /config/rffmpeg/.ssh
+touch /config/rffmpeg/.ssh/id_rsa
+chmod 600 /config/rffmpeg/.ssh/id_rsa
+if [ -f /config/rffmpeg/rffmpeg.yml ]; then
+    echo "**** rffmpeg.yml already present ****"
+    else
+    echo "**** Grabbing rffmpeg.yml from upstream ****"
+    curl -L -o /config/rffmpeg/rffmpeg.yml https://raw.githubusercontent.com/joshuaboniface/rffmpeg/master/rffmpeg.yml.sample  
+fi
+ln -s /config/rffmpeg/rffmpeg.yml /etc/rffmpeg/rffmpeg.yml
+
+#Grab rffmpeg
+mkdir -p /usr/local/bin/
+echo "**** Grabbing rffmpeg from upstream ****"
+if [ -f /usr/local/bin/rffmpeg ]; then
+    rm /usr/local/bin/rffmpeg
+fi
+curl -L -o /usr/local/bin/rffmpeg https://raw.githubusercontent.com/joshuaboniface/rffmpeg/master/rffmpeg
+chmod +x /usr/local/bin/rffmpeg
+ln -s /usr/local/bin/rffmpeg /usr/local/bin/ffprobe
+ln -s /usr/local/bin/rffmpeg /usr/local/bin/ffmpeg
+
+#WOL Support
+if [ $RFFMPEG_WOL = "native" ]
+then
+echo "**** Adding WOL Support ****"
+apt install -y wakeonlan iputils-ping
+mkdir -p /usr/local/bin/wol_rffmpeg
+curl -L -o /config/rffmpeg/wol https://raw.githubusercontent.com/junkman690/docker-mods/jellyfin-rffmpeg/wol
+chmod +x /config/rffmpeg/wol
+ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffmpeg
+ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffprobe
+fi
+
+if [ $RFFMPEG_WOL = "api" ]
+then
+echo "**** Adding WOL Support ****"
+apt install -y iputils-ping
+mkdir -p /usr/local/bin/wol_rffmpeg
+curl -L -o /config/rffmpeg/wol https://raw.githubusercontent.com/junkman690/docker-mods/jellyfin-rffmpeg/wol
+chmod +x /config/rffmpeg/wol
+ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffmpeg
+ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffprobe
+fi
+
+##Update rffmpeg.yml
+sed -i 's~#persist: "/run/shm"~persist: "/dev/shm"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#state: "/var/lib/rffmpeg"~state: "/config/rffmpeg"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#logfile: "/var/log/jellyfin/rffmpeg.log"~logfile: "/config/rffmpeg/rffmpeg.log"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#log_to_file: true~log_to_file: true~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#owner: jellyfin~owner: abc~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#group: sudo~group: abc~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#args:~args:~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#    - "-i"~    - "-i"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#    - "/var/lib/jellyfin/id_rsa"~    - "/config/rffmpeg/.ssh/id_rsa"~' /config/rffmpeg/rffmpeg.yml
+if [ ! -z "$RFFMPEG_USER" ]
+then
+sed -i "s~#user: jellyfin~user: $RFFMPEG_USER~" /config/rffmpeg/rffmpeg.yml
+fi
+
+#Fix permissions
+chown abc:abc -R /config/rffmpeg
+
+#Initialize database
+if [ -f /config/rffmpeg/rffmpeg.db ]; then
+    echo "**** DB already inialized ****"
+else
+    echo "**** Initialize database ****"
+    /usr/local/bin/rffmpeg init --yes
+	#Add host
+	if [ ! -z "$RFFMPEG_HOST" ]
+		then
+		s6-setuidgid abc /usr/local/bin/rffmpeg add --weight 1 $RFFMPEG_HOST
+	fi
+fi
+
+
+
+exit 0

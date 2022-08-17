@@ -1,0 +1,44 @@
+#!/usr/bin/bash
+
+mac="${RFFMPEG_HOST_MAC%\"}"
+mac="${mac#\"}"
+
+if [ -z $WOL_WAIT ]
+then
+WOL_WAIT=30
+fi
+
+ping -c1 -W1 $RFFMPEG_HOST >/dev/null 2>&1 && host=up || host=down
+
+if [ $RFFMPEG_WOL == "native" ] && [ ! -z $RFFMPEG_HOST ] && [ ! -z $RFFMPEG_HOST_MAC ] && [ ! -z $WOL_WAIT ] && [ $host == "down" ];
+then
+        echo WOL enabled
+        echo "$RFFMPEG_HOST" is down, sending wakeup to "$mac"
+        wakeonlan $mac
+        #wakeonlan -i $RFFMPEG_HOST $mac
+        echo "waiting $WOL_WAIT seconds for $RFFMPEG_HOST to wake"
+        sleep $WOL_WAIT
+fi
+
+if [ $RFFMPEG_WOL == "api" ] && [ ! -z $RFFMPEG_HOST ] && [ ! -z $RFFMPEG_HOST_MAC ] && [ $host == "down" ] && [ ! -z $WOL_WAIT ] && [ ! -z $WOL_API ] && [ ! -z $WOL_API_PORT ];
+then
+        echo WOL enabled
+        echo "$RFFMPEG_HOST" is down, sending wakeup via WOL_API: curl -X POST $WOL_API:$WOL_API_PORT/wol/"$mac"
+        curl -X POST $WOL_API:$WOL_API_PORT/wol/$mac
+        echo "waiting $WOL_WAIT seconds for $RFFMPEG_HOST to wake"
+        sleep $WOL_WAIT
+fi
+
+if [ ${0##*/} == "ffmpeg" ]
+then
+#echo ${0##*/}
+/usr/local/bin/ffmpeg "$@"
+fi
+
+if [ ${0##*/} == "ffprobe" ];
+then
+#echo ${0##*/}
+/usr/local/bin/ffprobe "$@"
+fi
+
+exit
