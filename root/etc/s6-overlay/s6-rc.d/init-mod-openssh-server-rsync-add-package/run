@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -f "/usr/bin/rsync" ]; then
+    echo "**** Adding rsync to package install list ****"
+    echo "rsync" >> /mod-repo-packages-to-install.list
+else
+    echo "**** rsync already installed ****"
+fi
