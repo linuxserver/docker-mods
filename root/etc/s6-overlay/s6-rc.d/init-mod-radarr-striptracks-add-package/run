@@ -1,0 +1,32 @@
+#!/usr/bin/with-contenv bash
+
+cat <<EOF
+----------------
+>>> Striptracks Mod by TheCaptain989 <<<
+Repos:
+  Dev/test: https://github.com/TheCaptain989/radarr-striptracks
+  Prod: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
+
+Version: $(cat /etc/version.tc989)
+----------------
+EOF
+
+# Determine if setup is needed
+if [ ! -f /usr/bin/mkvmerge ]; then
+    echo "**** Adding striptracks deps to package install list ****"
+    echo "mkvtoolnix" >> /mod-repo-packages-to-install.list
+else
+    echo "**** striptracks deps already installed, skipping ****"
+fi
+
+# Change ownership
+if [ $(stat -c '%G' /usr/local/bin/striptracks.sh) != "abc" ]; then
+    echo "Changing ownership on scripts."
+    chown abc:abc /usr/local/bin/striptracks*.sh
+fi
+
+# Make executable
+if [ ! -x /usr/local/bin/striptracks.sh ]; then
+    echo "Making scripts executable."
+    chmod +x /usr/local/bin/striptracks*.sh
+fi
