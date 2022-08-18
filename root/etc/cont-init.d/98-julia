@@ -1,8 +1,27 @@
 #!/usr/bin/with-contenv bash
 
+ARCH=$(uname -m)
+if [ "${ARCH}" = "armv7l" ]; then
+  echo '
+*********************************************************
+*********************************************************
+****                                                 ****
+****    julia binaries are no longer guaranteed      ****
+****                                                 ****
+****         to be available on arm32v7              ****
+****                                                 ****
+****     therefore this mod no longer supports       ****
+****                                                 ****
+****                  arm32v7                        ****
+****                                                 ****
+*********************************************************
+*********************************************************
+'
+  exit 0
+fi
+
 if [ -d "/julia-bins" ]; then
   echo "**** Installing/updating Julia ****"
-  ARCH=$(uname -m)
   mkdir -p /julia
   tar xf "/julia-bins/julia-${ARCH}.tar.gz" -C \
     /julia --strip-components=1
