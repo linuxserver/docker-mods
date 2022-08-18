@@ -1,0 +1,38 @@
+#!/usr/bin/with-contenv bash 
+
+# clone or update Absolute Series Scanner repo
+if [ ! -d /config/absolute ]; then
+    echo "**** no scanner repo found, cloning. ****"
+    s6-setuidgid abc git clone --depth 1 https://github.com/ZeroQI/Absolute-Series-Scanner /config/absolute
+else
+    echo "**** updating scanner repo ****"
+    s6-setuidgid abc git -C /config/absolute pull
+fi
+chown -R abc:abc /config/absolute
+
+scannerdir="/config/Library/Application Support/Plex Media Server/Scanners/Series"
+mkdir -p "$scannerdir"
+
+# copy the scanner if missing or out of date
+if [ ! -f "$scannerdir/Absolute Series Scanner.py" ]; then
+    echo "**** no scanner found. copying from repo ****"
+    cp -f "/config/absolute/Scanners/Series/Absolute Series Scanner.py" "$scannerdir/Absolute Series Scanner.py"
+else
+    if [ $(date -r "$scannerdir/Absolute Series Scanner.py" +%s) -lt $(date -r "/config/absolute/Scanners/Series/Absolute Series Scanner.py" +%s) ]; then
+        echo "**** scanner out of date, copying latest version ****"
+        cp -f "/config/absolute/Scanners/Series/Absolute Series Scanner.py" "$scannerdir/Absolute Series Scanner.py"
+    fi
+fi
+chown -R abc:abc "$scannerdir"
+
+plugindir="/config/Library/Application Support/Plex Media Server/Plug-ins"
+
+# clone or update Hama.bundle repo
+if [ ! -d "$plugindir/Hama.bundle" ]; then
+    echo "**** no agent found, cloning ****"
+    s6-setuidgid abc git clone --depth 1 https://github.com/ZeroQI/Hama.bundle "$plugindir/Hama.bundle"
+else
+    echo "**** pulling latest update ****"
+    s6-setuidgid abc git -C "$plugindir/Hama.bundle" pull
+fi
+chown -R abc:abc "$plugindir/Hama.bundle"
