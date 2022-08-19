@@ -1,0 +1,20 @@
+#!/usr/bin/with-contenv bash
+
+if ! pip list 2>&1 | grep -q "geoip2"; then
+  echo '------------------------------------------------------------------------'
+  echo '| Adding required modules for swag-f2bdiscord to package install list'
+  echo '------------------------------------------------------------------------'
+  echo "\
+    requests \
+    argparse \
+    geoip2==3.0.0" >> /mod-pip-packages-to-install.list
+fi
+
+if [ ! -f /config/fail2ban/Fail2Ban.py ]; then
+  cp /AwesomeFolder/Fail2Ban.py /config/fail2ban/
+  chmod +x /config/fail2ban/Fail2Ban.py
+fi
+
+if [ ! -f /config/fail2ban/action.d/discordEmbed.conf ]; then
+  cp /AwesomeFolder/discordEmbed.conf /config/fail2ban/action.d
+fi
