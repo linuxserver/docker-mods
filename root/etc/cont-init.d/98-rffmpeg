@@ -28,26 +28,26 @@ ln -s /usr/local/bin/rffmpeg /usr/local/bin/ffprobe
 ln -s /usr/local/bin/rffmpeg /usr/local/bin/ffmpeg
 
 #WOL Support
-if [ $RFFMPEG_WOL = "native" ]
+if [ $RFFMPEG_WOL = "native" ] && [ ! -f /usr/local/bin/wol_rffmpeg/wol ]
 then
 echo "**** Adding WOL Support ****"
 apt install -y wakeonlan iputils-ping
 mkdir -p /usr/local/bin/wol_rffmpeg
-curl -L -o /config/rffmpeg/wol https://raw.githubusercontent.com/junkman690/docker-mods/jellyfin-rffmpeg/wol
-chmod +x /config/rffmpeg/wol
-ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffmpeg
-ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffprobe
+curl -L -o /usr/local/bin/wol_rffmpeg/wol https://raw.githubusercontent.com/junkman690/docker-mods/jellyfin-rffmpeg/wol
+chmod +x /usr/local/bin/wol_rffmpeg/wol
+ln -s /usr/local/bin/wol_rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffmpeg
+ln -s /usr/local/bin/wol_rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffprobe
 fi
 
-if [ $RFFMPEG_WOL = "api" ]
+if [ $RFFMPEG_WOL = "api" ] && [ ! -f /usr/local/bin/wol_rffmpeg/wol ]
 then
 echo "**** Adding WOL Support ****"
 apt install -y iputils-ping
 mkdir -p /usr/local/bin/wol_rffmpeg
-curl -L -o /config/rffmpeg/wol https://raw.githubusercontent.com/junkman690/docker-mods/jellyfin-rffmpeg/wol
-chmod +x /config/rffmpeg/wol
-ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffmpeg
-ln -s /config/rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffprobe
+curl -L -o /usr/local/bin/wol_rffmpeg/wol https://raw.githubusercontent.com/junkman690/docker-mods/jellyfin-rffmpeg/wol
+chmod +x /usr/local/bin/wol_rffmpeg/wol
+ln -s /usr/local/bin/wol_rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffmpeg
+ln -s /usr/local/bin/wol_rffmpeg/wol /usr/local/bin/wol_rffmpeg/ffprobe
 fi
 
 ##Update rffmpeg.yml
