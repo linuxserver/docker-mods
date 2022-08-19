@@ -1,6 +1,6 @@
 # Imagemagick - Docker mod for nginx/swag
 
-This mod adds imagemagick and the php7 imagick module to nginx/swag, to be installed/updated during container start.
+This mod adds imagemagick and the php imagick module to nginx/swag, to be installed/updated during container start.
 
 In nginx/swag docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-imagemagick`
 
