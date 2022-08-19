@@ -1,0 +1,43 @@
+#!/usr/bin/with-contenv bash
+
+if ! pip list 2>&1 | grep -q "influxdb"; then
+  echo '-------------------------------------------------------------'
+  echo '| Mod by Gilbn                                              |'
+  echo '| Adding required modules for Geoip2Influx to install list  |'
+  echo '-------------------------------------------------------------'
+  echo "\
+    geoip2==3.0.0 \
+    geohash2==1.1 \
+    influxdb==5.3.0 \
+    IPy==1.0" >> /mod-pip-packages-to-install.list
+fi
+
+# Create log folder
+mkdir -p \
+  /config/log/geoip2influx
+# move old log if needed
+if [ -f /config/geoip2db/geoip2influx.log ]; then
+  mv /config/geoip2db/geoip2influx.log /config/log/geoip2influx
+fi
+
+# permissions
+chown -R abc:abc \
+  /geoip2influx \
+  /config/log/geoip2influx
+
+chmod +x /geoip2influx/geoip2influx.py
+
+# Display variables for troubleshooting
+echo -e "Variables set:\\n\
+NGINX_LOG_PATH=${NGINX_LOG_PATH}\\n\
+INFLUX_HOST=${INFLUX_HOST}\\n\
+INFLUX_HOST_PORT=${INFLUX_HOST_PORT}\\n\
+INFLUX_DATABASE=${INFLUX_DATABASE}\\n\
+INFLUX_USER=${INFLUX_USER}\\n\
+INFLUX_PASS=${INFLUX_PASS}\\n\
+INFLUX_RETENTION=${INFLUX_RETENTION}\\n\
+INFLUX_SHARD=${INFLUX_SHARD}\\n\
+GEO_MEASUREMENT=${GEO_MEASUREMENT}\\n\
+LOG_MEASUREMENT=${LOG_MEASUREMENT}\\n\
+SEND_NGINX_LOGS=${SEND_NGINX_LOGS}\\n\
+GEOIP2INFLUX_LOG_LEVEL=${GEOIP2INFLUX_LOG_LEVEL}\\n"
