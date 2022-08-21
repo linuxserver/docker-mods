@@ -35,9 +35,18 @@ tar xf \
     /tmp/crowdsec.tar.gz -C \
     /tmp/crowdsec --strip-components=1
 
-# Inject API keys into config file
 mkdir -p "${CONFIG_PATH}"
-API_KEY=${CROWDSEC_API_KEY} CROWDSEC_LAPI_URL=${CROWDSEC_LAPI_URL} envsubst < /tmp/crowdsec/lua-mod/config_example.conf > "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+if [ ! -f "${CONFIG_PATH}crowdsec-nginx-bouncer.conf" ]; then \
+    cp /tmp/crowdsec/lua-mod/config_example.conf "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+fi
+
+# Inject API keys into config file
+sed -i -r "s|API_KEY=.*$|API_KEY=${CROWDSEC_API_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -i -r "s|API_URL=.*$|API_URL=${CROWDSEC_LAPI_URL}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+
+# Sed in ReCaptcha keys
+sed -i -r "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -i -r "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 # Change config path
 sed -i "s|/etc/crowdsec/bouncers/|${CONFIG_PATH}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
@@ -50,10 +59,6 @@ mkdir -p ${LIB_PATH}plugins/crowdsec
 cp -r /tmp/crowdsec/lua-mod/lib/* ${LIB_PATH}
 
 cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /etc/nginx/http.d
-
-# Sed in ReCaptcha keys
-sed -i -r "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
-sed -i -r "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 # Sed in crowdsec include
 if ! grep -q '[^#]include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf' && ! grep -q '[^#]include /etc/nginx/conf.d/\*.conf;' '/config/nginx/nginx.conf'; then
