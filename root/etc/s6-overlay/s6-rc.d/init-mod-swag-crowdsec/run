@@ -12,13 +12,13 @@ if [[ -z $CROWDSEC_API_KEY ]] || [[ -z $CROWDSEC_LAPI_URL ]]; then
     exit 1
 fi
 
-apk add -U --upgrade --no-cache \
+echo "\
     gettext \
     lua5.1 \
     lua5.1-cjson \
     lua-resty-http \
     lua-sec \
-    nginx-mod-http-lua
+    nginx-mod-http-lua" >> /mod-repo-packages-to-install.list
 
 # Download nginx bouncer
 if [ -z ${CROWDSEC_VERSION+x} ]; then \
