@@ -5,28 +5,30 @@ mkdir -p \
     /config/crontabs
 
 # if root crontabs do not exist in config
-# copy root crontab from system
-if [[ ! -f /config/crontabs/root ]] && \
-crontab -l -u root; then
-    crontab -l -u root > /config/crontabs/root
+if [[ ! -f /config/crontabs/root ]]; then
+    # copy root crontab from system
+    if crontab -l -u root; then
+        crontab -l -u root > /config/crontabs/root
+    fi
+    
+    # if root crontabs still do not exist in config (were not copied from system)
+    # copy root crontab from included defaults (using -n, do not overwrite an existing file)
+    cp -n /defaults/crontabs-mod/root /config/crontabs/
 fi
 
-# if root crontabs still do not exist in config (were not copied from system)
-# copy root crontab from included defaults
-[[ ! -f /config/crontabs/root ]] && \
-    cp /defaults/crontabs-mod/root /config/crontabs/
 
 # if abc crontabs do not exist in config
-# copy abc crontab from system
-if [[ ! -f /config/crontabs/abc ]] && \
-crontab -l -u abc; then
-    crontab -l -u abc > /config/crontabs/abc
+if [[ ! -f /config/crontabs/abc ]]; then
+    # copy abc crontab from system
+    if crontab -l -u abc; then
+        crontab -l -u abc > /config/crontabs/abc
+    fi
+
+    # if abc crontabs still do not exist in config (were not copied from system)
+    # copy abc crontab from included defaults
+    cp -n /defaults/crontabs-mod/abc /config/crontabs/
 fi
 
-# if abc crontabs still do not exist in config (were not copied from system)
-# copy abc crontab from included defaults
-[[ ! -f /config/crontabs/abc ]] && \
-    cp /defaults/crontabs-mod/abc /config/crontabs/
 
 # import user crontabs
 crontab -u root /config/crontabs/root
