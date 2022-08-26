@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -f /usr/sbin/cron ] && [ -f /usr/bin/apt ]; then
+    echo "**** Adding cron to package install list ****"
+    echo "cron" >> /mod-repo-packages-to-install.list
+else
+    echo "**** cron package already installed, skipping ****"
+fi
