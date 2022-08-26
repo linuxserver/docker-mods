@@ -46,7 +46,6 @@ echo "**** Checking for cloudflare tunnel parameters... ****"
 if [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUNNEL_NAME} -gt 0 ]] && [[ ${#CF_TUNNEL_CONFIG} -gt 0 ]]; then
   if [[ ${#CF_TUNNEL_PASSWORD} -lt 32 ]]; then
     echo "**** Cloudflare tunnel password must be at least 32 characters long, exiting... ****"
-    rm -rf /etc/services.d/cloudflared
     exit 1 
   else
     echo "**** Cloudflare tunnel parameters found, starting cloudflare tunnel setup... ****"
@@ -85,9 +84,7 @@ if [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_T
     CF_TUNNEL_ID=$(echo ${JSON_RESULT} | jq -rc ".id // .result.id")
     CREDENTIALS_FILE=$(echo ${JSON_RESULT} | jq -rc ".credentials_file // .result.credentials_file")
     echo "**** Saving cloudflare tunnel (${CF_TUNNEL_NAME}) credentials json... ****"
-    if [ ! -d "/etc/cloudflared/" ]; then
-      mkdir -p "/etc/cloudflared";
-    fi
+    mkdir -p "/etc/cloudflared";
     printf "${CREDENTIALS_FILE}" > "/etc/cloudflared/${CF_TUNNEL_ID}.json"
     echo ${JSON_RESULT} | jq -r ".result.credentials_file"
     echo "**** Cloudflare tunnel (${CF_TUNNEL_NAME}) credentials saved to /etc/cloudflared/${CF_TUNNEL_ID}.json ****"
@@ -136,7 +133,6 @@ if [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_T
   fi
 else
   echo "**** Cloudflare parameters blank or missing, skipped cloudflare tunnel setup ****"
-  rm -rf /etc/services.d/cloudflared
 fi
 
 echo "**** Cloudflared setup script done, exiting... ****"
