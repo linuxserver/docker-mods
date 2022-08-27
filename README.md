@@ -74,23 +74,6 @@ COPY root/ /
 
 For most users this will suffice and anything in the root/ folder of the repository will be added to the end users Docker container / path.
 
-#### Legacy (v2) mods
-
-The most common paths to leverage for Linuxserver images are as follows. Assuming a mod name of `universal-mymod`:
-
-```text
-.
-└── root
-  ├── defaults                  -- Any default config files you need to copy as part of the mod can be placed here
-  └── etc
-    ├── cont-init.d
-    │  ├── 95-apt-get
-    │  └── 98-universal-mymod   -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x` and is run ordered by filename.
-    └── services.d
-      └── mymod
-        └── run                 -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
-```
-
 #### New (v3) mods
 
 The most common paths to leverage for Linuxserver images are as follows. Assuming a mod name of `universal-mymod`:
@@ -171,6 +154,23 @@ If your mod needs to take additional config steps *after* the packages have been
 ```
 
 Services will always run last, controlled by their dependency on `init-services`.
+
+#### Legacy (v2) mods
+
+The most common paths to leverage for Linuxserver images are as follows. Assuming a mod name of `universal-mymod`:
+
+```text
+.
+└── root
+  ├── defaults                  -- Any default config files you need to copy as part of the mod can be placed here
+  └── etc
+    ├── cont-init.d
+    │  ├── 95-apt-get
+    │  └── 98-universal-mymod   -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x` and is run ordered by filename.
+    └── services.d
+      └── mymod
+        └── run                 -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
+```
 
 The example files in this repo contain a script to install sshutil and a service file to run the installed utility.
 
