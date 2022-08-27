@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! apk info 2>&1 | grep -q "libmaxminddb"; then
+    echo "**** adding libmaxminddb to package install list ****"
+    echo "libmaxminddb" >> /mod-repo-packages-to-install.list
+else
+    echo "**** libmaxminddb already installed, skipping ****"
+fi
