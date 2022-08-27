@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+ABC_USER=$(id -nu ${PUID:-911})
+
+exec \
+    s6-setuidgid ${ABC_USER} s6-log n30 s10000000 S30000000 T !"gzip -nq9" /config/logs/dockerd
