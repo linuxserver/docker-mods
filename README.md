@@ -81,14 +81,14 @@ The most common paths to leverage for Linuxserver images are as follows. Assumin
 ```text
 .
 └── root
-    ├── defaults                      -- Any default config files you need to copy as part of the mod can be placed here
-    └── etc
-        ├── cont-init.d
-        │   ├── 95-apt-get
-        │   └── 98-universal-mymod    -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x` and is run ordered by filename.
-        └── services.d
-            └── mymod
-                └── run               -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
+  ├── defaults                  -- Any default config files you need to copy as part of the mod can be placed here
+  └── etc
+    ├── cont-init.d
+    │  ├── 95-apt-get
+    │  └── 98-universal-mymod   -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x` and is run ordered by filename.
+    └── services.d
+      └── mymod
+        └── run                 -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
 ```
 
 #### New (v3) mods
@@ -98,31 +98,31 @@ The most common paths to leverage for Linuxserver images are as follows. Assumin
 ```text
 .
 └── root
-    ├── defaults                              -- Any default config files you need to copy as part of the mod can be placed here
-    └── etc
-        └── s6-overlay
-            └── s6-rc.d
-                ├── init-mods-end
-                │   └── dependencies.d
-                │       └── init-mod-universal-mymod
-                ├── init-mods-package-install
-                │   └── dependencies.d
-                │       └── init-mod-universal-mymod
-                ├── init-mod-universal-mymod
-                │   ├── dependencies.d
-                │   │   └── init-mods
-                │   ├── run                   -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x`.
-                │   ├── type                  -- This should container the string `oneshot`.
-                │   └── up                    -- This should contain the absolute path to `run` e.g. `/etc/s6-overlay/s6-rc.d/init-mod-universal-mymod/run`.
-                ├── svc-mod-universal-mymod
-                │   ├── dependencies.d
-                │   │   └── init-services
-                │   ├── run                   -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
-                │   └── type                  -- This should contain the string `longrun`.
-                └── user
-                    └── contents.d
-                        ├── init-mod-universal-mymod
-                        └── svc-mod-universal-mymod
+  ├── defaults                                -- Any default config files you need to copy as part of the mod can be placed here
+  └── etc
+    └── s6-overlay
+      └── s6-rc.d
+        ├── init-mods-end
+        │  └── dependencies.d
+        │     └── init-mod-universal-mymod    -- If your mod does not need to install packages it should be a dependency of init-mods-end
+        ├── init-mods-package-install
+        │  └── dependencies.d
+        │     └── init-mod-universal-mymod    -- If your mod needs to install packages it should be a dependency of init-mods-package-install
+        ├── init-mod-universal-mymod
+        │  ├── dependencies.d
+        │  │  └── init-mods
+        │  ├── run                            -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x`.
+        │  ├── type                           -- This should contain the string `oneshot`.
+        │  └── up                             -- This should contain the absolute path to `run` e.g. `/etc/s6-overlay/s6-rc.d/init-mod-universal-mymod/run`.
+        ├── svc-mod-universal-mymod
+        │  ├── dependencies.d
+        │  │  └── init-services
+        │  ├── run                            -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
+        │  └── type                           -- This should contain the string `longrun`.
+        └── user
+          └── contents.d
+            ├── init-mod-universal-mymod
+            └── svc-mod-universal-mymod
 ```
 
 Note: For `oneshot` scripts you can alternatively omit the `run` file entirely and use the [execlineb](https://skarnet.org/software/execline/execlineb.html) syntax in `up` if your requirements are simple enough.
@@ -151,20 +151,23 @@ if [ -f /sbin/apk ]; then
 fi
 ```
 
-If your mod needs to take additional config steps *after* the packages have been installed, add a second `oneshot` script and make it depend on `init-mods-package-install` e.g.
+If your mod needs to take additional config steps *after* the packages have been installed, add a second `oneshot` script and make it depend on `init-mods-package-install` and add it as a dependency of `init-mods-end` e.g.
 
 ```text
 .
 └── root
-    └── etc
-        └── s6-overlay
-            └── s6-rc.d
-                └── init-mod-universal-mymod-postinstall
-                    ├── dependencies.d
-                    │   └── init-mods-package-install
-                    ├── run
-                    ├── type
-                    └── up
+  └── etc
+    └── s6-overlay
+      └── s6-rc.d
+        ├── init-mods-end
+        │  └── dependencies.d
+        │     └── init-mod-universal-mymod-postinstall
+        └── init-mod-universal-mymod-postinstall
+          ├── dependencies.d
+          │  └── init-mods-package-install
+          ├── run
+          ├── type
+          └── up
 ```
 
 Services will always run last, controlled by their dependency on `init-services`.
