@@ -1,8 +1,6 @@
 #!/usr/bin/with-contenv bash
 
-# Determine if setup is needed
-if [ ! -f /usr/local/lib/python***/dist-packages/sshuttle ] && \
-[ -f /usr/bin/apt ]; then
+if [ -f /usr/bin/apt ]; then
   ## Ubuntu
   apt-get update
   apt-get install --no-install-recommends -y \
@@ -12,8 +10,7 @@ if [ ! -f /usr/local/lib/python***/dist-packages/sshuttle ] && \
     python3-pip 
   pip3 install sshuttle
 fi
-if [ ! -f /usr/lib/python***/site-packages/sshuttle ] && \
-[ -f /sbin/apk ]; then
+if [ -f /sbin/apk ]; then
   # Alpine
   apk add --no-cache \
     iptables \
