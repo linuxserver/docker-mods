@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUNNEL_NAME} -gt 0 ]] && [[ ${#CF_TUNNEL_CONFIG} -gt 0 ]] && [[ ${#CF_TUNNEL_PASSWORD} -gt 31 ]]; then
+    exec s6-setuidgid abc cloudflared tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+else
+    echo "**** Issues with cloudflared settings, sleeping ****"
+    sleep infinity
+fi
