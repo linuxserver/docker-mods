@@ -134,7 +134,7 @@ if [ -f /sbin/apk ]; then
 fi
 ```
 
-If your mod needs to take additional config steps *after* the packages have been installed, add a second `oneshot` script and make it depend on `init-mods-package-install` and add it as a dependency of `init-mods-end` e.g.
+If your mod needs to take additional config steps *after* the packages have been installed, add a second `oneshot` script and make it depend on `init-mods-package-install`, add it as a dependency of `init-mods-end`, and add it to the content bundle e.g.
 
 ```text
 .
@@ -145,12 +145,15 @@ If your mod needs to take additional config steps *after* the packages have been
         ├── init-mods-end
         │  └── dependencies.d
         │     └── init-mod-universal-mymod-postinstall
-        └── init-mod-universal-mymod-postinstall
-          ├── dependencies.d
-          │  └── init-mods-package-install
-          ├── run
-          ├── type
-          └── up
+        ├── init-mod-universal-mymod-postinstall
+        │  ├── dependencies.d
+        │  │  └── init-mods-package-install
+        │  ├── run
+        │  ├── type
+        │  └── up
+        └── user
+          └── contents.d
+            └── init-mod-universal-mymod-postinstall
 ```
 
 Services will always run last, controlled by their dependency on `init-services`.
