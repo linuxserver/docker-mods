@@ -1,4 +1,4 @@
-# Jellyfin - Docker mod for rffmpeg support with OPTIONAL Wake On LAN (WOL) Support
+# rffmpeg - Docker mod for Jellyfin
 
 This mod adds rffmpeg to Linuxserver.io's Jellyfin https://github.com/linuxserver/docker-jellyfin. 
 
@@ -17,9 +17,11 @@ You can specify the remote SSH username and host using ENV, note currently only 
 * RFFMPEG_HOST= remote server name or IP
 
 You also need to ensure that /cache inside the container is exported on the host so it can be mapped on the remote host. Eg for docker compose. 
+```yaml
     volumes:
       - "Your jellyfin config dir":/config
       - "Your jellyfin config dir"/cache:/cache
+```
 See https://github.com/joshuaboniface/rffmpeg/blob/master/SETUP.md NFS setup for more details
       
 EXAMPLE Docker-Compose file with WOL support via API:
