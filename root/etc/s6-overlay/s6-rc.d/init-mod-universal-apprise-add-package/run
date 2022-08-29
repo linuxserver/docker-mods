@@ -1,0 +1,26 @@
+#!/usr/bin/with-contenv bash
+
+if ! command -v apprise; then
+    echo "**** Adding apprise and its deps to package install lists ****"
+    echo "apprise" >> /mod-pip-packages-to-install.list
+    ## Ubuntu
+    if [ -f /usr/bin/apt ]; then
+        echo "\
+            python3 \
+            python3-pip \
+            runc" >> /mod-repo-packages-to-install.list
+    fi
+    # Alpine
+    if [ -f /sbin/apk ]; then
+        echo "\
+            cargo \
+            libffi-dev \
+            openssl-dev \
+            python3 \
+            python3-dev \
+            python3 \
+            py3-pip" >> /mod-repo-packages-to-install.list
+    fi
+else
+    echo "**** apprise already installed, skipping ****"
+fi
