@@ -1,0 +1,31 @@
+#!/usr/bin/with-contenv bash
+
+cat <<EOF
+----------------
+>>> Flac2MP3 Mod by TheCaptain989 <<<
+Repos:
+Dev/test: https://github.com/TheCaptain989/lidarr-flac2mp3
+Prod: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
+
+Version: {{VERSION}}
+----------------
+EOF
+
+# Determine if setup is needed
+if [ ! -f /usr/bin/ffmpeg ]; then
+    echo "**** Adding ffmpeg to package install list ****"
+    echo "ffmpeg" >> /mod-repo-packages-to-install.list
+fi
+
+# Change ownership
+if [ $(stat -c '%G' /usr/local/bin/flac2mp3.sh) != "abc" ]; then
+    echo "Changing ownership on scripts."
+    chown abc:abc /usr/local/bin/flac2*.sh
+fi
+
+# Make executable
+if [ ! -x /usr/local/bin/flac2mp3.sh ]; then
+    echo "Making scripts executable."
+    chmod +x /usr/local/bin/flac2*.sh
+fi
+
