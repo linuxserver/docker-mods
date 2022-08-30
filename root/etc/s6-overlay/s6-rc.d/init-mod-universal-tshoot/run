@@ -2,15 +2,16 @@
 
 ## Ubuntu
 if [ -f /usr/bin/apt ]; then
-    apt-get install --no-install-recommends -y \
+    echo "\
         dnsutils \
         net-tools \
         iputils-ping \
-        traceroute
+        traceroute" >> /mod-repo-packages-to-install.list
+
 fi
 # Alpine
 if [ -f /sbin/apk ]; then
-    apk add --no-cache \
+    echo "\
         bind-tools \
-        net-tools
+        net-tools" >> /mod-repo-packages-to-install.list
 fi
