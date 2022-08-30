@@ -6,5 +6,4 @@ if [ -n "${LOGS_TO_STDOUT}" ]; then
     tail -F $TAIL_LOGS
 else
     echo "**** Env var LOGS_TO_STDOUT is not set, sleeping ****"
-    sleep infinity
 fi
