@@ -1,13 +1,5 @@
 #!/usr/bin/with-contenv bash
 
-#Install dependancies
-apt-get install -y --no-install-recommends \
-    iputils-ping \
-    openssh-client \
-    python3-click \
-    python3-yaml \
-    wakeonlan
-
 #Grab Config
 mkdir -p \
     /etc/rffmpeg \
@@ -47,9 +39,9 @@ chown abc:abc -R /config/rffmpeg
 
 #Initialize database
 if [ -f /config/rffmpeg/rffmpeg.db ]; then
-    echo "**** DB already inialized ****"
+    echo "**** rffmpeg DB already inialized ****"
 else
-    echo "**** Initialize database ****"
+    echo "**** Initialize rffmpeg database ****"
     /usr/local/bin/rffmpeg init --yes
     #Add host
     if [ ! -z "$RFFMPEG_HOST" ]; then
