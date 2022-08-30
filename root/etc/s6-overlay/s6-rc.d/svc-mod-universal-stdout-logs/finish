@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+if [ -z "${LOGS_TO_STDOUT}" ]; then
+    exit 125
+fi

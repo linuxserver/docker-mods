@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+
+if [ -n "${LOGS_TO_STDOUT}" ]; then
+    TAIL_LOGS=$(echo "$LOGS_TO_STDOUT" | sed 's#|# #g')
+    echo "Executing: tail -F $TAIL_LOGS"
+    tail -F $TAIL_LOGS
+else
+    echo "**** Env var LOGS_TO_STDOUT is not set, sleeping ****"
+fi
