@@ -258,7 +258,7 @@ elif [[ "${flac2mp3_type,,}" = "lidarr" ]]; then
   [ -z "$flac2mp3_tracks" ] && flac2mp3_tracks="$lidarr_trackfile_path"
 else
   # Called in an unexpected way
-  echo -e "Error|Unknown or missing 'lidarr_eventtype' environment variable: ${flac2mp3_type}\nNot called within Lidarr?\nTry using Batch Mode option: -f <file>"
+  echo -e "Error|Unknown or missing 'lidarr_eventtype' environment variable: ${flac2mp3_type}\nNot called within Lidarr.\nTry using Batch Mode option: -f <file>"
   exit 7
 fi
 
@@ -330,6 +330,7 @@ function check_rescan {
   done
   return $flac2mp3_return
 }
+### End Functions
 
 # Check for required binaries
 if [ ! -f "/usr/bin/ffmpeg" ]; then
@@ -439,6 +440,7 @@ fi
 #find "$lidarr_artist_path" -name "*.flac" -exec bash -c 'ffmpeg -loglevel warning -i "{}" -y -acodec libmp3lame -b:a 320k "${0/.flac}.mp3" && rm "{}"' {} \;
 
 #### BEGIN MAIN
+# Build dynamic log message
 flac2mp3_message="Info|Lidarr event: ${lidarr_eventtype}"
 if [ "$flac2mp3_type" != "batch" ]; then
   flac2mp3_message+=", Artist: ${lidarr_artist_name} (${lidarr_artist_id}), Album: ${lidarr_album_title} (${lidarr_album_id})"
@@ -457,6 +459,7 @@ fi
 flac2mp3_message+=", Track(s): ${flac2mp3_tracks}"
 echo "${flac2mp3_message}" | log
 
+# Process tracks
 echo -n "$flac2mp3_tracks" | awk -v Debug=$flac2mp3_debug \
 -v Recycle="$flac2mp3_recyclebin" \
 -v Bitrate="$flac2mp3_bitrate" \
@@ -526,7 +529,6 @@ BEGIN {
   }
 }
 ' | log
-
 #### END MAIN
 
 # Check for awk script completion
