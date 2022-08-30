@@ -1,0 +1,58 @@
+#!/usr/bin/with-contenv bash
+
+#Install dependancies
+apt-get install -y --no-install-recommends \
+    iputils-ping \
+    openssh-client \
+    python3-click \
+    python3-yaml \
+    wakeonlan
+
+#Grab Config
+mkdir -p \
+    /etc/rffmpeg \
+    /config/rffmpeg/.ssh
+touch /config/rffmpeg/.ssh/id_rsa
+chmod 600 /config/rffmpeg/.ssh/id_rsa
+if [ -f /config/rffmpeg/rffmpeg.yml ]; then
+    echo "**** rffmpeg.yml already present ****"
+else
+    echo "**** Creating rffmpeg.yml from sample ****"
+    cp /defaults/rffmpeg.yml.sample /config/rffmpeg/rffmpeg.yml
+fi
+
+#Grab rffmpeg
+mkdir -p /usr/local/bin/
+echo "**** Grabbing rffmpeg from upstream ****"
+rm -rf /usr/local/bin/rffmpeg
+curl -L -o /usr/local/bin/rffmpeg https://raw.githubusercontent.com/joshuaboniface/rffmpeg/master/rffmpeg
+chmod +x /usr/local/bin/rffmpeg
+
+##Update rffmpeg.yml
+sed -i 's~#persist: "/run/shm"~persist: "/dev/shm"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#state: "/var/lib/rffmpeg"~state: "/config/rffmpeg"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#logfile: "/var/log/jellyfin/rffmpeg.log"~logfile: "/config/rffmpeg/rffmpeg.log"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#log_to_file: true~log_to_file: true~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#owner: jellyfin~owner: abc~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#group: sudo~group: abc~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#args:~args:~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#    - "-i"~    - "-i"~' /config/rffmpeg/rffmpeg.yml
+sed -i 's~#    - "/var/lib/jellyfin/id_rsa"~    - "/config/rffmpeg/.ssh/id_rsa"~' /config/rffmpeg/rffmpeg.yml
+if [ ! -z "$RFFMPEG_USER" ]; then
+    sed -i "s~#user: jellyfin~user: $RFFMPEG_USER~" /config/rffmpeg/rffmpeg.yml
+fi
+
+#Fix permissions
+chown abc:abc -R /config/rffmpeg
+
+#Initialize database
+if [ -f /config/rffmpeg/rffmpeg.db ]; then
+    echo "**** DB already inialized ****"
+else
+    echo "**** Initialize database ****"
+    /usr/local/bin/rffmpeg init --yes
+    #Add host
+    if [ ! -z "$RFFMPEG_HOST" ]; then
+        s6-setuidgid abc /usr/local/bin/rffmpeg add --weight 1 $RFFMPEG_HOST
+    fi
+fi

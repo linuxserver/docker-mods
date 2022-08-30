@@ -1,0 +1,14 @@
+#!/usr/bin/with-contenv bash
+
+for package in iputils-ping openssh-client python3-click python3-yaml wakeonlan; do
+    if ! dpkg -s "${package}" >/dev/null 2>&1; then
+        PACKAGES="${package} ${PACKAGES}"
+    fi
+done
+
+if [ -n "${PACKAGES}" ]; then
+    echo "${PACKAGES}" >> /mod-repo-packages-to-install.list
+    echo "**** Adding rffmpeg dependencies to package install list ****"
+else
+    echo "**** rffmpeg dependencies already installed, skipping ****"
+fi

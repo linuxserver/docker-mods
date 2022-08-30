@@ -1,0 +1,70 @@
+---
+# Configuration file for rffmpeg
+#
+# Copy this sample to /etc/rffmpeg/rffmpeg.yml and replace the various attributes
+# with the values for your environment. For more details please see the README.
+#
+# Any commented value represents the default. Uncomment and alter as required.
+
+rffmpeg:
+    # Logging configuration
+    logging:
+        # Enable or disable file logging.
+        #log_to_file: true
+
+        # Log messages to this file.
+        # Ensure the user running rffmpeg can write to this directory.
+        #logfile: "/var/log/jellyfin/rffmpeg.log"
+
+        # Show debugging messages
+        #debug: false
+
+    # Directory configuration
+    directories:
+        # Persistent directory to store state database.
+        #state: "/var/lib/rffmpeg"
+
+        # Temporary directory to store SSH persistence sockets.
+        #persist: "/run/shm"
+
+        # The user who should own the state directory and database.
+        # This should normally be the user who normally runs rffmpeg commands (i.e. the media
+        # server service user).
+        #owner: jellyfin
+
+        # The group who should own the state directory and database (an administrative group).
+        # Use this group to control who is able to run "rffmpeg" management commands; users in
+        # this group will have unlimited access to the tool to add/remove hosts, view status, etc.
+        #group: sudo
+
+    # Remote (SSH) configuration
+    remote:
+        # The remote SSH user to connect as.
+        #user: jellyfin
+
+        # How long to persist SSH sessions; 0 to disable SSH persistence.
+        #persist: 300
+
+        # A YAML list of additional SSH arguments (e.g. private keys).
+        # One entry line per space-separated argument element.
+        #args: 
+        #    - "-i"
+        #    - "/var/lib/jellyfin/id_rsa"
+
+    # Remote command configuration
+    commands:
+        # The path (either full or in $PATH) to the default SSH binary.
+        #ssh: "/usr/bin/ssh"
+
+        # A YAML list of prefixes to the ffmpeg command (e.g. sudo, nice, etc.).
+        # One entry line per space-separated command element.
+        #pre:
+        #    - ""
+
+        # The (remote) ffmpeg and ffprobe command binary paths.
+        #ffmpeg: "/usr/lib/jellyfin-ffmpeg/ffmpeg"
+        #ffprobe: "/usr/lib/jellyfin-ffmpeg/ffprobe"
+
+        # Optional local fallback ffmpeg and ffprobe binary paths, if different from the above.
+        #fallback_ffmpeg: "/usr/lib/jellyfin-ffmpeg/ffmpeg"
+        #fallback_ffprobe: "/usr/lib/jellyfin-ffmpeg/ffprobe"
