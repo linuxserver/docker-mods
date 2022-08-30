@@ -1,0 +1,16 @@
+#!/usr/bin/with-contenv bash
+
+# Exit if no installable packages are provided
+if [ -z ${INSTALL_PACKAGES+x} ]; then
+    echo "**** No packages to install ****"
+    exit 0
+fi
+
+
+#Split list of packages on delimiter '|'
+IFS='|'
+INSTALL_PACKAGES=(${INSTALL_PACKAGES})
+for PKG in "${INSTALL_PACKAGES[@]}"; do
+    echo "**** Adding ${PKG} to install list ****"
+    echo "${PKG}" >> /mod-repo-packages-to-install.list
+done
