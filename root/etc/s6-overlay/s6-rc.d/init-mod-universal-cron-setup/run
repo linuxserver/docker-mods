@@ -1,0 +1,35 @@
+#!/usr/bin/with-contenv bash
+
+# make folders
+mkdir -p \
+    /config/crontabs
+
+# if root crontabs do not exist in config
+if [[ ! -f /config/crontabs/root ]]; then
+    # copy root crontab from system
+    if crontab -l -u root; then
+        crontab -l -u root > /config/crontabs/root
+    fi
+    
+    # if root crontabs still do not exist in config (were not copied from system)
+    # copy root crontab from included defaults (using -n, do not overwrite an existing file)
+    cp -n /defaults/crontabs-mod/root /config/crontabs/
+fi
+
+
+# if abc crontabs do not exist in config
+if [[ ! -f /config/crontabs/abc ]]; then
+    # copy abc crontab from system
+    if crontab -l -u abc; then
+        crontab -l -u abc > /config/crontabs/abc
+    fi
+
+    # if abc crontabs still do not exist in config (were not copied from system)
+    # copy abc crontab from included defaults
+    cp -n /defaults/crontabs-mod/abc /config/crontabs/
+fi
+
+
+# import user crontabs
+crontab -u root /config/crontabs/root
+crontab -u abc /config/crontabs/abc
