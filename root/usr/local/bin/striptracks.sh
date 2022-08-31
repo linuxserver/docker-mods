@@ -586,7 +586,7 @@ fi
 if [ -n "$striptracks_audiokeep" ]; then
   # Allows ordered argument on command line to override detected languages
   # plus special handling of ':org' code
-  [ $striptracks_debug -ge 1 ] && [[ "$striptracks_audiokeep" ~= :org ]] && echo "Debug|:org specified for audio. Using new code string of ${striptracks_audiokeep//:org/${striptracks_orglangCode}}" | log
+  [ $striptracks_debug -ge 1 ] && [[ "$striptracks_audiokeep" =~ :org ]] && echo "Debug|:org specified for audio. Using new code string of ${striptracks_audiokeep//:org/${striptracks_orglangCode}}" | log
   striptracks_audiokeep="${striptracks_audiokeep//:org/${striptracks_orglangCode}}"
 elif [ -n "$striptracks_proflangCodes" ]; then
   striptracks_audiokeep="$striptracks_proflangCodes"
@@ -601,7 +601,7 @@ fi
 if [ -n "$striptracks_subskeep" ]; then
   # Allows ordered argument on command line to override detected languages
   # plus special handling of ':org' code
-  [ $striptracks_debug -ge 1 ] && [[ "$striptracks_subskeep" ~= :org ]] && echo "Debug|:org specified for subtitles. Using new code string of ${striptracks_subskeep//:org/${striptracks_orglangCode}}" | log
+  [ $striptracks_debug -ge 1 ] && [[ "$striptracks_subskeep" =~ :org ]] && echo "Debug|:org specified for subtitles. Using new code string of ${striptracks_subskeep//:org/${striptracks_orglangCode}}" | log
   striptracks_subskeep="${striptracks_subskeep//:org/${striptracks_orglangCode}}"
 elif [ -n "$striptracks_proflangCodes" ]; then
   striptracks_subskeep="$striptracks_proflangCodes"
