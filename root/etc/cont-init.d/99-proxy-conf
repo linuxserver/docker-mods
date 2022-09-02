@@ -5,36 +5,28 @@
 # SWAG LOGIC https://github.com/linuxserver/docker-swag/blob/master/root/etc/cont-init.d/50-config
 ###
 
+# make our folders and links
+mkdir -p \
+    /config/nginx/proxy-confs
+
+# samples are removed on init by the nginx base
+
+# copy new samples
+if [[ -d /defaults/nginx/proxy-confs/ ]]; then
+    find /defaults/nginx/proxy-confs/ \
+        -maxdepth 1 \
+        -name "*.conf.sample" \
+        -type f \
+        -exec cp "{}" /config/nginx/proxy-confs/ +
+fi
+
 # copy reverse proxy configs
-cp -R /defaults/proxy-confs /config/nginx/
+cp -R /defaults/nginx/proxy-confs /config/nginx/
 
-# copy proxy defaults
-[[ ! -f /config/nginx/proxy.conf ]] &&
-  cp /defaults/proxy.conf /config/nginx/proxy.conf
-[[ ! -f /config/nginx/ssl.conf ]] &&
-  cp /defaults/ssl.conf /config/nginx/ssl.conf
-
-# Set resolver
-if ! grep -q 'resolver' /config/nginx/resolver.conf; then
-    RESOLVER=$(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf)
-    echo "Setting resolver to ${RESOLVER}"
-    echo -e "# This file is auto-generated only on first start, based on the container's /etc/resolv.conf file. Feel free to modify it as you wish.\n\nresolver ${RESOLVER} valid=30s;" > /config/nginx/resolver.conf
+# copy default config files if they don't exist
+if [[ ! -f /config/nginx/proxy.conf ]]; then
+    cp /defaults/nginx/proxy.conf.sample /config/nginx/proxy.conf
 fi
-
-# Set worker_processes
-if ! grep -q 'worker_processes' /config/nginx/worker_processes.conf; then
-    WORKER_PROCESSES=$(nproc)
-    echo "Setting worker_processes to ${WORKER_PROCESSES}"
-    echo -e "# This file is auto-generated only on first start, based on the cpu cores detected. Feel free to change it to any other number or to auto to let nginx handle it automatically.\n\nworker_processes ${WORKER_PROCESSES};" > /config/nginx/worker_processes.conf
-fi
-
-# copy pre-generated dhparams or generate if needed
-[[ ! -f /config/nginx/dhparams.pem ]] && \
-    cp /defaults/dhparams.pem /config/nginx/dhparams.pem
-if ! grep -q 'PARAMETERS' "/config/nginx/dhparams.pem"; then
-    curl -o /config/nginx/dhparams.pem -L "https://ssl-config.mozilla.org/ffdhe4096.txt"
-fi
-
 # permissions
 chown -R abc:abc \
   /config/nginx/{proxy.conf,ssl.conf,dhparams.pem,proxy-confs/}
