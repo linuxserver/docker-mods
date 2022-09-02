@@ -37,6 +37,7 @@ server {
     # deny access to .htaccess/.htpasswd files
     location ~ /\.ht {
         deny all;
+    }
 }
 
 # enable subdomain method reverse proxy confs
