@@ -1,5 +1,20 @@
 #!/usr/bin/with-contenv bash
 
+echo '
+***********************************************************
+***********************************************************
+****                                                   ****
+****                                                   ****
+**** This mod "linuxserver/mods:wait-for-internet"     ****
+****                                                   ****
+****                                                   ****
+**** has been deprecated and will not receive updates  ****
+****                                                   ****
+****                                                   ****
+****                                                   ****
+***********************************************************
+***********************************************************'
+
 # Loop until an active internet connection is established
 until $(curl --max-time 60 -s -o /dev/null https://www.linuxserver.io/); do
   # Sleep to allow cooldown
