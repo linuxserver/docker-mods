@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! apk info 2>&1 | grep -q "inotify-tools"; then
+    echo "**** Adding swag-auto-reload deps to package install list ****"
+    echo "inotify-tools" >> /mod-repo-packages-to-install.list
+else
+    echo "**** swag-auto-reload deps already installed, skipping ****"
+fi

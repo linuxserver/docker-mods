@@ -33,9 +33,12 @@ function wait_for_changes {
 }
 
 while wait_for_changes; do
-  if /usr/sbin/nginx -c /config/nginx/nginx.conf -t; then
+  if ! cat /etc/nginx/nginx.conf | grep "/config/nginx/nginx.conf"; then
+    export NGINX_CONF="-c /config/nginx/nginx.conf"
+  fi
+  if /usr/sbin/nginx ${NGINX_CONF} -t; then
     echo "Changes to nginx config detected and the changes are valid, reloading nginx"
-    /usr/sbin/nginx -c /config/nginx/nginx.conf -s reload
+    /usr/sbin/nginx ${NGINX_CONF} -s reload
   else
     echo "Changes to nginx config detected but the changes are not valid, skipping nginx reload. Please fix your config."
   fi  
