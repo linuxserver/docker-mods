@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -f "/usr/bin/git" ]; then
+    echo "**** Adding git to package install list ****"
+    echo "git" >> /mod-repo-packages-to-install.list
+else
+    echo "**** git already installed ****"
+fi
