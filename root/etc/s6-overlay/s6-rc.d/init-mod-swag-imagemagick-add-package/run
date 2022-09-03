@@ -6,7 +6,6 @@ if ! apk info 2>&1 | grep -q "imagemagick"; then
     echo "\
         imagemagick \
         ${PHPVERSION}-pecl-imagick" >> /mod-repo-packages-to-install.list
-    if 
 else
     echo "**** imagemagick already installed, skipping ****"
 fi
