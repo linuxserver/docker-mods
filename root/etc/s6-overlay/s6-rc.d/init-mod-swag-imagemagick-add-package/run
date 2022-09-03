@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+
+if ! apk info 2>&1 | grep -q "imagemagick"; then
+    echo "**** adding imagemagick to package install list ****"
+    PHPVERSION=$(readlink -f /usr/bin/php | sed 's|/usr/bin/||')
+    echo "\
+        imagemagick \
+        ${PHPVERSION}-pecl-imagick" >> /mod-repo-packages-to-install.list
+else
+    echo "**** imagemagick already installed, skipping ****"
+fi
