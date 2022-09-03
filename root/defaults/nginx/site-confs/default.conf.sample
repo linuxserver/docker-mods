@@ -1,0 +1,46 @@
+## Version 2022/09/02 - Changelog: https://github.com/linuxserver/docker-mods/blob/nginx-proxy-confs/root/defaults/nginx/site-confs/default.conf.sample
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name _;
+
+    set $root /app/www/public;
+    if (!-d /app/www/public) {
+        set $root /config/www;
+    }
+    root $root;
+    index index.html index.htm index.php;
+
+    # enable subfolder method reverse proxy confs
+    include /config/nginx/proxy-confs/*.subfolder.conf;
+
+    location / {
+        # enable for basic auth
+        #auth_basic "Restricted";
+        #auth_basic_user_file /config/nginx/.htpasswd;
+
+        try_files $uri $uri/ /index.html /index.php$is_args$args =404;
+    }
+
+    location ~ ^(.+\.php)(.*)$ {
+        fastcgi_split_path_info ^(.+\.php)(.*)$;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        include /etc/nginx/fastcgi_params;
+    }
+
+    # deny access to .htaccess/.htpasswd files
+    location ~ /\.ht {
+        deny all;
+    }
+}
+
+# enable subdomain method reverse proxy confs
+include /config/nginx/proxy-confs/*.subdomain.conf;
+# enable proxy cache for auth
+proxy_cache_path cache/ keys_zone=auth_cache:10m;
