@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! apk info 2>&1 | grep -q "ffmpeg"; then
+    echo "**** adding ffmpeg to package install list ****"
+    echo "ffmpeg" >> /mod-repo-packages-to-install.list
+else
+    echo "**** ffmpeg already installed, skipping ****"
+fi
