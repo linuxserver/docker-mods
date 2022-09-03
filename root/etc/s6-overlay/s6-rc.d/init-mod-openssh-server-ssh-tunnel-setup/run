@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+# allow tcp forwarding within openssh settings
+sed -i '/^AllowTcpForwarding/c\AllowTcpForwarding yes' /etc/ssh/sshd_config
+sed -i '/^GatewayPorts/c\GatewayPorts clientspecified' /etc/ssh/sshd_config
+echo "TcpForwarding is enabled"
