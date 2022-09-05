@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bash
 
-if ! pip list 2>&1 | grep -q "scikit-learn"; then
+if ! pip list 2> /dev/null | grep -q "scikit-learn"; then
     echo "**** Adding scikit-learn and deps to package install lists ****"
     echo "\
         build-essential \
