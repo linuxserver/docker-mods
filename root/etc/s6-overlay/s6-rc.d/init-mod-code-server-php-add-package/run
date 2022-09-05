@@ -7,3 +7,4 @@ if ! dpkg -s composer >/dev/null 2>&1 || ! dpkg -s php >/dev/null 2>&1; then
         php" >> /mod-repo-packages-to-install.list
 else
     echo "**** php already installed, skipping ****"
+fi
