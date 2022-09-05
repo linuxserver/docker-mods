@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -s subversion >/dev/null 2>&1; then
+    echo "**** Adding subversion to package install list ****"
+    echo "subversion" >> /mod-repo-packages-to-install.list
+else
+    echo "**** subversion already installed, skipping ****"
+fi
