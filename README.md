@@ -1,7 +1,7 @@
-# Nodejs - Docker mod for code-server
+# Nodejs - Docker mod for code-server/openvscode-server
 
-This mod adds a nodejs dev environment to code-server, to be installed/updated during container start.
+This mod adds a nodejs dev environment to code-server/openvscode-server, to be installed/updated during container start.
 
-In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-nodejs`
+In code-server/openvscode-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-nodejs`
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-nodejs|linuxserver/mods:code-server-mod2`
