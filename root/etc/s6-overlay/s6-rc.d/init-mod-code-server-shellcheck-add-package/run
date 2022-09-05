@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -s shellcheck >/dev/null 2>&1; then
+    echo "**** Adding shellcheck to package install list ****"
+    echo "shellcheck" >> /mod-repo-packages-to-install.list
+else
+    echo "**** shellcheck already installed, skipping ****"
+fi
