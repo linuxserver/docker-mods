@@ -1,8 +1,5 @@
 #!/usr/bin/with-contenv bash
 
-echo "**** installing nodejs dev environment ****"
-
-
 source /etc/lsb-release
 if [ "${DISTRIB_CODENAME}" = "bionic" ] || [ "${DISTRIB_CODENAME}" = "focal" ]; then
     if ! dpkg -l | grep gnupg > /dev/null; then
