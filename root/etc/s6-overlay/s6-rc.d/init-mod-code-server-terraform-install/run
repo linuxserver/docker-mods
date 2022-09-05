@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv bash
+
+install-extension hashicorp.terraform

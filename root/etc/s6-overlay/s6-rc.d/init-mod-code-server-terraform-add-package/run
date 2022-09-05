@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -l | grep gnupg > /dev/null; then
+    apt-get update && apt-get install -y gnupg
+fi
+
+if [ ! -f "/etc/apt/sources.list.d/hashicorp.list" ]; then
+    echo "**** Adding terraform packages to install list ****"
+    curl -s https://apt.releases.hashicorp.com/gpg | apt-key add -
+    source /etc/lsb-release
+    echo "deb https://apt.releases.hashicorp.com ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/hashicorp.list
+    echo "terraform" >> /mod-repo-packages-to-install.list
+else
+    echo "**** Terraform packages already installed, skipping ****"
+fi
