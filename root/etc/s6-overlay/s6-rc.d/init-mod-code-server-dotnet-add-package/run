@@ -1,0 +1,64 @@
+#!/usr/bin/with-contenv bash
+
+# Determine if setup is needed
+if [ -d /dotnet ]; then
+    # install deps
+    echo "**** Adding dotnet dependencies to package install list ****"
+    source /etc/lsb-release
+    if [ "${DISTRIB_CODENAME}" == "focal" ]; then
+        echo "libicu66" >> /mod-repo-packages-to-install.list
+    elif [ "${DISTRIB_CODENAME}" == "jammy" ]; then
+        echo "libicu70" >> /mod-repo-packages-to-install.list
+    fi
+    # remove existing install if updating
+    if ls -d /dotnet_* >/dev/null 2>&1; then
+        echo "deleting" $(ls -d /dotnet_*)
+        rm -rf /dotnet_*
+    fi
+    DOTNET_VERSIONS=$(cat /dotnet/versions.txt)
+    ARCH=$(uname -m)
+    for i in $DOTNET_VERSIONS; do
+        mkdir -p "/dotnet_${i}"
+        tar xzf "/dotnet/dotnetsdk_${i}_${ARCH}.tar.gz" -C "/dotnet_${i}"
+    done
+    rm -rf /dotnet
+    # symlink latest dotnet binary
+    DOTNET_LATEST=$(echo "$DOTNET_VERSIONS" | awk '{print $1}')
+    rm -rf /usr/local/bin/dotnet
+    ln -s /dotnet_${DOTNET_LATEST}/dotnet /usr/local/bin/dotnet
+    echo "
+    ****************************************************
+    ****************************************************
+    **
+    **
+    DOTNET SDK versions installed:
+    $(echo $DOTNET_VERSIONS | sed 's| |\n  |g')
+    **
+    **
+    Binary locations are:"
+    for i in $DOTNET_VERSIONS; do
+        echo "  /dotnet_${i}/dotnet"
+    done
+    echo "  **
+    **
+    Version $DOTNET_LATEST is symlinked from /usr/local/bin/dotnet and can be called from anywhere via \"dotnet\"
+    **
+    **
+    ****************************************************
+    ****************************************************"
+    # symlink other dotnet installs for access through latest binary
+    for i in {2..5}; do
+        DOTNET_OTHER_SDK_VERSION="$(echo $DOTNET_VERSIONS | awk -v var=${i} '{print $var}')"
+        if [ -n "$DOTNET_OTHER_SDK_VERSION" ]; then
+            DOTNET_OTHER_RUNTIME_VERSION="$(ls /dotnet_${DOTNET_OTHER_SDK_VERSION}/shared/Microsoft.NETCore.App)"
+            echo "**** Symlinking sdk version ${DOTNET_OTHER_SDK_VERSION} and runtime version ${DOTNET_OTHER_RUNTIME_VERSION} ****"
+            ln -s "/dotnet_${DOTNET_OTHER_SDK_VERSION}/shared/Microsoft.NETCore.App/${DOTNET_OTHER_RUNTIME_VERSION}" "/dotnet_${DOTNET_LATEST}/shared/Microsoft.NETCore.App/${DOTNET_OTHER_RUNTIME_VERSION}"
+            ln -s "/dotnet_${DOTNET_OTHER_SDK_VERSION}/shared/Microsoft.AspNetCore.App/${DOTNET_OTHER_RUNTIME_VERSION}" "/dotnet_${DOTNET_LATEST}/shared/Microsoft.AspNetCore.App/${DOTNET_OTHER_RUNTIME_VERSION}"
+            ln -s "/dotnet_${DOTNET_OTHER_SDK_VERSION}/sdk/${DOTNET_OTHER_SDK_VERSION}" "/dotnet_${DOTNET_LATEST}/sdk/${DOTNET_OTHER_SDK_VERSION}"
+        else
+            break
+        fi
+    done
+else
+    echo "**** Existing dotnet install is up to date, skipping ****"
+fi
