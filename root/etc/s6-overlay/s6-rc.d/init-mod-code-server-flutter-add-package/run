@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+if ! which unzip >/dev/null; then
+    echo "**** Adding flutter dependency packages to install list ****"
+    echo "unzip" >> /mod-repo-packages-to-install.list
+fi
