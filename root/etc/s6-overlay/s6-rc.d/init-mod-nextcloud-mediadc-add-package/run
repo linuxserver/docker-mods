@@ -1,0 +1,36 @@
+#!/usr/bin/with-contenv bash
+
+if ! pip list 2> /dev/null | grep -q "pillow-heif" || ! pip list 2> /dev/null | grep -q "hexhamming" || ! pip list 2> /dev/null | grep -q "PyWavelets"; then
+    echo "**** Adding pillow-heif, hexhamming, pywavelets and their deps to package install lists ****"
+    echo "\
+        ffmpeg \
+        imagemagick \
+        supervisor \
+        py3-numpy \
+        py3-pillow \
+        py3-asn1crypto \
+        py3-cffi \
+        py3-scipy \
+        py3-pynacl \
+        py3-cryptography \
+        py3-pip" >> /mod-repo-packages-to-install.list
+    if [ $(arch) = "armv7l" ]; then
+        echo "**** Installing build deps for pillow-heif on arm32v7, compiling pillow_heif may take a long time in the next step ****"
+        echo "\
+            python3-dev \
+            libtool \
+            git \
+            gcc \
+            m4 \
+            perl \
+            alpine-sdk \
+            cmake \
+            aom-dev" >> /mod-repo-packages-to-install.list
+    fi
+    echo "\
+        pillow-heif \
+        hexhamming \
+        pywavelets" >> /mod-pip-packages-to-install.list
+else
+    echo "**** pillow-heif, hexhamming and pywavelets already installed, skipping ****"
+fi
