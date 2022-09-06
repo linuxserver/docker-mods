@@ -1,0 +1,34 @@
+#!/usr/bin/with-contenv bash
+
+# Determine if setup is needed
+if [ ! -f "/usr/bin/apt" ]; then
+    echo "**** Image is not Ubuntu, skipping opencl-intel install ****"
+    exit 0
+fi
+
+if ! dpkg -l | grep gnupg > /dev/null; then
+    apt-get update && apt-get install -y gnupg
+fi
+
+if [ ! -f "/etc/apt/sources.list.d/kisak-mesa.list" ]; then
+    echo "**** Adding kisak-mesa repo ****"
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F63F0F2B90935439
+    source /etc/lsb-release
+    echo "deb http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/kisak-mesa.list
+fi
+
+pkgs='mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1'
+
+install=false
+for pkg in $pkgs; do
+    status="$(dpkg-query -W --showformat='${db:Status-Status}' "$pkg" 2>&1)"
+    if [ ! $? = 0 ] || [ ! "$status" = installed ]; then
+        install=true
+        break
+    fi
+done
+
+if "$install"; then
+    echo "**** Adding mesa to package install list ****"
+    echo "$pkgs" >> /mod-repo-packages-to-install.list
+fi
