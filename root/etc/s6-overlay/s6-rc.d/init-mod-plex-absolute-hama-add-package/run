@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash 
+
+if [ -z `command -v git` ]; then
+    echo "**** adding plex-absolute-hama deps to package install list ****"
+    echo "git" >> /mod-repo-packages-to-install.list
+else
+    echo "**** plex-absolute-hama deps already installed, skipping ****"
+fi
