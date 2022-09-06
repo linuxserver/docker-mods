@@ -6,10 +6,15 @@ if [ -z ${VSCODE_EXTENSION_IDS+x} ]; then
   exit 0
 fi
 
-
 IFS='|'
 VSCODE_EXTENSION_IDS=(${VSCODE_EXTENSION_IDS})
-for ID in "${VSCODE_EXTENSION_IDS[@]}"; do
-    echo "**** installing extension: ${ID} ****"
+# Use newly available abstraction if available (>= v4.0.x), else fallback to old method.
+if [ -x "$(command -v install-extension)" ]; then
+  for ID in "${VSCODE_EXTENSION_IDS[@]}"; do
+    install-extension ${ID}
+  done
+else
+  for ID in "${VSCODE_EXTENSION_IDS[@]}"; do
     s6-setuidgid abc code-server --user-data-dir /config/data --extensions-dir /config/extensions --install-extension ${ID}
-done
+  done
+fi

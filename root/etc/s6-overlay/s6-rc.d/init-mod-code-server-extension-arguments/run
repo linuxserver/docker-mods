@@ -1,0 +1,13 @@
+#!/usr/bin/with-contenv bash
+
+# Exit if no VsCode extensions are given
+if [ -z ${VSCODE_EXTENSION_IDS+x} ]; then
+  echo "**** No VSCODE EXTENSIONS GIVEN****"
+  exit 0
+fi
+
+IFS='|'
+VSCODE_EXTENSION_IDS=(${VSCODE_EXTENSION_IDS})
+for ID in "${VSCODE_EXTENSION_IDS[@]}"; do
+  install-extension ${ID}
+done
