@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+
+if ! pip list 2> /dev/null | grep -q "scikit-learn"; then
+    echo "**** Adding scikit-learn and deps to package install lists ****"
+    echo "\
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        python3-dev \
+        python3-pip \
+        python3-venv" >> /mod-repo-packages-to-install.list
+    echo "\
+        jupyterlab\
+        scikit-learn" >> /mod-pip-packages-to-install.list
+else
+    echo "**** scikit-learn already installed, skipping ****"
+fi
