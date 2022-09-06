@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -s ffmpeg >/dev/null 2>&1; then
+    echo "**** Adding ffmpeg to package install list ****"
+    echo "ffmpeg" >> /mod-repo-packages-to-install.list
+else
+    echo "**** ffmpeg already installed, skipping ****"
+fi
