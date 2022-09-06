@@ -28,7 +28,7 @@ services:
       - SUPERUSER_EMAIL=SUPERUSER_EMAIL
       - SUPERUSER_PASSWORD=SUPERUSER_PASSWORD
     volumes:
-      - path to data on host:/config
+      - /path/to/data/on/host:/config
     ports:
       - 8000:8000
     restart: unless-stopped
