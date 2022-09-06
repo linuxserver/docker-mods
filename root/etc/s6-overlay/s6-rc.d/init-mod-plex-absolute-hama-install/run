@@ -10,8 +10,13 @@ else
 fi
 chown -R abc:abc /config/absolute
 
+if [ ! -d "/config/Library/Application Support/Plex Media Server" ]; then
+    echo "**** Creating Scanner and Plug-ins folders ****"
+    mkdir -p "/config/Library/Application Support/Plex Media Server/Scanners/Series" "/config/Library/Application Support/Plex Media Server/Plug-ins"
+    chown -R abc:abc "/config/Library/Application Support/Plex Media Server"
+fi
+
 scannerdir="/config/Library/Application Support/Plex Media Server/Scanners/Series"
-mkdir -p "$scannerdir"
 
 # copy the scanner if missing or out of date
 if [ ! -f "$scannerdir/Absolute Series Scanner.py" ]; then
