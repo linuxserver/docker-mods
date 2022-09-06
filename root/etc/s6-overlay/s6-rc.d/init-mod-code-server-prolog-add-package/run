@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -l | grep gprolog > /dev/null; then
+    echo "**** Adding gprolog to package install list ****"
+    echo "gprolog" >> /mod-repo-packages-to-install.list
+else
+    echo "**** gprolog already installed ****"
+fi    
