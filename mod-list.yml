@@ -8,7 +8,8 @@ mods:
     mod_count: 24
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
-      - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
+      - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
+      - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
       - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet
       - extension-arguments: https://github.com/linuxserver/docker-mods/tree/code-server-extension-arguments
       - flutter: https://github.com/linuxserver/docker-mods/tree/code-server-flutter
@@ -22,7 +23,6 @@ mods:
       - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
-      - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
@@ -35,26 +35,17 @@ mods:
     mod_count: 1
     container_mods:
       - fonts: https://github.com/linuxserver/docker-mods/tree/firefox-fonts
-  healthchecks:
-    mod_count: 1
-    container_mods:
-      - apprise: https://github.com/linuxserver/docker-mods/tree/healthchecks-apprise
   jellyfin:
-    mod_count: 2
+    mod_count: 3
     container_mods:
       - amd: https://github.com/linuxserver/docker-mods/tree/jellyfin-amd
       - opencl-intel: https://github.com/linuxserver/docker-mods/tree/jellyfin-opencl-intel
+      - rffmpeg: https://github.com/linuxserver/docker-mods/tree/jellyfin-rffmpeg
   lazylibrarian:
     mod_count: 2
     container_mods:
       - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/lazylibrarian-ffmpeg
-  letsencrypt:
-    mod_count: 3
-    container_mods:
-      - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/letsencrypt-f2bdiscord
-      - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
-      - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
   lidarr:
     mod_count: 1
     container_mods:
@@ -68,7 +59,7 @@ mods:
     container_mods:
       - auto-reload: https://github.com/linuxserver/docker-mods/tree/swag-auto-reload
       - crowdsec: https://github.com/linuxserver/docker-mods/tree/swag-crowdsec
-      - imagemagick: https://github.com/linuxserver/docker-mods/tree/letsencrypt-imagemagick
+      - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - proxy-confs: https://github.com/linuxserver/docker-mods/tree/nginx-proxy-confs
   openssh-server:
@@ -80,11 +71,13 @@ mods:
       - openssh-client: https://github.com/linuxserver/docker-mods/tree/openssh-server-openssh-client
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   openvscode-server:
-    mod_count: 21
+    mod_count: 24
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
-      - docker: https://github.com/linuxserver/docker-mods/tree/code-server-docker
+      - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
+      - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
       - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet
+      - extension-arguments: https://github.com/linuxserver/docker-mods/tree/code-server-extension-arguments
       - flutter: https://github.com/linuxserver/docker-mods/tree/code-server-flutter
       - golang: https://github.com/linuxserver/docker-mods/tree/code-server-golang
       - java11: https://github.com/linuxserver/docker-mods/tree/code-server-java11
@@ -96,12 +89,13 @@ mods:
       - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
-      - python2: https://github.com/linuxserver/docker-mods/tree/code-server-python2
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
       - ssl: https://github.com/linuxserver/docker-mods/tree/code-server-ssl
+      - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
+      - terraform: https://github.com/linuxserver/docker-mods/tree/code-server-terraform
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
   paperless-ng:
     mod_count: 1
@@ -146,6 +140,7 @@ mods:
     mod_count: 10
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
+      - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
       - cloudflared: https://github.com/linuxserver/docker-mods/tree/universal-cloudflared
       - cron: https://github.com/linuxserver/docker-mods/tree/universal-cron
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
@@ -154,4 +149,3 @@ mods:
       - package-install: https://github.com/linuxserver/docker-mods/tree/universal-package-install
       - stdout-logs: https://github.com/linuxserver/docker-mods/tree/universal-stdout-logs
       - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
-      - wait-for-internet: https://github.com/linuxserver/docker-mods/tree/universal-wait-for-internet
