@@ -1,3 +1,5 @@
+# THIS MOD HAS BEEN DEPRECATED AND WILL NOT RECEIVE UPDATES
+
 # Universal Wait for Internet - Docker mod for an waiting on an active internet connection
 
 This mod is used to help wait until an active internet connection is established. By default, it will attempt to access https://www.linuxserver.io/. If after 60s a connection cannot be established, it will wait for 10s before attempting again. This will happen until an active connection is established.
