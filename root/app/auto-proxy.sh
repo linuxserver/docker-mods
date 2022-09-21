@@ -77,9 +77,13 @@ for CONTAINER in ${AUTO_GEN}; do
             sed -i "s|#auth_basic|auth_basic|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
         elif [ "${swag_auth}" == "ldap" ]; then
+            # Old (before standard-base)
             sed -i "s|#include /config/nginx/ldap.conf;|include /config/nginx/ldap.conf;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             sed -i "s|#auth_request /auth;|auth_request /auth;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             sed -i "s|#error_page 401 =200 /ldaplogin;|error_page 401 =200 /ldaplogin;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            # New (after standard-base)
+            sed -i "s|#include /config/nginx/ldap-server.conf;|include /config/nginx/ldap-server.conf;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            sed -i "s|#include /config/nginx/ldap-location.conf;|include /config/nginx/ldap-location.conf;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
         fi
     else
@@ -135,9 +139,13 @@ DUDE
             sed -i "s|#auth_basic|auth_basic|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
         elif [ "${swag_auth}" == "ldap" ]; then
+            # Old (before standard-base)
             sed -i "s|#include /config/nginx/ldap.conf;|include /config/nginx/ldap.conf;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             sed -i "s|#auth_request /auth;|auth_request /auth;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             sed -i "s|#error_page 401 =200 /ldaplogin;|error_page 401 =200 /ldaplogin;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            # New (after standard-base)
+            sed -i "s|#include /config/nginx/ldap-server.conf;|include /config/nginx/ldap-server.conf;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            sed -i "s|#include /config/nginx/ldap-location.conf;|include /config/nginx/ldap-location.conf;|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
         fi
     fi
