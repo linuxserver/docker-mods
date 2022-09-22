@@ -1,30 +1,11 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-DEFAULT_WATCH=()
-mapfile -t DEFAULT_WATCH < <(find /config/nginx -type f -name '*.conf' -print)
-DEFAULT_WATCH+=("/config/nginx/proxy-confs" "/config/nginx/site-confs")
-
-# start with an empty array for active watch
-ACTIVE_WATCH=()
-echo "MOD Auto-reload: Watching the following files/folders for changes"
-for i in "${DEFAULT_WATCH[@]}"; do
-  if [ -f "${i}" ] || [ -d "${i}" ]; then
-    echo "${i}"
-    ACTIVE_WATCH+=("${i}")
-  fi
-done
-for i in $(echo "${WATCHLIST}" | tr "|" " "); do
-  if [ -f "${i}" ] || [ -d "${i}" ]; then
-    echo "${i}"
-    ACTIVE_WATCH+=("${i}")
-  fi
-done
-
 function wait_for_changes {
   inotifywait -rq \
     --event modify,move,create,delete \
-    "${ACTIVE_WATCH[@]}"
+    --excludei '\.(sample|md)' \
+    "/config/nginx"
 }
 
 while wait_for_changes; do
