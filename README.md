@@ -1,15 +1,9 @@
 # Auto-reload - Docker mod for Nginx based images
 
-This mod allows Nginx to be reloaded automatically whenever there are valid changes to the following files and folders:
-- /config/nginx/authelia-location.conf
-- /config/nginx/authelia-server.conf
-- /config/nginx/geoip2.conf
-- /config/nginx/ldap.conf
-- /config/nginx/nginx.conf
+This mod allows Nginx to be reloaded automatically whenever there are valid changes to the `*.conf` files in `/config/nginx` or any files in the following folders:
+
 - /config/nginx/proxy-confs
-- /config/nginx/proxy.conf
 - /config/nginx/site-confs
-- /config/nginx/ssl.conf
 
 In the container's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-auto-reload`
 
