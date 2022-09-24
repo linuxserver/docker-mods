@@ -144,7 +144,7 @@
             "subfolder.conf" => "https://github.com/linuxserver/reverse-proxy-confs/blob/master/",
             "dashboard.subdomain.conf" => "https://github.com/linuxserver/docker-mods/blob/swag-dashboard/root/dashboard/",
         );
-        $output = shell_exec("/etc/cont-init.d/70-templates");
+        $output = shell_exec("/etc/cont-init.d/85-version-checks");
 
         foreach(explode(PHP_EOL, $output) as $line) {
             if(substr($line, 0, 1) === "*"){
