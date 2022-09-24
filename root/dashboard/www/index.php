@@ -153,7 +153,7 @@
                 $tr_class = ($counter % 2 == 0) ? 'shaded' : '';
                 $files .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.htmlspecialchars($line).'</span></td>';
                 $file_name = substr($line, strrpos($line, '/') + 1);
-                $link = "https://github.com/linuxserver/docker-swag/blob/master/root/defaults/".$file_name;
+                $link = "https://github.com/linuxserver/docker-swag/blob/master/root/defaults/nginx/".$file_name;
                 foreach($conf_locations as $key=>$value) {
                     if (strpos($file_name, $key) !== false) {
                         $link = $value.$file_name;
