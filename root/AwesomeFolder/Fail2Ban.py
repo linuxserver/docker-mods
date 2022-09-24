@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    data = Helpers(args.ip).data
+    data = Helpers(args.ip).data if "ban" in args.action else {}
     disc = Discord(data, args)
     if (payload := disc.create_payload()):
         disc.send(payload)
