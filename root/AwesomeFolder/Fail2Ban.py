@@ -85,14 +85,14 @@ class Helpers:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Discord notifier for F2B')
     parser.add_argument('-a', '--action', help="Which F2B action triggered the script", required=True)
-    parser.add_argument('-i', '--ip', help="ip which triggered the action", default="1.1.1.1")
+    parser.add_argument('-i', '--ip', help="ip which triggered the action", default="8.8.8.8")
     parser.add_argument('-j', '--jail', help="jail which triggered the action")
     parser.add_argument('-t', '--time', help="The time the action is valid")
     parser.add_argument('-f', '--fail', help="Amount of attempts done")
 
     args = parser.parse_args()
 
-    data = Helpers(args.ip).data
+    data = Helpers(args.ip).data if "ban" in args.action else {}
     disc = Discord(data, args)
     if (payload := disc.create_payload()):
         disc.send(payload)
