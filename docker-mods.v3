@@ -3,6 +3,7 @@
 
 # Version 3
 # 2022-09-25
+MOD_SCRIPT_VER="3"
 
 # Define custom folder paths
 SCRIPTS_DIR_OLD="/config/custom-cont-init.d"
@@ -285,7 +286,11 @@ run_mods() {
 
 # Main script loop
 
-if [ ! -d "${SCRIPTS_DIR}" ] && [ ! -d "${SERVICES_DIR}" ]; then
+if [[ ${S6_VERBOSITY} -ge 2 ]]; then
+    echo "[mod-init] Version ${MOD_SCRIPT_VER}"
+fi
+
+if [[ ! -d "${SCRIPTS_DIR}" ]] && [[ ! -d "${SERVICES_DIR}" ]]; then
     # Tamper check legacy custom folders
     tamper_check_legacy
     process_custom_services_legacy
