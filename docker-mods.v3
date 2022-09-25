@@ -163,12 +163,12 @@ curl_check() {
             apk add --no-cache \
                 curl \
                 jq
-        elif [ -f /usr/bin/dnf ]; then
+        elif [[ -f /usr/bin/dnf ]]; then
             # Fedora
             dnf install -y --setopt=install_weak_deps=False --best \
                 curl \
                 jq
-        elif [ -f /usr/sbin/pacman ]; then
+        elif [[ -f /usr/sbin/pacman ]]; then
             # Arch
             pacman -Sy --noconfirm \
                 curl \
