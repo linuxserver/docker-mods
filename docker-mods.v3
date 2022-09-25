@@ -1,0 +1,305 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+# Version 3
+# 2022-09-25
+
+# Define custom folder paths
+SCRIPTS_DIR_OLD="/config/custom-cont-init.d"
+SCRIPTS_DIR="/custom-cont-init.d"
+SERVICES_DIR_OLD="/config/custom-services.d"
+SERVICES_DIR="/custom-services.d"
+
+# Set executable bit on cont-init and services built into the image
+set_legacy_executable_bits() {
+    mkdir -p /etc/{cont-init.d,services.d}
+    chmod +x \
+        /etc/cont-init.d/* \
+        /etc/services.d/*/* 2>/dev/null || true
+}
+
+tamper_check() {
+    #Tamper check custom service locations
+    if [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* ! -user root 2>/dev/null)" ]]; then
+        echo "[custom-init] **** Some of the contents of the folder '${SERVICES_DIR}' are not owned by root, which is a security risk. ****"
+        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+    elif [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* -perm -o+w 2>/dev/null)" ]]; then
+        echo "[custom-init] **** Some of the contents of the folder '${SERVICES_DIR}' have write permissions for others, which is a security risk. ****"
+        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+    fi
+    #Tamper check custom script locations
+    if [[ -d "${SCRIPTS_DIR}" ]] && [[ -n "$(find ${SCRIPTS_DIR}/* ! -user root 2>/dev/null)" ]]; then
+        echo "[custom-init] **** Some of the contents of the folder '${SCRIPTS_DIR}' are not owned by root, which is a security risk. ****"
+        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+    elif [[ -d "${SCRIPTS_DIR}" ]] && [[ -n "$(find ${SCRIPTS_DIR}/* -perm -o+w 2>/dev/null)" ]]; then
+        echo "[custom-init] **** Some of the contents of the folder '${SCRIPTS_DIR}' have write permissions for others, which is a security risk. ****"
+        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+    fi
+}
+
+tamper_check_legacy() {
+    # Tamper check custom script locations
+    if [[ -d "${SCRIPTS_DIR_OLD}" ]] && [[ -n "$(find ${SCRIPTS_DIR_OLD} ! -user root 2>/dev/null)" ]]; then
+        echo "[custom-init] **** Potential tampering with custom scripts detected ****"
+        randstr=$(
+            tr </dev/urandom -dc _A-Z-a-z-0-9 | head -c8
+            echo
+        )
+        mv "${SCRIPTS_DIR_OLD}" "${SCRIPTS_DIR_OLD}.${randstr}"
+        echo "[custom-init] **** Folder ${SCRIPTS_DIR_OLD} is moved to ${SCRIPTS_DIR_OLD}.${randstr} ****"
+        echo "[custom-init] **** The folder '${SCRIPTS_DIR_OLD}' and its contents need to all be owned by root to prevent root escalation inside the container!!! ****"
+    elif [[ -d "${SCRIPTS_DIR_OLD}" ]] && [[ -n "$(find ${SCRIPTS_DIR_OLD} -perm -o+w 2>/dev/null)" ]]; then
+        echo "[custom-init] **** The folder '${SCRIPTS_DIR_OLD}' or some of its contents have write permissions for others, which is a security risk. ****"
+        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+    fi
+
+    # Tamper check custom service locations
+    if [[ -d "${SERVICES_DIR_OLD}" ]] && [[ -n "$(find ${SERVICES_DIR_OLD} ! -user root 2>/dev/null)" ]]; then
+        echo "[custom-init] **** Potential tampering with custom scripts detected ****"
+        randstr=$(
+            tr </dev/urandom -dc _A-Z-a-z-0-9 | head -c8
+            echo
+        )
+        mv "${SERVICES_DIR_OLD}" "${SERVICES_DIR_OLD}.${randstr}"
+        echo "[custom-init] **** Folder ${SERVICES_DIR_OLD} is moved to ${SERVICES_DIR_OLD}.${randstr} ****"
+        echo "[custom-init] **** The folder '${SERVICES_DIR_OLD}' and its contents need to all be owned by root to prevent root escalation inside the container!!! ****"
+    elif [[ -d "${SERVICES_DIR_OLD}" ]] && [[ -n "$(find ${SERVICES_DIR_OLD} -perm -o+w 2>/dev/null)" ]]; then
+        echo "[custom-init] **** The folder '${SERVICES_DIR_OLD}' or some of its contents have write permissions for others, which is a security risk. ****"
+        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+    fi
+}
+
+process_custom_services() {
+    # Remove all existing custom services before continuing to ensure
+    # we aren't running anything the user may have removed
+    if [[ -n "$(/bin/ls -A /etc/s6-overlay/s6-rc.d/custom-svc-* 2>/dev/null)" ]]; then
+        echo "[custom-init] removing existing custom services..."
+        rm -rf /etc/s6-overlay/s6-rc.d/custom-svc-*
+        rm /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-*
+    fi
+
+    # Make sure custom service directory exists and has files in it
+    if [[ -e "${SERVICES_DIR}" ]] && [[ -n "$(/bin/ls -A ${SERVICES_DIR} 2>/dev/null)" ]]; then
+        echo "[custom-init] Service files found in ${SERVICES_DIR}"
+        for SERVICE in "${SERVICES_DIR}"/*; do
+            NAME="$(basename "${SERVICE}")"
+            if [[ -f "${SERVICE}" ]]; then
+                echo "[custom-init] ${NAME}: service detected, copying..."
+                mkdir -p /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/
+                cp "${SERVICE}" /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
+                chmod +x /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
+                echo "longrun" >/etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/type
+                touch /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/init-services
+                touch /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-"${NAME}"
+                echo "[custom-init] ${NAME}: copied"
+            elif [[ ! -f "${SERVICE}" ]]; then
+                echo "[custom-init] ${NAME}: is not a file"
+            fi
+        done
+    else
+        echo "[custom-init] No custom services found, skipping..."
+    fi
+
+    # Remove legacy folder if it's empty
+    if [[ -e "${SERVICES_DIR_OLD}" ]] && [[ -z "$(/bin/ls -A ${SERVICES_DIR_OLD} 2>/dev/null)" ]]; then
+        echo "[custom-init] Legacy service folder ${SERVICES_DIR_OLD} is empty, deleting..."
+        rm -rf "${SERVICES_DIR_OLD}"
+    fi   
+}
+
+process_custom_services_legacy() {
+
+    # Remove all existing custom services before continuing to ensure
+    # we aren't running anything the user may have removed
+    if [[ -n "$(/bin/ls -A /etc/s6-overlay/s6-rc.d/custom-svc-* 2>/dev/null)" ]]; then
+        echo "[custom-init] removing existing custom services..."
+        rm -rf /etc/s6-overlay/s6-rc.d/custom-svc-*
+        rm /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-*
+    fi
+
+    # Make sure custom service directory exists and has files in it
+    if [[ -e "${SERVICES_DIR_OLD}" ]] && [[ -n "$(/bin/ls -A ${SERVICES_DIR_OLD} 2>/dev/null)" ]]; then
+        echo "[custom-init] Service files found in ${SERVICES_DIR_OLD}"
+        for SERVICE in "${SERVICES_DIR_OLD}"/*; do
+            NAME="$(basename "${SERVICE}")"
+            if [[ -f "${SERVICE}" ]]; then
+                echo "[custom-init] ${NAME}: service detected, copying..."
+                mkdir -p /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/
+                cp "${SERVICE}" /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
+                chmod +x /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
+                echo "longrun" >/etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/type
+                touch /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/init-services
+                touch /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-"${NAME}"
+                echo "[custom-init] ${NAME}: copied"
+            elif [[ ! -f "${SERVICE}" ]]; then
+                echo "[custom-init] ${NAME}: is not a file"
+            fi
+        done
+    else
+        echo "[custom-init] No custom services found, skipping..."
+    fi        
+
+    # Remove legacy folder if it's empty    
+    if [[ -e "${SERVICES_DIR_OLD}" ]] && [[ -z "$(/bin/ls -A ${SERVICES_DIR_OLD} 2>/dev/null)" ]]; then
+        echo "[custom-init] Legacy service folder ${SERVICES_DIR_OLD} is empty, deleting..."
+        rm -rf "${SERVICES_DIR_OLD}"
+    fi
+}
+
+# Check for curl
+curl_check() {
+    if [[ ! -f /usr/bin/curl ]] || [[ ! -f /usr/bin/jq ]]; then
+        echo "[mod-init] Curl/JQ was not found on this system for Docker mods installing"
+        if [[ -f /usr/bin/apt ]]; then
+            ## Ubuntu
+            export DEBIAN_FRONTEND="noninteractive"
+            apt-get update
+            apt-get install --no-install-recommends -y \
+                curl \
+                jq
+        elif [[ -f /sbin/apk ]]; then
+            # Alpine
+            apk add --no-cache \
+                curl \
+                jq
+        elif [ -f /usr/bin/dnf ]; then
+            # Fedora
+            dnf install -y --setopt=install_weak_deps=False --best \
+                curl \
+                jq
+        elif [ -f /usr/sbin/pacman ]; then
+            # Arch
+            pacman -Sy --noconfirm \
+                curl \
+                jq
+        fi
+    fi
+}
+
+# Use different filtering depending on URL
+get_blob_sha() {
+    if [[ $1 == "ghcr" ]]; then
+        curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+            --silent \
+            --location \
+            --request GET \
+            --header "Authorization: Bearer $2" \
+            "$3" | jq -r '.layers[0].digest'
+    else
+        curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+            --silent \
+            --location \
+            --request GET \
+            --header "Authorization: Bearer $2" \
+            "$3" | jq -r '.fsLayers[0].blobSum'
+    fi
+}
+
+# Main run logic
+run_mods() {
+    echo "[mod-init] Attempting to run Docker Modification Logic"
+    for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
+        # Support alternative endpoints
+        if [[ ${DOCKER_MOD} == ghcr.io/* ]] || [[ ${DOCKER_MOD} == linuxserver/* ]]; then
+            DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
+            ENDPOINT="${DOCKER_MOD%%:*}"
+            USERNAME="${DOCKER_MOD%%/*}"
+            REPO="${ENDPOINT#*/}"
+            TAG="${DOCKER_MOD#*:}"
+            if [[ ${TAG} == "${DOCKER_MOD}" ]]; then
+                TAG="latest"
+            fi
+            FILENAME="${USERNAME}.${REPO}.${TAG}"
+            AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull"
+            MANIFEST_URL="https://ghcr.io/v2/${ENDPOINT}/manifests/${TAG}"
+            BLOB_URL="https://ghcr.io/v2/${ENDPOINT}/blobs/"
+            MODE="ghcr"
+        else
+            ENDPOINT="${DOCKER_MOD%%:*}"
+            USERNAME="${DOCKER_MOD%%/*}"
+            REPO="${ENDPOINT#*/}"
+            TAG="${DOCKER_MOD#*:}"
+            if [[ ${TAG} == "${DOCKER_MOD}" ]]; then
+                TAG="latest"
+            fi
+            FILENAME="${USERNAME}.${REPO}.${TAG}"
+            AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
+            MANIFEST_URL="https://registry-1.docker.io/v2/${ENDPOINT}/manifests/${TAG}"
+            BLOB_URL="https://registry-1.docker.io/v2/${ENDPOINT}/blobs/"
+            MODE="dockerhub"
+        fi
+        # Kill off modification logic if any of the usernames are banned
+        for BANNED in $(curl -s https://raw.githubusercontent.com/linuxserver/docker-mods/master/blacklist.txt); do
+            if [[ "${BANNED,,}" == "${USERNAME,,}" ]]; then
+                if [[ -z ${RUN_BANNED_MODS+x} ]]; then
+                    echo "[mod-init] ${DOCKER_MOD} is banned from use due to reported abuse aborting mod logic"
+                    return
+                else
+                    echo "[mod-init] You have chosen to run banned mods ${DOCKER_MOD} will be applied"
+                fi
+            fi
+        done
+        echo "[mod-init] Applying ${DOCKER_MOD} files to container"
+        # Get Dockerhub token for api operations
+        TOKEN="$(
+            curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                --silent \
+                --header 'GET' \
+                "${AUTH_URL}" |
+                jq -r '.token'
+        )"
+        # Determine first and only layer of image
+        SHALAYER=$(get_blob_sha "${MODE}" "${TOKEN}" "${MANIFEST_URL}")
+        # Check if we have allready applied this layer
+        if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
+            echo "[mod-init] ${DOCKER_MOD} at ${SHALAYER} has been previously applied skipping"
+        else
+            # Download and extract layer to /
+            curl -f --retry 10 --retry-max-time 60 --retry-all-errors \
+                --silent \
+                --location \
+                --request GET \
+                --header "Authorization: Bearer ${TOKEN}" \
+                "${BLOB_URL}${SHALAYER}" -o \
+                /modtarball.tar.xz
+            mkdir -p /tmp/mod
+            tar xzf /modtarball.tar.xz -C /tmp/mod
+            if [[ -d /tmp/mod/etc/s6-overlay ]]; then
+                if [[ -d /tmp/mod/etc/cont-init.d ]]; then
+                    rm -rf /tmp/mod/etc/cont-init.d
+                fi
+                if [[ -d /tmp/mod/etc/services.d ]]; then
+                    rm -rf /tmp/mod/etc/services.d
+                fi
+            fi
+            shopt -s dotglob
+            cp -R /tmp/mod/* /
+            shopt -u dotglob
+            rm -rf /tmp/mod
+            rm -rf /modtarball.tar.xz
+            echo "${SHALAYER}" >"/${FILENAME}"
+            echo "[mod-init] ${DOCKER_MOD} applied to container"
+        fi
+    done
+}
+
+# Main script loop
+
+if [ ! -d "${SCRIPTS_DIR}" ] && [ ! -d "${SERVICES_DIR}" ]; then
+    # Tamper check legacy custom folders
+    tamper_check_legacy
+    process_custom_services_legacy
+else
+    # Tamper check new custom folders
+    tamper_check
+    process_custom_services
+fi
+
+# Run mod logic
+if [[ -n "${DOCKER_MODS+x}" ]]; then
+    curl_check
+    run_mods
+fi
+
+# Set executable bit on legacy cont-init and services built into the image and anything legacy unpacked by mods
+set_legacy_executable_bits
