@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing java17 dev environment ****"
+apt-get install -y \
+    openjdk-17-jdk
