@@ -1,9 +1,19 @@
 #!/usr/bin/with-contenv bash
 
 # Exit if no installable packages are provided
-if [ -z ${INSTALL_PACKAGES+x} ]; then
+if [ -z "${INSTALL_PACKAGES+x}" ] && [ -z "${INSTALL_PIP_PACKAGES+x}" ]; then
     echo "**** No packages to install ****"
     exit 0
+fi
+
+if [ -n "${INSTALL_PIP_PACKAGES}" ] && [ -f /usr/bin/apt ]; then
+    echo "\
+        python3-dev \
+        python3-pip" >> /mod-repo-packages-to-install.list
+elif [ -n "${INSTALL_PIP_PACKAGES}" ] && [ -f /sbin/apk ]; then
+    echo "\
+        python3-dev \
+        py3-pip" >> /mod-repo-packages-to-install.list
 fi
 
 
@@ -11,6 +21,12 @@ fi
 IFS='|'
 INSTALL_PACKAGES=(${INSTALL_PACKAGES})
 for PKG in "${INSTALL_PACKAGES[@]}"; do
-    echo "**** Adding ${PKG} to install list ****"
+    echo "**** Adding ${PKG} to OS package install list ****"
     echo "${PKG}" >> /mod-repo-packages-to-install.list
+done
+
+INSTALL_PIP_PACKAGES=(${INSTALL_PIP_PACKAGES})
+for PKG in "${INSTALL_PIP_PACKAGES[@]}"; do
+    echo "**** Adding ${PKG} to pip install list ****"
+    echo "${PKG}" >> /mod-pip-packages-to-install.list
 done
