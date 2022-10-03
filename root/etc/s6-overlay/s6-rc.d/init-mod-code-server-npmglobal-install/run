@@ -4,9 +4,10 @@
 if [ -f /usr/bin/npm ]; then
     echo "creating npm global folder in /config"
     mkdir -p /config/npm-global
+    chown abc:abc /config/npm-global
 
     echo "setting npm to global folder in /config"
-    npm config set prefix '/config/npm-global'
+    s6-setuidgid abc npm config set prefix '/config/npm-global'
 
     if  grep -q "/config/npm-global/bin" "/etc/services.d/code-server/run" 2>/dev/null || \
         grep -q "/config/npm-global/bin" "/etc/services.d/openvscode-server/run" 2>/dev/null || \
