@@ -1,5 +1,12 @@
 # CrowdSec - Docker mod for SWAG
 
+## nginx.conf change
+
+Make sure that the line below, under virtual hosts, is in your nginx.conf, otherwise crowdsec-bouncer will not work. More information here https://info.linuxserver.io/issues/2022-08-20-nginx-base/
+
+    # Includes virtual hosts configs.
+    include /etc/nginx/http.d/*.conf;
+
 This mod adds the [CrowdSec](https://crowdsec.net) [nginx bouncer](https://github.com/crowdsecurity/cs-nginx-bouncer/) to SWAG, to be installed/updated during container start.
 
 In SWAG docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-crowdsec`
