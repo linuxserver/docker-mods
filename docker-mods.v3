@@ -149,14 +149,14 @@ process_custom_services_legacy() {
 
 #Create our noisy chown alias to handle read-only/remote volumes
 create_lsiown_alias() {
-		cat <<- EOF > /usr/bin/lsiown
-		#!/bin/bash
+	cat <<- EOF > /usr/bin/lsiown
+	#!/bin/bash
 
-		chown "\$@" || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
+	chown "\$@" || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
 
-		EOF
+	EOF
 
-		chmod +x /usr/bin/lsiown
+	chmod +x /usr/bin/lsiown
 }
 
 # Check for curl
