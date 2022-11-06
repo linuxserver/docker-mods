@@ -147,6 +147,18 @@ process_custom_services_legacy() {
     fi
 }
 
+#Create our noisy chown alias to handle read-only/remote volumes
+create_lsiown_alias() {
+		cat <<- EOF > /usr/bin/lsiown
+		#!/bin/bash
+
+		chown "\$@" || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
+
+		EOF
+
+		chmod +x /usr/bin/lsiown
+}
+
 # Check for curl
 curl_check() {
     if [[ ! -f /usr/bin/curl ]] || [[ ! -f /usr/bin/jq ]]; then
@@ -308,3 +320,5 @@ fi
 
 # Set executable bit on legacy cont-init and services built into the image and anything legacy unpacked by mods
 set_legacy_executable_bits
+
+create_lsiown_alias
