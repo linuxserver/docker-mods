@@ -9,12 +9,12 @@ fi
 # clone or update Absolute Series Scanner repo
 if [ ! -d /config/absolute ]; then
     echo "**** no scanner repo found, cloning. ****"
-    s6-setuidgid abc git clone --depth 1 https://github.com/ZeroQI/Absolute-Series-Scanner /config/absolute
+    s6-setuidgid abc git clone --depth 1 https://github.com/ZeroQI/Absolute-Series-Scanner /config/Library/Application Support/Plex Media Server/
 else
     echo "**** updating scanner repo ****"
-    s6-setuidgid abc git -C /config/absolute pull
+    s6-setuidgid abc git -C /config/Library/Application Support/Plex Media Server/ pull
 fi
-chown -R abc:abc /config/absolute
+chown -R abc:abc /config/Library/Application Support/Plex Media Server/
 
 scannerdir="/config/Library/Application Support/Plex Media Server/Scanners/Series"
 mkdir -p "$scannerdir"
