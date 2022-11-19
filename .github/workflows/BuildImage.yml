@@ -17,7 +17,7 @@ jobs:
         run: |
           # Set version
           DOTNET_JSON="$(curl --retry 5 -sX GET https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases-index.json)"
-          DOTNET_VERSIONS="$(echo $DOTNET_JSON | jq -r '."releases-index"[] | select(."support-phase"=="lts" or ."support-phase"=="current") | ."latest-sdk"' | tr '\n' ' ' | head -c -1)"
+          DOTNET_VERSIONS="$(echo $DOTNET_JSON | jq -r '."releases-index"[] | select(."support-phase"=="active" or ."support-phase"=="maintenance") | ."latest-sdk"' | tr '\n' ' ' | head -c -1)"
           DOTNET_TAG="$(echo $DOTNET_VERSIONS | tr ' ' '_')"
           echo "DOTNET_TAG=${DOTNET_TAG}" >> $GITHUB_ENV
           # Build image
