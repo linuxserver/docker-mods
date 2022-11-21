@@ -6,7 +6,8 @@ if ! dpkg -l | grep gnupg > /dev/null; then
 fi
 
 [[ ! -f "/etc/apt/sources.list.d/nodesource.list" ]] && \
-    curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+    curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - && \
+    sudo apt-get install -y nodejs \
     echo "deb https://deb.nodesource.com/node_19.x bionic main" \
         > /etc/apt/sources.list.d/nodesource.list
 [[ ! -f "/etc/apt/sources.list.d/yarn.list" ]] && \
