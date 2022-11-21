@@ -5,13 +5,5 @@ if ! dpkg -l | grep gnupg > /dev/null; then
     apt-get update && apt-get install -y --no-install-recommends gnupg
 fi
 
-source /etc/lsb-release
-[[ ! -f "/etc/apt/sources.list.d/nodesource.list" ]] && \
-    curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - && \
-    sudo apt-get install -y nodejs \
-    echo "deb https://deb.nodesource.com/node_19.x ${DISTRIB_CODENAME} main" \
-        > /etc/apt/sources.list.d/nodesource.list
-
-echo "**** Adding nodejs to package install list ****"
-echo "\
-    nodejs" >> /mod-repo-packages-to-install.list
+echo "*** Downloading and installing nodejs package ***"
+curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - && sudo apt-get install -y nodejs
