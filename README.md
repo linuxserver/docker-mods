@@ -1,6 +1,6 @@
 # Nodejs - Docker mod for code-server/openvscode-server
 
-This mod adds a nodejs dev environment to code-server/openvscode-server, to be installed/updated during container start.
+This mod adds a nodejs v19 dev environment to code-server/openvscode-server, to be installed/updated during container start.
 
 In code-server/openvscode-server docker arguments, set an environment variable `DOCKER_MODS=cheekysim/mods:code-server-nodejs`
 
