@@ -11,11 +11,7 @@ source /etc/lsb-release
     sudo apt-get install -y nodejs \
     echo "deb https://deb.nodesource.com/node_19.x ${DISTRIB_CODENAME} main" \
         > /etc/apt/sources.list.d/nodesource.list
-[[ ! -f "/etc/apt/sources.list.d/yarn.list" ]] && \
-    corepack enable \
-    corepack prepare yarn@stable --activate
 
-echo "**** Adding nodejs and yarn to package install list ****"
+echo "**** Adding nodejs to package install list ****"
 echo "\
-    nodejs \
-    yarn" >> /mod-repo-packages-to-install.list
+    nodejs >> /mod-repo-packages-to-install.list
