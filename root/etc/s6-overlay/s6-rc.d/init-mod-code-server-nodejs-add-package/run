@@ -14,4 +14,4 @@ source /etc/lsb-release
 
 echo "**** Adding nodejs to package install list ****"
 echo "\
-    nodejs >> /mod-repo-packages-to-install.list
+    nodejs" >> /mod-repo-packages-to-install.list
