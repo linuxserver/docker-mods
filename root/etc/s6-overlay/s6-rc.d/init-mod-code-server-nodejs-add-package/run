@@ -7,8 +7,9 @@ fi
 
 source /etc/lsb-release
 [[ ! -f "/etc/apt/sources.list.d/nodesource.list" ]] && \
-    curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo "deb https://deb.nodesource.com/node_14.x ${DISTRIB_CODENAME} main" \
+    curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - && \
+    sudo apt-get install -y nodejs \
+    echo "deb https://deb.nodesource.com/node_19.x ${DISTRIB_CODENAME} main" \
         > /etc/apt/sources.list.d/nodesource.list
 [[ ! -f "/etc/apt/sources.list.d/yarn.list" ]] && \
     curl -s https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
