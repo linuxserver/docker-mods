@@ -44,4 +44,3 @@ if [ ! -x /usr/local/bin/flac2mp3.sh ]; then
   echo "Making scripts executable."
   chmod +x /usr/local/bin/flac2*.sh
 fi
-
