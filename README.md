@@ -1,6 +1,6 @@
 # cloudflare_real-ip - Docker mod for SWAG
 
-This mod adds a startup scipt that gets the IP's from Cloudflares edge servers, and formats them in a format Nginx can use with `set_real_ip_from`.
+This mod adds a startup script that gets the IPs from Cloudflare's edge servers, and formats them in a format Nginx can use with `set_real_ip_from`.
 
 It reads this [list for IPv4](https://www.cloudflare.com/ips-v4), and this [list for IPV6](https://www.cloudflare.com/ips-v6).
 
@@ -10,9 +10,9 @@ If adding multiple mods, enter them in an array separated by `|`, such as `DOCKE
 
 ## Mod usage instructions
 
-The file gets placed in your persistant data, at `/config/nginx/cf_real-ip.conf`
+The file gets placed in your persistent data, at `/config/nginx/cf_real-ip.conf`
 
-To enable nginx to read the ips from this file, you need the following in your nginx.conf (http section):
+To enable nginx to read the IPs from this file, you need the following in your `nginx.conf` (`http` section):
 
 ```nginx
 real_ip_header X-Forwarded-For;
@@ -26,8 +26,8 @@ This mod now also *tries* to set the real ip from the interfaces in the containe
 
 ## Cloudflare tunnels
 
-In case you use cloudflare tunnels, real IP might be reported in containers as 127.0.0.1
-In this case, please add below to HTTP section of nginx.conf.
+In case you use Cloudflare tunnels, real IP might be reported in containers as 127.0.0.1.
+In this case, please add below to `http` section of `nginx.conf`.
 
 From:
 
