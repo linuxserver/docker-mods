@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "linuxserver/mods" #don't modify
+  ENDPOINT: "tessypowder/docker-mods" #don't modify
   BASEIMAGE: "nextcloud" #replace
   MODNAME: "clientpush" #replace
 
