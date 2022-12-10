@@ -6,9 +6,7 @@
 MOD_SCRIPT_VER="3"
 
 # Define custom folder paths
-SCRIPTS_DIR_OLD="/config/custom-cont-init.d"
 SCRIPTS_DIR="/custom-cont-init.d"
-SERVICES_DIR_OLD="/config/custom-services.d"
 SERVICES_DIR="/custom-services.d"
 
 # Set executable bit on cont-init and services built into the image
@@ -34,38 +32,6 @@ tamper_check() {
         echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
     elif [[ -d "${SCRIPTS_DIR}" ]] && [[ -n "$(find ${SCRIPTS_DIR}/* -perm -o+w 2>/dev/null)" ]]; then
         echo "[custom-init] **** Some of the contents of the folder '${SCRIPTS_DIR}' have write permissions for others, which is a security risk. ****"
-        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
-    fi
-}
-
-tamper_check_legacy() {
-    # Tamper check custom script locations
-    if [[ -d "${SCRIPTS_DIR_OLD}" ]] && [[ -n "$(find ${SCRIPTS_DIR_OLD} ! -user root 2>/dev/null)" ]]; then
-        echo "[custom-init] **** Potential tampering with custom scripts detected ****"
-        randstr=$(
-            tr </dev/urandom -dc _A-Z-a-z-0-9 | head -c8
-            echo
-        )
-        mv "${SCRIPTS_DIR_OLD}" "${SCRIPTS_DIR_OLD}.${randstr}"
-        echo "[custom-init] **** Folder ${SCRIPTS_DIR_OLD} is moved to ${SCRIPTS_DIR_OLD}.${randstr} ****"
-        echo "[custom-init] **** The folder '${SCRIPTS_DIR_OLD}' and its contents need to all be owned by root to prevent root escalation inside the container!!! ****"
-    elif [[ -d "${SCRIPTS_DIR_OLD}" ]] && [[ -n "$(find ${SCRIPTS_DIR_OLD} -perm -o+w 2>/dev/null)" ]]; then
-        echo "[custom-init] **** The folder '${SCRIPTS_DIR_OLD}' or some of its contents have write permissions for others, which is a security risk. ****"
-        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
-    fi
-
-    # Tamper check custom service locations
-    if [[ -d "${SERVICES_DIR_OLD}" ]] && [[ -n "$(find ${SERVICES_DIR_OLD} ! -user root 2>/dev/null)" ]]; then
-        echo "[custom-init] **** Potential tampering with custom scripts detected ****"
-        randstr=$(
-            tr </dev/urandom -dc _A-Z-a-z-0-9 | head -c8
-            echo
-        )
-        mv "${SERVICES_DIR_OLD}" "${SERVICES_DIR_OLD}.${randstr}"
-        echo "[custom-init] **** Folder ${SERVICES_DIR_OLD} is moved to ${SERVICES_DIR_OLD}.${randstr} ****"
-        echo "[custom-init] **** The folder '${SERVICES_DIR_OLD}' and its contents need to all be owned by root to prevent root escalation inside the container!!! ****"
-    elif [[ -d "${SERVICES_DIR_OLD}" ]] && [[ -n "$(find ${SERVICES_DIR_OLD} -perm -o+w 2>/dev/null)" ]]; then
-        echo "[custom-init] **** The folder '${SERVICES_DIR_OLD}' or some of its contents have write permissions for others, which is a security risk. ****"
         echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
     fi
 }
@@ -99,51 +65,6 @@ process_custom_services() {
         done
     else
         echo "[custom-init] No custom services found, skipping..."
-    fi
-
-    # Remove legacy folder if it's empty
-    if [[ -e "${SERVICES_DIR_OLD}" ]] && [[ -z "$(/bin/ls -A ${SERVICES_DIR_OLD} 2>/dev/null)" ]]; then
-        echo "[custom-init] Legacy service folder ${SERVICES_DIR_OLD} is empty, deleting..."
-        rm -rf "${SERVICES_DIR_OLD}"
-    fi   
-}
-
-process_custom_services_legacy() {
-
-    # Remove all existing custom services before continuing to ensure
-    # we aren't running anything the user may have removed
-    if [[ -n "$(/bin/ls -A /etc/s6-overlay/s6-rc.d/custom-svc-* 2>/dev/null)" ]]; then
-        echo "[custom-init] removing existing custom services..."
-        rm -rf /etc/s6-overlay/s6-rc.d/custom-svc-*
-        rm /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-*
-    fi
-
-    # Make sure custom service directory exists and has files in it
-    if [[ -e "${SERVICES_DIR_OLD}" ]] && [[ -n "$(/bin/ls -A ${SERVICES_DIR_OLD} 2>/dev/null)" ]]; then
-        echo "[custom-init] Service files found in ${SERVICES_DIR_OLD}"
-        for SERVICE in "${SERVICES_DIR_OLD}"/*; do
-            NAME="$(basename "${SERVICE}")"
-            if [[ -f "${SERVICE}" ]]; then
-                echo "[custom-init] ${NAME}: service detected, copying..."
-                mkdir -p /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/
-                cp "${SERVICE}" /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
-                chmod +x /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/run
-                echo "longrun" >/etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/type
-                touch /etc/s6-overlay/s6-rc.d/custom-svc-"${NAME}"/dependencies.d/init-services
-                touch /etc/s6-overlay/s6-rc.d/user/contents.d/custom-svc-"${NAME}"
-                echo "[custom-init] ${NAME}: copied"
-            elif [[ ! -f "${SERVICE}" ]]; then
-                echo "[custom-init] ${NAME}: is not a file"
-            fi
-        done
-    else
-        echo "[custom-init] No custom services found, skipping..."
-    fi        
-
-    # Remove legacy folder if it's empty    
-    if [[ -e "${SERVICES_DIR_OLD}" ]] && [[ -z "$(/bin/ls -A ${SERVICES_DIR_OLD} 2>/dev/null)" ]]; then
-        echo "[custom-init] Legacy service folder ${SERVICES_DIR_OLD} is empty, deleting..."
-        rm -rf "${SERVICES_DIR_OLD}"
     fi
 }
 
@@ -302,12 +223,7 @@ if [[ ${S6_VERBOSITY} -ge 2 ]]; then
     echo "[mod-init] Version ${MOD_SCRIPT_VER}"
 fi
 
-if [[ ! -d "${SCRIPTS_DIR}" ]] && [[ ! -d "${SERVICES_DIR}" ]]; then
-    # Tamper check legacy custom folders
-    tamper_check_legacy
-    process_custom_services_legacy
-else
-    # Tamper check new custom folders
+if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
     tamper_check
     process_custom_services
 fi
