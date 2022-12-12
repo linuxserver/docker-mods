@@ -1,0 +1,26 @@
+name: Permission check
+
+on:
+  pull_request:
+    paths:
+      - '**/run'
+      - '**/finish'
+
+jobs:
+  permission_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: '0'
+
+      - name: Check Permissions
+        run: |
+          WRONG_PERM=$(find ./ -name run -not -perm -u=x,g=x,o=x && find ./ -name finish -not -perm -u=x,g=x,o=x)
+          if [ -n "${WRONG_PERM}" ]; then
+            echo "**** The following files are missing the executable bit: ****"
+            echo "${WRONG_PERM}"
+            exit 1
+          else
+            echo "**** All perms look good ****"
+          fi
