@@ -454,7 +454,7 @@ elif [ -f "$flac2mp3_config" ]; then
   [ $flac2mp3_debug -ge 2 ] && echo "API returned: $flac2mp3_result" | awk '{print "Debug|"$0}' | log
   flac2mp3_recyclebin="$(echo $flac2mp3_result | jq -crM .recycleBin)"
   # Test for trailing backslash
-  [ "${flac2mp3_recyclebin: -1:1}" != "/" ] && flac2mp3_recyclebin="${flac2mp3_recyclebin}/"
+  [ ${#flac2mp3_recyclebin} -ne 0 -a "${flac2mp3_recyclebin: -1:1}" != "/" ] && flac2mp3_recyclebin="${flac2mp3_recyclebin}/"
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Detected Lidarr RecycleBin '$flac2mp3_recyclebin'" | log
   
   # Get root folder path from Artist info
