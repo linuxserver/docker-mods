@@ -1,27 +1,9 @@
 name: Permission check
-
 on:
   pull_request:
     paths:
       - '**/run'
       - '**/finish'
-
 jobs:
   permission_check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3.1.0
-        with:
-          fetch-depth: '0'
-
-      - name: Check Permissions
-        run: |
-          WRONG_PERM=$(find ./ -name run -not -perm -u=x,g=x,o=x && find ./ -name finish -not -perm -u=x,g=x,o=x)
-          if [ -n "${WRONG_PERM}" ]; then
-            for i in ${WRONG_PERM}; do
-              echo "::error file=${i},line=1,title=Missing Executable Bit::This file needs to be set as executable!"
-            done
-            exit 1
-          else
-            echo "**** All perms look good ****"
-          fi
+    uses: linuxserver/github-workflows/.github/workflows/init-svc-executable-permissions.yml@v1
