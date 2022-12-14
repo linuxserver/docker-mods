@@ -6,7 +6,7 @@ echo "NZBGet Essentials - Installation Started"
 apk --update upgrade
 echo "Phase 1 - Dependencies are being installed...."
 apk add --no-cache --virtual=build-dependencies \
-    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+    --repository https://dl-cdn.alpinelinux.org/alpine/v3.12/main \
 	tar \
 	make \
 	g++ \
@@ -22,7 +22,7 @@ echo "Phase 1 - DONE"
 echo " "
 echo "Phase 2 - Binaries are being installed..."
 apk add --no-cache \
-    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+    --repository https://dl-cdn.alpinelinux.org/alpine/v3.12/main \
 	ffmpeg \
 	openssl \
 	p7zip \
