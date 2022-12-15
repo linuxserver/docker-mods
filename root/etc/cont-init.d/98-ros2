@@ -3,4 +3,4 @@
 echo "**** Installing ros2 and ros dev tools"
 apt-get install -y \
     ros-humble-ros-base \
-     ros-dev-tools
+    ros-dev-tools
