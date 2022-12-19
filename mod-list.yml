@@ -35,6 +35,10 @@ mods:
     mod_count: 1
     container_mods:
       - fonts: https://github.com/linuxserver/docker-mods/tree/firefox-fonts
+  homeassistant:
+    mod_count: 1
+    container_mods:
+      - hacs: https://github.com/linuxserver/docker-mods/tree/homeassistant-hacs
   jellyfin:
     mod_count: 3
     container_mods:
