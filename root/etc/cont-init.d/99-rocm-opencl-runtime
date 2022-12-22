@@ -1,0 +1,23 @@
+#!/usr/bin/with-contenv bash
+
+# Determine if setup is needed
+if [ ! -f "/usr/bin/apt" ]; then
+    echo "**** Image is not Ubuntu, skipping opencl-intel install ****"
+    exit 0
+fi
+
+pkgs='rocm-opencl-runtime'
+
+install=false
+for pkg in $pkgs; do
+    status="$(dpkg-query -W --showformat='${db:Status-Status}' "$pkg" 2>&1)"
+    if [ ! $? = 0 ] || [ ! "$status" = installed ]; then
+        install=true
+        break
+    fi
+done
+
+if "$install"; then
+    echo "**** Installing rocm-opencl-runtime ****"
+    apt-get install -y $pkgs
+fi
