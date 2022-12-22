@@ -3,9 +3,7 @@
 PAR2_VERSION="0.8.1"
 PAR2_URL="https://github.com/Parchive/par2cmdline/releases/download/v$PAR2_VERSION/par2cmdline-$PAR2_VERSION.tar.gz"
 echo "NZBGet Essentials FIXED - Installation Started"
-echo http://dl-cdn.alpinelinux.org/alpine/v3.12/main > /etc/apk/repositories
-echo http://dl-cdn.alpinelinux.org/alpine/v3.12/community >> /etc/apk/repositories
-apk --update
+apk --update upgrade
 echo "Phase 1 - Dependencies are being installed...."
 apk add --no-cache \
 	tar \
