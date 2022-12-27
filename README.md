@@ -1,4 +1,4 @@
-# MediaDC - Docker mod for nextcloud
+# Memories - Docker mod for nextcloud
 
 This mod adds the required packages the [Memories](https://apps.nextcloud.com/apps/memories) nextcloud app needs to work.
 
