@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** Installing perl package ****"
+apk add --no-cache \
+    perl

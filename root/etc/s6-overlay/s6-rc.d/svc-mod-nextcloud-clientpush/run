@@ -1,7 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-# This is an example service that would run for the mod
-# It depends on init-services, the baseimage hook for start of all longrun services
-
-exec \
-    s6-setuidgid abc /config/www/nextcloud/apps/notify_push/bin/x86_64/notify_push --nextcloud-url https://192.168.10.2:2443 --allow-self-signed --port 7867 /config/www/nextcloud/config/config.php

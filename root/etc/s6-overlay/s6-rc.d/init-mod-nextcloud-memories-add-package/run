@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+perl_executable_path=$(which perl)
+if [ -x "$perl_executable_path" ] ; then
+    echo "**** Adding perl5 and its deps to package install lists ****"
+    echo "perl\
+    " >> /mod-repo-packages-to-install.list
+else
+    echo "**** perl5 already installed, skipping ****"
+fi
