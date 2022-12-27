@@ -5,7 +5,7 @@ on: [push, pull_request, workflow_dispatch]
 env:
   ENDPOINT: "tessypowder/docker-mods" #don't modify
   BASEIMAGE: "nextcloud" #replace
-  MODNAME: "clientpush" #replace
+  MODNAME: "memories" #replace
 
 jobs:
   build:
