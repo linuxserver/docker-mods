@@ -62,9 +62,9 @@ cp /tmp/crowdsec/nginx/crowdsec_nginx.conf /etc/nginx/http.d
 
 # Sed in crowdsec include
 if ! grep -q '[^#]include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf' && ! grep -q '[^#]include /etc/nginx/conf.d/\*.conf;' '/config/nginx/nginx.conf'; then
-    if grep -q '#include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf'; then
+    if grep -q '#\s*include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf'; then
         # Enable http.d include
-        sed -i 's|#include /etc/nginx/http.d/\*.conf;|include /etc/nginx/http.d/\*.conf;|' /config/nginx/nginx.conf
+        sed -i 's|#\s*include /etc/nginx/http.d/\*.conf;|include /etc/nginx/http.d/\*.conf;|' /config/nginx/nginx.conf
     else
         # Warn about missing http.d include
         echo "
