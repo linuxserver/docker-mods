@@ -12,7 +12,7 @@ if [ ! -f "/etc/apt/sources.list.d/ros2.list" ]; then
     echo "ros-humble-ros-base ros-dev-tools" >> /mod-repo-packages-to-install.list
 
     echo "**** Automatically sourcing ROS2 ****"
-    printf "\n# Automatically source ROS2 humble\nsource /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
+    printf "\n# Automatically source ROS2 humble\nsource /opt/ros/humble/setup.bash" >> /config/.bashrc
 else
     echo "**** ROS2 packages already installed, skipping ****"
 fi

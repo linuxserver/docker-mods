@@ -6,7 +6,8 @@ if ! dpkg -l | grep gnupg > /dev/null; then
 fi
 
 source /etc/lsb-release
-[[ ! -f "/etc/apt/sources.list.d/ros2.list" ]] && \
+if [ ! -f "/etc/apt/sources.list.d/ros2.list" ]; then
     curl -sL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - && \
     echo "deb http://packages.ros.org/ros2/ubuntu ${DISTRIB_CODENAME} main" \
         > /etc/apt/sources.list.d/ros2.list
+fi
