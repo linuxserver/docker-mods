@@ -14,3 +14,5 @@ if [ ! -f "/flutter/bin/flutter" ]; then
 else
     echo "Flutter already installed, skipping"
 fi
+install-extension Dart-Code.flutter
+install-extension Nash.awesome-flutter-snippets
