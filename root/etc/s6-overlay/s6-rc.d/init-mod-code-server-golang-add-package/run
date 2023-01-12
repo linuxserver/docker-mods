@@ -1,15 +1,15 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** ensuring golang is in PATH ****"
-if grep -q -E '^(export )?PATH=' /etc/services.d/code-server/run; then
-    if ! grep -q -E '^(export )?PATH=.*/usr/local/go/bin.*' /etc/services.d/code-server/run; then
-        sed -i '/PATH/ s/$/:\/usr\/local\/go\/bin/' /etc/services.d/code-server/run
+if grep -q -E '^(export )?PATH=' /etc/s6-overlay/s6-rc.d/svc-code-server/run; then
+    if ! grep -q -E '^(export )?PATH=.*/usr/local/go/bin.*' /etc/s6-overlay/s6-rc.d/svc-code-server/run; then
+        sed -i '/PATH/ s/$/:\/usr\/local\/go\/bin/' /etc/s6-overlay/s6-rc.d/svc-code-server/run
     fi
-    if ! grep -q -E '^(export )?PATH=.*/config/go/bin:.*' /etc/services.d/code-server/run; then
-        sed -i 's/PATH=/PATH=\/config\/go\/bin:/g' /etc/services.d/code-server/run
+    if ! grep -q -E '^(export )?PATH=.*/config/go/bin:.*' /etc/s6-overlay/s6-rc.d/svc-code-server/run; then
+        sed -i 's/PATH=/PATH=\/config\/go\/bin:/g' /etc/s6-overlay/s6-rc.d/svc-code-server/run
     fi
 else
-    sed -i '/^#!\/usr\/bin/a \\n# Added by codeserver-golang\nexport PATH=/config/go/bin:$PATH:/usr/local/go/bin' /etc/services.d/code-server/run
+    sed -i '/^#!\/usr\/bin/a \\n# Added by codeserver-golang\nexport PATH=/config/go/bin:$PATH:/usr/local/go/bin' /etc/s6-overlay/s6-rc.d/svc-code-server/run
 fi
 
 ARCH=$(uname -m)
