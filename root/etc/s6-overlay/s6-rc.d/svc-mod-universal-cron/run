@@ -1,5 +1,9 @@
 #!/usr/bin/with-contenv bash
 
+if pidof cron >/dev/null || pidof crond >/dev/null; then
+    exit
+fi
+
 if [ -f /usr/bin/apt ]; then
     # ubuntu
     exec /usr/sbin/cron -f -L 1
