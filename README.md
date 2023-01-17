@@ -20,11 +20,33 @@ real_ip_recursive on;
 include /config/nginx/cf_real-ip.conf;
 ```
 
-You may also need to add this mod (and the above config changes) to every nginx based container being proxied by SWAG.
+This mod also *tries* to detect the real ip from the interfaces in the container.
 
-This mod now adds `127.0.0.1` and *tries* to add the real ip from the interfaces in the container.
+You may need to add this mod (and the above config changes) to every nginx based container being proxied by SWAG.
+
+## Cloudflare tunnels
+
+In case you use Cloudflare tunnels, real IP might be reported in containers as 127.0.0.1.
+In this case, please add below to `http` section of `nginx.conf`.
+
+From:
+
+```nginx
+real_ip_header X-Forwarded-For;
+real_ip_recursive on;
+include /config/nginx/cf_real-ip.conf;
+```
+
+to:
+
+```nginx
+real_ip_header X-Forwarded-For;
+real_ip_recursive on;
+include /config/nginx/cf_real-ip.conf;
+set_real_ip_from 127.0.0.1;
+```
 
 ## Versions
 
-* **16.01.23:** - Add 127.0.0.1 and format shell scripts.
+* **16.01.23:** - Format shell scripts.
 * **21.01.21:** - Fix bug when mod runs before internet-access.
