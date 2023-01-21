@@ -238,6 +238,10 @@ run_mods() {
     done
 }
 
+# Run alias creation functions
+create_lsiown_alias
+create_with_contenv_alias
+
 # Main script loop
 
 if [[ ${S6_VERBOSITY} -ge 2 ]]; then
@@ -257,6 +261,3 @@ fi
 
 # Set executable bit on legacy cont-init and services built into the image and anything legacy unpacked by mods
 set_legacy_executable_bits
-
-create_lsiown_alias
-create_with_contenv_alias
