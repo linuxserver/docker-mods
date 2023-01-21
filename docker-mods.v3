@@ -1,9 +1,11 @@
-#!/usr/bin/with-contenv bash
+#!/command/with-contenv bash
 # shellcheck shell=bash
 
-# Version 3
-# 2022-09-25
-MOD_SCRIPT_VER="3"
+# Version 4
+# 2023-01-21
+MOD_SCRIPT_VER="4"
+
+# Use /command/with-contenv shebang because /usr/bin/with-contenv is created in this script
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -18,7 +20,7 @@ set_legacy_executable_bits() {
 }
 
 tamper_check() {
-    #Tamper check custom service locations
+    # Tamper check custom service locations
     if [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* ! -user root 2>/dev/null)" ]]; then
         echo "[custom-init] **** Some of the contents of the folder '${SERVICES_DIR}' are not owned by root, which is a security risk. ****"
         echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
@@ -26,7 +28,7 @@ tamper_check() {
         echo "[custom-init] **** Some of the contents of the folder '${SERVICES_DIR}' have write permissions for others, which is a security risk. ****"
         echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
     fi
-    #Tamper check custom script locations
+    # Tamper check custom script locations
     if [[ -d "${SCRIPTS_DIR}" ]] && [[ -n "$(find ${SCRIPTS_DIR}/* ! -user root 2>/dev/null)" ]]; then
         echo "[custom-init] **** Some of the contents of the folder '${SCRIPTS_DIR}' are not owned by root, which is a security risk. ****"
         echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
@@ -68,16 +70,33 @@ process_custom_services() {
     fi
 }
 
-#Create our noisy chown alias to handle read-only/remote volumes
+# Create our noisy chown alias to handle read-only/remote volumes
 create_lsiown_alias() {
-	cat <<- EOF > /usr/bin/lsiown
+    cat <<-EOF >/usr/bin/lsiown
 	#!/bin/bash
-
 	chown "\$@" || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
-
 	EOF
+    chmod +x /usr/bin/lsiown
+}
 
-	chmod +x /usr/bin/lsiown
+# Create our with-contenv alias with umask support
+create_with_contenv_alias() {
+    if [[ -f /command/with-contenv ]]; then
+        echo "[mod-init] /command/with-contenv not found, skipping alias creation"
+        return
+    fi
+    rm -rf /usr/bin/with-contenv
+    cat <<-EOF >/usr/bin/with-contenv
+	#!/bin/bash
+    if [[ -f /run/s6/container_environment/UMASK ]] &&
+        { [[ "$(pwdx \$\$)" =~ "/run/s6/legacy-services/" ]] ||
+            [[ "$(pwdx \$\$)" =~ "/run/s6/services/" ]] ||
+            [[ "$(pwdx \$\$)" =~ "/servicedirs/svc-" ]]; }; then
+        umask "$(cat /run/s6/container_environment/UMASK)"
+    fi
+    exec /command/with-contenv "\$@"
+	EOF
+    chmod +x /usr/bin/with-contenv
 }
 
 # Check for curl
@@ -85,7 +104,7 @@ curl_check() {
     if [[ ! -f /usr/bin/curl ]] || [[ ! -f /usr/bin/jq ]]; then
         echo "[mod-init] Curl/JQ was not found on this system for Docker mods installing"
         if [[ -f /usr/bin/apt ]]; then
-            ## Ubuntu
+            # Ubuntu
             export DEBIAN_FRONTEND="noninteractive"
             apt-get update
             apt-get install --no-install-recommends -y \
@@ -238,3 +257,4 @@ fi
 set_legacy_executable_bits
 
 create_lsiown_alias
+create_with_contenv_alias
