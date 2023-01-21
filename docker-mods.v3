@@ -1,9 +1,9 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
 
-# Version 4
-# 2023-01-21
-MOD_SCRIPT_VER="4"
+# Version 3
+# 2022-09-25
+MOD_SCRIPT_VER="3"
 
 # Use /command/with-contenv shebang because /usr/bin/with-contenv is created in this script
 
