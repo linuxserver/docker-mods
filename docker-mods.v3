@@ -72,6 +72,7 @@ process_custom_services() {
 
 # Create our noisy chown alias to handle read-only/remote volumes
 create_lsiown_alias() {
+    # intentional tabs in the heredoc
     cat <<-EOF >/usr/bin/lsiown
 	#!/bin/bash
 	chown "\$@" || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
@@ -86,15 +87,16 @@ create_with_contenv_alias() {
         return
     fi
     rm -rf /usr/bin/with-contenv
+    # intentional tabs in the heredoc
     cat <<-EOF >/usr/bin/with-contenv
 	#!/bin/bash
-    if [[ -f /run/s6/container_environment/UMASK ]] &&
-        { [[ "$(pwdx \$\$)" =~ "/run/s6/legacy-services/" ]] ||
-            [[ "$(pwdx \$\$)" =~ "/run/s6/services/" ]] ||
-            [[ "$(pwdx \$\$)" =~ "/servicedirs/svc-" ]]; }; then
-        umask "$(cat /run/s6/container_environment/UMASK)"
-    fi
-    exec /command/with-contenv "\$@"
+	if [[ -f /run/s6/container_environment/UMASK ]] &&
+	    { [[ "$(pwdx \$\$)" =~ "/run/s6/legacy-services/" ]] ||
+	        [[ "$(pwdx \$\$)" =~ "/run/s6/services/" ]] ||
+	        [[ "$(pwdx \$\$)" =~ "/servicedirs/svc-" ]]; }; then
+	    umask "$(cat /run/s6/container_environment/UMASK)"
+	fi
+	exec /command/with-contenv "\$@"
 	EOF
     chmod +x /usr/bin/with-contenv
 }
