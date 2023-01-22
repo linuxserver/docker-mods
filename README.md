@@ -31,6 +31,7 @@ Set the following environment variables on your SWAG container.
 | `CROWDSEC_SECRET_KEY` | **Optional** | reCAPTCHA v2 Secret Key |
 | `CROWDSEC_VERSION` | **Optional** | Specify a version of the bouncer to install instead of using the latest release, for example `v1.0.0`. Must be a valid [release tag](https://github.com/crowdsecurity/cs-nginx-bouncer/tags). **Does not support versions older than v1.0.0**.
 | `CROWDSEC_F2B_DISABLE` | **Optional** | Set to `true` to disable swag's built-in fail2ban service if you don't need it |
+| `CROWDSEC_MODE` | **Optional** | defaults to `live` (immediate update) or `stream` to update requests every UPDATE_FREQUENCY seconds |
 | | | |
 
 The variables need to remain in place while you are using the mod. If you remove **required** variables the bouncer will be disabled the next time you recreate the container, if you remove **optional** variables the associated features will be disabled the next time you recreate the container.
