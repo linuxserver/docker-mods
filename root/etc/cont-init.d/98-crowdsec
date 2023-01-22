@@ -45,7 +45,7 @@ sed -i -r "s|API_KEY=.*$|API_KEY=${CROWDSEC_API_KEY}|" "${CONFIG_PATH}crowdsec-n
 sed -i -r "s|API_URL=.*$|API_URL=${CROWDSEC_LAPI_URL}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 # Sed in CROWDSEC_MODE mode, if defined in the env, defaults to live
-sed -i -r "s|CROWDSEC_MODE=.*$|SECRET_KEY=${CROWDSEC_MODE-live}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -i -r "s|MODE=.*$|SECRET_KEY=${CROWDSEC_MODE-live}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 # Sed in ReCaptcha keys
 
