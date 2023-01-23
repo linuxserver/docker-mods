@@ -48,6 +48,10 @@ sed -i -r "s|API_URL=.*$|API_URL=${CROWDSEC_LAPI_URL}|" "${CONFIG_PATH}crowdsec-
 sed -i -r "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 sed -i -r "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
+# Sed in bouncer update mode
+sed -i -r "s|MODE=.*$|MODE=${CROWDSEC_MODE:-live}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -i -r "s|UPDATE_FREQUENCY=.*$|UPDATE_FREQUENCY=${CROWDSEC_UPDATE_FREQUENCY:-10}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+
 # Change config path
 sed -i "s|/etc/crowdsec/bouncers/|${CONFIG_PATH}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
 
