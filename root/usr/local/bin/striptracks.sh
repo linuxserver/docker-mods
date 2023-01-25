@@ -58,13 +58,13 @@ function usage {
   usage="
 $striptracks_script   Version: $striptracks_ver
 Video remuxing script that only keeps tracks with the specified languages.
-Designed for use with Radarr and Sonarr, but may be used standalone in batch mode.
+Designed for use with Radarr and Sonarr, but may be used standalone in batch
+mode.
 
 Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
-  $0 [OPTIONS] [<audio_languages> [<subtitle_languages>]]
-  $0 [OPTIONS] {-f|--file} <video_file> {-a|--audio} <audio_languages> {-s|--subs} <subtitle_languages>
+  $0 [{-d|--debug} [<level>]] [[{-f|--file} <video_file>] {-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>]]
 
 Options and Arguments:
   -d, --debug [<level>]            enable debug logging
@@ -82,10 +82,10 @@ Options and Arguments:
       --help                       display this help and exit
       --version                    display script version and exit
       
-When audio_languages and subtitle_languages are omitted the script detects the audio
-or subtitle languages configured in the Radarr or Sonarr profile.  When used on the command
-line, they override the detected codes.  They are also accepted as positional parameters
-for backwards compatibility.
+When audio_languages and subtitle_languages are omitted the script detects the
+audio or subtitle languages configured in the Radarr or Sonarr profile.  When
+used on the command line, they override the detected codes.  They are also
+accepted as positional parameters for backwards compatibility.
 
 Batch Mode:
   In batch mode the script acts as if it were not called from within Radarr
@@ -94,21 +94,23 @@ Batch Mode:
   attribute is set to the basename of the file minus the extension.
 
 Examples:
-  $striptracks_script -d 2                       # Enable debugging level 2, audio and subtitles
-                                            # languages detected from Radarr/Sonarr
-  $striptracks_script -a :eng:und -s :eng        # keep English and Unknown audio and
-                                            # English subtitles
-  $striptracks_script -a :eng:org -s :eng        # keep English and Original audio and
-                                            # English subtitles
-  $striptracks_script :eng \"\"                    # keep English audio and no subtitles
-  $striptracks_script -d :eng:kor:jpn :eng:spa   # Enable debugging level 1, keeping English, Korean,
-                                            # and Japanese audio, and English and
-                                            # Spanish subtitles
-  $striptracks_script -f \"/path/to/movies/Finding Nemo (2003).mkv\" -a :eng:und -s :eng
-                                            # Batch Mode
-                                            # Keep English and Unknown audio and
-                                            # English subtitles, converting video specified
-
+  $striptracks_script -d 2                      # Enable debugging level 2, audio and
+                                           # subtitles languages detected from
+                                           # Radarr/Sonarr
+  $striptracks_script -a :eng:und -s :eng       # keep English and Unknown audio and
+                                           # English subtitles
+  $striptracks_script -a :eng:org -s :eng       # keep English and Original audio and
+                                           # English subtitles
+  $striptracks_script :eng \"\"                   # keep English audio and no subtitles
+  $striptracks_script -d :eng:kor:jpn :eng:spa  # Enable debugging level 1, keeping
+                                           # English, Korean, and Japanese
+                                           # audio, and English and Spanish
+                                           # subtitles
+  $striptracks_script -f \"/movies/path/Finding Nemo (2003).mkv\" -a :eng:und -s :eng
+                                           # Batch Mode
+                                           # Keep English and Unknown audio and
+                                           # English subtitles, converting video
+                                           # specified
 "
   echo "$usage" >&2
 }
@@ -181,10 +183,18 @@ eval set -- "$striptracks_pos_params"
 
 # Check for and assign positional arguments
 if [ -n "$1" ]; then
-  striptracks_audiokeep="$1"
+  if [ -n "$striptracks_audiokeep" ]; then
+    echo "Warning|Both positional and named arguments set for audio. Using $striptracks_audiokeep" >&2
+  else
+    striptracks_audiokeep="$1"
+  fi
 fi
 if [ -n "$2" ]; then
-  striptracks_subskeep="$2"
+  if [ -n "$striptracks_subskeep" ]; then
+    echo "Warning|Both positional and named arguments set for subtitles. Using $striptracks_subskeep" >&2
+  else
+    striptracks_subskeep="$2"
+  fi
 fi
 
 ## Mode specific variables
@@ -606,11 +616,9 @@ if [ -n "$striptracks_subskeep" ]; then
 elif [ -n "$striptracks_proflangCodes" ]; then
   striptracks_subskeep="$striptracks_proflangCodes"
 else
-  striptracks_message="Error|No subtitles languages specified or detected!"
+  striptracks_message="Info|No subtitles languages specified or detected. Removing all subtitles found."
   echo "$striptracks_message" | log
-  echo "$striptracks_message" >&2
-  usage
-  exit 3
+  striptracks_subskeep="null"
 fi
 
 #### BEGIN MAIN

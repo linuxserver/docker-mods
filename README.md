@@ -84,9 +84,7 @@ Both audio and subtitles that match the selected language(s) are kept.
 The script also supports command line arguments that will override the automatic language detection.  More granular control can therefore be exerted or extended using tagging and defining multiple Connect scripts (this is native Radarr/Sonarr functionality outside the scope of this documentation).
 
 The syntax for the command line is:  
-`striptracks.sh [OPTIONS] [<audio_languages> [<subtitle_languages>]]`  
-OR  
-`striptracks.sh [OPTIONS] {-f|--file} <video_file> {-a|--audio} <audio_languages> {-s|--subs} <subtitle_languages>`
+`striptracks.sh [{-d|--debug} [<level>]] [[{-f|--file} <video_file>] {-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>]]`  
 
 Where:
 
@@ -95,8 +93,9 @@ Option|Argument|Description
 -d, --debug|\[\<level\>\]|Enables debug logging. Level is optional.<br/>Default of 1 (low)<br/>2 includes JSON output<br/>3 contains even more JSON output
 -a, --audio|<audio_languages>|Audio languages to keep<br/>ISO639-2 code(s) prefixed with a colon (`:`)
 -s, --subs|<subtitle_languages>|Subtitle languages to keep<br/>IISO639-2 code(s) prefixed with a colon (`:`)
--f, --file|<video_file>|If included, the script enters **[Batch Mode](./README.md#batch-mode)** and converts the specified video file.<br/>![danger] **WARNING:** Do not use this argument when called from Radarr or Sonarr!
---help| |Display help and exit
+-f, --file|<video_file>|If included, the script enters **[Batch Mode](./README.md#batch-mode)** and converts the specified video file.<br/>Requires the `-a` option.<br/>![danger] **WARNING:** Do not use this argument when called from Radarr or Sonarr!
+--help| |Display help and exit.
+--version| |Display version and exit.
 
 The `<audio_languages>` and `<subtitle_languages>` are optional arguments that are colon (`:`) prepended language codes in [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes "List of ISO 639-2 codes") format.  
 For example:
@@ -111,6 +110,8 @@ Multiple codes may be concatenated, such as `:eng:spa` for both English and Span
 
 >**NOTE:** The script is smart enough to not remove the last audio track. (There is in fact no way to force the script to remove all audio.) This way you don't have to specify every possible language if you are importing a
 foreign film, for example.
+
+>![warning] **NOTE:** If no subtitle language is detected in the profile or specified on the command line, all subtitles are removed.
 
 #### Original language code
 The `:org` language code is a special code. When used, instead of retaining a specific language, the script substitutes the original movie language as specified in its [The Movie Database](https://www.themoviedb.org/ "TMDB") entry.  
@@ -129,7 +130,7 @@ The `:und` language code is a special code. When used, the script will match on 
                             # languages detected from Radarr/Sonarr
 -a :eng:und -s :eng         # Keep English and Unknown audio, and English subtitles
 -a :org:eng -s :eng         # Keep English and Original audio, and English subtitles
-:eng ""                     # Keep English audio and no subtitles
+:eng ""                     # Keep English audio and remove all subtitles
 -d :eng:kor:jpn :eng:spa    # Enable debugging level 1, keeping English, Korean, and Japanese audio, and
                             # English and Spanish subtitles
 -f "/path/to/movies/Finding Nemo (2003).mkv" -a :eng:und -s :eng
