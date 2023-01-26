@@ -1,4 +1,5 @@
 #!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
 CONFIG_PATH="/config/crowdsec/"
 LIB_PATH="/usr/local/lua/crowdsec/"
@@ -21,7 +22,7 @@ apk add -U --upgrade --no-cache \
     nginx-mod-http-lua
 
 # Download nginx bouncer
-if [ -z ${CROWDSEC_VERSION+x} ]; then \
+if [[ -z ${CROWDSEC_VERSION+x} ]]; then \
     CROWDSEC_VERSION=$(curl -sX GET "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]');
 fi
 
@@ -36,7 +37,7 @@ tar xf \
     /tmp/crowdsec --strip-components=1
 
 mkdir -p "${CONFIG_PATH}"
-if [ ! -f "${CONFIG_PATH}crowdsec-nginx-bouncer.conf" ]; then \
+if [[ ! -f "${CONFIG_PATH}crowdsec-nginx-bouncer.conf" ]]; then \
     cp /tmp/crowdsec/lua-mod/config_example.conf "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 fi
 
@@ -47,6 +48,10 @@ sed -i -r "s|API_URL=.*$|API_URL=${CROWDSEC_LAPI_URL}|" "${CONFIG_PATH}crowdsec-
 # Sed in ReCaptcha keys
 sed -i -r "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 sed -i -r "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+
+# Sed in CROWDSEC_MODE and UPDATE_FREQUENCY, if defined in the env, defaults to live and 10s
+sed -i -r "s|MODE=.*$|MODE=${CROWDSEC_MODE:-live}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -i -r "s|UPDATE_FREQUENCY=.*$|UPDATE_FREQUENCY=${CROWDSEC_UPDATE_FREQUENCY:-10}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 # Change config path
 sed -i "s|/etc/crowdsec/bouncers/|${CONFIG_PATH}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
