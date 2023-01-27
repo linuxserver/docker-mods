@@ -82,7 +82,7 @@ create_lsiown_alias() {
 
 # Create our with-contenv alias with umask support
 create_with_contenv_alias() {
-    if [[ -f /command/with-contenv ]]; then
+    if [[ ! -f /command/with-contenv ]]; then
         echo "[mod-init] /command/with-contenv not found, skipping alias creation"
         return
     fi
