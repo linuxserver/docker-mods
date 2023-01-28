@@ -1,18 +1,34 @@
 import collections
 import concurrent.futures
-import glob
 import json
 import os
 import re
 import socket
+from pathlib import Path
 import urllib3
+
+
+def get_proxy_conf_file_paths():
+    """Get all the active nginx proxy configuration files"""
+
+    file_paths = []
+
+    # include reverse proxy configs
+    reverse_proxy_conf_extensions = [
+        '*.subdomain.conf',
+        '*.subfolder.conf'
+    ]
+    for ext in reverse_proxy_conf_extensions:
+        file_paths.extend(Path('/config/nginx/proxy-confs').rglob(ext))
+
+    return file_paths
 
 
 def find_apps():
     apps = {}
-    file_paths = glob.glob("/config/nginx/**/**", recursive=True)
-    auto_confs = glob.glob("/etc/nginx/http.d/*", recursive=True)
-    file_paths.extend(auto_confs)
+
+    file_paths = get_proxy_conf_file_paths()
+
     for file_path in file_paths:
         if not os.path.isfile(file_path):
             continue
