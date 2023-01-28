@@ -8,12 +8,11 @@ from pathlib import Path
 import urllib3
 
 
-def get_proxy_conf_file_paths():
+def get_reverse_proxy_conf_file_paths():
     """Get all the active nginx proxy configuration files"""
 
     file_paths = []
 
-    # include reverse proxy configs
     reverse_proxy_conf_extensions = [
         '*.subdomain.conf',
         '*.subfolder.conf'
@@ -27,7 +26,7 @@ def get_proxy_conf_file_paths():
 def find_apps():
     apps = {}
 
-    file_paths = get_proxy_conf_file_paths()
+    file_paths = get_reverse_proxy_conf_file_paths()
 
     for file_path in file_paths:
         if not os.path.isfile(file_path):
