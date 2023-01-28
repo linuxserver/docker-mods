@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+# Disable f2b if requested
+if [[ ${CROWDSEC_F2B_DISABLE,,} == "true" ]]; then
+    echo "**** Disabling fail2ban Service ****"
+    s6-svc -d /run/service/svc-fail2ban
+fi

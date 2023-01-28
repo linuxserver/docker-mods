@@ -31,6 +31,8 @@ Set the following environment variables on your SWAG container.
 | `CROWDSEC_SECRET_KEY` | **Optional** | reCAPTCHA v2 Secret Key |
 | `CROWDSEC_VERSION` | **Optional** | Specify a version of the bouncer to install instead of using the latest release, for example `v1.0.0`. Must be a valid [release tag](https://github.com/crowdsecurity/cs-nginx-bouncer/tags). **Does not support versions older than v1.0.0**.
 | `CROWDSEC_F2B_DISABLE` | **Optional** | Set to `true` to disable swag's built-in fail2ban service if you don't need it |
+| `CROWDSEC_MODE` | **Optional** | Set to `live` (immediate update) or `stream` to update requests every CROWDSEC_UPDATE_FREQUENCY seconds. Defaults to `live` |
+| `CROWDSEC_UPDATE_FREQUENCY` | **Optional** | Set update frequency for use with `stream` mode. Defaults to `10`. |
 | | | |
 
 The variables need to remain in place while you are using the mod. If you remove **required** variables the bouncer will be disabled the next time you recreate the container, if you remove **optional** variables the associated features will be disabled the next time you recreate the container.
@@ -40,3 +42,9 @@ The variables need to remain in place while you are using the mod. If you remove
 If you're using the reCAPTCHA capability and you're running in an IPv4-only environment then you need to edit your `/config/nginx/resolver.conf` and add `ipv6=off` to the end of the `resolver` statement otherwise the bouncer will attempt to contact the reCAPTCHA endpoint over IPv6 and fail.
 
 e.g. `resolver  127.0.0.11 valid=30s ipv6=off;`
+
+## Versions
+
+* **28.01.23:** - Support mode selection, handle s6v3 init.
+* **25.08.22:** - Make hybrid mod.
+* **14.03.22:** - Initial Release.
