@@ -40,9 +40,6 @@ def find_apps():
             app = f"{params['proto']}://{params['name']}:{params['port']}/"
             if app not in apps:
                 apps[app] = set()
-            if file_path.startswith("/config/nginx/site-confs/") or file_path.endswith(".conf"):
-                file_path = "auto-proxy" if file_path.startswith("/etc/nginx/http.d/") else file_path
-                apps[app].add(file_path)
     return apps
 
 
