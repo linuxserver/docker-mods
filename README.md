@@ -42,3 +42,9 @@ The variables need to remain in place while you are using the mod. If you remove
 If you're using the reCAPTCHA capability and you're running in an IPv4-only environment then you need to edit your `/config/nginx/resolver.conf` and add `ipv6=off` to the end of the `resolver` statement otherwise the bouncer will attempt to contact the reCAPTCHA endpoint over IPv6 and fail.
 
 e.g. `resolver  127.0.0.11 valid=30s ipv6=off;`
+
+## Versions
+
+* **28.01.23:** - Support mode selection, handle s6v3 init.
+* **25.08.22:** - Make hybrid mod.
+* **14.03.22:** - Initial Release.
