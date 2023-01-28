@@ -61,15 +61,15 @@ def is_available(url):
 
 
 urllib3.disable_warnings()
-apps = find_apps()
+found_apps = find_apps()
 discovered_apps = collections.defaultdict(dict)
 with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-    futures = {executor.submit(is_available, app): app for app in apps.keys()}
+    futures = {executor.submit(is_available, app): app for app in found_apps.keys()}
     for future in concurrent.futures.as_completed(futures):
         app = futures[future]
-        if not future.result() and not apps[app]:
+        if not future.result() and not found_apps[app]:
             continue
         discovered_apps[app]["status"] = future.result()
-        discovered_apps[app]["locations"] = list(apps[app])
+        discovered_apps[app]["locations"] = list(found_apps[app])
 
 print(json.dumps(discovered_apps, sort_keys=True))
