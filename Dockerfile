@@ -1,12 +1,16 @@
 # Build container
-FROM golang:alpine AS buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 AS buildstage
 
 ARG CLOUDFLARED_TAG
 
 RUN mkdir -p /root-layer/cloudflared
 WORKDIR /src
 
-RUN apk --no-cache add git build-base curl jq
+RUN \
+  apk add --no-cache \
+    build-base \
+    git \
+    go
 
 ENV GO111MODULE=on \
     CGO_ENABLED=0
