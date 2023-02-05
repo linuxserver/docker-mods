@@ -138,6 +138,8 @@ get_blob_sha() {
             --silent \
             --location \
             --request GET \
+            --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            --header "Accept: application/vnd.oci.image.index.v1+json" \
             --header "Authorization: Bearer $2" \
             "$3" | jq -r '.layers[0].digest'
     else
@@ -145,6 +147,8 @@ get_blob_sha() {
             --silent \
             --location \
             --request GET \
+            --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            --header "Accept: application/vnd.oci.image.index.v1+json" \
             --header "Authorization: Bearer $2" \
             "$3" | jq -r '.fsLayers[0].blobSum'
     fi
