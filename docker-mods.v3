@@ -134,23 +134,69 @@ curl_check() {
 # Use different filtering depending on URL
 get_blob_sha() {
     if [[ $1 == "ghcr" ]]; then
-        curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+        MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             --silent \
             --location \
             --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.index.v1+json" \
-            --header "Authorization: Bearer $2" \
-            "$3" | jq -r '.layers[0].digest'
+            --header "Authorization: Bearer ${2}" \
+            "${3}/${TAG}" | jq -r 'first(.manifests[].digest)?')
+        if [[ -z "${MULTIDIGEST}" ]]; then
+            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                --silent \
+                --location \
+                --request GET \
+                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
+                --header "Authorization: Bearer ${2}" \
+                "${3}/${TAG}" | grep -v 404); then
+                echo "${DIGEST}" | jq -r '.layers[0].digest';
+            fi
+        else
+            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                --silent \
+                --location \
+                --request GET \
+                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
+                --header "Authorization: Bearer ${2}" \
+                "${3}/${MULTIDIGEST}" | grep -v 404); then
+                echo "${DIGEST}" | jq -r '.layers[0].digest';
+            fi
+        fi
     else
-        curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+        MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             --silent \
             --location \
             --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.index.v1+json" \
-            --header "Authorization: Bearer $2" \
-            "$3" | jq -r '.fsLayers[0].blobSum'
+            --header "Authorization: Bearer ${2}" \
+            "${3}/${TAG}" | jq -r 'first(.manifests[].digest)?')
+        if [[ -z "${MULTIDIGEST}" ]]; then
+            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                --silent \
+                --location \
+                --request GET \
+                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
+                --header "Authorization: Bearer ${2}" \
+                "${3}/${TAG}" | grep -v 404); then
+                echo "${DIGEST}" | jq -r '.layers[0].digest';
+            fi
+        else
+            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                --silent \
+                --location \
+                --request GET \
+                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
+                --header "Authorization: Bearer ${2}" \
+                "${3}/${MULTIDIGEST}" | grep -v 404); then
+                echo "${DIGEST}" | jq -r '.layers[0].digest';
+            fi
+        fi
     fi
 }
 
@@ -170,7 +216,7 @@ run_mods() {
             fi
             FILENAME="${USERNAME}.${REPO}.${TAG}"
             AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull"
-            MANIFEST_URL="https://ghcr.io/v2/${ENDPOINT}/manifests/${TAG}"
+            MANIFEST_URL="https://ghcr.io/v2/${ENDPOINT}/manifests"
             BLOB_URL="https://ghcr.io/v2/${ENDPOINT}/blobs/"
             MODE="ghcr"
         else
@@ -183,7 +229,7 @@ run_mods() {
             fi
             FILENAME="${USERNAME}.${REPO}.${TAG}"
             AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
-            MANIFEST_URL="https://registry-1.docker.io/v2/${ENDPOINT}/manifests/${TAG}"
+            MANIFEST_URL="https://registry-1.docker.io/v2/${ENDPOINT}/manifests"
             BLOB_URL="https://registry-1.docker.io/v2/${ENDPOINT}/blobs/"
             MODE="dockerhub"
         fi
