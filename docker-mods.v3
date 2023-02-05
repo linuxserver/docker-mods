@@ -222,6 +222,10 @@ run_mods() {
                 "${BLOB_URL}${SHALAYER}" -o \
                 /modtarball.tar.xz
             mkdir -p /tmp/mod
+            if ! tar -tzf /modtarball.tar.xz >/dev/null 2>&1; then
+                echo "Invalid tarball, could not download ${DOCKER_MOD}"
+                continue
+            fi
             tar xzf /modtarball.tar.xz -C /tmp/mod
             if [[ -d /tmp/mod/etc/s6-overlay ]]; then
                 if [[ -d /tmp/mod/etc/cont-init.d ]]; then
