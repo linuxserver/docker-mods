@@ -17,7 +17,7 @@ jobs:
         run: |
           FLOOD_VERSION=$(curl -s https://api.github.com/repos/johman10/flood-for-transmission/releases/latest | jq -rc ".tag_name")
           echo "FLOOD_VERSION=${FLOOD_VERSION}" >> $GITHUB_ENV
-          docker build --no-cache -t ${{ github.sha }} .
+          docker build --no-cache --build-arg FLOOD_VERSION=${FLOOD_VERSION} -t ${{ github.sha }} .
 
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
