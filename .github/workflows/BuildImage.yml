@@ -23,12 +23,8 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
-          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
-          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
 
       - name: Credential check
@@ -54,8 +50,6 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
 
       - name: Login to DockerHub
@@ -67,6 +61,4 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
         run: |
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
