@@ -140,6 +140,10 @@ mods:
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
+  transmission:
+    mod_count: 1
+    container_mods:
+      - floodui: https://github.com/linuxserver/docker-mods/tree/transmission-floodui
   universal:
     mod_count: 10
     container_mods:
