@@ -3,26 +3,32 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  ENDPOINT: "linuxserver/mods"
+  BASEIMAGE: "transmission"
+  MODNAME: "floodui"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v3.1.0
 
       - name: Build image
         run: |
+          FLOOD_VERSION=$(curl -s https://api.github.com/repos/johman10/flood-for-transmission/releases/latest | jq -rc ".tag_name")
+          echo "FLOOD_VERSION=${FLOOD_VERSION}" >> $GITHUB_ENV
           docker build --no-cache -t ${{ github.sha }} .
 
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
           docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
 
       - name: Credential check
@@ -48,6 +54,8 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
         run: |
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
+          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
           docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
 
       - name: Login to DockerHub
@@ -59,4 +67,6 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
         run: |
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}-${{ github.sha }}
+          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${FLOOD_VERSION}
           docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
