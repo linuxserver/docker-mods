@@ -32,7 +32,7 @@ curl -so \
 
 mkdir -p /tmp/crowdsec
 
-if ! tar -tzf /crowdsec.tar.gz >/dev/null 2>&1; then
+if ! tar -tzf /tmp/crowdsec.tar.gz >/dev/null 2>&1; then
     echo "**** Invalid tarball, could not download crowdsec bouncer ****"
     exit 1
 fi
