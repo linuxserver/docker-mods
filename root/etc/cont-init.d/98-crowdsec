@@ -32,6 +32,11 @@ curl -so \
 
 mkdir -p /tmp/crowdsec
 
+if ! tar -tzf /crowdsec.tar.gz >/dev/null 2>&1; then
+    echo "**** Invalid tarball, could not download crowdsec bouncer ****"
+    exit 1
+fi
+
 tar xf \
     /tmp/crowdsec.tar.gz -C \
     /tmp/crowdsec --strip-components=1
@@ -93,6 +98,7 @@ rm -rf \
 if [[ $CROWDSEC_F2B_DISABLE == "true" ]]; then
     echo "**** Disabling fail2ban Service ****"
     touch /etc/services.d/fail2ban/down
+    rm -rf /etc/logrotate.d/fail2ban
 fi
 
 echo "**** Successfully configured CrowdSec nginx Bouncer ${CROWDSEC_VERSION} ****"
