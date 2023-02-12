@@ -5,4 +5,5 @@
 if [[ ${CROWDSEC_F2B_DISABLE,,} == "true" ]]; then
     echo "**** Disabling fail2ban Service ****"
     s6-svc -d /run/service/svc-fail2ban
+    rm -rf /etc/logrotate.d/fail2ban
 fi
