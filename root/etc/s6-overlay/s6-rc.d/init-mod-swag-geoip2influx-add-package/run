@@ -9,7 +9,7 @@ if ! pip list 2>&1 | grep -q "influxdb"; then
     geoip2==3.0.0 \
     geohash2==1.1 \
     influxdb==5.3.0 \
-    IPy==1.0" >> /mod-pip-packages-to-install.list
+    IPy==1.01" >> /mod-pip-packages-to-install.list
 fi
 
 # Create log folder
