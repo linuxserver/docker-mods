@@ -18,7 +18,7 @@ else
                 if [ "${VAR_VALUE}" == "null" ]; then
                     VAR_VALUE=""
                 fi
-                if ! grep -q "${VAR}=\"${VAR_VALUE}\"" "/auto-proxy/${CONTAINER}.conf"; then
+                if ! grep -F -q "${VAR}=\"${VAR_VALUE}\"" "/auto-proxy/${CONTAINER}.conf"; then
                     AUTO_GEN="${CONTAINER} ${AUTO_GEN}"
                     echo "**** Labels for ${CONTAINER} changed, will generate new conf. ****"
                     break
