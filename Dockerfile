@@ -65,8 +65,6 @@ RUN \
     /tmp/compose-switch --strip-components=1 && \
   cd /tmp/compose-switch && \
   CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -ldflags="-s -w -X github.com/docker/compose-switch/internal.Version=${SWITCH_RELEASE}" -o /root-layer/docker-tgz/compose-switch_armv7l ./main.go && \
-  chmod +x /root-layer/docker-tgz/* && \
-  rm -rf /tmp/* && \
   echo "**** retrieve latest buildx version ****" && \
   BUILDX_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/buildx/releases/latest" \
     | awk '/tag_name/{print $4;exit}' FS='[""]') && \
@@ -79,7 +77,10 @@ RUN \
     "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-arm-v7" && \
   curl -fo \
     /root-layer/docker-tgz/docker-buildx_aarch64 -L \
-    "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-arm64"
+    "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-arm64" && \
+  chmod +x /root-layer/docker-tgz/* && \
+  rm -rf /tmp/*
+  
 
 
 # copy local files
