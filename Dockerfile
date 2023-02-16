@@ -1,5 +1,5 @@
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 
 ARG DOCKER_RELEASE
 ARG COMPOSE_RELEASE
@@ -7,7 +7,6 @@ ARG COMPOSE_RELEASE
 RUN \
   echo "**** install packages ****" && \
   apk add --no-cache \
-    curl \
     git \
     go && \
   echo "**** retrieve latest version ****" && \
@@ -66,8 +65,23 @@ RUN \
     /tmp/compose-switch --strip-components=1 && \
   cd /tmp/compose-switch && \
   CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -ldflags="-s -w -X github.com/docker/compose-switch/internal.Version=${SWITCH_RELEASE}" -o /root-layer/docker-tgz/compose-switch_armv7l ./main.go && \
+  echo "**** retrieve latest buildx version ****" && \
+  BUILDX_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/buildx/releases/latest" \
+    | awk '/tag_name/{print $4;exit}' FS='[""]') && \
+  echo "**** grab buildx ****" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker-buildx_x86_64 -L \
+    "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-amd64" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker-buildx_armv7l -L \
+    "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-arm-v7" && \
+  curl -fo \
+    /root-layer/docker-tgz/docker-buildx_aarch64 -L \
+    "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-arm64" && \
   chmod +x /root-layer/docker-tgz/* && \
   rm -rf /tmp/*
+  
+
 
 # copy local files
 COPY root/ /root-layer/
