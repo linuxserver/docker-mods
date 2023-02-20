@@ -144,6 +144,7 @@ mods:
     mod_count: 1
     container_mods:
       - floodui: https://github.com/linuxserver/docker-mods/tree/transmission-floodui
+      - transmissionic: https://github.com/linuxserver/docker-mods/tree/transmission-transmissionic
   universal:
     mod_count: 10
     container_mods:
