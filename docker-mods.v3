@@ -257,6 +257,7 @@ run_mods() {
         SHALAYER=$(get_blob_sha "${MODE}" "${TOKEN}" "${MANIFEST_URL}")
         if [[ -z "${SHALAYER}" ]]; then
             echo "[mod-init] ${DOCKER_MOD} could not be found on ${MODE}"
+            continue
         fi
         # Check if we have allready applied this layer
         if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
