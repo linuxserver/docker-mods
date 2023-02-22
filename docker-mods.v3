@@ -150,7 +150,7 @@ get_blob_sha() {
                 --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 --header "Accept: application/vnd.oci.image.manifest.v1+json" \
                 --header "Authorization: Bearer ${2}" \
-                "${3}/${TAG}" | grep -v 404); then
+                "${3}/${TAG}"); then
                 echo "${DIGEST}" | jq -r '.layers[0].digest';
             fi
         else
@@ -161,7 +161,7 @@ get_blob_sha() {
                 --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 --header "Accept: application/vnd.oci.image.manifest.v1+json" \
                 --header "Authorization: Bearer ${2}" \
-                "${3}/${MULTIDIGEST}" | grep -v 404); then
+                "${3}/${MULTIDIGEST}"); then
                 echo "${DIGEST}" | jq -r '.layers[0].digest';
             fi
         fi
@@ -182,7 +182,7 @@ get_blob_sha() {
                 --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 --header "Accept: application/vnd.oci.image.manifest.v1+json" \
                 --header "Authorization: Bearer ${2}" \
-                "${3}/${TAG}" | grep -v 404); then
+                "${3}/${TAG}"); then
                 echo "${DIGEST}" | jq -r '.layers[0].digest';
             fi
         else
@@ -193,7 +193,7 @@ get_blob_sha() {
                 --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 --header "Accept: application/vnd.oci.image.manifest.v1+json" \
                 --header "Authorization: Bearer ${2}" \
-                "${3}/${MULTIDIGEST}" | grep -v 404); then
+                "${3}/${MULTIDIGEST}"); then
                 echo "${DIGEST}" | jq -r '.layers[0].digest';
             fi
         fi
@@ -255,6 +255,9 @@ run_mods() {
         )"
         # Determine first and only layer of image
         SHALAYER=$(get_blob_sha "${MODE}" "${TOKEN}" "${MANIFEST_URL}")
+        if [[ -z "${SHALAYER}" ]]; then
+            echo "[mod-init] ${DOCKER_MOD} could not be found on ${MODE}"
+        fi
         # Check if we have allready applied this layer
         if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
             echo "[mod-init] ${DOCKER_MOD} at ${SHALAYER} has been previously applied skipping"
