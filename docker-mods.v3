@@ -297,9 +297,8 @@ run_mods() {
 }
 
 run_branding() {
-  if [[ "${LSIO_FIRST_PARTY}" = "true" ]]; then
-    # intentional tabs in the heredoc
-    cat <<-EOF >/etc/s6-overlay/s6-rc.d/init-adduser/run
+  # intentional tabs in the heredoc
+  cat <<-EOF >/etc/s6-overlay/s6-rc.d/init-adduser/run
 	#!/usr/bin/with-contenv bash
 	# shellcheck shell=bash
 
@@ -361,7 +360,6 @@ run_branding() {
 	lsiown abc:abc /defaults
 
 	EOF
-  fi
 }
 
 # Run alias creation functions
@@ -385,7 +383,9 @@ if [[ -n "${DOCKER_MODS+x}" ]]; then
     run_mods
 fi
 
-run_branding
+if [[ "${LSIO_FIRST_PARTY}" = "true" ]]; then
+    run_branding
+fi
 
 # Set executable bit on legacy cont-init and services built into the image and anything legacy unpacked by mods
 set_legacy_executable_bits
