@@ -73,6 +73,9 @@ for CONTAINER in ${AUTO_GEN}; do
         if [ "${swag_auth}" == "authelia" ]; then
             sed -i "s|#include /config/nginx/authelia|include /config/nginx/authelia|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling Authelia for ${CONTAINER} ****"
+        elif [ "${swag_auth}" == "authentik" ]; then
+            sed -i "s|#include /config/nginx/authentik|include /config/nginx/authentik|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Enabling Authentik for ${CONTAINER} ****"
         elif [ "${swag_auth}" == "http" ]; then
             sed -i "s|#auth_basic|auth_basic|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
@@ -135,6 +138,9 @@ DUDE
         if [ "${swag_auth}" == "authelia" ]; then
             sed -i "s|#include /config/nginx/authelia|include /config/nginx/authelia|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling Authelia for ${CONTAINER} ****"
+        elif [ "${swag_auth}" == "authentik" ]; then
+            sed -i "s|#include /config/nginx/authentik|include /config/nginx/authentik|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Enabling Authentik for ${CONTAINER} ****"
         elif [ "${swag_auth}" == "http" ]; then
             sed -i "s|#auth_basic|auth_basic|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"

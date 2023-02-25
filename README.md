@@ -3,7 +3,7 @@
 This mod gives SWAG the ability to auto-detect running containers via labels and automatically enable reverse proxy for them.
 
 ## Requirements:
-- This mod needs the `universal-docker` mod installed and set up with either mapping `docker.sock` or setting the environment variable `DOCKER_HOST=remoteaddress`.
+- This mod needs the [universal-docker mod](https://github.com/linuxserver/docker-mods/tree/universal-docker) installed and set up with either mapping `docker.sock` or setting the environment variable `DOCKER_HOST=remoteaddress`.
 - Other containers to be auto-detected and reverse proxied should be in the same [user defined bridge network](https://docs.linuxserver.io/general/swag#docker-networking) as SWAG.
 - Containers to be auto-detected and reverse proxied must have a label `swag=enable` at a minimum.
 - To benefit from curated preset proxy confs we provide, the container name must match the container names that are suggested in our readme examples (ie. `radarr` and not `Radarr-4K`).
@@ -11,10 +11,10 @@ This mod gives SWAG the ability to auto-detect running containers via labels and
 ## Labels:
 - `swag=enable` - required for auto-detection
 - `swag_address=containername` - *optional* - overrides upstream app address. Can be set to an IP or a DNS hostname. Defaults to `container name`.
-- `swag_port=80` - *optional* - overrides *internal* exposed port
+- `swag_port=80` - *optional* - overrides *internal* exposed port (if no preset conf and this label not set, auto-proxy will default to first detected exposed port)
 - `swag_proto=http` - *optional* - overrides internal proto (defaults to http)
 - `swag_url=containername.domain.com` - *optional* - overrides *server_name* (defaults to `containername.*`)
-- `swag_auth=authelia` - *optional* - enables auth methods (options are `authelia`, `ldap` and `http` for basic http auth)
+- `swag_auth=authelia` - *optional* - enables auth methods (options are `authelia`, `authentik`, `ldap` and `http` for basic http auth)
 - `swag_auth_bypass=/api,/othersubfolder` - *optional* - bypasses auth for selected subfolders. Comma separated, no spaces.
 
 
