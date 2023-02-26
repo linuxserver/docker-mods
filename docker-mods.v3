@@ -318,7 +318,7 @@ run_branding() {
 	      ███████╗███████║██║╚██████╔╝
 	      ╚══════╝╚══════╝╚═╝ ╚═════╝ 
 
-	    Brought to you by linuxserver.io
+	   Brought to you by linuxserver.io
 	───────────────────────────────────────"
 	if [[ -f /donate.txt ]]; then
 	    echo '
