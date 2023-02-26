@@ -342,15 +342,15 @@ run_branding() {
 
 	if [[ "\${time32}" == "1970" || "\${time32}" == "1969" ]] && [ "\$(uname -m)" == "armv7l" ]; then
 	    echo '
-	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-	Your DockerHost is running an outdated version of libseccomp
-
-	To fix this, please visit https://docs.linuxserver.io/faq#libseccomp
-
-	Apps will not behave correctly without this
-
-	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	╔═════════════════════════════════════════════════════════════════════════════╗
+	║                                                                             ║
+	║        Your Docker Host is running an outdated version of libseccomp        ║
+	║                                                                             ║
+	║    To fix this, please visit https://docs.linuxserver.io/faq#libseccomp     ║
+	║                                                                             ║
+	║                 Apps will not behave correctly without this                 ║
+	║                                                                             ║
+	╚═════════════════════════════════════════════════════════════════════════════╝
 	'
 	    sleep infinity
 	fi
