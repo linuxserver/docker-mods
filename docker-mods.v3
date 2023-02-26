@@ -298,17 +298,7 @@ run_mods() {
 
 run_branding() {
   # intentional tabs in the heredoc
-  cat <<-EOF >/etc/s6-overlay/s6-rc.d/init-adduser/run
-	#!/usr/bin/with-contenv bash
-	# shellcheck shell=bash
-
-	PUID=\${PUID:-911}
-	PGID=\${PGID:-911}
-
-	groupmod -o -g "\$PGID" abc
-	usermod -o -u "\$PUID" abc
-
-	echo "
+  cat <<-EOF >/etc/s6-overlay/s6-rc.d/init-adduser/branding
 	───────────────────────────────────────
 
 	      ██╗     ███████╗██╗ ██████╗ 
@@ -319,46 +309,7 @@ run_branding() {
 	      ╚══════╝╚══════╝╚═╝ ╚═════╝ 
 
 	   Brought to you by linuxserver.io
-	───────────────────────────────────────"
-	if [[ -f /donate.txt ]]; then
-	    echo '
-	To support the app dev(s) visit:'
-	    cat /donate.txt
-	fi
-	echo '
-	To support LSIO projects visit:
-	https://www.linuxserver.io/donate/
-	
 	───────────────────────────────────────
-	GID/UID
-	───────────────────────────────────────'
-	echo "
-	User UID:    \$(id -u abc)
-	User GID:    \$(id -g abc)
-	───────────────────────────────────────
-	"
-
-	time32="\$(date +%Y)"
-
-	if [[ "\${time32}" == "1970" || "\${time32}" == "1969" ]] && [ "\$(uname -m)" == "armv7l" ]; then
-	    echo '
-	╔═════════════════════════════════════════════════════════════════════════════╗
-	║                                                                             ║
-	║        Your Docker Host is running an outdated version of libseccomp        ║
-	║                                                                             ║
-	║    To fix this, please visit https://docs.linuxserver.io/faq#libseccomp     ║
-	║                                                                             ║
-	║                 Apps will not behave correctly without this                 ║
-	║                                                                             ║
-	╚═════════════════════════════════════════════════════════════════════════════╝
-	'
-	    sleep infinity
-	fi
-
-	lsiown abc:abc /app
-	lsiown abc:abc /config
-	lsiown abc:abc /defaults
-
 	EOF
 }
 
