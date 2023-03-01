@@ -141,7 +141,7 @@ get_blob_sha() {
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.index.v1+json" \
             --header "Authorization: Bearer ${2}" \
-            "${3}/${TAG}" | jq -r 'first(.manifests[].digest)?')
+            "${3}/${4}" | jq -r 'first(.manifests[].digest)?')
         if [[ -z "${MULTIDIGEST}" ]]; then
             if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
                 --silent \
@@ -150,7 +150,7 @@ get_blob_sha() {
                 --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 --header "Accept: application/vnd.oci.image.manifest.v1+json" \
                 --header "Authorization: Bearer ${2}" \
-                "${3}/${TAG}"); then
+                "${3}/${4}"); then
                 echo "${DIGEST}" | jq -r '.layers[0].digest';
             fi
         else
@@ -173,7 +173,7 @@ get_blob_sha() {
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.index.v1+json" \
             --header "Authorization: Bearer ${2}" \
-            "${3}/${TAG}" | jq -r 'first(.manifests[].digest)?')
+            "${3}/${4}" | jq -r 'first(.manifests[].digest)?')
         if [[ -z "${MULTIDIGEST}" ]]; then
             if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
                 --silent \
@@ -182,7 +182,7 @@ get_blob_sha() {
                 --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 --header "Accept: application/vnd.oci.image.manifest.v1+json" \
                 --header "Authorization: Bearer ${2}" \
-                "${3}/${TAG}"); then
+                "${3}/${4}"); then
                 echo "${DIGEST}" | jq -r '.layers[0].digest';
             fi
         else
@@ -254,7 +254,7 @@ run_mods() {
                 jq -r '.token'
         )"
         # Determine first and only layer of image
-        SHALAYER=$(get_blob_sha "${MODE}" "${TOKEN}" "${MANIFEST_URL}")
+        SHALAYER=$(get_blob_sha "${MODE}" "${TOKEN}" "${MANIFEST_URL}" "${TAG}")
         if [[ -z "${SHALAYER}" ]]; then
             echo "[mod-init] ${DOCKER_MOD} could not be found on ${MODE}"
             continue
