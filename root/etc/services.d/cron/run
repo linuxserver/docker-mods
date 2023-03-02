@@ -1,10 +1,10 @@
 #!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
 if [ -f /usr/bin/apt ]; then
     # ubuntu
     exec /usr/sbin/cron -f -L 1
-fi
-if [ -f /sbin/apk ]; then
+elif [ -f /sbin/apk ]; then
     # alpine
     exec /usr/sbin/crond -f -S -l 5
 fi
