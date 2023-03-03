@@ -1,4 +1,5 @@
 #!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
 if [ -f /usr/bin/apt ]; then
     apt-get update
