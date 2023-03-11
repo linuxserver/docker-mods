@@ -22,19 +22,47 @@ set_legacy_executable_bits() {
 tamper_check() {
     # Tamper check custom service locations
     if [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* ! -user root 2>/dev/null)" ]]; then
-        echo "[custom-init] **** Some of the contents of the folder '${SERVICES_DIR}' are not owned by root, which is a security risk. ****"
-        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+echo "╔═════════════════════════════════════════════════════════════════════════╗
+║                                                                         ║
+║        Some of the contents of the folder ${SERVICES_DIR}            ║
+║            are not owned by root, which is a security risk.             ║
+║                                                                         ║
+║  Please review the permissions of this folder and its contents to make  ║
+║     sure they are owned by root, and can only be modified by root.      ║
+║                                                                         ║
+╚═════════════════════════════════════════════════════════════════════════╝"
     elif [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* -perm -o+w 2>/dev/null)" ]]; then
-        echo "[custom-init] **** Some of the contents of the folder '${SERVICES_DIR}' have write permissions for others, which is a security risk. ****"
-        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+echo "╔═════════════════════════════════════════════════════════════════════════╗
+║                                                                         ║
+║        Some of the contents of the folder ${SERVICES_DIR}            ║
+║      have write permissions for others, which is a security risk.       ║
+║                                                                         ║
+║  Please review the permissions of this folder and its contents to make  ║
+║     sure they are owned by root, and can only be modified by root.      ║
+║                                                                         ║
+╚═════════════════════════════════════════════════════════════════════════╝"
     fi
     # Tamper check custom script locations
     if [[ -d "${SCRIPTS_DIR}" ]] && [[ -n "$(find ${SCRIPTS_DIR}/* ! -user root 2>/dev/null)" ]]; then
-        echo "[custom-init] **** Some of the contents of the folder '${SCRIPTS_DIR}' are not owned by root, which is a security risk. ****"
-        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+echo "╔═════════════════════════════════════════════════════════════════════════╗
+║                                                                         ║
+║        Some of the contents of the folder ${SCRIPTS_DIR}           ║
+║            are not owned by root, which is a security risk.             ║
+║                                                                         ║
+║  Please review the permissions of this folder and its contents to make  ║
+║     sure they are owned by root, and can only be modified by root.      ║
+║                                                                         ║
+╚═════════════════════════════════════════════════════════════════════════╝"
     elif [[ -d "${SCRIPTS_DIR}" ]] && [[ -n "$(find ${SCRIPTS_DIR}/* -perm -o+w 2>/dev/null)" ]]; then
-        echo "[custom-init] **** Some of the contents of the folder '${SCRIPTS_DIR}' have write permissions for others, which is a security risk. ****"
-        echo "[custom-init] **** Please review the permissions of this folder and its contents to make sure they are owned by root, and can only be modified by root. ****"
+echo "╔═════════════════════════════════════════════════════════════════════════╗
+║                                                                         ║
+║        Some of the contents of the folder ${SCRIPTS_DIR}           ║
+║      have write permissions for others, which is a security risk.       ║
+║                                                                         ║
+║  Please review the permissions of this folder and its contents to make  ║
+║     sure they are owned by root, and can only be modified by root.      ║
+║                                                                         ║
+╚═════════════════════════════════════════════════════════════════════════╝"
     fi
 }
 
