@@ -4,5 +4,5 @@
 # so it can take advantage of packages installed
 # init-mods-end depends on this script so that later init and services wait until this script exits
 
-echo "**** Setting up apprise ****"
-apprise blah blah
+echo "*** Removing existing par2cmdline packages ***"
+apk del --purge par2cmdline
