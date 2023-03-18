@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+# This is the init file used for adding os or pip packages to install lists.
+# It takes advantage of the built-in init-mods-package-install init script that comes with the baseimages.
+# If using this, we need to make sure we set this init as a dependency of init-mods-package-install so this one runs first
+
+if [[ -f /sbin/apk ]]; then
+    echo "\
+        libgomp" >> /mod-repo-packages-to-install.list
+fi

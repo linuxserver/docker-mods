@@ -4,14 +4,14 @@ on: [push, pull_request, workflow_dispatch]
 
 env:
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "sabnzbd" #replace
+  MODNAME: "par2cmdline-turbo" #replace
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@${{ vars.CHECKOUT_VERSION }}
 
       - name: Build image
         run: |
