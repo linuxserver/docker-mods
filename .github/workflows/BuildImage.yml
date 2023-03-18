@@ -3,9 +3,9 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "sabnzbd" #replace
-  MODNAME: "par2cmdline-turbo" #replace
+  ENDPOINT: "linuxserver/mods"
+  BASEIMAGE: "sabnzbd"
+  MODNAME: "par2cmdline-turbo"
 
 jobs:
   build:
