@@ -6,13 +6,12 @@ env:
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "sabnzbd" #replace
   MODNAME: "par2cmdline-turbo" #replace
-  CHECKOUT_VERSION: ${{ vars.ENV_CONTEXT_VAR }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@${CHECKOUT_VERSION}
+      - uses: actions/checkout@v3.4.0
 
       - name: Build image
         run: |
