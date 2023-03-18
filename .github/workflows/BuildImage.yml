@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: linuxserver/github-workflows/.github/workflows/checkout-helper.yml@53bbab3b19f79737f6a6fc7c731aff16772ca5b2
 
       - name: Build image
         run: |
