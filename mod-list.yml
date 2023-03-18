@@ -121,6 +121,10 @@ mods:
     mod_count: 1
     container_mods:
       - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
+  sabnzbd:
+    mod_count: 1
+    container_mods:
+      - par2cmdline-turbo: https://github.com/linuxserver/docker-mods/tree/sabnzbd-par2cmdline-turbo
   sonarr:
     mod_count: 1
     container_mods:
