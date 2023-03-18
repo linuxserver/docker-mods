@@ -4,4 +4,4 @@ This mod adds the [par2cmdline-turbo](https://github.com/animetosho/par2cmdline-
 
 In the SABnzbd docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:sabnzbd-par2cmdline-turbo`
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:sabnzbd-par2cmdline-turbo`|linuxserver/mods:openssh-server-mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:sabnzbd-par2cmdline-turbo|linuxserver/mods:openssh-server-mod2`
