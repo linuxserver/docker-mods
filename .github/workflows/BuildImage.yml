@@ -8,11 +8,11 @@ env:
   MODNAME: "par2cmdline-turbo"
 
 jobs:
-  checkout:
-    uses: linuxserver/github-workflows/.github/workflows/checkout-helper.yml@53bbab3b19f79737f6a6fc7c731aff16772ca5b2
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Build image
         run: |
           docker build --no-cache -t ${{ github.sha }} .
