@@ -211,7 +211,7 @@ run_mods() {
             REGISTRY="quay.io"
             DOCKER_MOD="${DOCKER_MOD#quay.io/*}"
             ;;
-        docker.io )
+        docker.io/* )
             REGISTRY="registry-1.docker.io"
             DOCKER_MOD="${DOCKER_MOD#docker.io/*}"
             ;;
