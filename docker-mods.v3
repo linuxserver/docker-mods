@@ -161,69 +161,35 @@ curl_check() {
 
 # Use different filtering depending on URL
 get_blob_sha() {
-    if [[ $1 == "ghcr" ]]; then
-        MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+    MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+        --silent \
+        --location \
+        --request GET \
+        --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+        --header "Accept: application/vnd.oci.image.index.v1+json" \
+        --header "Authorization: Bearer ${1}" \
+        "${2}/${3}" | jq -r 'first(.manifests[].digest)?')
+    if [[ -z "${MULTIDIGEST}" ]]; then
+        if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             --silent \
             --location \
             --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-            --header "Accept: application/vnd.oci.image.index.v1+json" \
-            --header "Authorization: Bearer ${2}" \
-            "${3}/${4}" | jq -r 'first(.manifests[].digest)?')
-        if [[ -z "${MULTIDIGEST}" ]]; then
-            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-                --silent \
-                --location \
-                --request GET \
-                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
-                --header "Authorization: Bearer ${2}" \
-                "${3}/${4}"); then
-                echo "${DIGEST}" | jq -r '.layers[0].digest';
-            fi
-        else
-            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-                --silent \
-                --location \
-                --request GET \
-                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
-                --header "Authorization: Bearer ${2}" \
-                "${3}/${MULTIDIGEST}"); then
-                echo "${DIGEST}" | jq -r '.layers[0].digest';
-            fi
+            --header "Accept: application/vnd.oci.image.manifest.v1+json" \
+            --header "Authorization: Bearer ${1}" \
+            "${2}/${3}"); then
+            echo "${DIGEST}" | jq -r '.layers[0].digest';
         fi
     else
-        MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+        if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             --silent \
             --location \
             --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-            --header "Accept: application/vnd.oci.image.index.v1+json" \
-            --header "Authorization: Bearer ${2}" \
-            "${3}/${4}" | jq -r 'first(.manifests[].digest)?')
-        if [[ -z "${MULTIDIGEST}" ]]; then
-            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-                --silent \
-                --location \
-                --request GET \
-                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
-                --header "Authorization: Bearer ${2}" \
-                "${3}/${4}"); then
-                echo "${DIGEST}" | jq -r '.layers[0].digest';
-            fi
-        else
-            if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-                --silent \
-                --location \
-                --request GET \
-                --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                --header "Accept: application/vnd.oci.image.manifest.v1+json" \
-                --header "Authorization: Bearer ${2}" \
-                "${3}/${MULTIDIGEST}"); then
-                echo "${DIGEST}" | jq -r '.layers[0].digest';
-            fi
+            --header "Accept: application/vnd.oci.image.manifest.v1+json" \
+            --header "Authorization: Bearer ${1}" \
+            "${2}/${MULTIDIGEST}"); then
+            echo "${DIGEST}" | jq -r '.layers[0].digest';
         fi
     fi
 }
@@ -233,34 +199,37 @@ run_mods() {
     echo "[mod-init] Attempting to run Docker Modification Logic"
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
         # Support alternative endpoints
-        if [[ ${DOCKER_MOD} == ghcr.io/* ]] || [[ ${DOCKER_MOD} == linuxserver/* ]]; then
+        case "${DOCKER_MOD}" in
+        linuxserver/* )
+            REGISTRY="ghcr.io"
+            ;;
+        ghcr.io/* )
+            REGISTRY="ghcr.io"
             DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
-            ENDPOINT="${DOCKER_MOD%%:*}"
-            USERNAME="${DOCKER_MOD%%/*}"
-            REPO="${ENDPOINT#*/}"
-            TAG="${DOCKER_MOD#*:}"
-            if [[ ${TAG} == "${DOCKER_MOD}" ]]; then
-                TAG="latest"
-            fi
-            FILENAME="${USERNAME}.${REPO}.${TAG}"
-            AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull"
-            MANIFEST_URL="https://ghcr.io/v2/${ENDPOINT}/manifests"
-            BLOB_URL="https://ghcr.io/v2/${ENDPOINT}/blobs/"
-            MODE="ghcr"
-        else
-            ENDPOINT="${DOCKER_MOD%%:*}"
-            USERNAME="${DOCKER_MOD%%/*}"
-            REPO="${ENDPOINT#*/}"
-            TAG="${DOCKER_MOD#*:}"
-            if [[ ${TAG} == "${DOCKER_MOD}" ]]; then
-                TAG="latest"
-            fi
-            FILENAME="${USERNAME}.${REPO}.${TAG}"
-            AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
-            MANIFEST_URL="https://registry-1.docker.io/v2/${ENDPOINT}/manifests"
-            BLOB_URL="https://registry-1.docker.io/v2/${ENDPOINT}/blobs/"
-            MODE="dockerhub"
+            ;;
+        quay.io/* )
+            REGISTRY="quay.io"
+            DOCKER_MOD="${DOCKER_MOD#quay.io/*}"
+            ;;
+        * )
+            REGISTRY="registry-1.docker.io"
+            ;;
+        esac
+        ENDPOINT="${DOCKER_MOD%%:*}"
+        USERNAME="${DOCKER_MOD%%/*}"
+        REPO="${ENDPOINT#*/}"
+        TAG="${DOCKER_MOD#*:}"
+        if [[ "${TAG}" == "${DOCKER_MOD}" ]]; then
+            TAG="latest"
         fi
+        FILENAME="${USERNAME}.${REPO}.${TAG}"
+        MANIFEST_URL="https://${REGISTRY}/v2/${ENDPOINT}/manifests"
+        BLOB_URL="https://${REGISTRY}/v2/${ENDPOINT}/blobs/"
+        case "${REGISTRY}" in
+            "ghcr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
+            "quay.io") AUTH_URL="https://quay.io/v2/auth?service=quay.io&scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
+            "registry-1.docker.io") AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull";;
+        esac
         # Kill off modification logic if any of the usernames are banned
         for BANNED in $(curl -s https://raw.githubusercontent.com/linuxserver/docker-mods/master/blacklist.txt); do
             if [[ "${BANNED,,}" == "${USERNAME,,}" ]]; then
@@ -282,7 +251,7 @@ run_mods() {
                 jq -r '.token'
         )"
         # Determine first and only layer of image
-        SHALAYER=$(get_blob_sha "${MODE}" "${TOKEN}" "${MANIFEST_URL}" "${TAG}")
+        SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}")
         if [[ -z "${SHALAYER}" ]]; then
             echo "[mod-init] ${DOCKER_MOD} could not be found on ${MODE}"
             continue
