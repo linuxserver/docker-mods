@@ -5,4 +5,6 @@
 # init-mods-end depends on this script so that later init and services wait until this script exits
 
 echo "*** Removing existing par2cmdline packages ***"
-apk del --purge par2cmdline
+if apk list --installed -q | grep par2cmdline &> /dev/null; then
+    apk del --purge -q par2cmdline
+fi
