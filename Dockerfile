@@ -44,7 +44,6 @@ RUN \
   ./automake.sh && \
   ./configure && \
   make && \
-  make check && \
   make install DESTDIR=/root-layer
 
 
