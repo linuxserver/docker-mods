@@ -21,7 +21,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build --no-cache -t ${{ github.sha }} .
+          docker buildx build --no-cache -t ${{ github.sha }} .
 
       - name: Tag image
         if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
