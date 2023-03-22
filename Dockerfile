@@ -53,5 +53,5 @@ FROM scratch
 LABEL maintainer="thespad"
 
 # Add files from buildstage
-COPY --from=buildstage-amd64 /root-layer/ /amd64
-COPY --from=buildstage-aarch64 /root-layer/ /aarch64
+COPY --from=buildstage-amd64 /root-layer/ /tmp/amd64
+COPY --from=buildstage-aarch64 /root-layer/ /tmp/aarch64
