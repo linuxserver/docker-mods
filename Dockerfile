@@ -46,6 +46,11 @@ RUN \
   make && \
   make install DESTDIR=/root-layer
 
+FROM scratch as consolidate-builds
+
+COPY --from=buildstage-x86_64 /root-layer/ /par2cmdline-turbo/x86_64
+COPY --from=buildstage-aarch64 /root-layer/ /par2cmdline-turbo/aarch64
+COPY root/ /
 
 ## Single layer deployed image ##
 FROM scratch
@@ -53,5 +58,4 @@ FROM scratch
 LABEL maintainer="thespad"
 
 # Add files from buildstage
-COPY --from=buildstage-x86_64 /root-layer/ /par2cmdline-turbo/x86_64
-COPY --from=buildstage-aarch64 /root-layer/ /par2cmdline-turbo/aarch64
+COPY --from=consolidate-builds / /
