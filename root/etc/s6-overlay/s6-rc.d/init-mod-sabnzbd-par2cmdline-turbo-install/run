@@ -12,7 +12,7 @@ fi
 ARCH=$(uname -m)
 if [[ -d "/par2cmdline-turbo/${ARCH}" ]]; then
     echo "**** Installing par2cmdline-turbo ****"
-    cp -a "/par2cmdline-turbo/${ARCH}/*" /
+    cp -a /par2cmdline-turbo/${ARCH}/* /
     rm -rf /par2cmdline-turbo
 else
     echo "**** par2cmdline-turbo already installed ****"
