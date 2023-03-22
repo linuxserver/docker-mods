@@ -1,5 +1,5 @@
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage-amd64
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage-x86_64
 
 RUN \
   echo "**** install packages ****" && \
@@ -30,7 +30,8 @@ RUN \
   apk add -U --update --no-cache --virtual=build-dependencies \
     autoconf \
     automake \
-    build-base && \
+    build-base \
+    linux-headers && \
   echo "**** install par2cmdline-turbo from source ****" && \
   mkdir /tmp/par2cmdline && \
   curl -o \
@@ -53,5 +54,5 @@ FROM scratch
 LABEL maintainer="thespad"
 
 # Add files from buildstage
-COPY --from=buildstage-amd64 /root-layer/ /tmp/amd64
-COPY --from=buildstage-aarch64 /root-layer/ /tmp/aarch64
+COPY --from=buildstage-x86_64 /root-layer/ /par2cmdline-turbo/x86_64
+COPY --from=buildstage-aarch64 /root-layer/ /par2cmdline-turbo/aarch64
