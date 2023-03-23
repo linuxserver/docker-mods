@@ -4,6 +4,7 @@ on:
     paths:
       - '**/run'
       - '**/finish'
+      - '**/check'
 jobs:
   permission_check:
     uses: linuxserver/github-workflows/.github/workflows/init-svc-executable-permissions.yml@v1
