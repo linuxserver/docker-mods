@@ -1,5 +1,7 @@
 #!/usr/bin/with-contenv bash
 
+AMDGPU_RELEASE=${AMDGPU_RELEASE:-5.4.1}
+
 # Determine if setup is needed
 if [ ! -f "/usr/bin/apt" ]; then
     echo "**** Image is not Ubuntu, skipping opencl-intel install ****"
@@ -17,7 +19,14 @@ if [ ! -f "/etc/apt/sources.list.d/kisak-mesa.list" ]; then
     echo "deb http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/kisak-mesa.list
 fi
 
-pkgs='mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1'
+if [ ! -f "/etc/apt/sources.list.d/amdgpu-focal.list" ]; then
+    echo "**** Adding amdgpu repo ****"
+    curl -sL --retry 3 https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -
+    echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/${AMDGPU_RELEASE} ubuntu main" > /etc/apt/sources.list.d/amdgpu-focal.list
+fi
+
+
+pkgs='mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 rocm-opencl-runtime'
 
 install=false
 for pkg in $pkgs; do
@@ -29,6 +38,6 @@ for pkg in $pkgs; do
 done
 
 if "$install"; then
-    echo "**** Adding mesa to package install list ****"
+    echo "**** Adding mesa and rocm-opencl-runtime to package install list ****"
     echo "$pkgs" >> /mod-repo-packages-to-install.list
 fi
