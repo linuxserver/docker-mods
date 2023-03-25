@@ -103,6 +103,7 @@ create_lsiown_alias() {
     # intentional tabs in the heredoc
     cat <<-EOF >/usr/bin/lsiown
 	#!/bin/bash
+	# Check ownership here
 	chown "\$@" || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
 	EOF
     chmod +x /usr/bin/lsiown
