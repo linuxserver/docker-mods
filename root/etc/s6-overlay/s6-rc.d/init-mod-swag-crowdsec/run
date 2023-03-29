@@ -50,9 +50,10 @@ fi
 sed -i -r "s|API_KEY=.*$|API_KEY=${CROWDSEC_API_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 sed -i -r "s|API_URL=.*$|API_URL=${CROWDSEC_LAPI_URL}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
-# Sed in ReCaptcha keys
+# Sed in ReCaptcha settings
 sed -i -r "s|SECRET_KEY=.*$|SECRET_KEY=${CROWDSEC_SECRET_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 sed -i -r "s|SITE_KEY=.*$|SITE_KEY=${CROWDSEC_SITE_KEY}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+sed -i -r "s|CAPTCHA_PROVIDER=.*$|CAPTCHA_PROVIDER=${CROWDSEC_CAPTCHA_PROVIDER}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 # Sed in CROWDSEC_MODE and UPDATE_FREQUENCY, if defined in the env, defaults to live and 10s
 sed -i -r "s|MODE=.*$|MODE=${CROWDSEC_MODE:-live}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
