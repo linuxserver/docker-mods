@@ -140,29 +140,37 @@
         $files = "";
         $counter = 1;
         $conf_locations = array(
+            ".conf" => "https://github.com/linuxserver/docker-swag/blob/master/root/defaults/nginx/",
             "subdomain.conf" => "https://github.com/linuxserver/reverse-proxy-confs/blob/master/",
             "subfolder.conf" => "https://github.com/linuxserver/reverse-proxy-confs/blob/master/",
             "dashboard.subdomain.conf" => "https://github.com/linuxserver/docker-mods/blob/swag-dashboard/root/dashboard/",
+            "nginx.conf" => "https://github.com/linuxserver/docker-baseimage-alpine-nginx/tree/master/root/defaults/nginx/",
+            "ssl.conf" => "https://github.com/linuxserver/docker-baseimage-alpine-nginx/tree/master/root/defaults/nginx/",
+            "default.conf" => "https://github.com/linuxserver/docker-swag/blob/master/root/defaults/nginx/site-confs/",
         );
-        $output = shell_exec("/etc/cont-init.d/85-version-checks");
+        $output = shell_exec("/etc/s6-overlay/s6-rc.d/init-version-checks/run");
 
         foreach(explode(PHP_EOL, $output) as $line) {
             if(substr($line, 0, 1) === "*"){
                 $tooltip .= str_replace("*", "", $line).PHP_EOL;
-            } elseif(substr($line, 0, 1) === "/") {
+            } elseif(str_contains($line, "/config/")) {
                 $tr_class = ($counter % 2 == 0) ? 'shaded' : '';
-                $files .= '<tr class="'.$tr_class.'"><td class="left-text"><span class="status-text">'.htmlspecialchars($line).'</span></td>';
-                $file_name = substr($line, strrpos($line, '/') + 1);
-                $link = "https://github.com/linuxserver/docker-swag/blob/master/root/defaults/nginx/".$file_name;
+                $clean_line = htmlspecialchars($line);
+                list($old_date, $new_date, $path) = explode(' │ ', $clean_line);
+                $old_date = trim($old_date, '│ \n\r\t\v\x00');
+                $new_date = trim($new_date, '│ \n\r\t\v\x00');
+                $path = trim($path, '│ \n\r\t\v\x00');
+                $files .= '<tr class="'.$tr_class.'">';
+                $files .= '<td class="left-text"><span class="status-text">'.$old_date.'</span></td>';
+                $files .= '<td class="left-text"><span class="status-text">'.$new_date.'</span></td>';
+                $files .= '<td class="left-text"><span class="status-text">'.$path.'</span></td>';
+                $file_name = substr($path, strrpos($path, '/') + 1);
                 foreach($conf_locations as $key=>$value) {
                     if (strpos($file_name, $key) !== false) {
                         $link = $value.$file_name;
                     }
-                }           
-                if (strpos($file_name, 'subdomain.conf') !== false or strpos($file_name, 'subfolder.conf') !== false) {
-                    $link .= '.sample';
                 }
-                $files .= '<td><a href="'.$link.'"><i class="fas fa-edit"></i></a></td></tr>';
+                $files .= '<td><a href="'.$link.'.sample"><i class="fas fa-edit"></i></a></td></tr>';
                 $counter++;
             }
         }
@@ -174,6 +182,14 @@
                 <div>
                     <h2>Version Updates <i class="fas fa-info-circle" title="{$tooltip}"></i></h2>
                     <table class="table-hover">
+                        <thead>
+                            <tr>
+                                <td><h3>Old Date</h3></td>
+                                <td><h3>New Date</h3></td>
+                                <td><h3>Path</h3></td>
+                                <td><h3>Link</h3></td>
+                            </tr>
+                        </thead>
                         <tbody class="tbody-data">
                             {$files}
                         </tbody>
@@ -253,7 +269,7 @@
         endif;
 
         $access_log = file_exists("/dashboard/logs") ? "/dashboard/logs/*.log" : "/config/log/nginx/access.log";
-        $goaccess = shell_exec("cat $access_log | /usr/local/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf $geodb -");
+        $goaccess = shell_exec("cat $access_log | /usr/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf $geodb -");
         $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
         $goaccess = str_replace("<h1 class='h-dashboard'>", "<h1>", $goaccess);
         $goaccess = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);

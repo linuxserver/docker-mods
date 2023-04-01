@@ -2,13 +2,11 @@
 
 echo "**** Applying the SWAG dashboard mod... ****"
 
-ARCH=$(uname -m)
-if [ -d "/goaccess/${ARCH}" ]; then
-    echo "**** Installing/updating goaccess ****"
-    cp -a /goaccess/${ARCH}/* /
-    rm -rf /goaccess
+if ! apk info 2>&1 | grep -q "goaccess"; then
+    echo "**** Adding goaccess to package install list ****"
+    echo "goaccess" >> /mod-repo-packages-to-install.list
 else
-    echo "**** Goaccess already installed and up to date ****"
+    echo "**** goaccess already installed, skipping ****"
 fi
 
 if ! apk info 2>&1 | grep -q "libmaxminddb"; then
