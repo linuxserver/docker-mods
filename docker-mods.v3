@@ -257,7 +257,7 @@ run_mods() {
         # Determine first and only layer of image
         SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}")
         if [[ -z "${SHALAYER}" ]]; then
-            echo "[mod-init] ${DOCKER_MOD} could not be found on ${MODE}"
+            echo "[mod-init] ${DOCKER_MOD} could not be found on ${REGISTRY}"
             continue
         fi
         # Check if we have allready applied this layer
