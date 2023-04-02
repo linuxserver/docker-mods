@@ -27,8 +27,9 @@ Set the following environment variables on your SWAG container.
 | --- | --- | --- |
 | `CROWDSEC_API_KEY` | **Required** | Your bouncer API key |
 | `CROWDSEC_LAPI_URL` | **Required** | Your local CrowdSec API endpoint, for example `http://crowdsec:8080` |
-| `CROWDSEC_SITE_KEY` | **Optional** | reCAPTCHA v2 Site Key |
-| `CROWDSEC_SECRET_KEY` | **Optional** | reCAPTCHA v2 Secret Key |
+| `CROWDSEC_SITE_KEY` | **Optional** | CAPTCHA Site Key |
+| `CROWDSEC_SECRET_KEY` | **Optional** | CAPTCHA Secret Key |
+| `CROWDSEC_CAPTCHA_PROVIDER` | **Optional** | CAPTCHA Provider (currently supported providers are `recaptcha`, `hcaptcha`, `turnstile`), requires v1.0.5 or newer. |
 | `CROWDSEC_VERSION` | **Optional** | Specify a version of the bouncer to install instead of using the latest release, for example `v1.0.0`. Must be a valid [release tag](https://github.com/crowdsecurity/cs-nginx-bouncer/tags). **Does not support versions older than v1.0.0**.
 | `CROWDSEC_F2B_DISABLE` | **Optional** | Set to `true` to disable swag's built-in fail2ban service if you don't need it |
 | `CROWDSEC_MODE` | **Optional** | Set to `live` (immediate update) or `stream` to update requests every CROWDSEC_UPDATE_FREQUENCY seconds. Defaults to `live` |
@@ -45,6 +46,7 @@ e.g. `resolver  127.0.0.11 valid=30s ipv6=off;`
 
 ## Versions
 
+* **29.03.23:** - Support multiple captcha providers from upstream.
 * **28.01.23:** - Support mode selection, handle s6v3 init.
 * **25.08.22:** - Make hybrid mod.
 * **14.03.22:** - Initial Release.
