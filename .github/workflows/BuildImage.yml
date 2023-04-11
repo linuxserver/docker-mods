@@ -1,6 +1,6 @@
 name: Build Image
 
-on: [push, pull_request, workflow_dispatch]
+on: [push, pull_request_target, workflow_dispatch]
 
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
@@ -32,7 +32,11 @@ jobs:
   build:
     uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
     needs: set-vars
-    secrets: inherit
+    secrets:
+      CR_USER: ${{ secrets.CR_USER }}
+      CR_PAT: ${{ secrets.CR_PAT }}
+      DOCKERUSER: ${{ secrets.DOCKERUSER }}
+      DOCKERPASS: ${{ secrets.DOCKERPASS }}
     with:
       GITHUB_REPO: ${{ needs.set-vars.outputs.GITHUB_REPO }}
       ENDPOINT: ${{ needs.set-vars.outputs.ENDPOINT }}
