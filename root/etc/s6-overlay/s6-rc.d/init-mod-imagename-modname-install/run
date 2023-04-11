@@ -5,4 +5,4 @@
 # init-mods-end depends on this script so that later init and services wait until this script exits
 
 echo "**** Setting up apprise ****"
-apprise blah blah
+#apprise blah blah
