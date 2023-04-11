@@ -1,6 +1,6 @@
 name: Build Image
 
-on: [push, pull_request, workflow_dispatch]
+on: [push, pull_request_target, workflow_dispatch]
 
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
