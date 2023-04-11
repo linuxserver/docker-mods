@@ -29,6 +29,13 @@ jobs:
       MODNAME: ${{ steps.outputs.outputs.MODNAME }}
       MOD_VERSION: ${{ steps.outputs.outputs.MOD_VERSION }}
 
+  random-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Testing PR changes to workflows
+        run: |
+          echo "Changes to workflow pushed from 3rd party PR"
+
   build:
     uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
     needs: set-vars
