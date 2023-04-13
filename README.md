@@ -6,7 +6,7 @@ In your container's docker arguments, set an environment variable `DOCKER_MODS=l
 
 For this language you will need to set the following environment variables as well:
 
-`LC_ALL=en_US`
+`LC_ALL=en_US.UTF-8`
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -22,7 +22,7 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 对于这种语言，您还需要设置以下环境变量：
 
-`LC_ALL=zh_CN`
+`LC_ALL=zh_CN.UTF-8`
 
 如果添加多个mod，将它们输入到一个数组中，以`|`分隔，例如`DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -38,7 +38,7 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 この言語では、次の環境変数も設定する必要があります:
 
-`LC_ALL=ja_JP`
+`LC_ALL=ja_JP.UTF-8`
 
 複数の mod を追加する場合は、「DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2」のように「|」で区切られた配列に入力します
 
@@ -54,7 +54,7 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 이 언어의 경우 다음 환경 변수도 설정해야 합니다.<br>
 
-`LC_ALL=ko_KR`
+`LC_ALL=ko_KR.UTF-8`
 
 여러 모드를 추가하는 경우 `|`로 구분된 배열에 입력하십시오(예: `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`<br>).
 
@@ -70,7 +70,7 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 بالنسبة لهذه اللغة ، ستحتاج إلى تعيين متغيرات البيئة التالية أيضًا: 
 
-`LC_ALL=ar_AE`
+`LC_ALL=ar_AE.UTF-8`
 
 في حالة إضافة تعديلات متعددة ، أدخلها في مصفوفة مفصولة بـ `|` ، مثل `DOCKER_MODS = linuxserver / mods: internationalization | linuxserver / mods: mod2` 
 
@@ -86,7 +86,7 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 Для этого языка вам также потребуется установить следующие переменные среды:
 
-`LC_ALL=ru_RU`
+`LC_ALL=ru_RU.UTF-8`
 
 При добавлении нескольких модов введите их в массив, разделенный символом `|`, например, `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -102,7 +102,7 @@ En los argumentos de la ventana acoplable de su contenedor, establezca una varia
 
 Para este idioma, también deberá configurar las siguientes variables de entorno:
 
-`LC_ALL=es_MX`
+`LC_ALL=es_MX.UTF-8`
 
 Si agrega varias modificaciones, introdúzcalas en una matriz separada por `|`, como `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -118,7 +118,7 @@ Setzen Sie in den Docker-Argumenten Ihres Containers eine Umgebungsvariable `DOC
 
 Für diese Sprache müssen Sie auch die folgenden Umgebungsvariablen setzen:
 
-`LC_ALL=de_DE`
+`LC_ALL=de_DE.UTF-8`
 
 Wenn Sie mehrere Mods hinzufügen, geben Sie sie in einem durch `|` getrennten Array ein, wie z. B. `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -134,7 +134,7 @@ Dans les arguments docker de votre conteneur, définissez une variable d'environ
 
 Pour cette langue, vous devrez également définir les variables d'environnement suivantes :
 
-`LC_ALL=fr_FR`
+`LC_ALL=fr_FR.UTF-8`
 
 Si vous ajoutez plusieurs mods, entrez-les dans un tableau séparé par `|`, comme `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -150,7 +150,7 @@ Stel in de docker-argumenten van uw container een omgevingsvariabele in `DOCKER_
 
 Voor deze taal moet u ook de volgende omgevingsvariabelen instellen:
 
-`LC_ALL=nl_NL`
+`LC_ALL=nl_NL.UTF-8`
 
 Als u meerdere mods toevoegt, voert u deze in een array in gescheiden door `|`, zoals `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -166,7 +166,7 @@ Negli argomenti docker del tuo contenitore, imposta una variabile di ambiente `D
 
 Per questa lingua dovrai impostare anche le seguenti variabili d'ambiente:
 
-`LC_ALL=it_IT`
+`LC_ALL=it_IT.UTF-8`
 
 Se aggiungi più mod, inseriscile in un array separato da `|`, ad esempio `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
@@ -181,266 +181,266 @@ Questa mod su alcune immagini di base è enorme (centinaia di mega giga compress
 The following language locales are also supported: 
 
 ```
-aa_DJ
-aa_ER
-aa_ET
-af_ZA
-am_ET
-an_ES
-ar_AE
-ar_BH
-ar_DZ
-ar_EG
-ar_IN
-ar_IQ
-ar_JO
-ar_KW
-ar_LB
-ar_LY
-ar_MA
-ar_OM
-ar_QA
-ar_SA
-ar_SD
-ar_SY
-ar_TN
-ar_YE
-as_IN
-ast_ES
-ayc_PE
-az_AZ
-be_BY
-bem_ZM
-ber_DZ
-ber_MA
-bg_BG
-bho_IN
-bn_BD
-bn_IN
-bo_CN
-bo_IN
-br_FR
-brx_IN
-bs_BA
-byn_ER
-ca_AD
-ca_ES
-ca_FR
-ca_IT
-crh_UA
-csb_PL
-cs_CZ
-cv_RU
-cy_GB
-da_DK
-de_AT
-de_BE
-de_CH
-de_DE
-de_LU
-doi_IN
-dv_MV
-dz_BT
-el_CY
-el_GR
-en_AG
-en_AU
-en_BW
-en_CA
-en_DK
-en_GB
-en_HK
-en_IE
-en_IN
-en_NG
-en_NZ
-en_PH
-en_SG
-en_US
-en_ZA
-en_ZM
-en_ZW
-es_AR
-es_BO
-es_CL
-es_CO
-es_CR
-es_CU
-es_DO
-es_EC
-es_ES
-es_GT
-es_HN
-es_MX
-es_NI
-es_PA
-es_PE
-es_PR
-es_PY
-es_SV
-es_US
-es_UY
-es_VE
-et_EE
-eu_ES
-fa_IR
-ff_SN
-fi_FI
-fil_PH
-fo_FO
-fr_BE
-fr_CA
-fr_CH
-fr_FR
-fr_LU
-fur_IT
-fy_DE
-fy_NL
-ga_IE
-gd_GB
-gez_ER
-gez_ET
-gl_ES
-gu_IN
-gv_GB
-ha_NG
-he_IL
-hi_IN
-hne_IN
-hr_HR
-hsb_DE
-ht_HT
-hu_HU
-hy_AM
-ia_FR
-id_ID
-ig_NG
-ik_CA
-is_IS
-it_CH
-it_IT
-iu_CA
-ja_JP
-ka_GE
-kk_KZ
-kl_GL
-km_KH
-kn_IN
-kok_IN
-ko_KR
-ks_IN
-ku_TR
-kw_GB
-ky_KG
-lb_LU
-lg_UG
-li_BE
-lij_IT
-li_NL
-lo_LA
-lt_LT
-lv_LV
-mag_IN
-mai_IN
-mg_MG
-mhr_RU
-mi_NZ
-mk_MK
-ml_IN
-mni_IN
-mn_MN
-mr_IN
-ms_MY
-mt_MT
-my_MM
-nb_NO
-nds_DE
-nds_NL
-ne_NP
-nhn_MX
-niu_NU
-niu_NZ
-nl_AW
-nl_BE
-nl_NL
-nn_NO
-nr_ZA
-nso_ZA
-oc_FR
-om_ET
-om_KE
-or_IN
-os_RU
-pa_IN
-pa_PK
-pl_PL
-ps_AF
-pt_BR
-pt_PT
-ro_RO
-ru_RU
-ru_UA
-rw_RW
-sa_IN
-sat_IN
-sc_IT
-sd_IN
-se_NO
-shs_CA
-sid_ET
-si_LK
-sk_SK
-sl_SI
-so_DJ
-so_ET
-so_KE
-so_SO
-sq_AL
-sq_MK
-sr_ME
-sr_RS
-ss_ZA
-st_ZA
-sv_FI
-sv_SE
-sw_KE
-sw_TZ
-szl_PL
-ta_IN
-ta_LK
-te_IN
-tg_TJ
-th_TH
-ti_ER
-ti_ET
-tig_ER
-tk_TM
-tl_PH
-tn_ZA
-tr_CY
-tr_TR
-ts_ZA
-tt_RU
-ug_CN
-uk_UA
-unm_US
-ur_IN
-ur_PK
-uz_UZ
-ve_ZA
-vi_VN
-wa_BE
-wae_CH
-wal_ET
-wo_SN
-xh_ZA
-yi_US
-yo_NG
-yue_HK
-zh_CN
-zh_HK
-zh_SG
-zh_TW
-zu_ZA
+aa_DJ.UTF-8
+aa_ER.UTF-8
+aa_ET.UTF-8
+af_ZA.UTF-8
+am_ET.UTF-8
+an_ES.UTF-8
+ar_AE.UTF-8
+ar_BH.UTF-8
+ar_DZ.UTF-8
+ar_EG.UTF-8
+ar_IN.UTF-8
+ar_IQ.UTF-8
+ar_JO.UTF-8
+ar_KW.UTF-8
+ar_LB.UTF-8
+ar_LY.UTF-8
+ar_MA.UTF-8
+ar_OM.UTF-8
+ar_QA.UTF-8
+ar_SA.UTF-8
+ar_SD.UTF-8
+ar_SY.UTF-8
+ar_TN.UTF-8
+ar_YE.UTF-8
+as_IN.UTF-8
+ast_ES.UTF-8
+ayc_PE.UTF-8
+az_AZ.UTF-8
+be_BY.UTF-8
+bem_ZM.UTF-8
+ber_DZ.UTF-8
+ber_MA.UTF-8
+bg_BG.UTF-8
+bho_IN.UTF-8
+bn_BD.UTF-8
+bn_IN.UTF-8
+bo_CN.UTF-8
+bo_IN.UTF-8
+br_FR.UTF-8
+brx_IN.UTF-8
+bs_BA.UTF-8
+byn_ER.UTF-8
+ca_AD.UTF-8
+ca_ES.UTF-8
+ca_FR.UTF-8
+ca_IT.UTF-8
+crh_UA.UTF-8
+csb_PL.UTF-8
+cs_CZ.UTF-8
+cv_RU.UTF-8
+cy_GB.UTF-8
+da_DK.UTF-8
+de_AT.UTF-8
+de_BE.UTF-8
+de_CH.UTF-8
+de_DE.UTF-8
+de_LU.UTF-8
+doi_IN.UTF-8
+dv_MV.UTF-8
+dz_BT.UTF-8
+el_CY.UTF-8
+el_GR.UTF-8
+en_AG.UTF-8
+en_AU.UTF-8
+en_BW.UTF-8
+en_CA.UTF-8
+en_DK.UTF-8
+en_GB.UTF-8
+en_HK.UTF-8
+en_IE.UTF-8
+en_IN.UTF-8
+en_NG.UTF-8
+en_NZ.UTF-8
+en_PH.UTF-8
+en_SG.UTF-8
+en_US.UTF-8
+en_ZA.UTF-8
+en_ZM.UTF-8
+en_ZW.UTF-8
+es_AR.UTF-8
+es_BO.UTF-8
+es_CL.UTF-8
+es_CO.UTF-8
+es_CR.UTF-8
+es_CU.UTF-8
+es_DO.UTF-8
+es_EC.UTF-8
+es_ES.UTF-8
+es_GT.UTF-8
+es_HN.UTF-8
+es_MX.UTF-8
+es_NI.UTF-8
+es_PA.UTF-8
+es_PE.UTF-8
+es_PR.UTF-8
+es_PY.UTF-8
+es_SV.UTF-8
+es_US.UTF-8
+es_UY.UTF-8
+es_VE.UTF-8
+et_EE.UTF-8
+eu_ES.UTF-8
+fa_IR.UTF-8
+ff_SN.UTF-8
+fi_FI.UTF-8
+fil_PH.UTF-8
+fo_FO.UTF-8
+fr_BE.UTF-8
+fr_CA.UTF-8
+fr_CH.UTF-8
+fr_FR.UTF-8
+fr_LU.UTF-8
+fur_IT.UTF-8
+fy_DE.UTF-8
+fy_NL.UTF-8
+ga_IE.UTF-8
+gd_GB.UTF-8
+gez_ER.UTF-8
+gez_ET.UTF-8
+gl_ES.UTF-8
+gu_IN.UTF-8
+gv_GB.UTF-8
+ha_NG.UTF-8
+he_IL.UTF-8
+hi_IN.UTF-8
+hne_IN.UTF-8
+hr_HR.UTF-8
+hsb_DE.UTF-8
+ht_HT.UTF-8
+hu_HU.UTF-8
+hy_AM.UTF-8
+ia_FR.UTF-8
+id_ID.UTF-8
+ig_NG.UTF-8
+ik_CA.UTF-8
+is_IS.UTF-8
+it_CH.UTF-8
+it_IT.UTF-8
+iu_CA.UTF-8
+ja_JP.UTF-8
+ka_GE.UTF-8
+kk_KZ.UTF-8
+kl_GL.UTF-8
+km_KH.UTF-8
+kn_IN.UTF-8
+kok_IN.UTF-8
+ko_KR.UTF-8
+ks_IN.UTF-8
+ku_TR.UTF-8
+kw_GB.UTF-8
+ky_KG.UTF-8
+lb_LU.UTF-8
+lg_UG.UTF-8
+li_BE.UTF-8
+lij_IT.UTF-8
+li_NL.UTF-8
+lo_LA.UTF-8
+lt_LT.UTF-8
+lv_LV.UTF-8
+mag_IN.UTF-8
+mai_IN.UTF-8
+mg_MG.UTF-8
+mhr_RU.UTF-8
+mi_NZ.UTF-8
+mk_MK.UTF-8
+ml_IN.UTF-8
+mni_IN.UTF-8
+mn_MN.UTF-8
+mr_IN.UTF-8
+ms_MY.UTF-8
+mt_MT.UTF-8
+my_MM.UTF-8
+nb_NO.UTF-8
+nds_DE.UTF-8
+nds_NL.UTF-8
+ne_NP.UTF-8
+nhn_MX.UTF-8
+niu_NU.UTF-8
+niu_NZ.UTF-8
+nl_AW.UTF-8
+nl_BE.UTF-8
+nl_NL.UTF-8
+nn_NO.UTF-8
+nr_ZA.UTF-8
+nso_ZA.UTF-8
+oc_FR.UTF-8
+om_ET.UTF-8
+om_KE.UTF-8
+or_IN.UTF-8
+os_RU.UTF-8
+pa_IN.UTF-8
+pa_PK.UTF-8
+pl_PL.UTF-8
+ps_AF.UTF-8
+pt_BR.UTF-8
+pt_PT.UTF-8
+ro_RO.UTF-8
+ru_RU.UTF-8
+ru_UA.UTF-8
+rw_RW.UTF-8
+sa_IN.UTF-8
+sat_IN.UTF-8
+sc_IT.UTF-8
+sd_IN.UTF-8
+se_NO.UTF-8
+shs_CA.UTF-8
+sid_ET.UTF-8
+si_LK.UTF-8
+sk_SK.UTF-8
+sl_SI.UTF-8
+so_DJ.UTF-8
+so_ET.UTF-8
+so_KE.UTF-8
+so_SO.UTF-8
+sq_AL.UTF-8
+sq_MK.UTF-8
+sr_ME.UTF-8
+sr_RS.UTF-8
+ss_ZA.UTF-8
+st_ZA.UTF-8
+sv_FI.UTF-8
+sv_SE.UTF-8
+sw_KE.UTF-8
+sw_TZ.UTF-8
+szl_PL.UTF-8
+ta_IN.UTF-8
+ta_LK.UTF-8
+te_IN.UTF-8
+tg_TJ.UTF-8
+th_TH.UTF-8
+ti_ER.UTF-8
+ti_ET.UTF-8
+tig_ER.UTF-8
+tk_TM.UTF-8
+tl_PH.UTF-8
+tn_ZA.UTF-8
+tr_CY.UTF-8
+tr_TR.UTF-8
+ts_ZA.UTF-8
+tt_RU.UTF-8
+ug_CN.UTF-8
+uk_UA.UTF-8
+unm_US.UTF-8
+ur_IN.UTF-8
+ur_PK.UTF-8
+uz_UZ.UTF-8
+ve_ZA.UTF-8
+vi_VN.UTF-8
+wa_BE.UTF-8
+wae_CH.UTF-8
+wal_ET.UTF-8
+wo_SN.UTF-8
+xh_ZA.UTF-8
+yi_US.UTF-8
+yo_NG.UTF-8
+yue_HK.UTF-8
+zh_CN.UTF-8
+zh_HK.UTF-8
+zh_SG.UTF-8
+zh_TW.UTF-8
+zu_ZA.UTF-8
 ```
 
