@@ -2,13 +2,13 @@
 
 This mod adds fonts and locales to an image, to be installed/updated during container start.
 
-In your container's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:internationalization`
+In your container's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 For this language you will need to set the following environment variables as well:
 
 `LC_ALL=en_US`
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## Word of warning
 
@@ -18,13 +18,13 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 此 mod 将字体和语言环境添加到图像中，以便在容器启动期间安装/更新。
 
-在容器的 docker 参数中，设置环境变量 `DOCKER_MODS=linuxserver/mods:internationalization`
+在容器的 docker 参数中，设置环境变量 `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 对于这种语言，您还需要设置以下环境变量：
 
 `LC_ALL=zh_CN`
 
-如果添加多个mod，将它们输入到一个数组中，以`|`分隔，例如`DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+如果添加多个mod，将它们输入到一个数组中，以`|`分隔，例如`DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## 警告词
 
@@ -34,13 +34,13 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 この mod は、イメージにフォントとロケールを追加し、コンテナーの起動時にインストール/更新します。
 
-コンテナーの docker 引数で、環境変数 `DOCKER_MODS=linuxserver/mods:internationalization` を設定します。
+コンテナーの docker 引数で、環境変数 `DOCKER_MODS=linuxserver/mods:universal-internationalization` を設定します。
 
 この言語では、次の環境変数も設定する必要があります:
 
 `LC_ALL=ja_JP`
 
-複数の mod を追加する場合は、「DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2」のように「|」で区切られた配列に入力します
+複数の mod を追加する場合は、「DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2」のように「|」で区切られた配列に入力します
 
 ## 注意事項
 
@@ -50,13 +50,13 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 이 모드는 컨테이너 시작 중에 설치/업데이트될 글꼴 및 로케일을 이미지에 추가합니다.<br>
 
-컨테이너의 도커 인수에서 환경 변수 `DOCKER_MODS=linuxserver/mods:internationalization`<br>을 설정합니다.
+컨테이너의 도커 인수에서 환경 변수 `DOCKER_MODS=linuxserver/mods:universal-internationalization`<br>을 설정합니다.
 
 이 언어의 경우 다음 환경 변수도 설정해야 합니다.<br>
 
 `LC_ALL=ko_KR`
 
-여러 모드를 추가하는 경우 `|`로 구분된 배열에 입력하십시오(예: `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`<br>).
+여러 모드를 추가하는 경우 `|`로 구분된 배열에 입력하십시오(예: `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`<br>).
 
 ## 경고의 말씀<br>
 
@@ -82,13 +82,13 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 Этот мод добавляет в изображение шрифты и локали, которые будут установлены/обновлены при запуске контейнера.
 
-В аргументах docker вашего контейнера установите переменную среды `DOCKER_MODS=linuxserver/mods:internationalization`
+В аргументах docker вашего контейнера установите переменную среды `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 Для этого языка вам также потребуется установить следующие переменные среды:
 
 `LC_ALL=ru_RU`
 
-При добавлении нескольких модов введите их в массив, разделенный символом `|`, например, `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+При добавлении нескольких модов введите их в массив, разделенный символом `|`, например, `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## Слово предупреждения
 
@@ -98,13 +98,13 @@ This mod on some base images is massive, (hundreds of megs compressed gigs uncom
 
 Este mod agrega fuentes y configuraciones regionales a una imagen, para que se instalen o actualicen durante el inicio del contenedor.
 
-En los argumentos de la ventana acoplable de su contenedor, establezca una variable de entorno `DOCKER_MODS=linuxserver/mods:internationalization`
+En los argumentos de la ventana acoplable de su contenedor, establezca una variable de entorno `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 Para este idioma, también deberá configurar las siguientes variables de entorno:
 
 `LC_ALL=es_MX`
 
-Si agrega varias modificaciones, introdúzcalas en una matriz separada por `|`, como `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+Si agrega varias modificaciones, introdúzcalas en una matriz separada por `|`, como `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## Palabra de advertencia
 
@@ -114,13 +114,13 @@ Este mod en algunas imágenes base es masivo (cientos de megas de conciertos com
 
 Dieser Mod fügt Schriftarten und Gebietsschemata zu einem Image hinzu, die während des Containerstarts installiert/aktualisiert werden.
 
-Setzen Sie in den Docker-Argumenten Ihres Containers eine Umgebungsvariable `DOCKER_MODS=linuxserver/mods:internationalization`
+Setzen Sie in den Docker-Argumenten Ihres Containers eine Umgebungsvariable `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 Für diese Sprache müssen Sie auch die folgenden Umgebungsvariablen setzen:
 
 `LC_ALL=de_DE`
 
-Wenn Sie mehrere Mods hinzufügen, geben Sie sie in einem durch `|` getrennten Array ein, wie z. B. `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+Wenn Sie mehrere Mods hinzufügen, geben Sie sie in einem durch `|` getrennten Array ein, wie z. B. `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## Warnung
 
@@ -130,13 +130,13 @@ Dieser Mod auf einigen Basis-Images ist massiv (Hunderte von MB komprimierte Gig
 
 Ce mod ajoute des polices et des paramètres régionaux à une image, à installer/mettre à jour lors du démarrage du conteneur.
 
-Dans les arguments docker de votre conteneur, définissez une variable d'environnement `DOCKER_MODS=linuxserver/mods:internationalization`
+Dans les arguments docker de votre conteneur, définissez une variable d'environnement `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 Pour cette langue, vous devrez également définir les variables d'environnement suivantes :
 
 `LC_ALL=fr_FR`
 
-Si vous ajoutez plusieurs mods, entrez-les dans un tableau séparé par `|`, comme `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+Si vous ajoutez plusieurs mods, entrez-les dans un tableau séparé par `|`, comme `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## Mot d'avertissement
 
@@ -146,13 +146,13 @@ Ce mod sur certaines images de base est massif (des centaines de mégas de conce
 
 Deze mod voegt lettertypen en landinstellingen toe aan een afbeelding, die moeten worden geïnstalleerd/geüpdatet tijdens het starten van de container.
 
-Stel in de docker-argumenten van uw container een omgevingsvariabele in `DOCKER_MODS=linuxserver/mods:internationalization`
+Stel in de docker-argumenten van uw container een omgevingsvariabele in `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 Voor deze taal moet u ook de volgende omgevingsvariabelen instellen:
 
 `LC_ALL=nl_NL`
 
-Als u meerdere mods toevoegt, voert u deze in een array in gescheiden door `|`, zoals `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+Als u meerdere mods toevoegt, voert u deze in een array in gescheiden door `|`, zoals `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## Waarschuwing
 
@@ -162,13 +162,13 @@ Deze mod op sommige basisafbeeldingen is enorm (honderden megs gecomprimeerde op
 
 Questa mod aggiunge caratteri e locali a un'immagine, da installare/aggiornare durante l'avvio del contenitore.
 
-Negli argomenti docker del tuo contenitore, imposta una variabile di ambiente `DOCKER_MODS=linuxserver/mods:internationalization`
+Negli argomenti docker del tuo contenitore, imposta una variabile di ambiente `DOCKER_MODS=linuxserver/mods:universal-internationalization`
 
 Per questa lingua dovrai impostare anche le seguenti variabili d'ambiente:
 
 `LC_ALL=it_IT`
 
-Se aggiungi più mod, inseriscile in un array separato da `|`, ad esempio `DOCKER_MODS=linuxserver/mods:internationalization|linuxserver/mods:mod2`
+Se aggiungi più mod, inseriscile in un array separato da `|`, ad esempio `DOCKER_MODS=linuxserver/mods:universal-internationalization|linuxserver/mods:mod2`
 
 ## Parola di avvertimento
 
