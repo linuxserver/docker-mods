@@ -23,7 +23,7 @@ Requires an internal DNS, add a rewrite of `dashboard.domain.com` to your server
 Remove the allow/deny lines in `/config/nginx/proxy-confs/dashboard.subdomain.com`, and instead secure it some other way (like Authelia for example).
 
 ## Notes 
-- The application discovery scans the proxy configs and looks for the following structure in accordance with the samples:
+- The application discovery scans for a list of known services, as well as enabled custom proxy confs that contain the following format:
   ```yaml
     set $upstream_app <container/address>;
     set $upstream_port <port>;
