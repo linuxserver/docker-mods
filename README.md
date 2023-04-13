@@ -11,7 +11,6 @@ If adding multiple mods, enter them in an array separated by `|`, such as `DOCKE
 * Fork the repo, create a new branch based on the branch `template`.
 * Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
 * Inspect the `root` folder contents. Edit, add and remove as necessary.
-* The mod should be compatible with both s6v2 and s6v3 (until s6v2 based baseimages are deprecated).
 * After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
 * Edit this readme with pertinent info, delete these instructions.
 * Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic if needed.
