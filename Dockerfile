@@ -1,15 +1,13 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 
-ARG DOTNET_VERSIONS
+ARG MOD_VERSION
 
 RUN \
- apk add --no-cache \
-    curl \
-    jq && \
  DOTNET_JSON=$(curl -sX GET "https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases-index.json") && \
- if [ -z ${DOTNET_VERSIONS+x} ]; then \
-    DOTNET_VERSIONS=$(echo "$DOTNET_JSON" | jq -r '."releases-index"[] | select(."support-phase"=="active" or ."support-phase"=="maintenance") | ."latest-sdk"' | tr '\n' ' ' | head -c -1); \
+ if [ -z ${MOD_VERSION+x} ]; then \
+    MOD_VERSION=$(echo "$DOTNET_JSON" | jq -r '."releases-index"[] | select(."support-phase"=="active" or ."support-phase"=="maintenance") | ."latest-sdk"' | tr '\n' '_' | head -c -1); \
  fi && \
+ DOTNET_VERSIONS="${MOD_VERSION//_/ }"
  mkdir -p /root-layer/dotnet && \
  echo "$DOTNET_VERSIONS" > /root-layer/dotnet/versions.txt && \
  echo "versions are ${DOTNET_VERSIONS}" && \
