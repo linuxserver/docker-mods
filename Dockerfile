@@ -7,7 +7,7 @@ RUN \
  if [ -z ${MOD_VERSION+x} ]; then \
     MOD_VERSION=$(echo "$DOTNET_JSON" | jq -r '."releases-index"[] | select(."support-phase"=="active" or ."support-phase"=="maintenance") | ."latest-sdk"' | tr '\n' '_' | head -c -1); \
  fi && \
- DOTNET_VERSIONS="${MOD_VERSION//_/ }"
+ DOTNET_VERSIONS="${MOD_VERSION//_/ }" && \
  mkdir -p /root-layer/dotnet && \
  echo "$DOTNET_VERSIONS" > /root-layer/dotnet/versions.txt && \
  echo "versions are ${DOTNET_VERSIONS}" && \
