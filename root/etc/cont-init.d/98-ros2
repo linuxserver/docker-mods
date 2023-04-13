@@ -1,9 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-echo "**** Installing ros2 and ros dev tools"
-apt-get install -y \
-    ros-humble-ros-base \
-    ros-dev-tools
-
-echo "**** Automatically sourcing ROS2 ****"
-    printf "\n# Automatically source ROS2 humble\nsource /opt/ros/humble/setup.bash" >> /config/.bashrc
