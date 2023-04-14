@@ -40,6 +40,7 @@ if [[ "${LSIO_BASE}" == "alpine" ]] && [[ ! -f /usr/share/fonts/noto/NotoSansCJK
     font-noto-emoji \
     lang
 elif [[ "${LSIO_BASE}" == "ubuntu" ]] && [[ ! -f /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc ]]; then
+  # Install fonts and locales
   apt-get update
   apt-get install -y \
     fonts-noto \
@@ -128,6 +129,7 @@ elif [[ "${LSIO_BASE}" == "ubuntu" ]] && [[ ! -f /usr/share/fonts/opentype/noto/
     language-pack-zh-hans \
     language-pack-zh-hant
 elif [[ "${LSIO_BASE}" == "debian" ]] && [[ ! -f /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc ]]; then
+  # Install fonts and locales
   apt-get update
   apt-get install -y \
     fonts-noto \
@@ -138,6 +140,7 @@ elif [[ "${LSIO_BASE}" == "debian" ]] && [[ ! -f /usr/share/fonts/opentype/noto/
     localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
   done
 elif [[ "${LSIO_BASE}" == "fedora" ]] && [[ ! -d /usr/share/licenses/google-noto-cjk-fonts-common ]]; then
+  # Install fonts and locales
   dnf install -y \
     glibc-langpack-aa \
     glibc-langpack-af \
@@ -712,16 +715,11 @@ elif [[ "${LSIO_BASE}" == "fedora" ]] && [[ ! -d /usr/share/licenses/google-noto
     localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
   done
 elif [[ "${LSIO_BASE}" == "arch" ]] && [[ ! -f /usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc ]]; then
+  # Install fonts
   pacman -Sy --noconfirm \
     noto-fonts-cjk \
     noto-fonts-emoji \
     noto-fonts-extra 
-  # Remove pacman lang stripping
-  sed -i '/locale/d' /etc/pacman.conf
-  sed -i '/lang/d' /etc/pacman.conf
-  # Re-install glibc
-  pacman -Sy --noconfirm \
-    glibc
   # Generate locales
   for LOCALE in ${LOCALES}; do
     echo "Generating Locale for ${LOCALE}"
