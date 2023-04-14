@@ -717,6 +717,7 @@ elif [[ "${LSIO_BASE}" == "fedora" ]] && [[ ! -d /usr/share/licenses/google-noto
 elif [[ "${LSIO_BASE}" == "arch" ]] && [[ ! -f /usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc ]]; then
   # Install fonts
   pacman -Sy --noconfirm \
+    glibc \
     noto-fonts-cjk \
     noto-fonts-emoji \
     noto-fonts-extra 
