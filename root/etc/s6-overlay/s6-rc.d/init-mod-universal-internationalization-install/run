@@ -41,6 +41,9 @@ if [[ "${LSIO_BASE}" == "alpine" ]] && [[ ! -f /usr/share/fonts/noto/NotoSansCJK
     lang
 elif [[ "${LSIO_BASE}" == "ubuntu" ]] && [[ ! -f /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc ]]; then
   # Install fonts and locales
+  sed -i \
+    '/locale/d' \
+    /etc/dpkg/dpkg.cfg.d/excludes
   apt-get update
   apt-get install -y \
     fonts-noto \
@@ -130,6 +133,9 @@ elif [[ "${LSIO_BASE}" == "ubuntu" ]] && [[ ! -f /usr/share/fonts/opentype/noto/
     language-pack-zh-hant
 elif [[ "${LSIO_BASE}" == "debian" ]] && [[ ! -f /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc ]]; then
   # Install fonts and locales
+  sed -i \
+    '/locale/d' \
+    /etc/dpkg/dpkg.cfg.d/docker
   apt-get update
   apt-get install -y \
     fonts-noto \
@@ -141,6 +147,7 @@ elif [[ "${LSIO_BASE}" == "debian" ]] && [[ ! -f /usr/share/fonts/opentype/noto/
   done
 elif [[ "${LSIO_BASE}" == "fedora" ]] && [[ ! -d /usr/share/licenses/google-noto-cjk-fonts-common ]]; then
   # Install fonts and locales
+  rm -f /etc/rpm/macros.image-language-conf
   dnf install -y \
     glibc-langpack-aa \
     glibc-langpack-af \
@@ -716,6 +723,9 @@ elif [[ "${LSIO_BASE}" == "fedora" ]] && [[ ! -d /usr/share/licenses/google-noto
   done
 elif [[ "${LSIO_BASE}" == "arch" ]] && [[ ! -f /usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc ]]; then
   # Install fonts
+  sed -i \
+    '/locale/d' \
+    /etc/pacman.conf
   pacman -Sy --noconfirm \
     glibc \
     noto-fonts-cjk \
