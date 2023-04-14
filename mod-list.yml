@@ -151,7 +151,7 @@ mods:
       - floodui: https://github.com/linuxserver/docker-mods/tree/transmission-floodui
       - transmissionic: https://github.com/linuxserver/docker-mods/tree/transmission-transmissionic
   universal:
-    mod_count: 10
+    mod_count: 11
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
       - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
@@ -160,6 +160,7 @@ mods:
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
       - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
       - git: https://github.com/linuxserver/docker-mods/tree/universal-git
+      - internationalization: https://github.com/linuxserver/docker-mods/tree/universal-internationalization
       - package-install: https://github.com/linuxserver/docker-mods/tree/universal-package-install
       - stdout-logs: https://github.com/linuxserver/docker-mods/tree/universal-stdout-logs
       - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
