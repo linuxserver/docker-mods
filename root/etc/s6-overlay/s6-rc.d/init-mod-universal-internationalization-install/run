@@ -26,6 +26,9 @@ else
   if grep -q 'ID=ubuntu' /etc/os-release || grep -q 'ID=debian' /etc/os-release; then
     echo 'Acquire::Languages "'${LC_ALL:0:2}'";' > /etc/apt/apt.conf.d/docker-no-languages
   fi
+  # Set additional env vars for app compatibility
+  printf "${LC_ALL}" > /run/s6/container_environment/LANGUAGE
+  printf "${LC_ALL}" > /run/s6/container_environment/LANG
 fi
 
 # Install pacakges and fonts
