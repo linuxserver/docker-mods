@@ -1,8 +1,7 @@
 ## Buildstage ##
 FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 
-ARG DOCKER_RELEASE
-ARG COMPOSE_RELEASE
+ARG MOD_VERSION
 
 RUN \
   echo "**** install packages ****" && \
@@ -10,10 +9,16 @@ RUN \
     git \
     go && \
   echo "**** retrieve latest version ****" && \
-  if [ -z ${DOCKER_RELEASE+x} ]; then \
+  if [[ -z "${MOD_VERSION+x}" ]]; then \
     DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
       | awk '/tag_name/{print $4;exit}' FS='[""]' \
       | sed 's|^v||'); \
+    COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" \
+      | awk '/tag_name/{print $4;exit}' FS='[""]' \
+      | sed 's|^v||'); \
+  else \
+    DOCKER_RELEASE=$(echo "${MOD_VERSION}" | sed 's|-.*||'); \
+    COMPOSE_RELEASE=$(echo "${MOD_VERSION}" | sed 's|.*-||'); \
   fi && \
   echo "**** grab docker ****" && \
   mkdir -p /root-layer/docker-tgz && \
@@ -26,12 +31,6 @@ RUN \
   curl -fo \
     /root-layer/docker-tgz/docker_aarch64.tgz -L \
     "https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz" && \
-  echo "**** retrieve latest compose version ****" && \
-  if [ -z ${COMPOSE_RELEASE+x} ]; then \
-    COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" \
-      | awk '/tag_name/{print $4;exit}' FS='[""]' \
-      | sed 's|^v||'); \
-  fi && \
   echo "**** grab compose ****" && \
   curl -fo \
     /root-layer/docker-tgz/docker-compose_x86_64 -L \
@@ -43,11 +42,9 @@ RUN \
     /root-layer/docker-tgz/docker-compose_aarch64 -L \
     "https://github.com/docker/compose/releases/download/v${COMPOSE_RELEASE}/docker-compose-linux-aarch64" && \
   echo "**** retrieve latest compose switch version ****" && \
-  if [ -z ${SWITCH_RELEASE+x} ]; then \
-    SWITCH_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose-switch/releases/latest" \
-      | awk '/tag_name/{print $4;exit}' FS='[""]' \
-      | sed 's|^v||'); \
-  fi && \
+  SWITCH_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose-switch/releases/latest" \
+    | awk '/tag_name/{print $4;exit}' FS='[""]' \
+    | sed 's|^v||') && \
   echo "**** grab compose switch ****" && \
   curl -fo \
     /root-layer/docker-tgz/compose-switch_x86_64 -L \

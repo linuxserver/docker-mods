@@ -23,5 +23,7 @@ if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
         > /sys/fs/cgroup/cgroup.subtree_control
 fi
 
-exec 2>&1 /usr/local/bin/dockerd \
-    --data-root "/config/var/lib/docker"
+exec \
+    s6-notifyoncheck -d -n 300 -w 1000 -c "docker version" \
+        2>&1 /usr/local/bin/dockerd \
+            --data-root "/config/var/lib/docker"

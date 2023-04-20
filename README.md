@@ -10,5 +10,6 @@ In the container's docker arguments,
 * Set the `privileged` option for the container
 
 Docker data root will reside under `/config/var/lib/docker`.
+On amd64, QEMU will be enabled on container start.
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:universal-docker-in-docker|linuxserver/mods:universal-mod2`
