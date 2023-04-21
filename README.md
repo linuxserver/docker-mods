@@ -3,15 +3,17 @@
 This mod adds the mesa libraries (v20.1+) needed for hardware encoding (VAAPI) on AMD GPUs to the Jellyfin Docker container (`latest` tag).
 
 To enable, you need to add the 2 following entries:
-- Device mapping for `/dev/dri`
-  - docker-compose: 
+- Device mapping for `/dev/dri` and `/dev/kfd`
+  - docker-compose:
     ```yaml
         devices:
           - /dev/dri:/dev/dri
+          - /dev/kfd:/dev/kfd
     ```
   - docker cli
     ```sh
     --device /dev/dri:/dev/dri
+    --device /dev/kfd:/dev/kfd
     ```
 - Environment Variable: `DOCKER_MODS=linuxserver/mods:jellyfin-amd`
   - docker-compose:
