@@ -59,7 +59,7 @@ One of the core ideas to remember when creating a Mod is that it can only contai
 
 ### Mod Types
 
-We now support "hybrid" mods, targeting both s6 v2 and v3. All currently supported Linuxserver base images are using s6 v3, however, older pinned images, forked versions, etc. may still be using v2. To support both cases, simply include both sets of files (as below) in your mod, the built-in mod logic will pick the appropriate files to run. v2 mods will run on v3 base images for the forseeable future but we will not provide support for that configuration.
+We now only support s6 v3 mods. All currently supported Linuxserver base images are using s6 v3, however, older pinned images, forked versions, etc. may still be using v2. New mods will not work with older s6 v2 based images.
 
 ### Docker Mod Simple - just add scripts
 
@@ -158,25 +158,6 @@ If your mod needs to take additional config steps *after* the packages have been
 
 Services will always run last, controlled by their dependency on `init-services`.
 
-#### Legacy (v2) mods
-
-The most common paths to leverage for Linuxserver images are as follows. Assuming a mod name of `universal-mymod`:
-
-```text
-.
-└── root
-  ├── defaults                  -- Any default config files you need to copy as part of the mod can be placed here
-  └── etc
-    ├── cont-init.d
-    │  ├── 95-apt-get
-    │  └── 98-universal-mymod   -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x` and is run ordered by filename.
-    └── services.d
-      └── mymod
-        └── run                 -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
-```
-
-The example files in this repo contain a script to install sshutil and a service file to run the installed utility.
-
 ### Docker Mod Complex - Sky is the limit
 
 In this repository you will find the `Dockerfile.complex` containing:
@@ -263,8 +244,9 @@ GitHub Actions will trigger a build off of your repo when you commit. The image 
 * Fork this repo, checkout the `template` branch.
 * Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
 * Inspect the `root` folder contents. Edit, add and remove as necessary.
+* After all init scripts and services are created, run `find ./ -path "./.git" -prune -o ( -name "run" -o -name "finish" -o -name "check" ) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
 * Edit the readme with pertinent info.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`.
+* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic if needed.
 * Ask the team to create a new branch named `<baseimagename>-<modname>` in this repo. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the [template branch](https://github.com/linuxserver/docker-mods/tree/template).
 * Submit PR against the branch created by the team.
 * Make sure that the commits in the PR are squashed.
