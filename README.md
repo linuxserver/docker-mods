@@ -1,25 +1,34 @@
-# Rsync - Docker mod for openssh-server
+# run_custom_before_legacy - Universal docker mod
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds a step in the init process for you to hijack, convenient when you want to execute custom code earlier on in the process than custom-cont.d allows you to do.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+The file this mod executes lives on the root, as `/init-run-custom-before-legacy`, map this as a file using volume mounts to replace it's content
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+## Usage
 
-# Mod creation instructions
+Here an example snippet to help you get started using this docker mod.
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic if needed.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+### docker-compose ([recommended](https://docs.linuxserver.io/general/docker-compose))
 
+```yaml
+  swag:
+    image: lscr.io/linuxserver/nginx
+    container_name: nginx
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/London
+      DOCKER_MODS: linuxserver/mods:universal-run_custom_before_legacy
+    volumes:
+      - /path/to/appdata/config:/config
+      - /path/to/custom/script:/init-run-custom-before-legacy
+    restart: unless-stopped
+```
 
-## Tips and tricks
+## Parameters
 
-* Some images have helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+Container images/mods are configured using parameters passed at runtime (such as those above).
+
+| Parameter | Function | Notes |
+| :----: | --- | --- |
+| `DOCKER_MODS` | Enable this docker mod with `linuxserver/mods:universal-run_custom_before_legacy` | If adding multiple mods, enter them in an array separated by `\|`, such as `DOCKER_MODS: linuxserver/mods:universal-run_custom_before_legacy\|linuxserver/mods:universal-mod2` |
