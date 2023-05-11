@@ -21,7 +21,7 @@ Here an example snippet to help you get started using this docker mod.
       DOCKER_MODS: linuxserver/mods:universal-run_custom_before_legacy
     volumes:
       - /path/to/appdata/config:/config
-      - /path/to/custom/script:/init-run-custom-before-legacy
+      - /path/to/custom/script:/init-run-custom-before-legacy:ro
     restart: unless-stopped
 ```
 
