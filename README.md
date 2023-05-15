@@ -2,6 +2,7 @@
 
 These files are used by Linuxserver build processes to handle mods in our images. Not for end-user consumption.
 
+* **15.05.23:** - Add DOCKER_MODS_DEBUG env.
 * **19.03.23:** - Add quay.io support for mods.
 * **25.02.23:** - Inject branding.
 * **05.02.23:** - Support multi-manifest mods for provenance, etc.
