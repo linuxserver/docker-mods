@@ -19,6 +19,12 @@ set_legacy_executable_bits() {
         /etc/services.d/*/* 2>/dev/null || true
 }
 
+if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
+  CURL_NOISE_LEVEL="-v"
+else
+  CURL_NOISE_LEVEL="--silent"
+fi
+
 tamper_check() {
     # Tamper check custom service locations
     if [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* ! -user root 2>/dev/null)" ]]; then
@@ -162,7 +168,7 @@ curl_check() {
 # Use different filtering depending on URL
 get_blob_sha() {
     MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-        --silent \
+        ${CURL_NOISE_LEVEL} \
         --location \
         --request GET \
         --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
@@ -171,7 +177,7 @@ get_blob_sha() {
         "${2}/${3}" | jq -r 'first(.manifests[].digest)?')
     if [[ -z "${MULTIDIGEST}" ]]; then
         if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-            --silent \
+            ${CURL_NOISE_LEVEL} \
             --location \
             --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
@@ -182,7 +188,7 @@ get_blob_sha() {
         fi
     else
         if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-            --silent \
+            ${CURL_NOISE_LEVEL} \
             --location \
             --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
@@ -249,7 +255,7 @@ run_mods() {
         # Get Dockerhub token for api operations
         TOKEN="$(
             curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
-                --silent \
+                ${CURL_NOISE_LEVEL} \
                 --header 'GET' \
                 "${AUTH_URL}" |
                 jq -r '.token'
@@ -266,7 +272,7 @@ run_mods() {
         else
             # Download and extract layer to /
             curl -f --retry 10 --retry-max-time 60 --retry-all-errors \
-                --silent \
+                ${CURL_NOISE_LEVEL} \
                 --location \
                 --request GET \
                 --header "Authorization: Bearer ${TOKEN}" \
