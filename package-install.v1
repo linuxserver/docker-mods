@@ -48,7 +48,7 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
         fi
         python3 -m pip install -U pip wheel setuptools
         PIP_ARGS=()
-        if [[ -f /usr/bin/apt ]]; then
+        if [[ -f /usr/bin/apt ]] && grep -q 'ID=ubuntu' /etc/os-release; then
             PIP_ARGS+=("-f" "https://wheel-index.linuxserver.io/ubuntu/")
         elif [[ -f /sbin/apk ]]; then
             ALPINE_VER=$(grep main /etc/apk/repositories | sed 's|.*alpine/v||' | sed 's|/main.*||')
