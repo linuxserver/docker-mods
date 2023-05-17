@@ -1,3 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-apt-get update
