@@ -1,10 +1,11 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as buildstage
+# syntax=docker/dockerfile:1
+
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 
 ARG GO_VERSION
 
 RUN \
  apk add --no-cache \
-    curl \
     grep && \
  if [ -z ${GO_VERSION+x} ]; then \
     GO_VERSION=$(curl -sLX GET https://go.dev/dl/ | grep -o '<span.*>.*linux-amd64.*</span>' | grep -oP '(?<=go).*(?=.linux)'); \
