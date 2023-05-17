@@ -1,10 +1,10 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** ensuring golang is in PATH ****"
-if ! grep -q -E '.*/usr/local/go/bin.*' /var/run/s6/container_environment/PATH; then
+if ! grep -q '/usr/local/go/bin' /var/run/s6/container_environment/PATH; then
     printf ':/usr/local/go/bin' >> /var/run/s6/container_environment/PATH
 fi
-if ! grep -q -E '.*/config/go/bin:.*' /var/run/s6/container_environment/PATH; then
+if ! grep -q '/config/go/bin' /var/run/s6/container_environment/PATH; then
     sed -i '1s|^|/config/go/bin:|' /var/run/s6/container_environment/PATH
 fi
 
