@@ -1,6 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-echo "**** installing php8 and composer ****"
-apt-get install -y \
-  composer \
-  php8.0
