@@ -2,7 +2,7 @@
 
 source /etc/lsb-release
 if [ ! -f "/etc/apt/sources.list.d/php8source.list" ]; then
-    sudo gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/php8.gpg --keyserver keyserver.ubuntu.com --recv-keys 14aa40ec0831756756d7f66c4f4ea0aae5267a6c
+    gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/php8.gpg --keyserver keyserver.ubuntu.com --recv-keys 14aa40ec0831756756d7f66c4f4ea0aae5267a6c
     echo "deb [signed-by=/usr/share/keyrings/php8.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu ${DISTRIB_CODENAME} main" \
         > /etc/apt/sources.list.d/php8source.list
     echo "**** Adding php8.2 and composer to package install list ****"
