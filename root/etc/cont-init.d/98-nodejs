@@ -1,6 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-echo "**** Installing nodejs and yarn"
-apt-get install -y \
-    nodejs \
-    yarn
