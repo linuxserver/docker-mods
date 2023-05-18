@@ -2,18 +2,18 @@
 
 FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 
-ARG TRANSMISSIONIC_VERSION
+ARG MOD_VERSION
 
 RUN \
   echo "**** grab transmissionic ****" && \
   mkdir -p /root-layer/themes && \
-  if [ -z ${TRANSMISSIONIC_VERSION+x} ]; then \
-    TRANSMISSIONIC_VERSION=$(curl -s "https://api.github.com/repos/6c65726f79/Transmissionic/releases/latest" \
+  if [ -z ${MOD_VERSION+x} ]; then \
+    MOD_VERSION=$(curl -s "https://api.github.com/repos/6c65726f79/Transmissionic/releases/latest" \
     | jq -rc ".tag_name"); \
   fi && \
   curl -o \
     /tmp/transmissionic.zip -L \
-    "https://github.com/6c65726f79/Transmissionic/releases/download/${TRANSMISSIONIC_VERSION}/Transmissionic-webui-${TRANSMISSIONIC_VERSION}.zip" && \
+    "https://github.com/6c65726f79/Transmissionic/releases/download/${MOD_VERSION}/Transmissionic-webui-${MOD_VERSION}.zip" && \
   unzip \
     /tmp/transmissionic.zip -d \
     /root-layer/themes && \
