@@ -100,18 +100,6 @@ mods:
       - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
       - terraform: https://github.com/linuxserver/docker-mods/tree/code-server-terraform
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
-  paperless-ng:
-    mod_count: 1
-    container_mods:
-      - multilangocr: https://github.com/linuxserver/docker-mods/tree/papermerge-multilangocr
-  paperless-ngx:
-    mod_count: 1
-    container_mods:
-      - multilangocr: https://github.com/linuxserver/docker-mods/tree/papermerge-multilangocr
-  papermerge:
-    mod_count: 1
-    container_mods:
-      - multilangocr: https://github.com/linuxserver/docker-mods/tree/papermerge-multilangocr
   plex:
     mod_count: 1
     container_mods:
