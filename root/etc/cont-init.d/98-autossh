@@ -1,7 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-# install autossh
-if [ -z `command -v autossh` ]; then
-  echo "**** installing autossh ****"
-  apk add --no-cache autossh
-fi
