@@ -1,19 +1,25 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as buildstage
+# syntax=docker/dockerfile:1
 
-ARG DOCKER_RELEASE
-ARG COMPOSE_RELEASE
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+
+ARG MOD_VERSION
 
 RUN \
   echo "**** install packages ****" && \
   apk add --no-cache \
-    curl \
     git \
     go && \
-  echo "**** retrieve latest docker version ****" && \
-  if [ -z ${DOCKER_RELEASE+x} ]; then \
+  echo "**** retrieve latest version ****" && \
+  if [[ -z "${MOD_VERSION+x}" ]]; then \
     DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
       | awk '/tag_name/{print $4;exit}' FS='[""]' \
       | sed 's|^v||'); \
+    COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" \
+      | awk '/tag_name/{print $4;exit}' FS='[""]' \
+      | sed 's|^v||'); \
+  else \
+    DOCKER_RELEASE=$(echo "${MOD_VERSION}" | sed 's|-.*||'); \
+    COMPOSE_RELEASE=$(echo "${MOD_VERSION}" | sed 's|.*-||'); \
   fi && \
   echo "**** grab docker ****" && \
   mkdir -p \
@@ -42,12 +48,6 @@ RUN \
     /tmp/docker_aarch64.tgz -C \
     /tmp/docker_aarch64 --strip-components=1 && \
   cp /tmp/docker_aarch64/docker /root-layer/docker-bins/docker_aarch64 && \
-  echo "**** retrieve latest compose version ****" && \
-  if [ -z ${COMPOSE_RELEASE+x} ]; then \
-    COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" \
-      | awk '/tag_name/{print $4;exit}' FS='[""]' \
-      | sed 's|^v||'); \
-  fi && \
   echo "**** grab compose ****" && \
   curl -fo \
     /root-layer/docker-bins/docker-compose_x86_64 -L \
