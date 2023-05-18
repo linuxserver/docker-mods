@@ -1,13 +1,15 @@
-## Version 2022/09/02 - Changelog: https://github.com/linuxserver/docker-mods/blob/nginx-proxy-confs/root/defaults/nginx/site-confs/default.conf.sample
+## Version 2023/05/18 - Changelog: https://github.com/linuxserver/docker-mods/commits/nginx-proxy-confs/root/defaults/nginx/site-confs/default.conf.sample
 
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl http2 default_server;
+    listen [::]:443 ssl http2 default_server;
 
     server_name _;
+
+    include /config/nginx/ssl.conf;
 
     set $root /app/www/public;
     if (!-d /app/www/public) {

@@ -20,6 +20,8 @@ RUN \
 # copy local files
 COPY root/ root/
 
+ADD https://raw.githubusercontent.com/linuxserver/docker-swag/master/root/defaults/nginx/proxy.conf.sample /root/defaults/nginx/proxy.conf.sample
+
 FROM scratch
 
 LABEL maintainer="Roxedus"
