@@ -1,6 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-echo "**** installing imagemagick ****"
-apk add --no-cache \
-  php7-pecl-imagick \
-  imagemagick
