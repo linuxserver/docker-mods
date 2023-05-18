@@ -11,6 +11,13 @@ MOD_SCRIPT_VER="3"
 SCRIPTS_DIR="/custom-cont-init.d"
 SERVICES_DIR="/custom-services.d"
 
+if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
+  CURL_NOISE_LEVEL="-v"
+  echo "[mod-init] Running in debug mode"
+else
+  CURL_NOISE_LEVEL="--silent"
+fi
+
 # Set executable bit on cont-init and services built into the image
 set_legacy_executable_bits() {
     mkdir -p /etc/{cont-init.d,services.d}
@@ -18,12 +25,6 @@ set_legacy_executable_bits() {
         /etc/cont-init.d/* \
         /etc/services.d/*/* 2>/dev/null || true
 }
-
-if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
-  CURL_NOISE_LEVEL="-v"
-else
-  CURL_NOISE_LEVEL="--silent"
-fi
 
 tamper_check() {
     # Tamper check custom service locations
