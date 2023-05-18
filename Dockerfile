@@ -1,14 +1,15 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as grab-stage
+# syntax=docker/dockerfile:1
+
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as grab-stage
 
 RUN \
- apk add --no-cache --upgrade \
-    curl \
+  apk add --no-cache --upgrade \
     tar && \
- mkdir -p /root/defaults/nginx/proxy-confs && \
- curl -o \
+  mkdir -p /root/defaults/nginx/proxy-confs && \
+  curl -o \
     /tmp/proxy.tar.gz -L \
     "https://github.com/linuxserver/reverse-proxy-confs/tarball/master" && \
- tar xf \
+  tar xf \
     /tmp/proxy.tar.gz -C \
     /root/defaults/nginx/proxy-confs \
     --strip-components=1 \
