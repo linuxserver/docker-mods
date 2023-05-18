@@ -1,4 +1,4 @@
-# This mod is deprecated due to Papermerge, Paperless-ng and Paperless-ngx having been deprecated
+# This mod is deprecated due to Papermerge, Paperless-ng and Paperless-ngx containers having been deprecated
 
 # Multi Language OCR - Docker mod for papermerge and paperless-ng/x
 
