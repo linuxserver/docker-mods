@@ -1,3 +1,5 @@
+# This mod is deprecated due to Papermerge, Paperless-ng and Paperless-ngx having been deprecated
+
 # Multi Language OCR - Docker mod for papermerge and paperless-ng/x
 
 This mod adds multi language OCR packages to papermerge and paperless-ng/x, to be installed/updated during container start. Keep in mind that you still have to enable the languages in the app itself, as this mod only installs the system language packs.
