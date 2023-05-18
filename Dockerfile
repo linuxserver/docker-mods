@@ -19,9 +19,9 @@ RUN \
 # copy local files
 COPY root/ root/
 
-ADD https://raw.githubusercontent.com/linuxserver/docker-swag/master/root/defaults/proxy.conf /root/defaults/proxy.conf
+ADD https://raw.githubusercontent.com/linuxserver/docker-swag/master/root/defaults/nginx/proxy.conf.sample /root/defaults/nginx/proxy.conf.sample
 
-ADD https://raw.githubusercontent.com/linuxserver/docker-swag/master/root/defaults/dhparams.pem /defaults/dhparams.pem
+ADD https://raw.githubusercontent.com/linuxserver/docker-baseimage-alpine-nginx/master/root/defaults/nginx/dhparams.pem /root/defaults/nginx/dhparams.pem
 
 FROM scratch
 
