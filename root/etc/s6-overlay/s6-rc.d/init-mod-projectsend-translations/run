@@ -1,0 +1,19 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -z "${TRANSLATIONS}" ]; then
+  OLDIFS=$IFS
+  IFS=','
+  for translation in ${TRANSLATIONS}; do
+    IFS=$OLDIFS
+    if [[ -d "/translations/${translation}" ]]; then
+        echo "**** install local translation: ${translation} ****"
+        cp -R "/translations/${translation}/*" /app/projectsend/
+    else
+        echo "**** install online translation: ${translation} ****"
+        curl -s -o "/tmp/${translation}.zip" -L "https://www.projectsend.org/translations/get.php?lang=${translation}"
+        unzip -o "/tmp/${translation}.zip" -d /app/projectsend;
+    fi
+  done
+  echo "**** cleanup ****"
+  rm -rf /tmp/*
+fi
