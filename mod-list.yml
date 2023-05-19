@@ -104,6 +104,10 @@ mods:
     mod_count: 1
     container_mods:
       - absolute-hama: https://github.com/linuxserver/docker-mods/tree/plex-absolute-hama
+  projectsend:
+    mod_count: 1
+    container_mods:
+      - translations: https://github.com/linuxserver/docker-mods/tree/projectsend-translations
   radarr:
     mod_count: 1
     container_mods:
