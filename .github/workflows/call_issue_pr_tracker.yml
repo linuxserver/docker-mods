@@ -12,5 +12,5 @@ jobs:
   manage-project:
     permissions:
       issues: write
-    uses: linuxserver/github-workflows/.github/workflows/issue-pr-tracker.yml@test
+    uses: linuxserver/github-workflows/.github/workflows/issue-pr-tracker.yml@v1
     secrets: inherit
