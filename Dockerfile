@@ -4,5 +4,5 @@ FROM scratch
 
 LABEL maintainer="alexschomb"
 
-# Add files from buildstage
+# copy local files
 COPY root/ /
