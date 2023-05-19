@@ -12,5 +12,6 @@ jobs:
   manage-project:
     permissions:
       issues: write
-    uses: linuxserver/github-workflows/.github/workflows/issue-pr-tracker.yml@v1
-    secrets: inherit
+    uses: linuxserver/github-workflows/.github/workflows/issue-pr-tracker.yml@test
+    secrets:
+      CR_PAT: ${{ secrets.CR_PAT }}
