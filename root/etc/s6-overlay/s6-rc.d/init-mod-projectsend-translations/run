@@ -17,3 +17,6 @@ if [ ! -z "${TRANSLATIONS}" ]; then
   echo "**** cleanup ****"
   rm -rf /tmp/*
 fi
+
+
+echo "blah"
