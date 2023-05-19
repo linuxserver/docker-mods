@@ -5,8 +5,8 @@ on: [push, pull_request_target, workflow_dispatch]
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "sabnzbd" #replace
-  MODNAME: "par2cmdline-turbo" #replace
+  BASEIMAGE: "sabnzbd"
+  MODNAME: "par2cmdline-turbo"
 
 jobs:
   set-vars:
@@ -20,7 +20,7 @@ jobs:
           echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_OUTPUT
           echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_OUTPUT
           # **** If the mod needs to be versioned, set the versioning logic below. Otherwise leave as is. ****
-          MOD_VERSION=""
+          MOD_VERSION=$(curl -s https://api.github.com/repos/animetosho/par2cmdline-turbo/releases/latest | jq -rc ".tag_name")
           echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_OUTPUT
     outputs:
       GITHUB_REPO: ${{ steps.outputs.outputs.GITHUB_REPO }}
