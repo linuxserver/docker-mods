@@ -17,5 +17,3 @@ if [ ! -z "${TRANSLATIONS}" ]; then
   echo "**** cleanup ****"
   rm -rf /tmp/*
 fi
-
-while :; do :; done & kill -STOP $! && wait $!

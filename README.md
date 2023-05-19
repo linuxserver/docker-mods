@@ -33,9 +33,5 @@ services:
     restart: unless-stopped
 ```
 
-### Known limitations
-
-* Translations will only update when rebuilding the base image (``docker-compose down && docker-compose up -d --rebuild``), a simple ``docker-compose restart`` is not sufficient. This is because the [Docker image of LinuxServer.io](https://github.com/linuxserver/docker-projectsend) does not work with mounted volumes inside ``/app/projectsend/``. As a result, translation development can be very uncomfortable using this approach. Sorry.
-
 ## Source / References
 I took inspiration from the Dockerfile of the [Grafana](https://github.com/grafana/grafana/) repository, especially [this file](https://github.com/grafana/grafana/blob/main/packaging/docker/run.sh). Thanks!
