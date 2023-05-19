@@ -1,5 +1,7 @@
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage-x86_64
+FROM ghcr.io/linuxserver/baseimage-alpine:3.18 as buildstage-x86_64
+
+ARG MOD_VERSION
 
 RUN \
   echo "**** install packages ****" && \
@@ -11,7 +13,7 @@ RUN \
   mkdir /tmp/par2cmdline && \
   curl -o \
     /tmp/par2cmdline.tar.gz -L \
-    "https://github.com/animetosho/par2cmdline-turbo/archive/refs/heads/turbo.tar.gz" && \  
+    "https://github.com/animetosho/par2cmdline-turbo/archive/${MOD_VERSION}.tar.gz" && \
   tar xf \
     /tmp/par2cmdline.tar.gz -C \
     /tmp/par2cmdline --strip-components=1 && \
@@ -23,7 +25,9 @@ RUN \
   make install DESTDIR=/root-layer
 
 ## Buildstage ##
-FROM --platform=aarch64 ghcr.io/linuxserver/baseimage-alpine:arm64v8-3.17 as buildstage-aarch64
+FROM --platform=aarch64 ghcr.io/linuxserver/baseimage-alpine:arm64v8-3.18 as buildstage-aarch64
+
+ARG MOD_VERSION
 
 RUN \
   echo "**** install packages ****" && \
@@ -36,7 +40,7 @@ RUN \
   mkdir /tmp/par2cmdline && \
   curl -o \
     /tmp/par2cmdline.tar.gz -L \
-    "https://github.com/animetosho/par2cmdline-turbo/archive/refs/heads/turbo.tar.gz" && \  
+    "https://github.com/animetosho/par2cmdline-turbo/archive/${MOD_VERSION}.tar.gz" && \
   tar xf \
     /tmp/par2cmdline.tar.gz -C \
     /tmp/par2cmdline --strip-components=1 && \
