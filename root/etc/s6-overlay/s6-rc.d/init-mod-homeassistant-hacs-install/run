@@ -8,7 +8,7 @@ else
     -fL "https://github.com/hacs/integration/releases/latest/download/hacs.zip"
   mkdir -p /config/custom_components/hacs
   unzip /tmp/hacs.zip -d /config/custom_components/hacs
-  chown abc:abc /config/custom_components
-  chown -R abc:abc /config/custom_components/hacs
+  lsiown abc:abc /config/custom_components
+  lsiown -R abc:abc /config/custom_components/hacs
   rm -rf /tmp/hacs.zip
 fi
