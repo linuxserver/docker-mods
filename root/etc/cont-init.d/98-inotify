@@ -1,3 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-apk add --no-cache inotify-tools
