@@ -27,7 +27,7 @@ if [ "$(sed -nE 's|## Version ([0-9]{4}\/[0-9]{2}\/[0-9]{2}).*|\1|p' /dashboard/
 fi
 
 # permissions
-chown -R abc:abc \
+lsiown -R abc:abc \
     /dashboard \
     /config/nginx/proxy-confs/dashboard.subdomain.conf
 
