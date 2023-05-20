@@ -8,21 +8,17 @@ if [ ! -f "/usr/bin/apt" ]; then
     exit 0
 fi
 
-if ! dpkg -l | grep gnupg > /dev/null; then
-    apt-get update && apt-get install -y gnupg
-fi
-
 if [ ! -f "/etc/apt/sources.list.d/kisak-mesa.list" ]; then
     echo "**** Adding kisak-mesa repo ****"
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F63F0F2B90935439
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF63F0F2B90935439" | gpg --dearmor | tee /usr/share/keyrings/kisak-mesa.gpg >/dev/null
     source /etc/lsb-release
-    echo "deb http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/kisak-mesa.list
+    echo "deb [signed-by=/usr/share/keyrings/kisak-mesa.gpg] http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/kisak-mesa.list
 fi
 
 if [ ! -f "/etc/apt/sources.list.d/amdgpu-focal.list" ]; then
     echo "**** Adding amdgpu repo ****"
-    curl -sL --retry 3 https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -
-    echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/${AMDGPU_RELEASE} ubuntu main" > /etc/apt/sources.list.d/amdgpu-focal.list
+    curl -fsSL https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor | tee /usr/share/keyrings/rocm.gpg >/dev/null
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${AMDGPU_RELEASE} ubuntu main" > /etc/apt/sources.list.d/amdgpu-focal.list
 fi
 
 

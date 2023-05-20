@@ -1,7 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-if [ ! -f "/etc/apt/sources.list.d/kisak-mesa-focal.list" ]; then
-    echo "**** Adding kisak-mesa repo ****"
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F63F0F2B90935439
-    echo "deb http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu focal main" > /etc/apt/sources.list.d/kisak-mesa-focal.list
-fi
