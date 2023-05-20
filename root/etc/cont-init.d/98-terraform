@@ -1,8 +1,0 @@
-#!/usr/bin/with-contenv bash
-# shellcheck shell=bash
-
-echo "**** Installing Terraform"
-apt-get install -y \
-    terraform
-
-install-extension hashicorp.terraform
