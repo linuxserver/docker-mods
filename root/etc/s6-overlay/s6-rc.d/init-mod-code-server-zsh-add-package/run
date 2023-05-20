@@ -18,6 +18,6 @@ else
     echo "**** It looks like Oh My Zsh was manually deleted after install. Please recreate the code-server container to reinstall Oh My Zsh. ****"
 fi
 
-chown -R abc:abc \
+lsiown -R abc:abc \
     /config/.oh-my-zsh \
     /config/.zshrc
