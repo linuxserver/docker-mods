@@ -1,2 +1,0 @@
-#!/usr/bin/with-contenv bash
-apk info --installed ttf-dejavu >/dev/null || apk add --no-cache ttf-dejavu font-noto-emoji font-croscore
