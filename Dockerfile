@@ -10,7 +10,7 @@ RUN \
     /root-layer && \
   if [[ -z "${MOD_VERSION}" ]]; then \
     MOD_VERSION=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" \
-      | awk '/tag_name/{print $4;exit}' FS='[""]'); \
+      | jq -r '.tag_name'); \
   fi && \
   echo $MOD_VERSION > /root-layer/CALIBRE_RELEASE
 
