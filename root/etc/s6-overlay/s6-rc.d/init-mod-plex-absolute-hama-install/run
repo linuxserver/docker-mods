@@ -8,12 +8,12 @@ else
     echo "**** updating scanner repo ****"
     s6-setuidgid abc git -C /config/absolute pull
 fi
-chown -R abc:abc /config/absolute
+lsiown -R abc:abc /config/absolute
 
 if [ ! -d "/config/Library/Application Support/Plex Media Server" ]; then
     echo "**** Creating Scanner and Plug-ins folders ****"
     mkdir -p "/config/Library/Application Support/Plex Media Server/Scanners/Series" "/config/Library/Application Support/Plex Media Server/Plug-ins"
-    chown -R abc:abc "/config/Library/Application Support/Plex Media Server"
+    lsiown -R abc:abc "/config/Library/Application Support/Plex Media Server"
 fi
 
 scannerdir="/config/Library/Application Support/Plex Media Server/Scanners/Series"
@@ -28,7 +28,7 @@ else
         cp -f "/config/absolute/Scanners/Series/Absolute Series Scanner.py" "$scannerdir/Absolute Series Scanner.py"
     fi
 fi
-chown -R abc:abc "$scannerdir"
+lsiown -R abc:abc "$scannerdir"
 
 plugindir="/config/Library/Application Support/Plex Media Server/Plug-ins"
 
@@ -40,4 +40,4 @@ else
     echo "**** pulling latest update ****"
     s6-setuidgid abc git -C "$plugindir/Hama.bundle" pull
 fi
-chown -R abc:abc "$plugindir/Hama.bundle"
+lsiown -R abc:abc "$plugindir/Hama.bundle"
