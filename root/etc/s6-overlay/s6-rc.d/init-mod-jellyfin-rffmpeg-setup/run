@@ -35,7 +35,7 @@ if [ ! -z "$RFFMPEG_USER" ]; then
 fi
 
 #Fix permissions
-chown abc:abc -R /config/rffmpeg
+lsiown abc:abc -R /config/rffmpeg
 
 #Initialize database
 if [ -f /config/rffmpeg/rffmpeg.db ]; then
