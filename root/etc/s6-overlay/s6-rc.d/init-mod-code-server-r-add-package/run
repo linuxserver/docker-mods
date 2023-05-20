@@ -6,9 +6,9 @@ fi
 
 if [ ! -f "/etc/apt/sources.list.d/r.list" ]; then
     echo "**** Adding r packages to install list ****"
-    curl -s https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | apt-key add -
+    curl -fsSL https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee /usr/share/keyrings/r.asc >/dev/null
     source /etc/lsb-release
-    echo "deb https://cloud.r-project.org/bin/linux/ubuntu ${DISTRIB_CODENAME}-cran40/" > /etc/apt/sources.list.d/r.list
+    echo "deb [signed-by=/usr/share/keyrings/r.asc] https://cloud.r-project.org/bin/linux/ubuntu ${DISTRIB_CODENAME}-cran40/" > /etc/apt/sources.list.d/r.list
     echo "\
         build-essential \
         r-base" >> /mod-repo-packages-to-install.list
