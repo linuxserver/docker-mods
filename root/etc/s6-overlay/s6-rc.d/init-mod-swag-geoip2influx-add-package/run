@@ -21,7 +21,7 @@ if [ -f /config/geoip2db/geoip2influx.log ]; then
 fi
 
 # permissions
-chown -R abc:abc \
+lsiown -R abc:abc \
   /geoip2influx \
   /config/log/geoip2influx
 
