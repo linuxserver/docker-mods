@@ -1,19 +1,18 @@
-## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-ubuntu:focal as buildstage
+# syntax=docker/dockerfile:1
 
-ARG BUILD_DATE
-ARG VERSION
-ARG CALIBRE_RELEASE
-ARG DEBIAN_FRONTEND="noninteractive"
-LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="chbmb"
+## Buildstage ##
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+
+ARG MOD_VERSION
 
 RUN \
   mkdir -p \
     /root-layer && \
-  CALIBRE_RELEASE=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" \
-  | awk '/tag_name/{print $4;exit}' FS='[""]') && \
-  echo $CALIBRE_RELEASE > /root-layer/CALIBRE_RELEASE
+  if [[ -z "${MOD_VERSION}" ]]; then \
+    MOD_VERSION=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" \
+      | jq -r '.tag_name'); \
+  fi && \
+  echo $MOD_VERSION > /root-layer/CALIBRE_RELEASE
 
 # copy local files
 COPY root/ /root-layer/
