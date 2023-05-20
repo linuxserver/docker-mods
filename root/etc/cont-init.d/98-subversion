@@ -1,6 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-echo "**** installing subversion ****"
-apt-get install -y subversion
-
-install-extension johnstoncode.svn-scm
