@@ -10,7 +10,7 @@ fi
 
 if [ ! -f "/etc/apt/sources.list.d/kisak-mesa.list" ]; then
     echo "**** Adding kisak-mesa repo ****"
-    gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/kisak-mesa.gpg --keyserver keyserver.ubuntu.com --recv-keys F63F0F2B90935439
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF63F0F2B90935439" | gpg --dearmor | tee /usr/share/keyrings/kisak-mesa.gpg >/dev/null
     source /etc/lsb-release
     echo "deb [signed-by=/usr/share/keyrings/kisak-mesa.gpg] http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/kisak-mesa.list
 fi
