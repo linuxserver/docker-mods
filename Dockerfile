@@ -1,7 +1,9 @@
+# syntax=docker/dockerfile:1
+
 # Build container
 FROM ghcr.io/linuxserver/baseimage-alpine:3.17 AS buildstage
 
-ARG CLOUDFLARED_TAG
+ARG MOD_VERSION
 
 RUN mkdir -p /root-layer/cloudflared
 WORKDIR /src
@@ -16,12 +18,12 @@ ENV GO111MODULE=on \
     CGO_ENABLED=0
 
 RUN \
-  if [ -z "${CLOUDFLARED_TAG}" ]; then \
+  if [ -z "${MOD_VERSION}" ]; then \
     curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest \
       | jq -rc ".tag_name" \
       | xargs -I TAG sh -c 'git -c advice.detachedHead=false clone https://github.com/cloudflare/cloudflared --depth=1 --branch TAG .'; \
   else \
-    git -c advice.detachedHead=false clone https://github.com/cloudflare/cloudflared --depth=1 --branch ${CLOUDFLARED_TAG} .; \
+    git -c advice.detachedHead=false clone https://github.com/cloudflare/cloudflared --depth=1 --branch ${MOD_VERSION} .; \
   fi
 
 RUN GOOS=linux GOARCH=amd64 make cloudflared
