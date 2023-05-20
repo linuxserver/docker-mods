@@ -1,6 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-TAIL_LOGS=$(echo "$LOGS_TO_STDOUT" | sed 's#|# #g')
-
-echo "Executing: tail -F $TAIL_LOGS"
-tail -F $TAIL_LOGS
