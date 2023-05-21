@@ -1,6 +1,6 @@
 # PHP8 - Docker mod for code-server/openvscode-server
 
-This mod adds php8.0 and composer to code-server/openvscode-server, to be installed/updated during container start.
+This mod adds php8.2 and composer to code-server/openvscode-server, to be installed/updated during container start.
 
 In code-server/openvscode-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-php8`
 
