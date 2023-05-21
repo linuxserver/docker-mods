@@ -25,7 +25,7 @@ do
   # Change ownership
   if [ $(stat -c '%G' $file) != "abc" ]; then
     echo "Changing ownership on $file script."
-    chown abc:abc $file
+    lsiown abc:abc $file
   fi
 
   # Make executable
