@@ -32,8 +32,8 @@
 #  2 - no audio language specified on command line
 #  3 - no subtitles language specified on command line
 #  4 - mkvmerge not found
-#  5 - specified video file not found
-#  6 - unable to rename video to temp video
+#  5 - input video file not found
+#  6 - unable to rename temp video to MKV
 #  7 - unknown eventtype environment variable
 #  8 - unsupported Radarr/Sonarr version (v2)
 #  9 - mkvmerge get media info failed
@@ -236,7 +236,7 @@ fi
 export striptracks_rescan_api="Rescan${striptracks_video_type^}"
 export striptracks_json_key="${striptracks_video_type}Id"
 export striptracks_eventtype="${striptracks_type,,}_eventtype"
-export striptracks_tempvideo="${striptracks_video}.tmp"
+export striptracks_tempvideo="${striptracks_video%.*}.tmp"
 export striptracks_newvideo="${striptracks_video%.*}.mkv"
 # If this were defined directly in Radarr or Sonarr this would not be needed here
 striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["ara","bul","zho","chi","ces","cze","dan","nld","dut","eng","fin","fra","fre","deu","ger","ell","gre","heb","hin","hun","isl","ice","ita","jpn","kor","lit","nor","pol","por","ron","rom","rus","spa","swe","tha","tur","vie","und"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Norwegian","iso639-2":["nor"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
@@ -653,21 +653,10 @@ else
   exit 9
 fi
 
-# Rename the original video file to a temporary name
-[ $striptracks_debug -ge 1 ] && echo "Debug|Renaming: \"$striptracks_video\" to \"$striptracks_tempvideo\"" | log
-mv -f "$striptracks_video" "$striptracks_tempvideo" 2>&1 | log
-striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
-  striptracks_message="Error|[$striptracks_return] Unable to rename video: \"$striptracks_video\" to temp video: \"$striptracks_tempvideo\". Halting."
-  echo "$striptracks_message" | log
-  echo "$striptracks_message" >&2
-  exit 6
-}
-
 # Process video file
 echo "$striptracks_json_processed" | awk -v Debug=$striptracks_debug \
--v OrgVideo="$striptracks_video" \
+-v Video="$striptracks_video" \
 -v TempVideo="$striptracks_tempvideo" \
--v MKVVideo="$striptracks_newvideo" \
 -v Title="$striptracks_title" \
 -v AudioKeep="$striptracks_audiokeep" \
 -v SubsKeep="$striptracks_subskeep" '
@@ -717,7 +706,7 @@ BEGIN {
 }
 END {
   if (!NoTr) {
-    print "Error|No tracks found in \""TempVideo"\"" > "/dev/stderr"
+    print "Error|No tracks found in \""Video"\"" > "/dev/stderr"
     exit
   }
   if (!AudCnt) AudCnt=0; if (!SubsCnt) SubsCnt=0
@@ -762,45 +751,48 @@ END {
     CommandLine = CommandLine" -S"
   else
     CommandLine = CommandLine" -s " join(SubsCommand, ",")
-  if (Debug >= 1) print "Debug|Executing: nice "MKVMerge" --title \""Title"\" -q -o \""MKVVideo"\" "CommandLine" \""TempVideo"\""
-  Result = system("nice "MKVMerge" --title \""Title"\" -q -o \""MKVVideo"\" "CommandLine" \""TempVideo"\"")
-  if (Result>1) print "Error|["Result"] remuxing \""TempVideo"\"" > "/dev/stderr"
+  if (Debug >= 1) print "Debug|Executing: nice "MKVMerge" --title \""Title"\" -q -o \""TempVideo"\" "CommandLine" \""Video"\""
+  Result = system("nice "MKVMerge" --title \""Title"\" -q -o \""TempVideo"\" "CommandLine" \""Video"\"")
+  if (Result > 1) print "Error|["Result"] remuxing \""Video"\"" > "/dev/stderr"
 }' | log
 #### END MAIN
 
 # Check for script completion and non-empty file
-if [ -s "$striptracks_newvideo" ]; then
-  # Use Recycle Bin if configured
-  if [ "$striptracks_recyclebin" ]; then
-    [ $striptracks_debug -ge 1 ] && echo "Debug|Recycling: \"$striptracks_tempvideo\" to \"${striptracks_recyclebin%/}/$(basename "$striptracks_video")"\" | log
-    mv "$striptracks_tempvideo" "${striptracks_recyclebin%/}/$(basename "$striptracks_video")" 2>&1 | log
-    striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
-      striptracks_message="Error|[$striptracks_return] Unable to move video: \"$striptracks_tempvideo\" to Recycle Bin: \"${striptracks_recyclebin%/}\""
-      echo "$striptracks_message" | log
-      echo "$striptracks_message" >&2
-    }
-  else
-    [ $striptracks_debug -ge 1 ] && echo "Debug|Deleting: \"$striptracks_tempvideo\"" | log
-    rm "$striptracks_tempvideo" 2>&1 | log
-    striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
-      striptracks_message="Error|[$striptracks_return] Unable to delete temporary video: \"$striptracks_tempvideo\""
-      echo "$striptracks_message" | log
-      echo "$striptracks_message" >&2
-    }
-  fi
-else
-  striptracks_message="Error|Unable to locate or invalid remuxed file: \"$striptracks_newvideo\". Undoing rename."
+if [ ! -s "$striptracks_tempvideo" ]; then
+  striptracks_message="Error|Unable to locate or invalid remuxed file: \"$striptracks_tempvideo\".  Halting."
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
-  [ $striptracks_debug -ge 1 ] && echo "Debug|Renaming: \"$striptracks_tempvideo\" to \"$striptracks_video\"" | log
-  mv -f "$striptracks_tempvideo" "$striptracks_video" 2>&1 | log
+  exit 10
+fi
+
+# Remove the original video.  Use Recycle Bin if configured
+if [ "$striptracks_recyclebin" ]; then
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Recycling: \"$striptracks_video\" to \"${striptracks_recyclebin%/}/$(basename "$striptracks_video")"\" | log
+  mv "$striptracks_video" "${striptracks_recyclebin%/}/$(basename "$striptracks_video")" 2>&1 | log
   striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
-    striptracks_message="Error|[$striptracks_return] Unable to move video: \"$striptracks_tempvideo\" to \"$striptracks_video\""
+    striptracks_message="Error|[$striptracks_return] Unable to move video: \"$striptracks_video\" to Recycle Bin: \"${striptracks_recyclebin%/}/$(basename "$striptracks_video")\""
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
-  exit 10
+else
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Deleting: \"$striptracks_video\"" | log
+  rm "$striptracks_video" 2>&1 | log
+  striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
+    striptracks_message="Error|[$striptracks_return] Unable to delete original video: \"$striptracks_video\""
+    echo "$striptracks_message" | log
+    echo "$striptracks_message" >&2
+  }
 fi
+
+# Rename the temporary video file to MKV
+[ $striptracks_debug -ge 1 ] && echo "Debug|Renaming: \"$striptracks_tempvideo\" to \"$striptracks_newvideo\"" | log
+mv -f "$striptracks_tempvideo" "$striptracks_newvideo" 2>&1 | log
+striptracks_return=$?; [ "$striptracks_return" != 0 ] && {
+  striptracks_message="Error|[$striptracks_return] Unable to rename temp video: \"$striptracks_tempvideo\" to: \"$striptracks_newvideo\".  Halting."
+  echo "$striptracks_message" | log
+  echo "$striptracks_message" >&2
+  exit 6
+}
 
 striptracks_filesize=$(numfmt --to iec --format "%.3f" $(stat -c %s "$striptracks_newvideo"))
 striptracks_message="Info|New size: $striptracks_filesize"
@@ -819,8 +811,7 @@ elif [ -n "$striptracks_api_url" ]; then
       striptracks_original_quality="$(echo $striptracks_result | jq -crM .quality)"
       [ $striptracks_debug -ge 1 ] && echo "Debug|Detected quality '$(echo $striptracks_original_quality | jq -crM .quality.name)'." | log
       # Loop a maximum of twice
-      #  Radarr needs to Rescan twice when the file extension changes
-      #  (.avi -> .mkv for example)
+      #  Radarr needs to Rescan twice when the file extension changes (.avi -> .mkv for example)
       for ((loop=1; $loop <= 2; loop++)); do
         # Scan the disk for the new movie file
         if rescan; then
