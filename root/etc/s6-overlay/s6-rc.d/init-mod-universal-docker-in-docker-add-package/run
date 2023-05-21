@@ -2,7 +2,7 @@
 
 ABC_USER=$(id -nu ${PUID:-911})
 mkdir -p /config/{logs/dockerd,var/lib/docker}
-chown -R ${ABC_USER}:${ABC_USER} /config/logs
+lsiown -R ${ABC_USER}:${ABC_USER} /config/logs
 
 echo "**** installing docker and docker compose ****"
 if [ -f /usr/bin/apt ]; then
