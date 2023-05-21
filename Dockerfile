@@ -1,23 +1,22 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as buildstage
+# syntax=docker/dockerfile:1
 
-ARG JULIA_VERSION
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+
+ARG MOD_VERSION
 
 RUN \
-  apk add --no-cache \
-    curl \
-    jq && \
-  if [ -z "${JULIA_VERSION}" ]; then \
-    JULIA_VERSION=$(curl -sL https://julialang.org/downloads/ \
+  if [ -z "${MOD_VERSION}" ]; then \
+    MOD_VERSION=$(curl -sL https://julialang.org/downloads/ \
       | sed 's|.*Current stable release: v||' \
       | sed 's| (.*||'); \
   fi && \
-  JULIA_MIN_VERSION=$(echo "${JULIA_VERSION}" | cut -d. -f 1,2) && \
+  JULIA_MIN_VERSION=$(echo "${MOD_VERSION}" | cut -d. -f 1,2) && \
   mkdir -p /root-layer/julia-bins && \
   echo "**** Downloading x86_64 binary ****" && \
-  curl -fL "https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz" -o \
+  curl -fL "https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MIN_VERSION}/julia-${MOD_VERSION}-linux-x86_64.tar.gz" -o \
     "/root-layer/julia-bins/julia-x86_64.tar.gz" && \
   echo "**** Downloading aarch64 binary ****" && \
-  curl -fL "https://julialang-s3.julialang.org/bin/linux/aarch64/${JULIA_MIN_VERSION}/julia-${JULIA_VERSION}-linux-aarch64.tar.gz" -o \
+  curl -fL "https://julialang-s3.julialang.org/bin/linux/aarch64/${JULIA_MIN_VERSION}/julia-${MOD_VERSION}-linux-aarch64.tar.gz" -o \
     "/root-layer/julia-bins/julia-aarch64.tar.gz"
 
 COPY root/ /root-layer/
