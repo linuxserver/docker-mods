@@ -1,62 +1,45 @@
 name: Build Image
 
-on: [push, pull_request, workflow_dispatch]
+on: [push, pull_request_target, workflow_dispatch]
 
 env:
+  GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "calibre-web" #replace
   MODNAME: "dtrpg-metadata" #replace
 
 jobs:
-  build:
+  set-vars:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.3
-
-      - name: Build image
+      - name: Set Vars
+        id: outputs
         run: |
-          docker build --no-cache -t ${{ github.sha }} .
+          echo "GITHUB_REPO=${{ env.GITHUB_REPO }}" >> $GITHUB_OUTPUT
+          echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_OUTPUT
+          echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_OUTPUT
+          echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_OUTPUT
+          # **** If the mod needs to be versioned, set the versioning logic below. Otherwise leave as is. ****
+          MOD_VERSION=""
+          echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_OUTPUT
+    outputs:
+      GITHUB_REPO: ${{ steps.outputs.outputs.GITHUB_REPO }}
+      ENDPOINT: ${{ steps.outputs.outputs.ENDPOINT }}
+      BASEIMAGE: ${{ steps.outputs.outputs.BASEIMAGE }}
+      MODNAME: ${{ steps.outputs.outputs.MODNAME }}
+      MOD_VERSION: ${{ steps.outputs.outputs.MOD_VERSION }}
 
-      - name: Tag image
-        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
-        run: |
-          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-          docker tag ${{ github.sha }} ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-
-      - name: Credential check
-        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) }}
-        run: |
-          echo "CR_USER=${{ secrets.CR_USER }}" >> $GITHUB_ENV
-          echo "CR_PAT=${{ secrets.CR_PAT }}" >> $GITHUB_ENV
-          echo "DOCKERUSER=${{ secrets.DOCKERUSER }}" >> $GITHUB_ENV
-          echo "DOCKERPASS=${{ secrets.DOCKERPASS }}" >> $GITHUB_ENV
-          if [[ "${{ secrets.CR_USER }}" == "" && "${{ secrets.CR_PAT }}" == "" && "${{ secrets.DOCKERUSER }}" == "" && "${{ secrets.DOCKERPASS }}" == "" ]]; then
-            echo "::error::Push credential secrets missing."
-            echo "::error::You must set either CR_USER & CR_PAT or DOCKERUSER & DOCKERPASS as secrets in your repo settings."
-            echo "::error::See https://github.com/linuxserver/docker-mods/blob/master/README.md for more information/instructions."
-            exit 1
-          fi
-
-      - name: Login to GitHub Container Registry
-        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
-        run: |
-          echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.CR_USER }} --password-stdin
-
-      - name: Push tags to GitHub Container Registry
-        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.CR_USER && env.CR_PAT }}
-        run: |
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker push ghcr.io/${ENDPOINT}:${BASEIMAGE}-${MODNAME}
-
-      - name: Login to DockerHub
-        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
-        run: |
-          echo ${{ secrets.DOCKERPASS }} | docker login -u ${{ secrets.DOCKERUSER }} --password-stdin
-
-      - name: Push tags to DockerHub
-        if: ${{ github.ref == format('refs/heads/{0}-{1}', env.BASEIMAGE, env.MODNAME) && env.DOCKERUSER && env.DOCKERPASS }}
-        run: |
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}-${{ github.sha }}
-          docker push ${ENDPOINT}:${BASEIMAGE}-${MODNAME}
+  build:
+    uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
+    needs: set-vars
+    secrets:
+      CR_USER: ${{ secrets.CR_USER }}
+      CR_PAT: ${{ secrets.CR_PAT }}
+      DOCKERUSER: ${{ secrets.DOCKERUSER }}
+      DOCKERPASS: ${{ secrets.DOCKERPASS }}
+    with:
+      GITHUB_REPO: ${{ needs.set-vars.outputs.GITHUB_REPO }}
+      ENDPOINT: ${{ needs.set-vars.outputs.ENDPOINT }}
+      BASEIMAGE: ${{ needs.set-vars.outputs.BASEIMAGE }}
+      MODNAME: ${{ needs.set-vars.outputs.MODNAME }}
+      MOD_VERSION: ${{ needs.set-vars.outputs.MOD_VERSION }}
