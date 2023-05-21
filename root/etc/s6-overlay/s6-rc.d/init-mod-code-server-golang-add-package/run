@@ -1,15 +1,11 @@
 #!/usr/bin/with-contenv bash
 
 echo "**** ensuring golang is in PATH ****"
-if grep -q -E '^(export )?PATH=' /etc/s6-overlay/s6-rc.d/svc-code-server/run; then
-    if ! grep -q -E '^(export )?PATH=.*/usr/local/go/bin.*' /etc/s6-overlay/s6-rc.d/svc-code-server/run; then
-        sed -i '/PATH/ s/$/:\/usr\/local\/go\/bin/' /etc/s6-overlay/s6-rc.d/svc-code-server/run
-    fi
-    if ! grep -q -E '^(export )?PATH=.*/config/go/bin:.*' /etc/s6-overlay/s6-rc.d/svc-code-server/run; then
-        sed -i 's/PATH=/PATH=\/config\/go\/bin:/g' /etc/s6-overlay/s6-rc.d/svc-code-server/run
-    fi
-else
-    sed -i '/^#!\/usr\/bin/a \\n# Added by codeserver-golang\nexport PATH=/config/go/bin:$PATH:/usr/local/go/bin' /etc/s6-overlay/s6-rc.d/svc-code-server/run
+if ! grep -q '/usr/local/go/bin' /var/run/s6/container_environment/PATH; then
+    printf ':/usr/local/go/bin' >> /var/run/s6/container_environment/PATH
+fi
+if ! grep -q '/config/go/bin' /var/run/s6/container_environment/PATH; then
+    sed -i '1s|^|/config/go/bin:|' /var/run/s6/container_environment/PATH
 fi
 
 ARCH=$(uname -m)
