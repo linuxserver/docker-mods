@@ -44,13 +44,17 @@ if [ ! -e /usr/bin/calibre-server ] || [ "${CALIBRE_RELEASE}" != "$(cat /config/
     mkdir -p \
         /app/calibre
     if [ "$(uname -m)" == "x86_64" ]; then
-        curl -o \
+        curl -f -o \
             /tmp/calibre.txz -L \
             "https://github.com/kovidgoyal/calibre/releases/download/${CALIBRE_RELEASE}/calibre-${CALIBRE_RELEASE:1}-x86_64.txz"
     elif [ "$(uname -m)" == "aarch64" ]; then
-        curl -o \
+        curl -f -o \
             /tmp/calibre.txz -L \
             "https://github.com/kovidgoyal/calibre/releases/download/${CALIBRE_RELEASE}/calibre-${CALIBRE_RELEASE:1}-arm64.txz"
+    fi
+    if [ "$?" != "0" ]; then
+      echo "**** Calibre package ${CALIBRE_RELEASE} not available ****"
+      exit 0
     fi
     tar xf \
         /tmp/calibre.txz \
