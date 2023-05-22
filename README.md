@@ -24,7 +24,7 @@ Follow these steps to enable the maxmind mod:
     ```nginx
     map $geoip2_data_country_iso_code $geo-whitelist {
         default no;
-        UK yes;
+        GB yes;
     }
 
     map $geoip2_data_country_iso_code $geo-blacklist {
