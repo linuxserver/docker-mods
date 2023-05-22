@@ -6,6 +6,12 @@ In openssh-server docker arguments, set an environment variable `DOCKER_MODS=lin
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel|linuxserver/mods:openssh-server-mod2`
 
+### Mod parameters
+
+| Parameter | Function | Notes |
+| :----: | --- | --- |
+| `SHELL_NOLOGIN` | NoLogin User Shell | Optional, set this to `true` to disable login shell |
+
 Note: `GatewayPorts` is set to `clientspecified`, this moves the responsibility to define the gateway host of the port to the client that opens the tunnel, e.g. `*:8080` to forward 8080 to all connection, default is localhost only.
 In addition it is still necessary to expose the same port on the container level, using either the `--expose` (only to other containers) or the `--port` (expose on host level/internet) run options (or the counterparts in docker-compose).
 
@@ -19,6 +25,7 @@ services:
     image: linuxserver/openssh-server
     environment:
       - DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel
+      - SHELL_NOLOGIN=false
     volumes:
       - /path/to/appdata/config:/config
     expose:
