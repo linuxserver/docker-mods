@@ -4,3 +4,10 @@
 sed -i '/^AllowTcpForwarding/c\AllowTcpForwarding yes' /etc/ssh/sshd_config
 sed -i '/^GatewayPorts/c\GatewayPorts clientspecified' /etc/ssh/sshd_config
 echo "TcpForwarding is enabled"
+
+if [ "$SHELL_NOLOGIN" == 'true' ]; then
+  USER_NAME=${USER_NAME:-linuxserver.io}
+
+  usermod --shell /sbin/nologin "$USER_NAME" &&
+  echo "Shell is set to /sbin/nologin for the user $USER_NAME"
+fi
