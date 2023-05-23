@@ -4,14 +4,17 @@
 if [[ -f "/mod-pip-packages-to-install.list" ]]; then
     IFS=' ' read -ra PIP_PACKAGES <<< "$(tr '\n' ' ' < /mod-pip-packages-to-install.list)"
     if [[ ${#PIP_PACKAGES[@]} -ne 0 ]] && [[ ${PIP_PACKAGES[*]} != "" ]]; then
-        if [[ -f /usr/bin/apt ]]; then
-            echo "python3-venv" >> /mod-repo-packages-to-install.list
-        elif [[ -f /sbin/apk ]]; then
-            echo "python3" >> /mod-repo-packages-to-install.list
-        elif [[ -f /usr/sbin/pacman ]]; then
-            echo "python" >> /mod-repo-packages-to-install.list
-        elif [[ -f /usr/bin/dnf ]]; then
-            echo "python3" >> /mod-repo-packages-to-install.list
+        if ! command -v python3; then
+            CREATE_VENV="true"
+            if [[ -f /usr/bin/apt ]]; then
+                echo "python3-venv" >> /mod-repo-packages-to-install.list
+            elif [[ -f /sbin/apk ]]; then
+                echo "python3" >> /mod-repo-packages-to-install.list
+            elif [[ -f /usr/sbin/pacman ]]; then
+                echo "python" >> /mod-repo-packages-to-install.list
+            elif [[ -f /usr/bin/dnf ]]; then
+                echo "python3" >> /mod-repo-packages-to-install.list
+            fi
         fi
     fi
 fi
@@ -42,7 +45,7 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
     IFS=' ' read -ra PIP_PACKAGES <<< "$(tr '\n' ' ' < /mod-pip-packages-to-install.list)"
     if [[ ${#PIP_PACKAGES[@]} -ne 0 ]] && [[ ${PIP_PACKAGES[*]} != "" ]]; then
         echo "[mod-init] **** Installing all pip packages ****"
-        if ! command -v pip; then
+        if [[ ${CREATE_VENV} == "true" ]]; then
             echo "**** Creating venv ****"
             python3 -m venv /lsiopy
         fi
