@@ -42,7 +42,7 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
     IFS=' ' read -ra PIP_PACKAGES <<< "$(tr '\n' ' ' < /mod-pip-packages-to-install.list)"
     if [[ ${#PIP_PACKAGES[@]} -ne 0 ]] && [[ ${PIP_PACKAGES[*]} != "" ]]; then
         echo "[mod-init] **** Installing all pip packages ****"
-        if [[ ! -d /lsiopy/bin ]]; then
+        if ! command -v pip; then
             echo "**** Creating venv ****"
             python3 -m venv /lsiopy
         fi
@@ -52,11 +52,7 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
             PIP_ARGS+=("-f" "https://wheel-index.linuxserver.io/ubuntu/")
         elif [[ -f /sbin/apk ]]; then
             ALPINE_VER=$(grep main /etc/apk/repositories | sed 's|.*alpine/v||' | sed 's|/main.*||')
-            if [[ "${ALPINE_VER}" = "3.14" ]]; then
-                PIP_ARGS+=("-f" "https://wheel-index.linuxserver.io/alpine/")
-            else
-                PIP_ARGS+=("-f" "https://wheel-index.linuxserver.io/alpine-${ALPINE_VER}/")
-            fi
+            PIP_ARGS+=("-f" "https://wheel-index.linuxserver.io/alpine-${ALPINE_VER}/")
         fi
         python3 -m pip install \
             "${PIP_ARGS[@]}" \
