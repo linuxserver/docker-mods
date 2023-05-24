@@ -4,6 +4,7 @@
 # Version 3
 # 2022-09-25
 MOD_SCRIPT_VER="3"
+MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${MANIFEST_URL}:${TAG}"
 
 # Use /command/with-contenv shebang because /usr/bin/with-contenv is created in this script
 
@@ -175,7 +176,7 @@ get_blob_sha() {
         --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
         --header "Accept: application/vnd.oci.image.index.v1+json" \
         --header "Authorization: Bearer ${1}" \
-        --user-agent "Mozilla/5.0 (Linux $(uname -m)) linuxserver/mods:${TAG}" \
+        --user-agent "${MOD_UA}" \
         "${2}/${3}" | jq -r 'first(.manifests[].digest)?')
     if [[ -z "${MULTIDIGEST}" ]]; then
         if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
@@ -185,7 +186,7 @@ get_blob_sha() {
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.manifest.v1+json" \
             --header "Authorization: Bearer ${1}" \
-            --user-agent "Mozilla/5.0 (Linux $(uname -m)) linuxserver/mods:${TAG}" \
+            --user-agent "${MOD_UA}" \
             "${2}/${3}"); then
             echo "${DIGEST}" | jq -r '.layers[0].digest';
         fi
@@ -197,7 +198,7 @@ get_blob_sha() {
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.manifest.v1+json" \
             --header "Authorization: Bearer ${1}" \
-            --user-agent "Mozilla/5.0 (Linux $(uname -m)) linuxserver/mods:${TAG}" \
+            --user-agent "${MOD_UA}" \
             "${2}/${MULTIDIGEST}"); then
             echo "${DIGEST}" | jq -r '.layers[0].digest';
         fi
@@ -310,7 +311,7 @@ run_mods() {
                 --location \
                 --request GET \
                 --header "Authorization: Bearer ${TOKEN}" \
-                --user-agent "Mozilla/5.0 (Linux $(uname -m)) linuxserver/mods:${TAG}" \
+                --user-agent "${MOD_UA}" \
                 "${BLOB_URL}${SHALAYER}" -o \
                 /modtarball.tar.xz
             mkdir -p /tmp/mod
