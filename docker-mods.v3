@@ -251,7 +251,7 @@ run_mods() {
         FILENAME="${USERNAME}.${REPO}.${TAG}"
         MANIFEST_URL="https://${REGISTRY}/v2/${ENDPOINT}/manifests"
         BLOB_URL="https://${REGISTRY}/v2/${ENDPOINT}/blobs/"
-        MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${MANIFEST_URL}:${TAG}"
+        MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${REGISTRY}/${ENDPOINT}:${TAG}"
         case "${REGISTRY}" in
             "lscr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "ghcr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
