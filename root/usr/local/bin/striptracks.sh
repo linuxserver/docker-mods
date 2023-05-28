@@ -663,7 +663,7 @@ echo "$striptracks_json_processed" | awk -v Debug=$striptracks_debug \
 # Array join function, based on GNU docs
 function join(array, sep,    i, ret) {
   for (i in array)
-    if (!ret)
+    if (ret == "")
       ret = array[i]
     else
       ret = ret sep array[i]
