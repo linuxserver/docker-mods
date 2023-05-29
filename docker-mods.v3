@@ -280,7 +280,7 @@ run_mods() {
         )"
         # If we're using lscr try and get the manifest from ghcr, if it fails re-request a token from Docker Hub
         if [[ "${REGISTRY}" == "lscr.io" ]]; then
-            if [[ -n $(curl -sLH "Authorization: Bearer ${TOKEN}" "${MANIFEST_URL}/${TAG}" | jq -r '.errors' >/dev/null 2>&1) ]]; then
+            if [[ -n $(curl --user-agent "${MOD_UA}" -sLH "Authorization: Bearer ${TOKEN}" "${MANIFEST_URL}/${TAG}" | jq -r '.errors' >/dev/null 2>&1) ]]; then
                 AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
                 TOKEN="$(
                     curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
