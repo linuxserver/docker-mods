@@ -6,8 +6,8 @@ server {
 
     server_name _;
 
-	root /dashboard/www;
-	index index.php;
+    root /dashboard/www;
+    index index.php;
 
     client_max_body_size 0;
 
@@ -33,7 +33,7 @@ server {
         allow 172.16.0.0/12;
         allow 192.168.0.0/16;
         deny all;
-        
+
         try_files $uri $uri/ /index.php?$args =404;
     }
     location ~ \.php$ {
@@ -41,7 +41,7 @@ server {
         allow 172.16.0.0/12;
         allow 192.168.0.0/16;
         deny all;
-        
+
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass 127.0.0.1:9000;
         fastcgi_index index.php;
@@ -50,13 +50,13 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
 
     server_name dashboard.*;
 
-	root /dashboard/www;
-	index index.php;
+    root /dashboard/www;
+    index index.php;
 
     include /config/nginx/ssl.conf;
 
@@ -84,7 +84,7 @@ server {
         allow 172.16.0.0/12;
         allow 192.168.0.0/16;
         deny all;
-        
+
         try_files $uri $uri/ /index.php?$args =404;
     }
     location ~ \.php$ {
@@ -103,7 +103,7 @@ server {
         allow 172.16.0.0/12;
         allow 192.168.0.0/16;
         deny all;
-        
+
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass 127.0.0.1:9000;
         fastcgi_index index.php;
