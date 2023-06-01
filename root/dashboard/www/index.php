@@ -47,7 +47,7 @@
     }
 
     function GetProxies() {
-        $output = shell_exec("python3 /dashboard/swag-proxies.py");
+        $output = shell_exec("/lsiopy/bin/python3 /dashboard/swag-proxies.py");
         $results = json_decode($output);
         $status = "";
         $index = 0;
@@ -100,7 +100,7 @@
     }
 
     function GetF2B() {
-        $output = shell_exec("python3 /dashboard/swag-f2b.py");
+        $output = shell_exec("/lsiopy/bin/python3 /dashboard/swag-f2b.py");
         $jails = json_decode($output, true);
         $status = "";
         $index = 0;
