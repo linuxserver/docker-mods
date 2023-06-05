@@ -5,8 +5,8 @@ on: [push, pull_request_target, workflow_dispatch]
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "transmission" #replace
+  MODNAME: "env-var-settings" #replace
 
 jobs:
   set-vars:
