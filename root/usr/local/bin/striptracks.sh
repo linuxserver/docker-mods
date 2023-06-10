@@ -99,8 +99,9 @@ Examples:
                                            # Radarr/Sonarr
   $striptracks_script -a :eng:und -s :eng       # keep English and Unknown audio and
                                            # English subtitles
-  $striptracks_script -a :eng:org -s :eng       # keep English and Original audio and
+  $striptracks_script -a :eng:org -s :eng       # keep English and Original* audio and
                                            # English subtitles
+                                           # *Only supported in Radarr!
   $striptracks_script :eng \"\"                   # keep English audio and no subtitles
   $striptracks_script -d :eng:kor:jpn :eng:spa  # Enable debugging level 1, keeping
                                            # English, Korean, and Japanese
@@ -181,7 +182,7 @@ done
 # Set positional arguments in their proper place
 eval set -- "$striptracks_pos_params"
 
-# Check for and assign positional arguments
+# Check for and assign positional arguments. Named arguments override positional arguments.
 if [ -n "$1" ]; then
   if [ -n "$striptracks_audiokeep" ]; then
     echo "Warning|Both positional and named arguments set for audio. Using $striptracks_audiokeep" >&2
@@ -239,12 +240,12 @@ export striptracks_eventtype="${striptracks_type,,}_eventtype"
 export striptracks_tempvideo="${striptracks_video%.*}.tmp"
 export striptracks_newvideo="${striptracks_video%.*}.mkv"
 # If this were defined directly in Radarr or Sonarr this would not be needed here
-striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["ara","bul","zho","chi","ces","cze","dan","nld","dut","eng","fin","fra","fre","deu","ger","ell","gre","heb","hin","hun","isl","ice","ita","jpn","kor","lit","nor","pol","por","ron","rom","rus","spa","swe","tha","tur","vie","und"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Norwegian","iso639-2":["nor"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
+striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["ara","ben","bos","bul","cat","zho","chi","hrv","ces","cze","dan","nld","dut","eng","est","fin","fra","fre","deu","ger","ell","gre","heb","hin","hun","isl","ice","ind","ita","jpn","kor","lav","lit","mal","nor","fas","per","pol","por","ron","rum","rus","srp","slk","slo","spa","swe","tam","tel","tha","tur","ukr","vie","und"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bengali","iso639-2":["ben"]}},{"language":{"name":"Bosnian","iso639-2":["bos"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Catalan","iso639-2":["cat"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Croatian","iso639-2":["hrv"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Estonian","iso639-2":["est"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Indonesian","iso639-2":["ind"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Latvian","iso639-2":["lav"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Malayalam","iso639-2":["mal"]}},{"language":{"name":"Norwegian","iso639-2":["nor"]}},{"language":{"name":"Persian","iso639-2":["fas","per"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Portuguese (Brazil)","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Serbian","iso639-2":["srp"]}},{"language":{"name":"Slovak","iso639-2":["slk","slo"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Spanish (Latino)","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Tamil","iso639-2":["tam"]}},{"language":{"name":"Telugu","iso639-2":["tel"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Ukrainian","iso639-2":["ukr"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
 
 ### Functions
 
 # Can still go over striptracks_maxlog if read line is too long
-#  Must include whole function in subshell for read to work!
+## Must include whole function in subshell for read to work!
 function log {(
   while read
   do
@@ -592,33 +593,49 @@ else
   echo "$striptracks_message" >&2
 fi
 
-# Final assignment of audio and subtitles options
-if [ -n "$striptracks_audiokeep" ]; then
-  # Allows ordered argument on command line to override detected languages
-  # plus special handling of ':org' code
-  [ $striptracks_debug -ge 1 ] && [[ "$striptracks_audiokeep" =~ :org ]] && echo "Debug|:org specified for audio. Using new code string of ${striptracks_audiokeep//:org/${striptracks_orglangCode}}" | log
+# Special handling for ':org' code.  This is only valid in Radarr!
+if [[ "$striptracks_audiokeep" =~ :org ]]; then
+  [ $striptracks_debug -ge 1 ] && echo "Debug|:org specified for audio. Changing '${striptracks_audiokeep}' to '${striptracks_audiokeep//:org/${striptracks_orglangCode}}'" | log
   striptracks_audiokeep="${striptracks_audiokeep//:org/${striptracks_orglangCode}}"
-elif [ -n "$striptracks_proflangCodes" ]; then
-  striptracks_audiokeep="$striptracks_proflangCodes"
-else
+  if [ "${striptracks_type,,}" = "sonarr" -o "${striptracks_type,,}" = "batch" ]; then
+    striptracks_message="Warn|:org code specified for audio, but this is undefined for Sonarr and Batch mode! Unexpected behavior may result."
+    echo "$striptracks_message" | log
+    echo "$striptracks_message" >&2
+  fi
+fi
+if [[ "$striptracks_subskeep" =~ :org ]]; then
+  [ $striptracks_debug -ge 1 ] && echo "Debug|:org specified for subtitles. Changing '${striptracks_subskeep}' to '${striptracks_subskeep//:org/${striptracks_orglangCode}}'" | log
+  striptracks_subskeep="${striptracks_subskeep//:org/${striptracks_orglangCode}}"
+  if [ "${striptracks_type,,}" = "sonarr" -o "${striptracks_type,,}" = "batch" ]; then
+    striptracks_message="Warn|:org code specified for subtitles, but this is undefined for Sonarr and Batch mode! Unexpected behavior may result."
+    echo "$striptracks_message" | log
+    echo "$striptracks_message" >&2
+  fi
+fi
+
+# Final assignment of audio and subtitles options
+## Guard clause
+if [ -z "$striptracks_audiokeep" -a -z "$striptracks_proflangCodes" ]; then
   striptracks_message="Error|No audio languages specified or detected!"
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
   usage
   exit 2
 fi
+## Allows command line argument to override detected languages
+if [ -z "$striptracks_audiokeep" -a -n "$striptracks_proflangCodes" ]; then
+  striptracks_audiokeep="$striptracks_proflangCodes"
+fi
 
-if [ -n "$striptracks_subskeep" ]; then
-  # Allows ordered argument on command line to override detected languages
-  # plus special handling of ':org' code
-  [ $striptracks_debug -ge 1 ] && [[ "$striptracks_subskeep" =~ :org ]] && echo "Debug|:org specified for subtitles. Using new code string of ${striptracks_subskeep//:org/${striptracks_orglangCode}}" | log
-  striptracks_subskeep="${striptracks_subskeep//:org/${striptracks_orglangCode}}"
-elif [ -n "$striptracks_proflangCodes" ]; then
-  striptracks_subskeep="$striptracks_proflangCodes"
-else
+## Guard clause
+if [ -z "$striptracks_subskeep" -a -z "$striptracks_proflangCodes" ]; then
   striptracks_message="Info|No subtitles languages specified or detected. Removing all subtitles found."
   echo "$striptracks_message" | log
   striptracks_subskeep="null"
+fi
+## Allows command line argument to override detected languages
+if [ -z "$striptracks_subskeep" -a -n "$striptracks_proflangCodes" ]; then
+  striptracks_subskeep="$striptracks_proflangCodes"
 fi
 
 #### BEGIN MAIN
@@ -718,13 +735,13 @@ END {
       if (AudioKeep ~ Track[i, "lang"]) {
         print "Info|Keeping audio track "Track[i, "id"]": "Track[i, "lang"]" "Track[i, "codec"]
         AudioCommand[i] = Track[i, "id"]
-      # Special case if there is only one audio track, even if it was not specified
+      # Special case if there is only one audio track, even if it was not selected
       } else if (AudCnt == 1) {
-        print "Info|Keeping only audio track "Track[i, "id"]": "Track[i, "lang"]" "Track[i, "codec"]
+        print "Warn|No audio tracks matched! Keeping only audio track "Track[i, "id"]": "Track[i, "lang"]" "Track[i, "codec"]
         AudioCommand[i] = Track[i, "id"]
       # Special case if there were multiple tracks, none were selected, and this is the last one.
       } else if (length(AudioCommand) == 0 && Track[i, "id"] == AudCnt) {
-        print "Info|Keeping last audio track "Track[i, "id"]": "Track[i, "lang"]" "Track[i, "codec"]
+        print "Warn|No audio tracks matched! Keeping last audio track "Track[i, "id"]": "Track[i, "lang"]" "Track[i, "codec"]
         AudioCommand[i] = Track[i, "id"]
       } else
         AudRmvLog[i] = Track[i, "id"]": "Track[i, "lang"]" "Track[i, "codec"]

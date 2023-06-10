@@ -118,7 +118,7 @@ The `:org` language code is a special code. When used, instead of retaining a sp
 As an example, when importing "_Amores Perros (2000)_" with options `--audio :org:eng`, the Spanish and English audio tracks are preserved.  
 Several [Included Wrapper Scripts](./README.md#included-wrapper-scripts) use this special code.
 
->**NOTE:** This feature relies on the 'originalLanguage' field in the Radarr database. It is not known to exist in Sonarr, and the `:org` code will therefore be ignored.
+>![danger] **NOTE:** This feature relies on the 'originalLanguage' field in the Radarr database. It is not known to exist in Sonarr, and the `:org` code will therefore be ignored. It is also invalid to in Batch Mode.
 
 #### Unknown language code
 The `:und` language code is a special code. When used, the script will match on any track that has a blank language entry. If not included, tracks with a blank language value will be removed.  
