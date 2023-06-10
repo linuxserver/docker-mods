@@ -5,6 +5,7 @@ if ! apk info --installed ttf-dejavu >/dev/null; then
     echo "\
         ttf-dejavu \
         font-noto-emoji \
+        font-noto-cjk \
         font-croscore" >> /mod-repo-packages-to-install.list
 else
     echo "**** Firefox-fonts packages already installed, skipping ****"
