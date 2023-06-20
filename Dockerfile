@@ -1,6 +1,8 @@
+# syntax=docker/dockerfile:1
+
 FROM scratch
 
-LABEL maintainer="username"
+LABEL maintainer="JonathanTreffler"
 
 # copy local files
 COPY root/ /
