@@ -2,7 +2,7 @@
 
 if [ ! -f "/etc/apt/sources.list.d/hashicorp.list" ]; then
     echo "**** Adding terraform packages to install list ****"
-    curl -fsSL https://apt.releases.hashicorp.com/gpg | tee /usr/share/keyrings/hashicorp.gpg >/dev/null
+    curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp.gpg >/dev/null
     source /etc/lsb-release
     echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/hashicorp.list
     echo "terraform" >> /mod-repo-packages-to-install.list
