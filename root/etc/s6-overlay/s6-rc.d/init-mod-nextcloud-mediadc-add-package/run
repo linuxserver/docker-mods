@@ -6,6 +6,9 @@ if ! pip list 2> /dev/null | grep -q "pillow-heif" || ! pip list 2> /dev/null | 
         ffmpeg \
         imagemagick \
         supervisor" >> /mod-repo-packages-to-install.list
+    if [ $(arch) = "x86_64" ]; then
+        echo "scipy" >> /mod-pip-packages-to-install.list
+    fi
     echo "\
         asn1crypto \
         cryptography \
@@ -14,8 +17,7 @@ if ! pip list 2> /dev/null | grep -q "pillow-heif" || ! pip list 2> /dev/null | 
         pillow \
         pillow-heif \
         pynacl \
-        pywavelets \
-        scipy" >> /mod-pip-packages-to-install.list
+        pywavelets" >> /mod-pip-packages-to-install.list
 else
     echo "**** pillow-heif, hexhamming and pywavelets already installed, skipping ****"
 fi
