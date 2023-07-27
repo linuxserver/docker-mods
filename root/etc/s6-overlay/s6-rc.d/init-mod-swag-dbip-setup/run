@@ -7,6 +7,7 @@ chmod +x /etc/periodic/weekly/dbip
 # check GeoIP2 database
 if [ ! -f /config/geoip2db/dbip-country-lite.mmdb ]; then
     echo "Downloading GeoIP2 City database."
+    mkdir -p "/config/geoip2db"
     /etc/periodic/weekly/dbip
 fi
 
