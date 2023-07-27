@@ -5,6 +5,12 @@ CONFIG_PATH="/config/crowdsec/"
 LIB_PATH="/usr/local/lua/crowdsec/"
 DATA_PATH="/var/lib/crowdsec/lua/"
 
+if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
+  CURL_NOISE_LEVEL="-v"
+else
+  CURL_NOISE_LEVEL="--silent"
+fi
+
 echo "**** Configuring CrowdSec nginx Bouncer ****"
 
 # If API keys are missing, disable mod and exit
@@ -23,10 +29,10 @@ echo "\
 
 # Download nginx bouncer
 if [[ -z ${CROWDSEC_VERSION+x} ]]; then \
-    CROWDSEC_VERSION=$(curl -sX GET "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]');
+    CROWDSEC_VERSION=$(curl -s "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]');
 fi
 
-curl -so \
+curl "${CURL_NOISE_LEVEL}" -Lo \
     /tmp/crowdsec.tar.gz -L \
     "https://github.com/crowdsecurity/cs-nginx-bouncer/releases/download/${CROWDSEC_VERSION}/crowdsec-nginx-bouncer.tgz"
 
