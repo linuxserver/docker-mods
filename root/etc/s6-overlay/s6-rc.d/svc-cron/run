@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+if builtin command -v busybox >/dev/null && [[ $(busybox) =~ [[:space:]](crond)([,]|$) ]]; then
+    exec busybox crond -f -S -l 5
+elif [[ -f /usr/bin/apt ]] && [[ -f /usr/sbin/cron ]]; then
+    exec /usr/sbin/cron -f -L 5
+else
+    echo "**** cron not found ****"
+fi

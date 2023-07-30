@@ -1,9 +1,11 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-if [ ! -f /usr/sbin/cron ] && [ -f /usr/bin/apt ]; then
+if ! builtin command -v busybox >/dev/null; then
+    echo "**** Adding busybox to package install list ****"
+    echo "busybox" >>/mod-repo-packages-to-install.list
+fi
+if [[ -f /usr/bin/apt ]] && [[ ! -f /usr/sbin/cron ]]; then
     echo "**** Adding cron to package install list ****"
     echo "cron" >>/mod-repo-packages-to-install.list
-else
-    echo "**** cron package already installed, skipping ****"
 fi
