@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+echo "\
+    uptime-kuma-api" >> /mod-pip-packages-to-install.list

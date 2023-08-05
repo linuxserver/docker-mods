@@ -4,5 +4,20 @@
 # so it can take advantage of packages installed
 # init-mods-end depends on this script so that later init and services wait until this script exits
 
-echo "**** Setting up apprise ****"
-apprise blah blah
+# rm -rf /etc/nginx/http.d/auto-proxy*.conf /config/nginx/proxy-confs/auto-proxy*.conf
+# sed -i 's|#include /etc/nginx/http.d|include /etc/nginx/http.d|' /config/nginx/nginx.conf
+# cp /defaults/auto-proxy-readme /etc/nginx/http.d/auto-proxy-readme
+# rm -rf /auto-proxy
+# mkdir /auto-proxy
+
+# if ! grep -q "/app/auto-proxy.sh" /config/crontabs/root; then
+#     echo "*       *       *       *       *       /app/auto-proxy.sh" >> /config/crontabs/root
+#     cp /config/crontabs/root /etc/crontabs/root
+# fi
+
+if [ -z "$UPTIME_KUMA_URL" ] || [ -z "$UPTIME_KUMA_USERNAME" ] || [ -z "$UPTIME_KUMA_PASSWORD" ]; then
+    echo "**** Docker mod not set up properly, skipping SWAG auto-uptime-kuma ****"
+    exit 0
+fi
+
+/app/auto-uptime-kuma.py

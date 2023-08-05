@@ -3,10 +3,10 @@ name: Build Image
 on: [push, pull_request_target, workflow_dispatch]
 
 env:
-  GITHUB_REPO: "linuxserver/docker-mods" #don't modify
-  ENDPOINT: "linuxserver/mods" #don't modify
+  GITHUB_REPO: "labmonkey/docker-mods" #don't modify
+  ENDPOINT: "labmonkey/mods" #don't modify
   BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  MODNAME: "swag-auto-uptime-kuma" #replace
 
 jobs:
   set-vars:
