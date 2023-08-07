@@ -5,10 +5,6 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 ARG MOD_VERSION
 
 RUN \
-  echo "**** install packages ****" && \
-  apk add --no-cache \
-    git \
-    go && \
   echo "**** retrieve latest version ****" && \
   if [[ -z "${MOD_VERSION+x}" ]]; then \
     DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
