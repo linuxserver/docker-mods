@@ -67,10 +67,10 @@ RUN \
   fi && \
   echo "**** grab buildx plugin ****" && \
   curl -fo \
-    /root-layer/docker-bins/buildx_x86_64 -L \
+    /root-layer/docker-bins/docker-buildx_x86_64 -L \
     "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-amd64" && \
   curl -fo \
-    /root-layer/docker-bins/buildx_aarch64 -L \
+    /root-layer/docker-bins/docker-buildx_aarch64 -L \
     "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-arm64" && \
   chmod +x /root-layer/docker-bins/* && \
   rm -rf /tmp/*

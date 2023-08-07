@@ -10,7 +10,7 @@ if [[ -d "/docker-bins" ]] ; then
   echo "Copying over docker and docker-compose binaries"
   mkdir -p /usr/local/lib/docker/cli-plugins
   mv "/docker-bins/docker-compose_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-compose
-  mv "/docker-bins/buildx_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-buildx
+  mv "/docker-bins/docker-buildx_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-buildx
   mv "/docker-bins/docker_${ARCH}" /usr/local/bin/docker
   mv "/docker-bins/compose-switch_${ARCH}" /usr/local/bin/docker-compose
   rm -rf /docker-bins
