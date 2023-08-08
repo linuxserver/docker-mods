@@ -1,5 +1,6 @@
 #!/usr/bin/with-contenv bash
 
+ARCH=$(uname -m)
 if [[ "${ARCH}" = "armv7l" ]]; then
   echo "**** The universal docker mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
   exit 0
@@ -37,7 +38,6 @@ else
         xfsprogs \
         xz" >> /mod-repo-packages-to-install.list
 fi
-ARCH=$(uname -m)
 if [ -d "/docker-tgz" ] ; then
     echo "Copying over docker and docker-compose binaries"
     mkdir -p /usr/local/lib/docker/cli-plugins

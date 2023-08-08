@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bash
 
-if [[ "${ARCH}" = "armv7l" ]]; then
+if [[ $(uname -m) = "armv7l" ]]; then
   echo "**** The universal docker mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
   exit 0
 fi
