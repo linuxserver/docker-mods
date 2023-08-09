@@ -1,5 +1,10 @@
 #!/usr/bin/with-contenv bash
 
+if [[ $(uname -m) = "armv7l" ]]; then
+  echo "**** The universal docker mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
+  sleep infinity
+fi
+
 ## dind hack from https://github.com/moby/moby/blob/master/hack/dind
 export container=docker
 if [ -d /sys/kernel/security ] && ! mountpoint -q /sys/kernel/security; then

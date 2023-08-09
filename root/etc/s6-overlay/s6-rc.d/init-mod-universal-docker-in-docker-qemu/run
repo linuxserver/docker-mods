@@ -1,5 +1,10 @@
 #!/usr/bin/with-contenv bash
 
+if [[ $(uname -m) = "armv7l" ]]; then
+  echo "**** The universal docker mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
+  exit 0
+fi
+
 if [[ $(uname -m) = "x86_64" ]]; then
     echo "**** Enabling QEMU ****"
     exec docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
