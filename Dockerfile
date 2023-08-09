@@ -5,10 +5,6 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 ARG MOD_VERSION
 
 RUN \
-  echo "**** install packages ****" && \
-  apk add --no-cache \
-    git \
-    go && \
   echo "**** retrieve latest version ****" && \
   if [[ -z "${MOD_VERSION+x}" ]]; then \
     DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
@@ -25,7 +21,6 @@ RUN \
   mkdir -p \
     /root-layer/docker-bins \
     /tmp/docker_x86_64 \
-    /tmp/docker_armv7l \
     /tmp/docker_aarch64 && \
   curl -fo \
     /tmp/docker_x86_64.tgz -L \
@@ -34,13 +29,6 @@ RUN \
     /tmp/docker_x86_64.tgz -C \
     /tmp/docker_x86_64 --strip-components=1 && \
   cp /tmp/docker_x86_64/docker /root-layer/docker-bins/docker_x86_64 && \
-  curl -fo \
-    /tmp/docker_armv7l.tgz -L \
-    "https://download.docker.com/linux/static/stable/armhf/docker-${DOCKER_RELEASE}.tgz" && \
-  tar xf \
-    /tmp/docker_armv7l.tgz -C \
-    /tmp/docker_armv7l --strip-components=1 && \
-  cp /tmp/docker_armv7l/docker /root-layer/docker-bins/docker_armv7l && \
   curl -fo \
     /tmp/docker_aarch64.tgz -L \
     "https://download.docker.com/linux/static/stable/aarch64/docker-${DOCKER_RELEASE}.tgz" && \
@@ -52,9 +40,6 @@ RUN \
   curl -fo \
     /root-layer/docker-bins/docker-compose_x86_64 -L \
     "https://github.com/docker/compose/releases/download/v${COMPOSE_RELEASE}/docker-compose-linux-x86_64" && \
-  curl -fo \
-    /root-layer/docker-bins/docker-compose_armv7l -L \
-    "https://github.com/docker/compose/releases/download/v${COMPOSE_RELEASE}/docker-compose-linux-armv7" && \
   curl -fo \
     /root-layer/docker-bins/docker-compose_aarch64 -L \
     "https://github.com/docker/compose/releases/download/v${COMPOSE_RELEASE}/docker-compose-linux-aarch64" && \
@@ -71,16 +56,18 @@ RUN \
   curl -fo \
     /root-layer/docker-bins/compose-switch_aarch64 -L \
     "https://github.com/docker/compose-switch/releases/download/v${SWITCH_RELEASE}/docker-compose-linux-arm64" && \
-  echo "**** compile compose switch on armhf ****" && \
+  echo "**** retrieve latest buildx version ****" && \
+  if [ -z ${BUILDX_RELEASE+x} ]; then \
+    BUILDX_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/buildx/releases/latest" \
+      | awk '/tag_name/{print $4;exit}' FS='[""]'); \
+  fi && \
+  echo "**** grab buildx plugin ****" && \
   curl -fo \
-    /tmp/compose-switch.tar.gz -L \
-    "https://github.com/docker/compose-switch/archive/refs/tags/v${SWITCH_RELEASE}.tar.gz" && \
-  mkdir -p /tmp/compose-switch && \
-  tar xf \
-    /tmp/compose-switch.tar.gz -C \
-    /tmp/compose-switch --strip-components=1 && \
-  cd /tmp/compose-switch && \
-  CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -ldflags="-s -w -X github.com/docker/compose-switch/internal.Version=${SWITCH_RELEASE}" -o /root-layer/docker-bins/compose-switch_armv7l ./main.go && \
+    /root-layer/docker-bins/docker-buildx_x86_64 -L \
+    "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-amd64" && \
+  curl -fo \
+    /root-layer/docker-bins/docker-buildx_aarch64 -L \
+    "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-arm64" && \
   chmod +x /root-layer/docker-bins/* && \
   rm -rf /tmp/*
 

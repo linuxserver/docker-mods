@@ -1,6 +1,6 @@
 # Docker - Docker mod for all images
 
-This mod adds `docker` and `docker-compose` binaries to any linuxserver image.
+This mod adds the `docker` binary as wells as the `buildx` and the `compose` plug-ins to any linuxserver image.
 
 **IMPORTANT NOTE**: For docker access inside a container, a volume mapping needs to be added for `/var/run/docker.sock:/var/run/docker.sock:ro` in the container's docker run/create/compose. If you'd like to connect to a remote docker service instead, you don't have to map the docker sock; you can either set an env var for `DOCKER_HOST=remoteaddress` or use the docker cli option `-H`.
 
