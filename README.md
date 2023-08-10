@@ -86,5 +86,7 @@ WOL ENV:
 * WOL_API = IP of docker host
 * WOL_API_PORT= port wol_api is running on
 * WOL_WAIT= time in seconds to wait for host to wake
-* WOL_NATIVE_HOST = IP of NAT gateway with forwarded port for WoL
-* WOL_NATIVE_PORT = External port on gateway for forwarding. Ensure that it is mapped to your target machine IP on port 9.
+* WOL_NATIVE_HOST = IP of NAT gateway with forwarded port for WoL *
+* WOL_NATIVE_PORT = External port on gateway for forwarding. Ensure that it is mapped to your target machine IP on port 9. *
+
+*Optional. Only applicable when not using the WoL docker service API and when waking from outside NAT is required. Omit, or leave blank otherwise.
