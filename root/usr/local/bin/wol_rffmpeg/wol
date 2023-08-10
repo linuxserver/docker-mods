@@ -14,8 +14,15 @@ if [ $RFFMPEG_WOL == "native" ] && [ ! -z $RFFMPEG_HOST ] && [ ! -z $RFFMPEG_HOS
 then
         echo WOL enabled
         echo "$RFFMPEG_HOST" is down, sending wakeup to "$mac"
-        wakeonlan $mac
-        #wakeonlan -i $RFFMPEG_HOST $mac
+
+        WOL_OPTIONS=""
+        if [ ! -z $WOL_NATIVE_HOST ]; then
+            WOL_OPTIONS="$WOL_OPTIONS -i $WOL_NATIVE_HOST"
+        fi
+        if [ ! -z $WOL_NATIVE_PORT ]; then
+            WOL_OPTIONS="$WOL_OPTIONS -p $WOL_NATIVE_PORT"
+        fi
+        wakeonlan $WOL_OPTIONS $mac
         echo "waiting $WOL_WAIT seconds for $RFFMPEG_HOST to wake"
         sleep $WOL_WAIT
 fi
