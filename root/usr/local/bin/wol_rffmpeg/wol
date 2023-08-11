@@ -22,7 +22,15 @@ then
         if [ ! -z $WOL_NATIVE_PORT ]; then
             WOL_OPTIONS="$WOL_OPTIONS -p $WOL_NATIVE_PORT"
         fi
-        wakeonlan $WOL_OPTIONS $mac
+        # Alpine
+        if [ -f /sbin/apk ]; then
+                wol $WOL_OPTIONS $mac
+        fi
+        # Ubuntu
+        if [ -f /usr/bin/apt ]; then
+                wakeonlan $WOL_OPTIONS $mac
+        fi
+        #wakeonlan -i $RFFMPEG_HOST $mac
         echo "waiting $WOL_WAIT seconds for $RFFMPEG_HOST to wake"
         sleep $WOL_WAIT
 fi
