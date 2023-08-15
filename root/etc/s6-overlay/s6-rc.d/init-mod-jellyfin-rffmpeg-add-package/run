@@ -2,7 +2,7 @@
 
 ## Ubuntu
 if [ -f /usr/bin/apt ]; then
-    for package in iputils-ping openssh-client python3-click python3-yaml python3 wakeonlan; do
+    for package in iputils-ping openssh-client wakeonlan; do
         if ! dpkg -s "${package}" >/dev/null 2>&1; then
             PACKAGES="${package} ${PACKAGES}"
         fi
@@ -13,7 +13,7 @@ if [ -f /sbin/apk ]; then
     if ! grep -qxF '@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing' /etc/apk/repositories; then
         echo @testing https://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
     fi
-    for package in openssh py3-click py3-yaml python3 wol@testing; do
+    for package in openssh wol@testing; do
         if ! apk info -e "${package}" >/dev/null 2>&1; then
             PACKAGES="${package} ${PACKAGES}"
         fi
@@ -22,6 +22,7 @@ fi
 
 if [ -n "${PACKAGES}" ]; then
     echo "${PACKAGES}" >> /mod-repo-packages-to-install.list
+    echo click pyyaml >> /mod-pip-packages-to-install.list
     echo "**** Adding rffmpeg dependencies to package install list ****"
 else
     echo "**** rffmpeg dependencies already installed, skipping ****"
