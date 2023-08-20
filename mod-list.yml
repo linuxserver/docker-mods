@@ -137,11 +137,12 @@ mods:
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
   transmission:
-    mod_count: 3
+    mod_count: 4
     container_mods:
       - env-var-settings: https://github.com/linuxserver/docker-mods/tree/transmission-env-var-settings
       - floodui: https://github.com/linuxserver/docker-mods/tree/transmission-floodui
       - transmissionic: https://github.com/linuxserver/docker-mods/tree/transmission-transmissionic
+      - transmission-web-control: https://github.com/linuxserver/docker-mods/tree/transmission-transmission-web-control
   universal:
     mod_count: 11
     container_mods:
