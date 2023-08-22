@@ -1,11 +1,11 @@
 #!/usr/bin/with-contenv bash
 
 if [ -z "$UPTIME_KUMA_URL" ] || [ -z "$UPTIME_KUMA_USERNAME" ] || [ -z "$UPTIME_KUMA_PASSWORD" ]; then
-    echo "[mod-swag-auto-uptime-kuma] Missing required environment variables. Please refer to the Readme, skipping..."
+    echo "[mod-auto-uptime-kuma] Missing required environment variables. Please refer to the Readme, skipping..."
     exit 0
 fi
 
-echo "[mod-swag-auto-uptime-kuma] Executing SWAG auto-uptime-kuma mod"
+echo "[mod-auto-uptime-kuma] Executing SWAG auto-uptime-kuma mod"
 
 scriptPath='/app/auto-uptime-kuma.py'
 

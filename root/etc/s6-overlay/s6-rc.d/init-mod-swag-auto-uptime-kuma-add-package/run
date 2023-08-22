@@ -1,12 +1,12 @@
 #!/usr/bin/with-contenv bash
 
-echo "[mod-swag-auto-uptime-kuma] Installing SWAG auto-uptime-kuma packages"
+echo "[mod-auto-uptime-kuma] Installing SWAG auto-uptime-kuma packages"
 
 if ! pip list 2>&1 | grep -q "uptime-kuma-api\|docker"; then
     echo "\
     docker \
     uptime-kuma-api" >> /mod-pip-packages-to-install.list
-    echo "[mod-swag-auto-uptime-kuma] Successfuly installed packages"
+    echo "[mod-auto-uptime-kuma] Successfuly installed packages"
 else
-    echo "[mod-swag-auto-uptime-kuma] Packages already installed, skipping..."
+    echo "[mod-auto-uptime-kuma] Packages already installed, skipping..."
 fi

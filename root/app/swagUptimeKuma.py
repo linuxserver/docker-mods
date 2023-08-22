@@ -99,7 +99,7 @@ class SwagUptimeKuma:
         self._api.delete_monitor(monitorData['id'])
 
     def deleteMonitors(self, containerNames):
-        print(f"{logPrefix} Deleting all monitors that had their containers removed")
+        print(f"{logPrefix} Deleting all monitors that had their containers removed or were disabled")
         if (containerNames):
             for containerName in containerNames:
                 self.deleteMonitor(containerName)
@@ -152,7 +152,7 @@ class SwagUptimeKuma:
 
     def getMonitorSwagTagValue(self, monitorData):
         """
-        This value is container name itself. Used to link containers with monitors
+        This value is container name itself. Used to link containers with monitors.
         """
         for tag in monitorData.get('tags'):
             if (has_key_with_value(tag, "name", self.swagTagName)):
