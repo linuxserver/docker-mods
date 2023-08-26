@@ -1,0 +1,13 @@
+#!/usr/bin/with-contenv bash 
+
+plugindir="/config/Library/Application Support/Plex Media Server/Plug-ins"
+
+# clone or update Audnexus.bundle (https://github.com/djdembeck/Audnexus.bundle)
+if [ ! -d "$plugindir/Audnexus.bundle" ]; then
+    echo "**** no agent found, cloning ****"
+    s6-setuidgid abc git clone --depth 1 https://github.com/djdembeck/Audnexus.bundle "$plugindir/Audnexus.bundle"
+else
+    echo "**** pulling latest update ****"
+    s6-setuidgid abc git -C "$plugindir/Hama.bundle" pull
+fi
+lsiown -R abc:abc "$plugindir/Audnexus.bundle"
