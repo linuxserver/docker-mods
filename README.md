@@ -1,4 +1,4 @@
-# Audnexus.bundle - Docker Mod for plex
+# Audnexus.bundle - Docker Mod for Plex
 
 This mod adds [djdembeck/Audnexus.bundle](https://github.com/djdembeck/Audnexus.bundle).
 
