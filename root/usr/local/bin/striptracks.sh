@@ -1290,7 +1290,7 @@ elif [ -n "$striptracks_api_url" ]; then
             striptracks_videofile_id="$(echo $striptracks_result | jq -crM ".[] | select(.existingPath | endswith(\"${striptracks_newvideo##*/}\")) | .${striptracks_json_quality_root}Id")"
             striptracks_renamedvideo="${striptracks_newvideo%/*}/$(echo $striptracks_result | jq -crM ".[] | select(.existingPath | endswith(\"${striptracks_newvideo##*/}\")) | .newPath")"
             # Rename video if needed
-            if [ -n striptracks_videofile_id ]; then
+            if [ -n "$striptracks_videofile_id" ]; then
               rename_video
               striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
                 striptracks_message="Error|[$striptracks_return] ${striptracks_type^} error when renaming \"${striptracks_newvideo##*/}\" to \"${striptracks_renamedvideo##*/}\""
