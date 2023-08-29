@@ -55,7 +55,8 @@ This basic demo installs Pip and a couple dependencies for plugins some users le
 We will always recommend to our users consuming Mods that they leverage ones from active community members or projects so transparency is key here. We understand that image layers can be pushed on the back end behind these pipelines, but every little bit helps.
 In this repository we will be going over two basic methods of making a Mod along with an example of the GitHub Actions build logic to get this into a Dockerhub and/or GitHub Container Registry endpoint. Though we are not officially endorsing GitHub Actions here it is built in to GitHub repositories and forks making it very easy to get started. If you prefer others feel free to use them as long as build jobs are transparent.
 
-One of the core ideas to remember when creating a Mod is that it can only contain a single image layer, the examples below will show you how to add files standardly and how to run complex logic to assemble the files in a build layer to copy them over into this single layer.
+> **Note**
+> One of the core ideas to remember when creating a Mod is that it can only contain a **single image layer**, the examples below will show you how to add files standardly and how to run complex logic to assemble the files in a build layer to copy them over into this single layer.
 
 ### Mod Types
 
@@ -87,28 +88,29 @@ The most common paths to leverage for Linuxserver images are as follows. Assumin
       └── s6-rc.d
         ├── init-mods-end
         │  └── dependencies.d
-        │     └── init-mod-universal-mymod    -- If your mod does not need to install packages it should be a dependency of init-mods-end
+        │     └── init-mod-universal-mymod    -- If your mod does not need to install packages it should be a dependency of init-mods-end (empty file)
         ├── init-mods-package-install
         │  └── dependencies.d
-        │     └── init-mod-universal-mymod    -- If your mod needs to install packages it should be a dependency of init-mods-package-install
+        │     └── init-mod-universal-mymod    -- If your mod needs to install packages it should be a dependency of init-mods-package-install (empty file)
         ├── init-mod-universal-mymod
         │  ├── dependencies.d
-        │  │  └── init-mods
-        │  ├── run                            -- This is the init logic script that runs before the services in the container. It needs to be `chmod +x`.
+        │  │  └── init-mods                   -- Tells our init logic that this depends on the `init-mods` step (empty file)
+        │  ├── run                            -- This is the init logic script that runs before the services in the container. Use `chmod +x` to set proper permissions.
         │  ├── type                           -- This should contain the string `oneshot`.
         │  └── up                             -- This should contain the absolute path to `run` e.g. `/etc/s6-overlay/s6-rc.d/init-mod-universal-mymod/run`.
         ├── svc-mod-universal-mymod
         │  ├── dependencies.d
-        │  │  └── init-services
-        │  ├── run                            -- This is the script that runs in the foreground for persistent services. It needs to be `chmod +x`.
+        │  │  └── init-services               -- Tells our init logic that this depends on the `init-services` step (empty file)
+        │  ├── run                            -- This is the script that runs in the foreground for persistent services. Use `chmod +x` to set proper permissions.
         │  └── type                           -- This should contain the string `longrun`.
         └── user
           └── contents.d
-            ├── init-mod-universal-mymod
-            └── svc-mod-universal-mymod
+            ├── init-mod-universal-mymod      -- Tells our init logic that we need this directory (empty file)
+            └── svc-mod-universal-mymod       -- Tells our init logic that we need this directory (empty file)
 ```
 
-Note: For `oneshot` scripts you can alternatively omit the `run` file entirely and use the [execlineb](https://skarnet.org/software/execline/execlineb.html) syntax in `up` if your requirements are simple enough.
+> **Note**
+> For `oneshot` scripts you can alternatively omit the `run` file entirely and use the [execlineb](https://skarnet.org/software/execline/execlineb.html) syntax in `up` if your requirements are simple enough.
 
 #### Installing Packages
 
@@ -254,6 +256,10 @@ GitHub Actions will trigger a build off of your repo when you commit. The image 
 
 ## Appendix
 
+### File encoding
+
+s6 init files must be encoded in plain `UTF-8`, and not `UTF-8 with BOM`. You can remove the BOM using your IDE if necessary.
+
 ### Inspecting mods
 
 To inspect the file contents of external Mods dive is a great CLI tool:
@@ -262,8 +268,14 @@ To inspect the file contents of external Mods dive is a great CLI tool:
 
 Basic usage:
 
+**Unix w/ Docker**
 ```bash
 docker run --rm -it \
     -v /var/run/docker.sock:/var/run/docker.sock \
     wagoodman/dive:latest <Image Name>
+```
+
+**w/o Docker**
+```bash
+dive <Image Name>
 ```
