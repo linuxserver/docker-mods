@@ -32,6 +32,11 @@ if [[ -z ${CROWDSEC_VERSION+x} ]]; then \
     CROWDSEC_VERSION=$(curl -s "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]');
 fi
 
+if [[ -z ${CROWDSEC_VERSION+x} ]]; then \
+    echo "**** Could not fetch current bouncer version from Github ****"
+    exit 1
+fi
+
 curl "${CURL_NOISE_LEVEL}" -Lo \
     /tmp/crowdsec.tar.gz -L \
     "https://github.com/crowdsecurity/cs-nginx-bouncer/releases/download/${CROWDSEC_VERSION}/crowdsec-nginx-bouncer.tgz"
