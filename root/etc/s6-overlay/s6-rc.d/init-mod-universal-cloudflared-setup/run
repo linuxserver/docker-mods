@@ -9,7 +9,8 @@ if [ "${ARCH}" = "x86_64" ]; then
 elif [ "${ARCH}" = "aarch64" ]; then 
   ARCH="arm64" 
 elif [ "${ARCH}" = "armv7l" ]; then 
-  ARCH="armhf" 
+  echo "**** The universal cloudflared mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
+  exit 0
 else
   echo "**** Unsupported Linux architecture ${ARCH} found, exiting... ****"
   exit 1
@@ -18,9 +19,6 @@ echo "**** Linux architecture found: ${ARCH} ****"
 
 echo "**** Checking for cloudflared setup script dependencies... ****"
 YQARCH="${ARCH}"
-if [ "${YQ_ARCH}" = "armhf" ]; then 
-  YQARCH="arm" 
-fi
 echo "**** Temporarily installing /tmp/yq... ****"
 curl -sLo /tmp/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQARCH}
 chmod +x /tmp/yq

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build container
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.18 AS buildstage
 
 ARG MOD_VERSION
 
@@ -31,9 +31,6 @@ RUN mv cloudflared /root-layer/cloudflared/cloudflared-amd64
 
 RUN GOOS=linux GOARCH=arm64 make cloudflared
 RUN mv cloudflared /root-layer/cloudflared/cloudflared-arm64
-
-RUN GOOS=linux GOARCH=arm make cloudflared
-RUN mv cloudflared /root-layer/cloudflared/cloudflared-armhf
 
 COPY root/ /root-layer/
 
