@@ -612,7 +612,7 @@ function get_rename {
 function rename_video {
   local url="$striptracks_api_url/command"
   local data="{\"name\":\"RenameFiles\",\"${striptracks_video_type}Id\":$striptracks_rescan_id,\"files\":[$striptracks_videofile_id]}"
-  echo "Info|Renaming new video file per ${striptracks_type^}'s rules to \"${striptracks_renamedvideo##*/}\"" | log
+  echo "Info|Renaming new video file per ${striptracks_type^}'s rules to \"$(basename "$striptracks_renamedvideo")\"" | log
   [ $striptracks_debug -ge 1 ] && echo "Debug|Renaming \"$striptracks_newvideo\". Calling ${striptracks_type^} API using POST and URL '$url' with data $data" | log
   unset striptracks_result
   striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
@@ -1287,13 +1287,12 @@ elif [ -n "$striptracks_api_url" ]; then
           }
           # Check if new video is in list of files that can be renamed
           if [ -n "$striptracks_result" -a "$striptracks_result" != "[]" ]; then
-            striptracks_videofile_id="$(echo $striptracks_result | jq -crM ".[] | select(.existingPath | endswith(\"${striptracks_newvideo##*/}\")) | .${striptracks_json_quality_root}Id")"
-            striptracks_renamedvideo="${striptracks_newvideo%/*}/$(echo $striptracks_result | jq -crM ".[] | select(.existingPath | endswith(\"${striptracks_newvideo##*/}\")) | .newPath")"
+            striptracks_renamedvideo="$(echo $striptracks_result | jq -crM ".[] | select(.${striptracks_json_quality_root}Id == $striptracks_videofile_id) | .newPath")"
             # Rename video if needed
-            if [ -n "$striptracks_videofile_id" ]; then
+            if [ -n "$striptracks_renamedvideo" ]; then
               rename_video
               striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
-                striptracks_message="Error|[$striptracks_return] ${striptracks_type^} error when renaming \"${striptracks_newvideo##*/}\" to \"${striptracks_renamedvideo##*/}\""
+                striptracks_message="Error|[$striptracks_return] ${striptracks_type^} error when renaming \"$(basename "$striptracks_newvideo")\" to \"$(basename "$striptracks_renamedvideo")\""
                 echo "$striptracks_message" | log
                 echo "$striptracks_message" >&2
                 striptracks_exitstatus=17
