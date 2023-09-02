@@ -1,11 +1,14 @@
 # syntax=docker/dockerfile:1
 
+## Buildstage ##
 FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 
 ARG MOD_VERSION
 
+# copy local files
 COPY root/ /root-layer/
 
+# Add version to script
 RUN \
   MOD_VERSION="${MOD_VERSION:-unknown}" && \
   sed -i -e "s/{{VERSION}}/$MOD_VERSION/" \
@@ -17,5 +20,5 @@ FROM scratch
 
 LABEL maintainer="TheCaptain989"
 
-# Copy local files
+# Add files from buildstage
 COPY --from=buildstage /root-layer/ /
