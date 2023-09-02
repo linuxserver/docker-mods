@@ -5,8 +5,8 @@ on: [push, pull_request_target, workflow_dispatch]
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "plex" #replace
+  MODNAME: "audnexus" #replace
 
 jobs:
   set-vars:
