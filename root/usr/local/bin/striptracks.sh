@@ -1195,6 +1195,8 @@ elif [ -n "$striptracks_api_url" ]; then
         if get_videofile_info; then
           striptracks_videofile_info="$striptracks_result"
           # Check that the file didn't get lost in the Rescan.
+          # TODO: Also losing releaseGroup
+          # TODO: In Radarr, losing customFormats and customFormatScore
           # If we lost the quality information, put it back
           if [ "$(echo $striptracks_videofile_info | jq -crM .quality.quality.name)" != "$(echo $striptracks_original_quality | jq -crM .quality.name)" ]; then
             set_quality
