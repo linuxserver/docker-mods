@@ -102,9 +102,10 @@ mods:
       - terraform: https://github.com/linuxserver/docker-mods/tree/code-server-terraform
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
   plex:
-    mod_count: 1
+    mod_count: 2
     container_mods:
       - absolute-hama: https://github.com/linuxserver/docker-mods/tree/plex-absolute-hama
+      - audnexus: https://github.com/linuxserver/docker-mods/tree/plex-audnexus
   projectsend:
     mod_count: 1
     container_mods:
