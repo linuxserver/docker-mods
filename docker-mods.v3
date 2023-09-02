@@ -108,9 +108,27 @@ process_custom_services() {
 # Create our noisy chown alias to handle read-only/remote volumes
 create_lsiown_alias() {
     # intentional tabs in the heredoc
-    cat <<-EOF >/usr/bin/lsiown
+    cat <<-'EOF' >/usr/bin/lsiown
 	#!/bin/bash
-	chown "\$@" || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
+
+	OPTIONS=()
+	while getopts RcfvhHLP OPTION
+	do
+	    if [[ "${OPTION}" != "?" ]]; then
+	        OPTIONS+=("-${OPTION}")
+	    fi
+	done
+
+	shift $((OPTIND - 1))
+	OWNER=$1
+	IFS=: read -r USER GROUP <<< "${OWNER}"
+	if [[ -z "${GROUP}" ]]; then
+	    printf '**** Permissions could not be set. Group is missing or incorrect, expecting user:group. ****\n'
+	    exit 0
+	fi
+
+	PATH=("${@:2}")
+	/usr/bin/find "${PATH[@]}" \( ! -group "${GROUP}" -o ! -user "${USER}" \) -exec chown "${OPTIONS[@]}" "${USER}":"${GROUP}" {} + || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
 	EOF
     chmod +x /usr/bin/lsiown
 }
