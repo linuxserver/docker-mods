@@ -41,6 +41,7 @@ services:
       - RFFMPEG_WOL=api
       - RFFMPEG_HOST=transcode
       - RFFMPEG_HOST_MAC="12:ab:34:cd:ef:56"
+      - RFFMPEG_COMMIT_SHA=master # (optional) which commit of rffmpeg to download
       - WOL_API=192.168.1.5  #docker host IP
       - WOL_API_PORT=8431
       - WOL_WAIT=10  #time transcode host takes to start
