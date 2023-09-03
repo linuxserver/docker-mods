@@ -17,7 +17,11 @@ fi
 mkdir -p /usr/local/bin/
 echo "**** Grabbing rffmpeg from upstream ****"
 rm -rf /usr/local/bin/rffmpeg
-curl -L -o /usr/local/bin/rffmpeg https://raw.githubusercontent.com/joshuaboniface/rffmpeg/master/rffmpeg
+if [ ! -z "$RFFMPEG_COMMIT_SHA" ]; then
+    curl -L -o /usr/local/bin/rffmpeg https://raw.githubusercontent.com/joshuaboniface/rffmpeg/$RFFMPEG_COMMIT_SHA/rffmpeg
+else
+    curl -L -o /usr/local/bin/rffmpeg https://raw.githubusercontent.com/joshuaboniface/rffmpeg/master/rffmpeg
+fi
 chmod +x /usr/local/bin/rffmpeg
 
 ##Update rffmpeg.yml
