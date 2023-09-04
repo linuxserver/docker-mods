@@ -5,32 +5,21 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.18 AS buildstage
 
 ARG MOD_VERSION
 
-RUN mkdir -p /root-layer/cloudflared
-WORKDIR /src
-
 RUN \
-  apk add --no-cache \
-    build-base \
-    git \
-    go
-
-ENV GO111MODULE=on \
-    CGO_ENABLED=0
-
-RUN \
-  if [ -z "${MOD_VERSION}" ]; then \
-    curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest \
-      | jq -rc ".tag_name" \
-      | xargs -I TAG sh -c 'git -c advice.detachedHead=false clone https://github.com/cloudflare/cloudflared --depth=1 --branch TAG .'; \
-  else \
-    git -c advice.detachedHead=false clone https://github.com/cloudflare/cloudflared --depth=1 --branch ${MOD_VERSION} .; \
-  fi
-
-RUN GOOS=linux GOARCH=amd64 make cloudflared
-RUN mv cloudflared /root-layer/cloudflared/cloudflared-amd64
-
-RUN GOOS=linux GOARCH=arm64 make cloudflared
-RUN mv cloudflared /root-layer/cloudflared/cloudflared-arm64
+  echo "**** retrieve latest version ****" && \
+  if [[ -z "${MOD_VERSION}" ]]; then \
+    MOD_VERSION=$(curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest \
+      | jq -rc ".tag_name"); \
+  fi && \
+  echo "**** grab binaries ****" && \
+  mkdir -p /root-layer/cloudflared && \
+  curl -fo \
+    /root-layer/cloudflared/cloudflared-amd64 -L \
+    "https://github.com/cloudflare/cloudflared/releases/download/${MOD_VERSION}/cloudflared-linux-amd64" && \
+  curl -fo \
+    /root-layer/cloudflared/cloudflared-arm64 -L \
+    "https://github.com/cloudflare/cloudflared/releases/download/${MOD_VERSION}/cloudflared-linux-arm64" && \
+  chmod +x /root-layer/cloudflared/*
 
 COPY root/ /root-layer/
 
