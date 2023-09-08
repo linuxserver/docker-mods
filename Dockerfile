@@ -7,7 +7,7 @@ ARG MOD_VERSION=master
 RUN \
   echo "**** grab rffmpeg ****" && \
   mkdir -p /root-layer/usr/local/bin/ && \
-  curl -o \
+  curl -fo \
     /root-layer/usr/local/bin/rffmpeg -L \
     "https://raw.githubusercontent.com/joshuaboniface/rffmpeg/${MOD_VERSION}/rffmpeg" && \
   chmod +x /root-layer/usr/local/bin/rffmpeg
