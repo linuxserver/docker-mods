@@ -13,17 +13,6 @@ else
     cp /defaults/rffmpeg.yml.sample /config/rffmpeg/rffmpeg.yml
 fi
 
-#Grab rffmpeg
-mkdir -p /usr/local/bin/
-echo "**** Grabbing rffmpeg from upstream ****"
-rm -rf /usr/local/bin/rffmpeg
-if [ ! -z "$RFFMPEG_COMMIT_SHA" ]; then
-    curl -L -o /usr/local/bin/rffmpeg https://raw.githubusercontent.com/joshuaboniface/rffmpeg/$RFFMPEG_COMMIT_SHA/rffmpeg
-else
-    curl -L -o /usr/local/bin/rffmpeg https://raw.githubusercontent.com/joshuaboniface/rffmpeg/master/rffmpeg
-fi
-chmod +x /usr/local/bin/rffmpeg
-
 ##Update rffmpeg.yml
 sed -i 's~#persist: "/run/shm"~persist: "/dev/shm"~' /config/rffmpeg/rffmpeg.yml
 sed -i 's~#state: "/var/lib/rffmpeg"~state: "/config/rffmpeg"~' /config/rffmpeg/rffmpeg.yml
