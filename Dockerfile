@@ -2,11 +2,12 @@
 
 FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
 
-ARG MOD_VERSION=master
+ARG MOD_VERSION
 
 RUN \
   echo "**** grab rffmpeg ****" && \
   mkdir -p /root-layer/usr/local/bin/ && \
+  MOD_VERSION=${MOD_VERSION:-master} && \
   curl -fo \
     /root-layer/usr/local/bin/rffmpeg -L \
     "https://raw.githubusercontent.com/joshuaboniface/rffmpeg/${MOD_VERSION}/rffmpeg" && \
