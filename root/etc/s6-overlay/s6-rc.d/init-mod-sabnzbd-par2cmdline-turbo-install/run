@@ -1,4 +1,5 @@
 #!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
 # This is an install script that is designed to run after init-mods-package-install
 # so it can take advantage of packages installed
@@ -9,11 +10,22 @@ if apk list --installed -q | grep par2cmdline &> /dev/null; then
     apk del --purge -q par2cmdline
 fi
 
-ARCH=$(uname -m)
-if [[ -d "/par2cmdline-turbo/${ARCH}" ]]; then
-    echo "**** Installing par2cmdline-turbo ****"
-    cp -a /par2cmdline-turbo/${ARCH}/* /
-    rm -rf /par2cmdline-turbo
+if [[ -e "/usr/local/bin/par2" ]] && grep -q 'par2cmdline-turbo' <<< "$(/usr/local/bin/par2 -V)"; then
+    echo "┌─────────────────────────────────────────────────────────────────────────────┐"
+    echo "│                                                                             │"
+    echo "|               par2cmdline-turbo is now included in the SABnzbd              │"
+    echo "|                docker image and this mod has been deprecated.               │"
+    echo "│                                                                             │"
+    echo "│      Please remove this mod from your setup as it will not be updated.      |"
+    echo "│                                                                             │"
+    echo "└─────────────────────────────────────────────────────────────────────────────┘"
 else
-    echo "**** par2cmdline-turbo already installed or platform unsupported ****"
+    ARCH=$(uname -m)
+    if [[ -d "/par2cmdline-turbo/${ARCH}" ]]; then
+        echo "**** Installing par2cmdline-turbo ****"
+        cp -a /par2cmdline-turbo/${ARCH}/* /
+        rm -rf /par2cmdline-turbo
+    else
+        echo "**** par2cmdline-turbo already installed or platform unsupported ****"
+    fi
 fi
