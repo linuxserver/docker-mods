@@ -1,5 +1,7 @@
 # par2cmdline-turbo - SABnzbd mod
 
+## par2cmdline-turbo is now included in the SABnzbd docker image and this mod has been deprecated
+
 This mod adds the [par2cmdline-turbo](https://github.com/animetosho/par2cmdline-turbo) fork as a replacement for the standard par2cmdline package.
 
 It is supported on both amd64 and aarch64 (arm64) platforms, but not armhf (arm32).
