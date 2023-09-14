@@ -127,8 +127,15 @@ create_lsiown_alias() {
 	    exit 0
 	fi
 
+	ERROR='**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
 	PATH=("${@:2}")
-	/usr/bin/find "${PATH[@]}" \( ! -group "${GROUP}" -o ! -user "${USER}" \) -exec chown "${OPTIONS[@]}" "${USER}":"${GROUP}" {} + || printf '**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
+
+	if [[ "${OPTIONS[*]}" =~ "-R" ]]; then
+		OPTIONS=( "${OPTIONS[@]/-R/-P}" )
+		/usr/bin/find "${PATH[@]}" \( ! -group "${GROUP}" -o ! -user "${USER}" \) -exec chown "${OPTIONS[@]}" "${USER}":"${GROUP}" {} + || printf "${ERROR}"
+	else
+		/usr/bin/find "${PATH[@]}" -maxdepth 0 \( ! -group "${GROUP}" -o ! -user "${USER}" \) -exec chown "${OPTIONS[@]}" "${USER}":"${GROUP}" {} + || printf "${ERROR}"
+	fi
 	EOF
     chmod +x /usr/bin/lsiown
 }
