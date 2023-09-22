@@ -63,14 +63,21 @@
             if (!empty($data->locations)) {
                 $locations = $data->locations;
                 $location = implode(",", $locations);
-                $status .= '<i class="fas fa-check-circle"></i></td><td class="left-text"><span class="status-text">'.$location.'</span></td>';
+                $status .= '<i class="fas fa-check-circle"></i></td><td class="align-td">';
+                $auths = implode(PHP_EOL, $data->auths);
+                if ($data->auth_status == 1) {
+                    $status .= '<i class="fas fa-check-circle" title="'.$auths.'"></i>';
+                } else {
+                    $status .= '<i class="fas fa-exclamation-circle"  title="'.$auths.'"></i>';
+                }
+                $status .= '</td><td class="left-text"><span class="status-text">'.$location.'</span></td>';
             } else {
                 $error = 'Unable to locate the proxy config for '.$result.', it must use the following structure:'.PHP_EOL;
                 $error .= '&#09;set $upstream_app <container/address>;'.PHP_EOL;
                 $error .= '&#09;set $upstream_port <port>;'.PHP_EOL;
                 $error .= '&#09;set $upstream_proto <protocol>;'.PHP_EOL;
                 $error .= '&#09;proxy_pass $upstream_proto://$upstream_app:$upstream_port;'.PHP_EOL;
-                $status .= '<i class="fas fa-exclamation-circle" title="'.$error.'"></i></td><td></td>';
+                $status .= '<i class="fas fa-exclamation-circle" title="'.$error.'"></i></td><td></td><td></td>';
             }
             $status .= '</tr>';
             $index++;
@@ -85,6 +92,7 @@
                                 <td><h3>Application</h3></td>
                                 <td><h3>Available</h3></td>
                                 <td><h3>Proxied</h3></td>
+                                <td><h3>Auth</h3></td>
                                 <td><h3>Location</h3></td>
                             </tr>
                         </thead>
