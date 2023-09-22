@@ -25,11 +25,10 @@ def find_apps():
             continue
         file = open(file_path, "r")
         content = file.read()
-        match_proxy(content, file_path, apps)
-    match_auth(apps, auths)
+        match_proxy(apps, auths, content, file_path)
     return apps, auths
 
-def match_proxy(content, file_path, apps):
+def match_proxy(apps, auths, content, file_path):
     results = re.finditer(PROXY_REGEX, content)
     for result in results:
         params = result.groupdict()
@@ -39,22 +38,19 @@ def match_proxy(content, file_path, apps):
         if file_path.startswith("/config/nginx/site-confs/") or file_path.endswith(".conf"):
             file_path = "auto-proxy" if file_path.startswith("/etc/nginx/http.d/") else file_path
             apps[app].add(file_path)
+            match_auth(auths, app, file_path, content)
 
-def match_auth(apps, auths):
-    for app, file_paths in apps.items():
-        for file_path in file_paths:
-            file = open(file_path, "r")
-            content = file.read()
-            if re.findall(AUTHELIA_REGEX, content):
-                auths[app][file_path] = "Authelia"
-            elif re.findall(AUTHENTIK_REGEX, content):
-                auths[app][file_path] = "Authentik"
-            elif re.findall(BASIC_AUTH_REGEX, content):
-                auths[app][file_path] = "Basic Auth"
-            elif re.findall(LDAP_REGEX, content):
-                auths[app][file_path] = "LDAP"
-            else:
-                auths[app][file_path] = "No Auth"
+def match_auth(auths, app, file_path, content):
+    if re.findall(AUTHELIA_REGEX, content):
+        auths[app][file_path] = "Authelia"
+    elif re.findall(AUTHENTIK_REGEX, content):
+        auths[app][file_path] = "Authentik"
+    elif re.findall(BASIC_AUTH_REGEX, content):
+        auths[app][file_path] = "Basic Auth"
+    elif re.findall(LDAP_REGEX, content):
+        auths[app][file_path] = "LDAP"
+    else:
+        auths[app][file_path] = "No Auth"
 
 def is_available(url):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
