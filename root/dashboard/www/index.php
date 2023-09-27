@@ -24,9 +24,14 @@
                 .far, .fas {
                     font-family: "Font Awesome 5 Free" !important;
                 }
-                .fa-exclamation-circle,.fa-check-circle, .fa-info-circle, .fa-edit, .fa-lock {
+                .fa-exclamation-circle,.fa-check-circle, .fa-info-circle, .fa-edit, .fa-lock, .fa-lock-open {
                     font-size:20px;
                     padding: 2px;
+                }
+                .fa-lock-open {
+                    color: gray;
+                    padding-left: 7px;
+                    cursor: help;
                 }
                 .fa-check-circle, .fa-lock {
                     color: #5DB56A;
@@ -66,9 +71,9 @@
                 $status .= '<i class="fas fa-check-circle"></i></td><td class="align-td">';
                 $auths = implode(PHP_EOL, $data->auths);
                 if ($data->auth_status == 1) {
-                    $status .= '<i class="fas fa-check-circle" title="'.$auths.'"></i>';
+                    $status .= '<i class="fas fa-lock" title="'.$auths.'"></i>';
                 } else {
-                    $status .= '<i class="fas fa-exclamation-circle"  title="'.$auths.'"></i>';
+                    $status .= '<i class="fas fa-lock-open"  title="'.$auths.'"></i>';
                 }
                 $status .= '</td><td class="left-text"><span class="status-text">'.$location.'</span></td>';
             } else {
