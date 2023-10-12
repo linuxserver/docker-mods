@@ -736,21 +736,25 @@ elif [[ "${LSIO_BASE}" == "arch" ]] && [[ ! -f /usr/share/fonts/noto-cjk/NotoSan
     echo "Generating Locale for ${LOCALE}"
     localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
   done
-  # Add Firefox Langpacks
-  if which firefox; then
-    FIREFOX_VERSION=$(curl -sI https://download.mozilla.org/?product=firefox-latest | awk -F '(releases/|/win32)' '/Location/ {print $2}')
-    RELEASE_URL="https://releases.mozilla.org/pub/firefox/releases/${FIREFOX_VERSION}/win64/xpi/"
-    LANGS=$(curl -Ls ${RELEASE_URL} | awk -F '(xpi">|</a>)' '/href.*xpi/ {print $2}' | tr '\n' ' ')
-    EXTENSION_DIR=/usr/lib/firefox-addons/distribution/extensions/
-    mkdir -p ${EXTENSION_DIR}
-    for LANG in ${LANGS}; do
-      LANGCODE=$(echo ${LANG} | sed 's/\.xpi//g')
-      echo "Downloading ${LANG} Firefox Language pack"
-      curl -o \
-        ${EXTENSION_DIR}langpack-${LANGCODE}@firefox.mozilla.org.xpi -Ls \
-        ${RELEASE_URL}${LANG}
-    done
-  fi
 else
   echo "**** International Fonts/Locales installed skipping ****"
 fi
+
+# Add Firefox Langpacks
+if which firefox && [ ! -f /langlock ]; then
+  echo "Installing firefox langpacks"
+  FIREFOX_VERSION=$(curl -sI https://download.mozilla.org/?product=firefox-latest | awk -F '(releases/|/win32)' '/Location/ {print $2}')
+  RELEASE_URL="https://releases.mozilla.org/pub/firefox/releases/${FIREFOX_VERSION}/win64/xpi/"
+  LANGS=$(curl -Ls ${RELEASE_URL} | awk -F '(xpi">|</a>)' '/href.*xpi/ {print $2}' | tr '\n' ' ')
+  EXTENSION_DIR=/usr/lib/firefox-addons/distribution/extensions/
+  mkdir -p ${EXTENSION_DIR}
+  for LANG in ${LANGS}; do
+    LANGCODE=$(echo ${LANG} | sed 's/\.xpi//g')
+    echo "Downloading ${LANG} Firefox Language pack"
+    curl -o \
+      ${EXTENSION_DIR}langpack-${LANGCODE}@firefox.mozilla.org.xpi -Ls \
+      ${RELEASE_URL}${LANG}
+  done
+fi
+
+touch /langlock
