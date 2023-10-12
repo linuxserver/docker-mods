@@ -746,7 +746,11 @@ if which firefox && [ ! -f /langlock ]; then
   FIREFOX_VERSION=$(curl -sI https://download.mozilla.org/?product=firefox-latest | awk -F '(releases/|/win32)' '/Location/ {print $2}')
   RELEASE_URL="https://releases.mozilla.org/pub/firefox/releases/${FIREFOX_VERSION}/win64/xpi/"
   LANGS=$(curl -Ls ${RELEASE_URL} | awk -F '(xpi">|</a>)' '/href.*xpi/ {print $2}' | tr '\n' ' ')
-  EXTENSION_DIR=/usr/lib/firefox-addons/distribution/extensions/
+  if [[ "${LSIO_BASE}" == "alpine" ]]; then
+    EXTENSION_DIR=/usr/lib/firefox/distribution/extensions/
+  else 
+    EXTENSION_DIR=/usr/lib/firefox-addons/distribution/extensions/
+  fi
   mkdir -p ${EXTENSION_DIR}
   for LANG in ${LANGS}; do
     LANGCODE=$(echo ${LANG} | sed 's/\.xpi//g')
