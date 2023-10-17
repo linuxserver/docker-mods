@@ -49,6 +49,10 @@ if [ ! -L /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0 ]; then
     PACKAGES="libxkbcommon0 ${PACKAGES}"
 fi
 
+if [ ! -L /usr/lib/x86_64-linux-gnu/libnss3.so ]; then
+    PACKAGES="libnss3-dev ${PACKAGES}"
+fi
+
 if [ ! -L /usr/lib/x86_64-linux-gnu/libOpenGL.so.0 ]; then
     PACKAGES="libopengl0 ${PACKAGES}"
 fi
