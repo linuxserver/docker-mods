@@ -49,8 +49,28 @@ if [ ! -L /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0 ]; then
     PACKAGES="libxkbcommon0 ${PACKAGES}"
 fi
 
+if [ ! -L /usr/lib/x86_64-linux-gnu/libnss3.so ]; then
+    PACKAGES="libnss3 ${PACKAGES}"
+fi
+
 if [ ! -L /usr/lib/x86_64-linux-gnu/libOpenGL.so.0 ]; then
     PACKAGES="libopengl0 ${PACKAGES}"
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libXcomposite.so.1 ]; then
+    PACKAGES="libxcomposite1 ${PACKAGES}"
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libxkbfile.so.1 ]; then
+    PACKAGES="libxkbfile1 ${PACKAGES}"
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libXrandr.so.2 ]; then
+    PACKAGES="libxrandr2 ${PACKAGES}"
+fi
+
+if [ ! -L /usr/lib/x86_64-linux-gnu/libXtst.so.6 ]; then
+    PACKAGES="libxtst6 ${PACKAGES}"
 fi
 
 if [ -n "${PACKAGES}" ]; then
