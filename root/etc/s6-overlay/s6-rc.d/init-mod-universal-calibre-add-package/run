@@ -61,6 +61,10 @@ if [ ! -L /usr/lib/x86_64-linux-gnu/libXcomposite.so.1 ]; then
     PACKAGES="libxcomposite1 ${PACKAGES}"
 fi
 
+if [ ! -L /usr/lib/x86_64-linux-gnu/libXrandr.so.2 ]; then
+    PACKAGES="libxrandr2 ${PACKAGES}"
+fi
+
 if [ -n "${PACKAGES}" ]; then
     echo "${PACKAGES}" >> /mod-repo-packages-to-install.list
     echo "**** Adding calibre dependencies to package install list ****"
