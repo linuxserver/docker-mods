@@ -65,6 +65,10 @@ if [ ! -L /usr/lib/x86_64-linux-gnu/libXrandr.so.2 ]; then
     PACKAGES="libxrandr2 ${PACKAGES}"
 fi
 
+if [ ! -L /usr/lib/x86_64-linux-gnu/libXtst.so.6 ]; then
+    PACKAGES="libxtst6 ${PACKAGES}"
+fi
+
 if [ -n "${PACKAGES}" ]; then
     echo "${PACKAGES}" >> /mod-repo-packages-to-install.list
     echo "**** Adding calibre dependencies to package install list ****"
