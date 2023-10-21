@@ -304,7 +304,7 @@ function get_version {
 		-H "Accept: application/json" \
     --get "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -326,7 +326,7 @@ function get_video_info {
 		-H "Accept: application/json" \
     --get "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -348,7 +348,7 @@ function get_videofile_info {
 		-H "Accept: application/json" \
     --get "$url" )
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -365,19 +365,29 @@ function rescan {
   local url="$striptracks_api_url/command"
   local data="{\"name\":\"$striptracks_rescan_api\",\"${striptracks_video_type}Id\":$striptracks_rescan_id}"
   echo "Info|Calling ${striptracks_type^} API to rescan ${striptracks_video_type}" | log
-  [ $striptracks_debug -ge 1 ] && echo "Debug|Forcing rescan of $striptracks_video_type '$striptracks_rescan_id'. Calling ${striptracks_type^} API using POST and URL '$url' with data $data" | log
-  unset striptracks_result
-  striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
-    -H "Content-Type: application/json" \
-		-H "Accept: application/json" \
-    -d "$data" \
-    "$url")
-  local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
-    echo "$striptracks_message" | log
-    echo "$striptracks_message" >&2
-  }
-  [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+  local i=0
+  for ((i=1; i <= 2; i++)); do
+    [ $striptracks_debug -ge 1 ] && echo "Debug|Forcing rescan of $striptracks_video_type '$striptracks_rescan_id'. Calling ${striptracks_type^} API using POST and URL '$url' with data $data" | log
+    unset striptracks_result
+    striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      -d "$data" \
+      "$url")
+    local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
+      local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
+      echo "$striptracks_message" | log
+      echo "$striptracks_message" >&2
+    }
+    [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+    # Exit loop if database is not locked, else wait 1 minute
+    if [[ ! "$(echo $striptracks_result | jq -jcrM .message?)" =~ database\ is\ locked ]]; then
+      break
+    else
+      [ $striptracks_debug -ge 1 ] && echo "Debug|Database is locked. Waiting 1 minute." | log
+      sleep 60
+    fi
+  done
   striptracks_jobid="$(echo $striptracks_result | jq -crM .id)"
   if [ $striptracks_curlret -eq 0 -a "$striptracks_jobid" != "null" ]; then
     local striptracks_return=0
@@ -394,8 +404,8 @@ function check_job {
   #  2 - failed
   #  3 - loop timed out
   # 10 - curl error
-  local i=0
   local url="$striptracks_api_url/command/$striptracks_jobid"
+  local i=0
   [ $striptracks_debug -ge 1 ] && echo "Debug|Checking job $striptracks_jobid completion. Calling ${striptracks_type^} API using GET and URL '$url'" | log
   for ((i=1; i <= 15; i++)); do
     unset striptracks_result
@@ -404,7 +414,7 @@ function check_job {
       -H "Accept: application/json" \
       --get "$url")
     local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-      local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+      local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
       echo "$striptracks_message" | log
       echo "$striptracks_message" >&2
       local striptracks_return=10
@@ -443,7 +453,7 @@ function get_profiles {
     -H "Accept: application/json" \
     --get "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -466,7 +476,7 @@ function get_language_codes {
     -H "Accept: application/json" \
     --get "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -481,18 +491,28 @@ function get_language_codes {
 # Delete track
 function delete_video {
   local url="$striptracks_api_url/$striptracks_videofile_api/$1"
-  [ $striptracks_debug -ge 1 ] && echo "Debug|Deleting or recycling \"$striptracks_video\". Calling ${striptracks_type^} API using DELETE and URL '$url'" | log
-  unset striptracks_result
-  striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
-     -H "Content-Type: application/json" \
-     -H "Accept: application/json" \
-     -X DELETE "$url")
-  local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
-    echo "$striptracks_message" | log
-    echo "$striptracks_message" >&2
-  }
-  [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+  local i=0
+  for ((i=1; i <= 2; i++)); do
+    [ $striptracks_debug -ge 1 ] && echo "Debug|Deleting or recycling \"$striptracks_video\". Calling ${striptracks_type^} API using DELETE and URL '$url'" | log
+    unset striptracks_result
+    striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
+       -H "Content-Type: application/json" \
+       -H "Accept: application/json" \
+       -X DELETE "$url")
+    local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
+      local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
+      echo "$striptracks_message" | log
+      echo "$striptracks_message" >&2
+    }
+    [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+    # Exit loop if database is not locked, else wait 1 minute
+    if [[ ! "$(echo $striptracks_result | jq -jcrM .message?)" =~ database\ is\ locked ]]; then
+      break
+    else
+      [ $striptracks_debug -ge 1 ] && echo "Debug|Database is locked. Waiting 1 minute." | log
+      sleep 60
+    fi
+  done
   if [ $striptracks_curlret -eq 0 ]; then
     local striptracks_return=0
   else
@@ -517,7 +537,7 @@ function delete_video {
     # -d "filterExistingFiles=false" \
     # --get "$url")
   # local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    # local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url?${temp_id:+$temp_id&}folder=$striptracks_video_folder&filterExistingFiles=false\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    # local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url?${temp_id:+$temp_id&}folder=$striptracks_video_folder&filterExistingFiles=false\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     # echo "$striptracks_message" | log
     # echo "$striptracks_message" >&2
   # }
@@ -533,19 +553,29 @@ function delete_video {
 function set_metadata {
   local url="$striptracks_api_url/$striptracks_videofile_api/editor"
   local data="$(echo $striptracks_original_metadata | jq -crM "{${striptracks_videofile_api}Ids: [${striptracks_videofile_id}], quality, releaseGroup}")"
-  [ $striptracks_debug -ge 1 ] && echo "Debug|Updating from quality '$(echo $striptracks_videofile_info | jq -crM .quality.quality.name)' to '$(echo $striptracks_original_metadata | jq -crM .quality.quality.name)' and release group '$(echo $striptracks_videofile_info | jq -crM '.releaseGroup | select(. != null)')' to '$(echo $striptracks_original_metadata | jq -crM '.releaseGroup | select(. != null)')'. Calling ${striptracks_type^} API using PUT and URL '$url' with data $data" | log
-  unset striptracks_result
-  striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
-    -H "Content-Type: application/json" \
-		-H "Accept: application/json" \
-    -d "$data" \
-    -X PUT "$url")
-  local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
-    echo "$striptracks_message" | log
-    echo "$striptracks_message" >&2
-  }
-  [ $striptracks_debug -ge 3 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+  local i=0
+  for ((i=1; i <= 2; i++)); do
+    [ $striptracks_debug -ge 1 ] && echo "Debug|Updating from quality '$(echo $striptracks_videofile_info | jq -crM .quality.quality.name)' to '$(echo $striptracks_original_metadata | jq -crM .quality.quality.name)' and release group '$(echo $striptracks_videofile_info | jq -crM '.releaseGroup | select(. != null)')' to '$(echo $striptracks_original_metadata | jq -crM '.releaseGroup | select(. != null)')'. Calling ${striptracks_type^} API using PUT and URL '$url' with data $data" | log
+    unset striptracks_result
+    striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      -d "$data" \
+      -X PUT "$url")
+    local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
+      local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
+      echo "$striptracks_message" | log
+      echo "$striptracks_message" >&2
+    }
+    [ $striptracks_debug -ge 3 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+    # Exit loop if database is not locked, else wait 1 minute
+    if [[ ! "$(echo $striptracks_result | jq -jcrM .message?)" =~ database\ is\ locked ]]; then
+      break
+    else
+      [ $striptracks_debug -ge 1 ] && echo "Debug|Database is locked. Waiting 1 minute." | log
+      sleep 60
+    fi
+  done
   if [ $striptracks_curlret -eq 0 -a "${#striptracks_result}" != 0 ]; then
     local striptracks_return=0
   else
@@ -557,9 +587,9 @@ function set_metadata {
 function get_mediainfo {
   [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: /usr/bin/mkvmerge -J \"$1\"" | log
   unset striptracks_json
-  striptracks_json=$(/usr/bin/mkvmerge -J "$1")
+  striptracks_json=$(/usr/bin/mkvmerge -J "$1" 2>&1)
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message="Error|[$striptracks_curlret] Error executing mkvmerge."
+    local striptracks_message="Error|[$striptracks_curlret] Error executing mkvmerge. It returned: $striptracks_json"
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -584,7 +614,7 @@ function get_mediainfo {
     # -d "$data" \
     # "$url")
   # local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    # local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    # local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     # echo "$striptracks_message" | log
     # echo "$striptracks_message" >&2
   # }
@@ -608,7 +638,7 @@ function get_rename {
     -d "$data" \
     --get "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url&$data\"\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url&$data\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -633,7 +663,7 @@ function rename_video {
     -d "$data" \
     "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -657,7 +687,7 @@ function set_radarr_language {
     -d "$data" \
     -X PUT "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -681,7 +711,7 @@ function set_sonarr_language {
     -d "$data" \
     -X PUT "$url")
   local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
-    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -crM .message?)" | awk '{print "Error|"$0}')
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
   }
@@ -759,7 +789,7 @@ elif [ -f "$striptracks_arr_config" ]; then
   [[ $striptracks_bindaddress = "*" ]] && striptracks_bindaddress=localhost
 
   # Build URL to Radarr/Sonarr API
-  striptracks_api_url="http://$striptracks_bindaddress:$striptracks_port$striptracks_urlbase/api/v3"
+  striptracks_api_url="http://$striptracks_bindaddress:$striptracks_port${striptracks_urlbase:+/$striptracks_urlbase}/api/v3"
 
   # Check Radarr/Sonarr version
   if get_version; then
@@ -958,7 +988,11 @@ if get_mediainfo "$striptracks_video"; then
   [ $striptracks_debug -ge 1 ] && echo "$striptracks_json_processed" | awk '{print "Debug|"$0}' | log
 else
   # Get media info failed
-  striptracks_message="Error|Container format '$(echo $striptracks_json | jq -crM .container.type)' is unsupported by mkvmerge. Unable to continue."
+  if [ "$(echo $striptracks_json | jq -crM '.container.supported')" = "false" ]; then
+    striptracks_message="Error|Container format '$(echo $striptracks_json | jq -crM .container.type)' is unsupported by mkvmerge. Unable to continue."
+  else
+    striptracks_message="Error|mkvmerge error. Unable to continue."
+  fi
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
   end_script 9
