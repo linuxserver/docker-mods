@@ -67,7 +67,8 @@ for CONTAINER in ${AUTO_GEN}; do
             echo "**** Overriding proto as ${swag_proto} for ${CONTAINER} ****"
         fi
         if [ -n "${swag_url}" ]; then
-            sed -i "s|server_name .*|server_name ${swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            SED_swag_url=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_url}")
+            sed -i "s|server_name .*|server_name ${SED_swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Overriding url as ${swag_url} for ${CONTAINER} ****"
         fi
         if [ "${swag_auth}" == "authelia" ]; then
@@ -133,7 +134,8 @@ DUDE
         if [ -z "${swag_url}" ]; then
             swag_url="${CONTAINER}.*"
         fi
-        sed -i "s|server_name .*|server_name ${swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+        SED_swag_url=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_url}")
+        sed -i "s|server_name .*|server_name ${SED_swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
         echo "**** Setting url ${swag_url} for ${CONTAINER} ****"
         if [ "${swag_auth}" == "authelia" ]; then
             sed -i "s|#include /config/nginx/authelia|include /config/nginx/authelia|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
