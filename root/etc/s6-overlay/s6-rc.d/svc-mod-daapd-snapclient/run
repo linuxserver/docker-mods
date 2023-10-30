@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+exec \
+    snapclient --player file:filename=/music/snapclient,mode=w

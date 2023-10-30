@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+# Alpine
+if [ -f /sbin/apk ]; then
+    echo "snapcast-client" >> /mod-repo-packages-to-install.list
+fi

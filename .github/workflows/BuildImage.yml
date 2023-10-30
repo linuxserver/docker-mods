@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "user/endpoint"
+  ENDPOINT: "napnap75/mod-daapd-snapclient"
   BRANCH: "master"
 
 jobs:
