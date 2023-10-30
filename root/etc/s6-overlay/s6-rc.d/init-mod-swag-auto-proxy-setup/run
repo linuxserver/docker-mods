@@ -12,8 +12,7 @@ rm -rf /auto-proxy
 mkdir /auto-proxy
 
 if ! grep -q "/app/auto-proxy.sh" /config/crontabs/root; then
-    echo "*       *       *       *       *       /app/auto-proxy.sh" >> /config/crontabs/root
-    cp /config/crontabs/root /etc/crontabs/root
+    echo "*       *       *       *       *       /app/auto-proxy.sh" >> /etc/crontabs/root
 fi
 
 /app/auto-proxy.sh
