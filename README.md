@@ -16,6 +16,7 @@ This mod gives SWAG the ability to auto-detect running containers via labels and
 - `swag_url=containername.domain.com` - *optional* - overrides *server_name* (defaults to `containername.*`)
 - `swag_auth=authelia` - *optional* - enables auth methods (options are `authelia`, `authentik`, `ldap` and `http` for basic http auth)
 - `swag_auth_bypass=/api,/othersubfolder` - *optional* - bypasses auth for selected subfolders. Comma separated, no spaces.
+- `swag_server_custom_directive=custom_directive;` - *optional* - injects the label value as is into the server block of the generated conf. Must be a valid nginx directive, ending with a semi colon.
 
 
 In SWAG docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:universal-docker|linuxserver/mods:swag-auto-proxy` and either add a volume mapping for `/var/run/docker.sock:/var/run/docker.sock:ro`, or set an environment var `DOCKER_HOST=remoteaddress`.
