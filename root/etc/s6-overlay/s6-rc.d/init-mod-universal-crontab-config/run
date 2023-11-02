@@ -9,7 +9,7 @@ for cron_user in abc root; do
     # if crontabs do not exist in config
     if [[ ! -f "/config/crontabs/${cron_user}" ]]; then
         # copy crontab from system
-        if crontab -l -u "${cron_user}" >/dev/null; then
+        if crontab -l -u "${cron_user}" >/dev/null 2>&1; then
             crontab -l -u "${cron_user}" >"/config/crontabs/${cron_user}"
         fi
 
