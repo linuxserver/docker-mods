@@ -13,7 +13,7 @@ else
             AUTO_GEN="${CONTAINER} ${AUTO_GEN}"
         else
             INSPECTION=$(docker inspect ${CONTAINER})
-            for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass; do
+            for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass swag_server_custom_directive; do
                 VAR_VALUE=$(echo ${INSPECTION} | jq -r ".[0].Config.Labels[\"${VAR}\"]")
                 if [ "${VAR_VALUE}" == "null" ]; then
                     VAR_VALUE=""
@@ -40,7 +40,7 @@ fi
 for CONTAINER in ${AUTO_GEN}; do
     INSPECTION=$(docker inspect ${CONTAINER})
     rm -rf "/auto-proxy/${CONTAINER}.conf"
-    for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass; do
+    for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass swag_server_custom_directive; do
         VAR_VALUE=$(echo ${INSPECTION} | jq -r ".[0].Config.Labels[\"${VAR}\"]")
         if [ "${VAR_VALUE}" == "null" ]; then
             VAR_VALUE=""
@@ -67,8 +67,14 @@ for CONTAINER in ${AUTO_GEN}; do
             echo "**** Overriding proto as ${swag_proto} for ${CONTAINER} ****"
         fi
         if [ -n "${swag_url}" ]; then
-            sed -i "s|server_name .*|server_name ${swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            SED_swag_url=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_url}")
+            sed -i "s|server_name .*|server_name ${SED_swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Overriding url as ${swag_url} for ${CONTAINER} ****"
+        fi
+        if [ -n "${swag_server_custom_directive}" ]; then
+            SED_swag_server_custom_directive=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_server_custom_directive}")
+            sed -i -e '/include.*ssl.conf;/a\' -e "    ${SED_swag_server_custom_directive}" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Adding custom directive from the swag_server_custom_directive label for ${CONTAINER} ****"
         fi
         if [ "${swag_auth}" == "authelia" ]; then
             sed -i "s|#include /config/nginx/authelia|include /config/nginx/authelia|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
@@ -133,8 +139,14 @@ DUDE
         if [ -z "${swag_url}" ]; then
             swag_url="${CONTAINER}.*"
         fi
-        sed -i "s|server_name .*|server_name ${swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+        SED_swag_url=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_url}")
+        sed -i "s|server_name .*|server_name ${SED_swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
         echo "**** Setting url ${swag_url} for ${CONTAINER} ****"
+        if [ -n "${swag_server_custom_directive}" ]; then
+            SED_swag_server_custom_directive=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_server_custom_directive}")
+            sed -i -e '/include.*ssl.conf;/a\' -e "    ${SED_swag_server_custom_directive}" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Adding custom directive from the swag_server_custom_directive label for ${CONTAINER} ****"
+        fi
         if [ "${swag_auth}" == "authelia" ]; then
             sed -i "s|#include /config/nginx/authelia|include /config/nginx/authelia|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling Authelia for ${CONTAINER} ****"

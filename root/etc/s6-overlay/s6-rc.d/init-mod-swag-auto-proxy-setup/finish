@@ -1,4 +1,4 @@
 #!/usr/bin/with-contenv bash
 
-sed -i '/\/app\/auto-proxy.sh/d' /config/crontabs/root
+sed -i '/\/app\/auto-proxy.sh/d' /etc/crontabs/root
 rm -rf /etc/nginx/http.d/auto-proxy*.conf /config/nginx/proxy-confs/auto-proxy*.conf
