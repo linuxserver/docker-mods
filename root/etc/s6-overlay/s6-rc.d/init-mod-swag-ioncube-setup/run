@@ -12,9 +12,6 @@ else
   elif [ "${ARCH}" = "aarch64" ]; then 
     ARCH="aarch64" 
     echo "**** Linux architecture found: arm64 ****"
-  elif [ "${ARCH}" = "armv7l" ]; then 
-    ARCH="armv7l" 
-    echo "**** Linux architecture found: armhf ****"
   else
     echo "**** Unsupported Linux architecture ${ARCH} found, exiting... ****"
     exit 1
@@ -33,9 +30,9 @@ else
     && mkdir -p /usr/local/ioncube && cp /tmp/ioncube/*.so /usr/local/ioncube \
     && rm /tmp/ioncube_loaders_lin_${ARCH}.tar.gz && rm -rf /tmp/ioncube
   echo "**** Ioncube Loader extracted: /usr/local/ioncube ****"
-
+  PHP_FOLDER=$(php --ini | grep '/php.ini' | sed -r 's|.*(/etc/php.*)/php\.ini|\1|')
   echo "zend_extension = /usr/local/ioncube/ioncube_loader_lin_${PHP_MAJOR_VERSION}.${PHP_MINOR_VERSION}.so" \
-    > /etc/php${PHP_MAJOR_VERSION}/conf.d/00-ioncube.ini
+    > "${PHP_FOLDER}/conf.d/00-ioncube.ini"
   echo "**** Ioncube Loader PHP extension enabled: ioncube_loader_lin_${PHP_MAJOR_VERSION}.${PHP_MINOR_VERSION}.so ****"
 
   echo "**** Ioncube Loader Installed ****"
