@@ -22,7 +22,7 @@ if [ ! -f "/etc/apt/sources.list.d/amdgpu-focal.list" ]; then
 fi
 
 
-pkgs='mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 rocm-opencl-runtime'
+pkgs='mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers mesa-opencl-icd libdrm-radeon1 rocm-opencl-runtime'
 
 install=false
 for pkg in $pkgs; do
