@@ -1,9 +1,9 @@
 #!/usr/bin/with-contenv bash
 
 if [ -n "${LOGS_TO_STDOUT}" ]; then
-    IFS='|' read -ra PATH_ARRAY <<< "$LOGS_TO_STDOUT"
-    echo "Executing: tail -F ${PATH_ARRAY[@]}"
-    tail -F "${PATH_ARRAY[@]}"
+    IFS='|' read -ra TAIL_LOGS <<< "$LOGS_TO_STDOUT"
+    echo "Executing: tail -F ${TAIL_LOGS[@]}"
+    tail -F "${TAIL_LOGS[@]}"
 else
     echo "**** Env var LOGS_TO_STDOUT is not set, sleeping ****"
 fi
