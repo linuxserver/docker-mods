@@ -2,6 +2,11 @@
 
 # Determine if setup is needed
 if [ -d /dotnet ]; then
+    ARCH=$(uname -m)
+    if [[ "${ARCH}" = "armv7l" ]]; then
+        echo "**** The dotnet mod no longer supports arm32v7/armhf images, exiting ****"
+        exit 0
+    fi
     # install deps
     echo "**** Adding dotnet dependencies to package install list ****"
     source /etc/lsb-release
@@ -16,7 +21,6 @@ if [ -d /dotnet ]; then
         rm -rf /dotnet_*
     fi
     DOTNET_VERSIONS=$(cat /dotnet/versions.txt)
-    ARCH=$(uname -m)
     for i in $DOTNET_VERSIONS; do
         mkdir -p "/dotnet_${i}"
         tar xzf "/dotnet/dotnetsdk_${i}_${ARCH}.tar.gz" -C "/dotnet_${i}"

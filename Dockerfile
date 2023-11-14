@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.18 as buildstage
 
 ARG MOD_VERSION
 
@@ -18,14 +18,10 @@ RUN \
     DOTNET_RELEASE_URL=$(echo "${DOTNET_JSON}" | jq -r ".\"releases-index\"[] | select(.\"latest-sdk\"==\"${i}\") | .\"releases.json\"") && \
     DOTNET_RELEASE_JSON=$(curl -fSsLX GET "${DOTNET_RELEASE_URL}") && \
     AMD64_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-x64.tar.gz\")) | .url") && \
-    ARM32_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-arm.tar.gz\")) | .url") && \
     ARM64_URL=$(echo "${DOTNET_RELEASE_JSON}" | jq -r ".releases[] | select(.sdk.version==\"${i}\") | .sdk.files[] | select(.name | contains(\"linux-arm64.tar.gz\")) | .url") && \
     curl -fSL --retry 3 --retry-connrefused -o \
         /root-layer/dotnet/dotnetsdk_"${i}"_x86_64.tar.gz -L \
         "${AMD64_URL}" && \
-    curl -fSL --retry 3 --retry-connrefused -o \
-        /root-layer/dotnet/dotnetsdk_"${i}"_armv7l.tar.gz -L \
-        "${ARM32_URL}" && \
     curl -fSL --retry 3 --retry-connrefused -o \
         /root-layer/dotnet/dotnetsdk_"${i}"_aarch64.tar.gz -L \
         "${ARM64_URL}" || exit 1; \
