@@ -2,6 +2,11 @@
 # shellcheck shell=bash
 
 for cron_user in abc root; do
+    if [[ -f "/etc/crontabs/${cron_user}" ]]; then
+        lsiown "${cron_user}":"${cron_user}" "/etc/crontabs/${cron_user}"
+        crontab -u "${cron_user}" "/etc/crontabs/${cron_user}"
+    fi
+
     # make folders
     mkdir -p \
         /config/crontabs
