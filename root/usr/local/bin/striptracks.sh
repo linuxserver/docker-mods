@@ -22,6 +22,8 @@
 #  stat
 #  nice
 #  basename
+#  dirname
+#  mktemp
 
 # Exit codes:
 #  0 - success; or test
@@ -36,6 +38,7 @@
 #  9 - mkvmerge get media info failed
 # 10 - remuxing completed, but no output file found
 # 11 - source video had no audio or subtitle tracks
+# 12 - log file is not writable
 # 13 - awk script exited abnormally
 # 16 - could not delete the original file
 # 17 - Radarr/Sonarr API error
@@ -65,23 +68,27 @@ mode.
 Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
-  $0 [{-d|--debug} [<level>]] [[{-f|--file} <video_file>] {-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>]]
+  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-d|--debug} [<level>]]
 
 Options and Arguments:
-  -d, --debug [<level>]            enable debug logging
-                                   Level is optional, default of 1 (low)
-  -a, --audio <audio_languages>    audio languages to keep
+  -a, --audio <audio_languages>    Audio languages to keep
                                    ISO639-2 code(s) prefixed with a colon \`:\`
-                                   Multiple codes may be concatenated.
-  -s, --subs <subtitle_languages>  subtitles languages to keep
+                                   multiple codes may be concatenated.
+  -s, --subs <subtitle_languages>  Subtitles languages to keep
                                    ISO639-2 code(s) prefixed with a colon \`:\`
-                                   Multiple codes may be concatenated.
-  -f, --file <video_file>          if included, the script enters batch mode
+                                   multiple codes may be concatenated.
+  -f, --file <video_file>          If included, the script enters batch mode
                                    and converts the specified video file.
                                    WARNING: Do not use this argument when called
                                    from Radarr or Sonarr!
-      --help                       display this help and exit
-      --version                    display script version and exit
+  -l, --log <log_file>             Log filename
+                                   [default: /config/log/striptracks.txt]
+  -d, --debug [<level>]            Enable debug logging
+                                   level is optional, between 1-3
+                                   1 is lowest, 3 is highest
+                                   [default: 1]
+      --help                       Display this help and exit
+      --version                    Display script version and exit
       
 When audio_languages and subtitle_languages are omitted the script detects the
 audio or subtitle languages configured in the Radarr or Sonarr profile.  When
@@ -131,6 +138,16 @@ while (( "$#" )); do
       else
         export striptracks_debug=1
         shift
+      fi
+    ;;
+    -l|--log ) # Log file
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        export striptracks_log="$2"
+        shift 2
+      else
+        echo "Error|Invalid option: $1 requires an argument." >&2
+        usage
+        exit 1
       fi
     ;;
     --help ) # Display usage
@@ -263,7 +280,6 @@ else
 fi
 export striptracks_rescan_api="Rescan${striptracks_video_type^}"
 export striptracks_eventtype="${striptracks_type,,}_eventtype"
-export striptracks_tempvideo="${striptracks_video%.*}.tmp"
 export striptracks_newvideo="${striptracks_video%.*}.mkv"
 # If this were defined directly in Radarr or Sonarr this would not be needed here
 # shellcheck disable=SC2089
@@ -277,7 +293,7 @@ function log {(
   while read -r
   do
     # shellcheck disable=2046
-    echo $(date +"%Y-%-m-%-d %H:%M:%S.%1N")\|"[$striptracks_pid]$REPLY" >>"$striptracks_log"
+    echo $(date +"%Y-%-m-%-d %H:%M:%S.%1N")"|[$striptracks_pid]$REPLY" >>"$striptracks_log"
     local striptracks_filesize=$(stat -c %s "$striptracks_log")
     if [ $striptracks_filesize -gt $striptracks_maxlogsize ]
     then
@@ -734,6 +750,25 @@ function end_script {
 }
 ### End Functions
 
+# Check that log path exists
+if [ ! -d "$(dirname $striptracks_log)" ]; then
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Log file path does not exist: '$(dirname $striptracks_log)'. Using log file in current directory."
+  striptracks_log=./striptracks.txt
+fi
+
+# Check that the log file exists
+if [ ! -f "$striptracks_log" ]; then
+  echo "Info|Creating a new log file: $striptracks_log"
+  touch "$striptracks_log" 2>&1
+fi
+
+# Check that the log file is writable
+if [ ! -w "$striptracks_log" ]; then
+  echo "Error|Log file '$striptracks_log' is not writable or does not exist." >&2
+  striptracks_log=/dev/null
+  striptracks_exitstatus=12
+fi
+
 # Check for required binaries
 if [ ! -f "/usr/bin/mkvmerge" ]; then
   striptracks_message="Error|/usr/bin/mkvmerge is required by this script"
@@ -828,6 +863,12 @@ if [ ! -f "$striptracks_video" ]; then
   echo "$striptracks_message" >&2
   end_script 5
 fi
+
+# Create temporary filename
+striptracks_basename="$(basename -- "${striptracks_video}")"
+striptracks_fileroot="${striptracks_basename%.*}"
+export striptracks_tempvideo="$(dirname -- "${striptracks_video}")/$(mktemp -u -- "${striptracks_fileroot:0:5}.tmp.XXXXXX")"
+[ $striptracks_debug -ge 1 ] && echo "Debug|Using temporary file \"$striptracks_tempvideo\"" | log
 
 #### Prep work. Includes detect languages configured in Radarr/Sonarr, quality of video, etc.
 # Bypass if using batch mode
@@ -963,7 +1004,7 @@ fi
 
 #### BEGIN MAIN
 # shellcheck disable=SC2046
-striptracks_filesize=$(numfmt --to iec --format "%.3f" $(stat -c %s "$striptracks_video"))
+striptracks_filesize=$(stat -c %s "${striptracks_video}" | numfmt --to iec --format "%.3f")
 striptracks_message="Info|${striptracks_type^} event: ${!striptracks_eventtype}, Video: $striptracks_video, Size: $striptracks_filesize, AudioKeep: $striptracks_audiokeep, SubsKeep: $striptracks_subskeep"
 echo "$striptracks_message" | log
 
@@ -1172,6 +1213,14 @@ else
   }
 fi
 
+# Another check for the temporary file, to make sure it wasn't deleted
+if [ ! -f "$striptracks_tempvideo" ]; then
+  striptracks_message="Error|${striptracks_type^} deleted the temporary remuxed file: \"$striptracks_tempvideo\".  Halting."
+  echo "$striptracks_message" | log
+  echo "$striptracks_message" >&2
+  end_script 10
+fi
+
 # Rename the temporary video file to MKV
 [ $striptracks_debug -ge 1 ] && echo "Debug|Renaming: \"$striptracks_tempvideo\" to \"$striptracks_newvideo\"" | log
 mv -f "$striptracks_tempvideo" "$striptracks_newvideo" 2>&1 | log
@@ -1183,7 +1232,7 @@ striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
 }
 
 # shellcheck disable=SC2046
-striptracks_filesize=$(numfmt --to iec --format "%.3f" $(stat -c %s "$striptracks_newvideo"))
+striptracks_filesize=$(stat -c %s "${striptracks_newvideo}" | numfmt --to iec --format "%.3f")
 striptracks_message="Info|New size: $striptracks_filesize"
 echo "$striptracks_message" | log
 
