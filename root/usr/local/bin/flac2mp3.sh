@@ -14,15 +14,18 @@
 #  stat
 #  nice
 #  basename
+#  dirname
 #  printenv
 #  chmod
 #  tr
+#  sed
 
 # Exit codes:
 #  0 - success; or test
 #  1 - no audio tracks detected
 #  2 - ffmpeg not found
 #  3 - invalid command line arguments
+#  4 - log file is not writable
 #  5 - specified audio file not found
 #  6 - error when creating output directory
 #  7 - unknown eventtype environment variable
@@ -58,13 +61,9 @@ Audio conversion script designed for use with Lidarr
 Source: https://github.com/TheCaptain989/lidarr-flac2mp3
 
 Usage:
-  $0 [{-d|--debug} [<level>]] [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} \"<options>\" {-e|--extension} <extension>] [{-f|--file} <audio_file>] [{-k|--keepfile}] [{-o|--output} <directory>] [{-r|--regex} '<regex>'] [{-t|--tags} <taglist>]
+  $0 [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} \"<options>\" {-e|--extension} <extension>] [{-f|--file} <audio_file>] [{-k|--keep-file}] [{-o|--output} <directory>] [{-r|--regex} '<regex>'] [{-t|--tags} <taglist>] [{-l|--log} <log_file>] [{-d|--debug} [<level>]]
 
 Options:
-  -d, --debug [<level>]         Enable debug logging
-                                level is optional, between 1-3
-                                1 is lowest, 3 is highest
-                                [default: 1]
   -b, --bitrate <bitrate>       Set output quality in constant bits per second
                                 [default: 320k]
                                 Ex: 160k, 240k, 300000
@@ -102,6 +101,12 @@ Options:
   -t, --tags <taglist>          Comma separated list of metadata tags to apply
                                 automated corrections to.
                                 Supports: disc, genre
+  -l, --log <log_file>          log filename
+                                [default: /config/log/flac2mp3.txt]
+  -d, --debug [<level>]         Enable debug logging
+                                level is optional, between 1-3
+                                1 is lowest, 3 is highest
+                                [default: 1]
       --help                    Display this help and exit
       --version                 Display script version and exit
 
@@ -162,6 +167,16 @@ while (( "$#" )); do
     --version ) # Display version
       echo "$flac2mp3_script $flac2mp3_ver"
       exit 0
+    ;;
+    -l|--log ) # Log file
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        export flac2mp3_log="$2"
+        shift 2
+      else
+        echo "Error|Invalid option: $1 requires an argument." >&2
+        usage
+        exit 1
+      fi
     ;;
     -f|--file ) # Batch Mode
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
@@ -277,7 +292,7 @@ while (( "$#" )); do
         exit 3
       fi
     ;;
-    -*|--*=) # Unknown option
+    -*) # Unknown option
       echo "Error|Unknown option: $1" >&2
       usage
       exit 20
@@ -508,9 +523,9 @@ function import_tracks {
 }
 # Get track media info from ffprobe
 function ffprobe {
-  [ $flac2mp3_debug -ge 2 ] && echo "Debug|Executing: /usr/bin/ffprobe -hide_banner -loglevel $flac2mp3_ffmpeg_log -print_format json=compact=1 -show_format -show_entries \"format=tags : format_tags=disc,genre\" -i \"$1\"" | log
+  [ $flac2mp3_debug -ge 2 ] && echo "Debug|Executing: /usr/bin/ffprobe -hide_banner -loglevel $flac2mp3_ffmpeg_log -print_format json=compact=1 -show_format -show_entries \"format=tags : format_tags=title,disc,genre\" -i \"$1\"" | log
   unset flac2mp3_ffprobe_json
-  flac2mp3_ffprobe_json=$(/usr/bin/ffprobe -hide_banner -loglevel $flac2mp3_ffmpeg_log -print_format json=compact=1 -show_format -show_entries "format=tags : format_tags=disc,genre" -i "$1")
+  flac2mp3_ffprobe_json=$(/usr/bin/ffprobe -hide_banner -loglevel $flac2mp3_ffmpeg_log -print_format json=compact=1 -show_format -show_entries "format=tags : format_tags=title,disc,genre" -i "$1")
   flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
     flac2mp3_message="Error|[$flac2mp3_return] ffprobe error when inspecting track: \"$1\""
     echo "$flac2mp3_message" | log
@@ -524,20 +539,48 @@ function ffprobe {
   fi
   return $flac2mp3_return
 }
+# Exit program
+function end_script {
+  # Cool bash feature
+  flac2mp3_message="Info|Completed in $((SECONDS/60))m $((SECONDS%60))s"
+  echo "$flac2mp3_message" | log
+  [ "$1" != "" ] && flac2mp3_exitstatus=$1
+  [ $flac2mp3_debug -ge 1 ] && echo "Debug|Exit code ${flac2mp3_exitstatus:-0}" | log
+  exit ${flac2mp3_exitstatus:-0}
+}
 ### End Functions
+
+# Check that log path exists
+if [ ! -d "$(dirname $flac2mp3_log)" ]; then
+  [ $flac2mp3_debug -ge 1 ] && echo "Debug|Log file path does not exist: '$(dirname $flac2mp3_log)'. Using log file in current directory."
+  flac2mp3_log=./flac2mp3.txt
+fi
+
+# Check that the log file exists
+if [ ! -f "$flac2mp3_log" ]; then
+  echo "Info|Creating a new log file: $flac2mp3_log"
+  touch "$flac2mp3_log" 2>&1
+fi
+
+# Check that the log file is writable
+if [ ! -w "$flac2mp3_log" ]; then
+  echo "Error|Log file '$flac2mp3_log' is not writable or does not exist." >&2
+  flac2mp3_log=/dev/null
+  flac2mp3_exitstatus=4
+fi
 
 # Check for required binaries
 if [ ! -f "/usr/bin/ffmpeg" ]; then
   flac2mp3_message="Error|/usr/bin/ffmpeg is required by this script"
   echo "$flac2mp3_message" | log
   echo "$flac2mp3_message" >&2
-  exit 2
+  end_script 2
 fi
 if [ ! -f "/usr/bin/ffprobe" ]; then
   flac2mp3_message="Error|/usr/bin/ffprobe is required by this script"
   echo "$flac2mp3_message" | log
   echo "$flac2mp3_message" >&2
-  exit 2
+  end_script 2
 fi
 
 # Log Debug state
@@ -563,7 +606,7 @@ if [[ "$lidarr_eventtype" = "Test" ]]; then
   flac2mp3_message="Info|Script was test executed successfully."
   echo "$flac2mp3_message" | log
   echo "$flac2mp3_message"
-  exit 0
+  end_script
 fi
 
 # Log Batch mode
@@ -588,7 +631,7 @@ elif [ -f "$flac2mp3_config" ]; then
   [[ $flac2mp3_bindaddress = "*" ]] && flac2mp3_bindaddress=localhost
 
   # Build URL to Lidarr API
-  flac2mp3_api_url="http://$flac2mp3_bindaddress:$flac2mp3_port$flac2mp3_urlbase/api/v1"
+  flac2mp3_api_url="http://$flac2mp3_bindaddress:$flac2mp3_port${flac2mp3_urlbase:+/$flac2mp3_urlbase}/api/v1"
 
   # Check Lidarr version
   if get_version; then
@@ -616,7 +659,7 @@ if [ "$flac2mp3_type" = "batch" -a ! -f "$flac2mp3_tracks" ]; then
   flac2mp3_message="Error|Input file not found: \"$flac2mp3_tracks\""
   echo "$flac2mp3_message" | log
   echo "$flac2mp3_message" >&2
-  exit 5
+  end_script 5
 fi
 
 # Check for empty tracks variable
@@ -624,7 +667,7 @@ if [ -z "$flac2mp3_tracks" ]; then
   flac2mp3_message="Error|No audio tracks were detected or specified!"
   echo "$flac2mp3_message" | log
   echo "$flac2mp3_message" >&2
-  exit 1
+  end_script 1
 fi
 
 # If specified, check if destination folder exists and create if necessary
@@ -635,7 +678,7 @@ if [ "$flac2mp3_output" -a ! -d "$flac2mp3_output" ]; then
     flac2mp3_message="Error|[$flac2mp3_return] mkdir returned an error. Unable to create output directory."
     echo "$flac2mp3_message" | log
     echo "$flac2mp3_message" >&2
-    exit 6
+    end_script 6
   }
 fi
 
@@ -724,15 +767,23 @@ for flac2mp3_track in $flac2mp3_tracks; do
     if ffprobe "$flac2mp3_track"; then
       for flac2mp3_tag in $(echo $flac2mp3_tags | tr ',' '|'); do
         case "$flac2mp3_tag" in
+          title )  # Fix for parenthesis in titles for live and mix names
+            flac2mp3_tag_title=$(echo "$flac2mp3_ffprobe_json" | jq -crM '.format.tags | to_entries[] | select(.key | match("title"; "i")).value')
+            [ $flac2mp3_debug -ge 1 ] && echo "Debug|Original metadata: title=$flac2mp3_tag_title" | log
+            flac2mp3_pattern='\([^)]+\)$'      # Rough way to limit editing metadata for every track
+            if [[ "$flac2mp3_tag_title" =~ $flac2mp3_pattern ]]; then
+              flac2mp3_ffmpeg_metadata+="-metadata title=\"$(echo "$flac2mp3_tag_title" | sed -r 's/\((live|acoustic|demo|[^)]*((re)?mix(es)?|dub|version))\)$/[\1]/i')\" "
+            fi
+          ;;
           disc )   # Fix one disc by itself
-            flac2mp3_tag_disc=$(echo "$flac2mp3_ffprobe_json" | jq -crM '.format.tags.disc')
+            flac2mp3_tag_disc=$(echo "$flac2mp3_ffprobe_json" | jq -crM '.format.tags | to_entries[] | select(.key | match("disc"; "i")).value')
             [ $flac2mp3_debug -ge 1 ] && echo "Debug|Original metadata: disc=$flac2mp3_tag_disc" | log
             if [ "$flac2mp3_tag_disc" == "1" ]; then
               flac2mp3_ffmpeg_metadata+='-metadata disc="1/1" '
             fi
           ;;
           genre )   # Fix multiple genres
-            flac2mp3_tag_genre=$(echo "$flac2mp3_ffprobe_json" | jq -crM '.format.tags | to_entries[] | select(.key | match("genre";"i")).value')
+            flac2mp3_tag_genre=$(echo "$flac2mp3_ffprobe_json" | jq -crM '.format.tags | to_entries[] | select(.key | match("genre"; "i")).value')
             [ $flac2mp3_debug -ge 1 ] && echo "Debug|Original metadata: genre=$flac2mp3_tag_genre" | log
             # Only trigger on multiple genres
             if [[ $flac2mp3_tag_genre =~ \; ]]; then
@@ -821,9 +872,6 @@ for flac2mp3_track in $flac2mp3_tracks; do
   flac2mp3_import_list+="${flac2mp3_newTrack}|"
 done
 IFS=$' \t\n'
-# Remove trailing pipe
-flac2mp3_import_list="${flac2mp3_import_list%|}"
-[ $flac2mp3_debug -ge 1 ] && echo "Debug|Track import list: \"$flac2mp3_import_list\"" | log
 #### END MAIN
 
 #### Call Lidarr API to update database
@@ -835,6 +883,9 @@ elif [ $flac2mp3_keep -eq 1 ]; then
 elif [ -n "$flac2mp3_api_url" ]; then
   # Check for artist ID
   if [ -n "$lidarr_artist_id" ]; then
+    # Remove trailing pipe
+    flac2mp3_import_list="${flac2mp3_import_list%|}"
+    [ $flac2mp3_debug -ge 1 ] && echo "Debug|Track import list: \"$flac2mp3_import_list\"" | log
     # Scan for files to import into Lidarr
     export flac2mp3_import_count=$(echo $flac2mp3_import_list |  awk -F\| '{print NF}')
     if [ $flac2mp3_import_count -ne 0 ]; then
@@ -906,8 +957,4 @@ else
   flac2mp3_exitstatus=20
 fi
 
-# Cool bash feature
-flac2mp3_message="Info|Completed in $(($SECONDS/60))m $(($SECONDS%60))s"
-echo "$flac2mp3_message" | log
-[ $flac2mp3_debug -ge 1 ] && echo "Debug|Exit code ${flac2mp3_exitstatus:-0}" | log
-exit ${flac2mp3_exitstatus:-0}
+end_script
