@@ -20,7 +20,7 @@ jobs:
           echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_OUTPUT
           echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_OUTPUT
           # **** If the mod needs to be versioned, set the versioning logic below. Otherwise leave as is. ****
-          MOD_VERSION=$(curl -s https://api.github.com/repos/ronggang/transmission-web-control/releases/latest | jq -rc ".tag_name")
+          MOD_VERSION=$(curl -s https://api.github.com/repos/transmission-web-control/transmission-web-control/releases/latest | jq -rc ".tag_name")
           echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_OUTPUT
     outputs:
       GITHUB_REPO: ${{ steps.outputs.outputs.GITHUB_REPO }}
