@@ -6,9 +6,9 @@ This mod adds a python script that sends geo location metrics from the nginx acc
 ![](.assets/geoip2influx.png)
 
 
-The mod will parse the access log for IPs and and convert them into geo metrics for InfluxDB. It will also send log metrics if enabled.
+The mod will parse the access log for IPs and and convert them into geo metrics for InfluxDB. It will also send log metrics if enabled. This mod depends on the [swag-maxmind-mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind)!
 
-Add `-e DOCKER_MODS=linuxserver/mods:swag-geoip2influx`
+Add `-e DOCKER_MODS=linuxserver/mods:swag-geoip2influx|linuxserver/mods:swag-maxmind`
 
 ## Enviroment variables:
 
@@ -29,14 +29,8 @@ Add the ones that differ on your system.
 | GEOIP2INFLUX_LOG_LEVEL | info | Optional. Sets the log level in geoip2influx.log. Use `debug` for verbose logging Optional, defaults to info. |
 | INFLUX_RETENTION | 7d | Optional. Sets the retention for the database. Defaults to example.|
 | INFLUX_SHARD | 1d | Optional. Set the shard for the database. Defaults to example. |
-| MAXMINDDB_LICENSE_KEY | xxxxxxx | Add your Maxmind licence key |
 
 ***
-### MaxMind Geolite2
-
-Default download location is `/config/geoip2db/GeoLite2-City.mmdb`
-
-Get your licence key here: https://www.maxmind.com/en/geolite2/signup
 
 ### InfluxDB 
 
@@ -53,7 +47,7 @@ The InfluxDB database will be created automatically with the name you choose.
 
 ## Sending Nginx log metrics
 
-1. Uncomment the Geoip2 config in `nginx.conf`
+1. Setup the [swag-maxmind-mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind)
 
 2. Add the following to the http block in your `nginx.conf`file:
 
