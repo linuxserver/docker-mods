@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+export NEXTCLOUD_URL="https://localhost"
+export ALLOW_SELF_SIGNED=true
+NEXTCLOUD_BASE="/config/www/nextcloud"
+NOTIFY_PUSH_BIN="$NEXTCLOUD_BASE/apps/notify_push/bin/$(arch)/notify_push"
+
+# run notify-push binary 
+echo "**** Starting notify-push ****"
+s6-setuidgid abc "$NOTIFY_PUSH_BIN" "$NEXTCLOUD_BASE/config/config.php"

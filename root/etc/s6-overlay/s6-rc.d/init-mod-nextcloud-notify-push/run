@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+
+NEXTCLOUD_BASE="/config/www/nextcloud"
+NOTIFY_PUSH_BIN="$NEXTCLOUD_BASE/apps/notify_push/bin/$(arch)/notify_push"
+
+# Check if notify-push is installed
+if [ ! -d "$NEXTCLOUD_BASE/apps/notify_push/" ]; then
+  echo "**** Notify-push folder not found. Download and install the notify-push/client-push app and restart the container. ****"
+  exit 1
+fi 
+# Check cpu arch
+if [ ! -f "$NOTIFY_PUSH_BIN" ]; then
+  echo "**** Did not find a matching notify-push binary for your cpu arch: $(arch) ****"
+  exit 1
+fi
