@@ -239,6 +239,7 @@ get_auth_url() {
     local scope
     # Call to get manifests and extract www-authenticate header
     auth_header=$(curl -sLI ${CURL_NOISE_LEVEL} "${1}/${2}" | grep -i www-authenticate | tr -d '\r')
+    write_debug "${auth_header}"
     if [[ -n "${auth_header}" ]]; then
         # Extract realm URL from www-authenticate header
         realm_url=$(echo "$auth_header" | grep -oP 'realm="\K[^"]+')
