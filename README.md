@@ -2,6 +2,7 @@
 
 These files are used by Linuxserver build processes to handle mods in our images. Not for end-user consumption.
 
+* **03.01.24:** - Support arbitrary mod registries.
 * **14.09.23:** - Fix lsiown edge cases.
 * **08.09.23:** - Change lsiown to skip files that are already owned by the user.
 * **25.05.23:** - Add lscr.io support for mods.
