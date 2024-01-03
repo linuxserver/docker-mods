@@ -4,7 +4,7 @@
 # Use /command/with-contenv shebang because /usr/bin/with-contenv is created in this script
 
 # Version 3
-# 2022-09-25
+# 2022-09-25 - Initial Release
 MOD_SCRIPT_VER="3"
 
 # Define custom folder paths
@@ -189,6 +189,11 @@ curl_check() {
     fi
 }
 
+write_debug() {
+    local MSG=$@
+    if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo "[mod-init] (DEBUG) $MSG"; fi
+}
+
 # Use different filtering depending on URL
 get_blob_sha() {
     MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
@@ -227,6 +232,20 @@ get_blob_sha() {
     fi
 }
 
+get_auth_url() {
+    # Call to get manifests and extract www-authenticate header
+    local auth_header=$(curl -sLI ${CURL_NOISE_LEVEL} "${1}/${2}" | grep -i www-authenticate | tr -d '\r')
+    if [[ -n "${auth_header}" ]]; then
+        # Extract realm URL from www-authenticate header
+        local realm_url=$(echo "$auth_header" | grep -oP 'realm="\K[^"]+')
+        local service=$(echo "$auth_header" | grep -oP 'service="\K[^"]+')
+        local scope=$(echo "$auth_header" | grep -oP 'scope="\K[^"]+')
+        echo "$realm_url?service=$service&scope=$scope"
+    else
+        exit 1
+    fi
+}
+
 # Main run logic
 run_mods() {
     echo "[mod-init] Attempting to run Docker Modification Logic"
@@ -244,24 +263,15 @@ run_mods() {
             [[ ${DOCKER_MODS_FORCE_REGISTRY,,} = "true" ]] && REGISTRY="ghcr.io" || REGISTRY="lscr.io"
             DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
             ;;
-        lscr.io/* )
-            REGISTRY="lscr.io"
-            DOCKER_MOD="${DOCKER_MOD#lscr.io/*}"
-            ;;
-        ghcr.io/* )
-            REGISTRY="ghcr.io"
-            DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
-            ;;
-        quay.io/* )
-            REGISTRY="quay.io"
-            DOCKER_MOD="${DOCKER_MOD#quay.io/*}"
-            ;;
-        docker.io/* )
-            REGISTRY="registry-1.docker.io"
-            DOCKER_MOD="${DOCKER_MOD#docker.io/*}"
-            ;;
         * )
-            REGISTRY="registry-1.docker.io"
+            if [[ $DOCKER_MOD == */* ]]; then
+                REGISTRY="registry-1.docker.io"
+                MOD="${DOCKER_MOD%/*}"
+            fi
+            if [[ $MOD == */* ]]; then
+                REGISTRY="${MOD%%/*}"
+                DOCKER_MOD="${DOCKER_MOD#"$REGISTRY"/*}"
+            fi
             ;;
         esac
         ENDPOINT="${DOCKER_MOD%%:*}"
@@ -275,12 +285,15 @@ run_mods() {
         MANIFEST_URL="https://${REGISTRY}/v2/${ENDPOINT}/manifests"
         BLOB_URL="https://${REGISTRY}/v2/${ENDPOINT}/blobs/"
         MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${REGISTRY}/${ENDPOINT}:${TAG}"
+        write_debug "Registry='${REGISTRY}', Repository='${USERNAME}', Image='${ENDPOINT}', Tag='${TAG}'"
         case "${REGISTRY}" in
             "lscr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "ghcr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "quay.io") AUTH_URL="https://quay.io/v2/auth?service=quay.io&scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "registry-1.docker.io") AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull";;
+            *) get_auth_url "${MANIFEST_URL}" "${TAG}"
         esac
+        if [[ -z "${AUTH_URL}" ]]; then echo "[mod-init] Could not fetch auth URL from registry, skipping mod";fi
         # Kill off modification logic if any of the usernames are banned
         for BANNED in $(curl -s https://raw.githubusercontent.com/linuxserver/docker-mods/master/blacklist.txt); do
             if [[ "${BANNED,,}" == "${USERNAME,,}" ]]; then
@@ -304,6 +317,7 @@ run_mods() {
         # If we're using lscr try and get the manifest from ghcr, if it fails re-request a token from Docker Hub
         if [[ "${REGISTRY}" == "lscr.io" ]]; then
             if [[ -n $(curl --user-agent "${MOD_UA}" -sLH "Authorization: Bearer ${TOKEN}" "${MANIFEST_URL}/${TAG}" | jq -r '.errors' >/dev/null 2>&1) ]]; then
+                write_debug "Couldn't fetch manifest from ghcr.io, trying docker.io"
                 AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
                 TOKEN="$(
                     curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
@@ -314,9 +328,7 @@ run_mods() {
                 )"
             fi
         fi
-        if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
-            echo "[mod-init] Using ${AUTH_URL} as auth endpoint"
-        fi
+        write_debug "Using ${AUTH_URL} as auth endpoint"
         # Determine first and only layer of image
         SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}")
         if [[ -z "${SHALAYER}" ]]; then
@@ -363,17 +375,54 @@ run_mods() {
     done
 }
 
+run_mods_local() {
+    echo "[mod-init] Attempting to run Local Docker Modification Logic"
+    for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
+        # Check mod file exists
+        if [[ -n "$(/bin/ls -A "/mods/${DOCKER_MOD}.tar" 2>/dev/null)" ]]; then
+            # Caculate mod bits
+            FILENAME="${DOCKER_MOD}.local"
+            SHALAYER=$(sha256sum "/mods/${DOCKER_MOD}.tar" | cut -d " " -f 1)
+            # Check if we have allready applied this layer
+            if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
+                echo "[mod-init] ${DOCKER_MOD} at ${SHALAYER} has been previously applied, skipping"
+            else
+                echo "[mod-init] Installing ${DOCKER_MOD}"
+                mkdir -p "/tmp/mod/${DOCKER_MOD}"
+                tar xf "/mods/${DOCKER_MOD}.tar" -C /tmp/mod --strip-components=1
+                tar xf "/tmp/mod/layer.tar" -C "/tmp/mod/${DOCKER_MOD}"
+                if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/s6-overlay" ]]; then
+                    if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d" ]]; then
+                        rm -rf "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d"
+                    fi
+                    if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/services.d" ]]; then
+                        rm -rf "/tmp/mod/${DOCKER_MOD}/etc/services.d"
+                    fi
+                fi
+                shopt -s dotglob
+                cp -R "/tmp/mod/${DOCKER_MOD}"/* /
+                shopt -u dotglob
+                rm -rf "/tmp/mod/${DOCKER_MOD}"
+                echo "${SHALAYER}" >"/${FILENAME}.local"
+                echo "[mod-init] ${DOCKER_MOD} applied to container"
+            fi
+        else
+            echo "[mod-init] ${DOCKER_MOD}.tar not found in /mods, skipping"
+        fi
+    done
+}
+
 run_branding() {
   # intentional tabs in the heredoc
   cat <<-EOF >/etc/s6-overlay/s6-rc.d/init-adduser/branding
 	───────────────────────────────────────
 
-	      ██╗     ███████╗██╗ ██████╗ 
+	      ██╗     ███████╗██╗ ██████╗
 	      ██║     ██╔════╝██║██╔═══██╗
 	      ██║     ███████╗██║██║   ██║
 	      ██║     ╚════██║██║██║   ██║
 	      ███████╗███████║██║╚██████╔╝
-	      ╚══════╝╚══════╝╚═╝ ╚═════╝ 
+	      ╚══════╝╚══════╝╚═╝ ╚═════╝
 
 	   Brought to you by linuxserver.io
 	───────────────────────────────────────
@@ -396,7 +445,9 @@ if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
 fi
 
 # Run mod logic
-if [[ -n "${DOCKER_MODS+x}" ]]; then
+if [[ -n "${DOCKER_MODS+x}" ]] && [[ "${DOCKER_MODS_SIDELOAD,,}" = "true" ]]; then
+    run_mods_local
+elif [[ -n "${DOCKER_MODS+x}" ]]; then
     curl_check
     run_mods
 fi
