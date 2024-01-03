@@ -1,12 +1,13 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 ARG MOD_VERSION
 
 RUN \
   if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -sL https://julialang.org/downloads/ \
+      | grep 'Current stable release:' \
       | sed 's|.*Current stable release: v||' \
       | sed 's| (.*||'); \
   fi && \
