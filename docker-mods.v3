@@ -190,7 +190,7 @@ curl_check() {
 }
 
 write_debug() {
-    local MSG=$@
+    local MSG=$*
     if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo "[mod-init] (DEBUG) $MSG"; fi
 }
 
@@ -233,13 +233,17 @@ get_blob_sha() {
 }
 
 get_auth_url() {
+    local auth_header
+    local realm_url
+    local service
+    local scope
     # Call to get manifests and extract www-authenticate header
-    local auth_header=$(curl -sLI ${CURL_NOISE_LEVEL} "${1}/${2}" | grep -i www-authenticate | tr -d '\r')
+    auth_header=$(curl -sLI ${CURL_NOISE_LEVEL} "${1}/${2}" | grep -i www-authenticate | tr -d '\r')
     if [[ -n "${auth_header}" ]]; then
         # Extract realm URL from www-authenticate header
-        local realm_url=$(echo "$auth_header" | grep -oP 'realm="\K[^"]+')
-        local service=$(echo "$auth_header" | grep -oP 'service="\K[^"]+')
-        local scope=$(echo "$auth_header" | grep -oP 'scope="\K[^"]+')
+        realm_url=$(echo "$auth_header" | grep -oP 'realm="\K[^"]+')
+        service=$(echo "$auth_header" | grep -oP 'service="\K[^"]+')
+        scope=$(echo "$auth_header" | grep -oP 'scope="\K[^"]+')
         echo "$realm_url?service=$service&scope=$scope"
     else
         exit 1
