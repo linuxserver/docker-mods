@@ -264,13 +264,17 @@ run_mods() {
             DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
             ;;
         * )
-            if [[ $DOCKER_MOD == */* ]]; then
-                REGISTRY="registry-1.docker.io"
-                MOD="${DOCKER_MOD%/*}"
-            fi
+            # Default assumption is docker.io
+            REGISTRY="registry-1.docker.io"
+            MOD="${DOCKER_MOD%/*}"
+            # If mod still has a / after stripping off the image name it's not docker.io
             if [[ $MOD == */* ]]; then
                 REGISTRY="${MOD%%/*}"
                 DOCKER_MOD="${DOCKER_MOD#"$REGISTRY"/*}"
+            # If "repo" name has . in it, then assume it's actually a registry with no repo
+            elif [[ ${DOCKER_MOD%%/*} =~ \. ]]; then
+                REGISTRY="${DOCKER_MOD%%/*}"
+                MOD="${DOCKER_MOD##*/}"
             fi
             ;;
         esac
