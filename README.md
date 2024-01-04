@@ -12,5 +12,4 @@ Supported  architectures:
 - [x] linux/aarch64
 
 Supported docker base images:
-- [x] ubuntu:jammy (tested)
-- [x] alpine (untested)
+- [x] ubuntu:jammy

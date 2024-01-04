@@ -3,7 +3,6 @@
 set -e
 
 RUST_BINS_PATH="/rust-bins"
-ALPINE_RELEASE_PATH="/etc/alpine-release"
 PACKAGES_TO_INSTALL_LIST="/mod-repo-packages-to-install.list"
 
 ARCH=$(uname -m)
@@ -14,22 +13,15 @@ if [[ ! " ${SUPPORTED_ARCHS[@]} " =~ " ${ARCH} " ]]; then
   exit 1
 fi
 
-MUSL_OR_GNU=$(ldd /bin/sh | grep -q musl && echo "musl" || echo "gnu")
-RUST_BINARY_ARCHIVE_PATH="$RUST_BINS_PATH/rust-$ARCH-$MUSL_OR_GNU.tar.gz"
+RUST_BINARY_ARCHIVE_PATH="$RUST_BINS_PATH/rust-$ARCH-gnu.tar.gz"
 
 grep_os_release() {
-  grep -q "$1" /etc/os-release && echo true || echo false
+  grep -q "$1" /etc/os-release && true || false
 }
 
 if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
   echo "+++ unpacking rust tar +++"
   tar -xzf "$RUST_BINARY_ARCHIVE_PATH" -C "$RUST_BINS_PATH" --strip-components=1
-
-  if [[ -f "$ALPINE_RELEASE_PATH" ]]; then
-    # in alpine ldconfig requires the configuration directory
-    sed -i 's/ldconfig/ldconfig \/etc\/ld.so.conf.d/g' "$RUST_BINS_PATH/install.sh"
-  fi
-
 
   echo "+++ installing rust +++"
   "$RUST_BINS_PATH/install.sh"
@@ -38,8 +30,6 @@ if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
   echo "+++ adding build tools +++"
   if grep_os_release "debian"; then
     echo "build-essential" >>"$PACKAGES_TO_INSTALL_LIST"
-  elif grep_os_release "alpine"; then
-    echo "build-base" >>"$PACKAGES_TO_INSTALL_LIST"
   else
     echo "gcc" >>"$PACKAGES_TO_INSTALL_LIST"
   fi
