@@ -2,11 +2,6 @@
 
 set -e
 
-if command -v rustc >/dev/null 2>&1; then
-  echo "+++ rust is already installed +++"
-  exit 0
-fi
-
 RUST_BINS_PATH="/rust-bins"
 PACKAGES_TO_INSTALL_LIST="/mod-repo-packages-to-install.list"
 
@@ -14,7 +9,7 @@ ARCH=$(uname -m)
 SUPPORTED_ARCHS=("x86_64" "aarch64")
 
 if [[ ! " ${SUPPORTED_ARCHS[@]} " =~ " ${ARCH} " ]]; then
-  echo "+++ unsupported architecture: $ARCH +++"
+  echo "**** unsupported architecture: $ARCH ****"
   exit 1
 fi
 
@@ -25,20 +20,19 @@ grep_os_release() {
 }
 
 if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
-  echo "+++ unpacking rust tar +++"
+  echo "**** unpacking rust tar ****"
   tar -xzf "$RUST_BINARY_ARCHIVE_PATH" -C "$RUST_BINS_PATH" --strip-components=1
 
-  echo "+++ installing rust +++"
+  echo "**** installing rust ****"
   "$RUST_BINS_PATH/install.sh"
   rm -rf "$RUST_BINS_PATH"
 
-  echo "+++ adding build tools +++"
+  echo "**** adding build tools ****"
   if grep_os_release "debian"; then
     echo "build-essential" >>"$PACKAGES_TO_INSTALL_LIST"
   else
     echo "gcc" >>"$PACKAGES_TO_INSTALL_LIST"
   fi
-
 else
-  echo "+++ rust tar not found +++"
+  echo "**** rust already installed ****"
 fi
