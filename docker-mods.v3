@@ -161,7 +161,7 @@ create_with_contenv_alias() {
 # Check for curl
 curl_check() {
     if [[ ! -f /usr/bin/curl ]] || [[ ! -f /usr/bin/jq ]]; then
-        write_mod_info "[mod-init] Curl/JQ was not found on this system for Docker mods installing"
+        write_mod_info "Curl/JQ was not found on this system for Docker mods installing"
         if [[ -f /usr/bin/apt ]]; then
             # Ubuntu
             export DEBIAN_FRONTEND="noninteractive"
@@ -473,10 +473,6 @@ create_lsiown_alias
 create_with_contenv_alias
 
 # Main script loop
-
-if [[ ${S6_VERBOSITY} -ge 2 ]]; then
-    echo "[mod-init] Version ${MOD_SCRIPT_VER}"
-fi
 
 if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
     tamper_check
