@@ -13,11 +13,14 @@ if [[ ! " ${SUPPORTED_ARCHS[@]} " =~ " ${ARCH} " ]]; then
   exit 1
 fi
 
-RUST_BINARY_ARCHIVE_PATH="$RUST_BINS_PATH/rust-$ARCH-gnu.tar.gz"
+if ! dpkg -l | grep build-essential >/dev/null; then
+  echo "**** adding build-essential to install list ****"
+  echo "build-essential" >>"$PACKAGES_TO_INSTALL_LIST"
+else
+  echo "**** build-essential already installed ****"
+fi
 
-grep_os_release() {
-  grep -q "$1" /etc/os-release && true || false
-}
+RUST_BINARY_ARCHIVE_PATH="$RUST_BINS_PATH/rust-$ARCH-gnu.tar.gz"
 
 if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
   echo "**** unpacking rust tar ****"
@@ -26,13 +29,6 @@ if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
   echo "**** installing rust ****"
   "$RUST_BINS_PATH/install.sh"
   rm -rf "$RUST_BINS_PATH"
-
-  echo "**** adding build tools ****"
-  if grep_os_release "debian"; then
-    echo "build-essential" >>"$PACKAGES_TO_INSTALL_LIST"
-  else
-    echo "gcc" >>"$PACKAGES_TO_INSTALL_LIST"
-  fi
 else
-  echo "**** rust already installed ****"
+  echo "**** rust bin does not exist ****"
 fi
