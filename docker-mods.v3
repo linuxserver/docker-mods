@@ -282,7 +282,7 @@ get_arch(){
 
 # Main run logic
 run_mods() {
-    write_mod_info "Attempting to run Docker Modification Logic"
+    write_mod_info "Running Docker Modification Logic"
     write_mod_debug "Running in debug mode"
     write_mod_debug "Mod script version ${MOD_SCRIPT_VER}"
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
@@ -415,7 +415,7 @@ run_mods() {
 }
 
 run_mods_local() {
-    write_mod_info "Attempting to run Local Docker Modification Logic"
+    write_mod_info "Running Local Docker Modification Logic"
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
         # Check mod file exists
         if [[ -n "$(/bin/ls -A "/mods/${DOCKER_MOD}.tar" 2>/dev/null)" ]]; then
