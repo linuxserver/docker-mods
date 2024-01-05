@@ -3,8 +3,7 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 ARG MOD_VERSION
 
-RUN apk add --no-cache curl jq && \
-  if [ -z "$MOD_VERSION" ]; then \
+RUN if [ -z "$MOD_VERSION" ]; then \
     MOD_VERSION=$(curl -s https://api.github.com/repos/rust-lang/rust/releases/latest | jq -r .tag_name); \
   fi && \
   mkdir -p /root-layer/rust-bins && \

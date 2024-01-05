@@ -2,6 +2,11 @@
 
 set -e
 
+if command -v rustc >/dev/null 2>&1; then
+  echo "+++ rust is already installed +++"
+  exit 0
+fi
+
 RUST_BINS_PATH="/rust-bins"
 PACKAGES_TO_INSTALL_LIST="/mod-repo-packages-to-install.list"
 
