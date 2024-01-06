@@ -30,5 +30,5 @@ if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
   "$RUST_BINS_PATH/install.sh"
   rm -rf "$RUST_BINS_PATH"
 else
-  echo "**** rust bin does not exist ****"
+  echo "**** latest rust is already installed ****"
 fi
