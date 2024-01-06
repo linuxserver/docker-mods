@@ -4,7 +4,7 @@
 # Use /command/with-contenv shebang because /usr/bin/with-contenv is created in this script
 
 # Version 3
-# 2022-09-25
+# 2022-09-25 - Initial Release
 MOD_SCRIPT_VER="3"
 
 # Define custom folder paths
@@ -13,7 +13,6 @@ SERVICES_DIR="/custom-services.d"
 
 if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
   CURL_NOISE_LEVEL="-v"
-  echo "[mod-init] Running in debug mode"
 else
   CURL_NOISE_LEVEL="--silent"
 fi
@@ -141,7 +140,7 @@ create_lsiown_alias() {
 # Create our with-contenv alias with umask support
 create_with_contenv_alias() {
     if [[ ! -f /command/with-contenv ]]; then
-        echo "[mod-init] /command/with-contenv not found, skipping alias creation"
+        echo "/command/with-contenv not found, skipping alias creation"
         return
     fi
     rm -rf /usr/bin/with-contenv
@@ -162,7 +161,7 @@ create_with_contenv_alias() {
 # Check for curl
 curl_check() {
     if [[ ! -f /usr/bin/curl ]] || [[ ! -f /usr/bin/jq ]]; then
-        echo "[mod-init] Curl/JQ was not found on this system for Docker mods installing"
+        write_mod_info "Curl/JQ was not found on this system for Docker mods installing"
         if [[ -f /usr/bin/apt ]]; then
             # Ubuntu
             export DEBIAN_FRONTEND="noninteractive"
@@ -189,22 +188,35 @@ curl_check() {
     fi
 }
 
+write_mod_info() {
+    local MSG=$*
+    echo "[mod-init] $MSG"
+}
+
+write_mod_error() {
+    local MSG=$*
+    echo "[mod-init] (ERROR) $MSG"
+}
+
+write_mod_debug() {
+    local MSG=$*
+    if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo "[mod-init] (DEBUG) $MSG"; fi
+}
+
 # Use different filtering depending on URL
 get_blob_sha() {
     MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
         ${CURL_NOISE_LEVEL} \
         --location \
-        --request GET \
         --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
         --header "Accept: application/vnd.oci.image.index.v1+json" \
         --header "Authorization: Bearer ${1}" \
         --user-agent "${MOD_UA}" \
-        "${2}/${3}" | jq -r 'first(.manifests[].digest)?')
+        "${2}/${3}" | jq -r ".manifests[]? | select(.platform.architecture == \"${4}\").digest?")
     if [[ -z "${MULTIDIGEST}" ]]; then
         if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             ${CURL_NOISE_LEVEL} \
             --location \
-            --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.manifest.v1+json" \
             --header "Authorization: Bearer ${1}" \
@@ -216,7 +228,6 @@ get_blob_sha() {
         if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             ${CURL_NOISE_LEVEL} \
             --location \
-            --request GET \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             --header "Accept: application/vnd.oci.image.manifest.v1+json" \
             --header "Authorization: Bearer ${1}" \
@@ -227,9 +238,53 @@ get_blob_sha() {
     fi
 }
 
+get_auth_url() {
+    local auth_header
+    local realm_url
+    local service
+    local scope
+    # Call to get manifests and extract www-authenticate header
+    auth_header=$(curl -sLI ${CURL_NOISE_LEVEL} "${1}/${2}" | grep -i www-authenticate | tr -d '\r')
+    write_mod_debug "${auth_header}"
+    if [[ -n "${auth_header}" ]]; then
+        # Extract realm URL from www-authenticate header
+        realm_url=$(echo "$auth_header" | grep -oP 'realm="\K[^"]+')
+        service=$(echo "$auth_header" | grep -oP 'service="\K[^"]+')
+        scope=$(echo "$auth_header" | grep -oP 'scope="\K[^"]+')
+        echo "$realm_url?service=$service&scope=$scope"
+    else
+        exit 1
+    fi
+}
+
+get_arch(){
+    local arch
+
+    if [[ -f /sbin/apk ]]; then
+        arch=$(apk --print-arch)
+    elif [[ -f /usr/bin/dpkg ]]; then
+        arch=$(dpkg --print-architecture)
+    else
+        arch=$(uname -m)
+    fi
+
+    case "${arch}" in
+    x86_64 )
+        arch="amd64"
+        ;;
+    aarch64 )
+        arch="arm64"
+        ;;
+    esac
+
+    echo "${arch}"
+}
+
 # Main run logic
 run_mods() {
-    echo "[mod-init] Attempting to run Docker Modification Logic"
+    write_mod_info "Running Docker Modification Logic"
+    write_mod_debug "Running in debug mode"
+    write_mod_debug "Mod script version ${MOD_SCRIPT_VER}"
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
         # Support alternative endpoints
         case "${DOCKER_MOD}" in
@@ -244,24 +299,19 @@ run_mods() {
             [[ ${DOCKER_MODS_FORCE_REGISTRY,,} = "true" ]] && REGISTRY="ghcr.io" || REGISTRY="lscr.io"
             DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
             ;;
-        lscr.io/* )
-            REGISTRY="lscr.io"
-            DOCKER_MOD="${DOCKER_MOD#lscr.io/*}"
-            ;;
-        ghcr.io/* )
-            REGISTRY="ghcr.io"
-            DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
-            ;;
-        quay.io/* )
-            REGISTRY="quay.io"
-            DOCKER_MOD="${DOCKER_MOD#quay.io/*}"
-            ;;
-        docker.io/* )
-            REGISTRY="registry-1.docker.io"
-            DOCKER_MOD="${DOCKER_MOD#docker.io/*}"
-            ;;
         * )
+            # Default assumption is docker.io
             REGISTRY="registry-1.docker.io"
+            MOD="${DOCKER_MOD%/*}"
+            # If mod still has a / after stripping off the image name it's not docker.io
+            if [[ $MOD == */* ]]; then
+                REGISTRY="${MOD%%/*}"
+                DOCKER_MOD="${DOCKER_MOD#"$REGISTRY"/*}"
+            # If "repo" name has . in it, then assume it's actually a registry with no repo
+            elif [[ ${DOCKER_MOD%%/*} =~ \. ]]; then
+                REGISTRY="${DOCKER_MOD%%/*}"
+                MOD="${DOCKER_MOD##*/}"
+            fi
             ;;
         esac
         ENDPOINT="${DOCKER_MOD%%:*}"
@@ -275,74 +325,75 @@ run_mods() {
         MANIFEST_URL="https://${REGISTRY}/v2/${ENDPOINT}/manifests"
         BLOB_URL="https://${REGISTRY}/v2/${ENDPOINT}/blobs/"
         MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${REGISTRY}/${ENDPOINT}:${TAG}"
+        write_mod_debug "Registry='${REGISTRY}', Repository='${USERNAME}', Image='${ENDPOINT}', Tag='${TAG}'"
         case "${REGISTRY}" in
             "lscr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "ghcr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "quay.io") AUTH_URL="https://quay.io/v2/auth?service=quay.io&scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "registry-1.docker.io") AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull";;
+            *) AUTH_URL=$(get_auth_url "${MANIFEST_URL}" "${TAG}")
         esac
+        if [[ -z "${AUTH_URL}" ]]; then write_mod_error "Could not fetch auth URL from registry, skipping mod";fi
         # Kill off modification logic if any of the usernames are banned
         for BANNED in $(curl -s https://raw.githubusercontent.com/linuxserver/docker-mods/master/blacklist.txt); do
             if [[ "${BANNED,,}" == "${USERNAME,,}" ]]; then
                 if [[ -z ${RUN_BANNED_MODS+x} ]]; then
-                    echo "[mod-init] ${DOCKER_MOD} is banned from use due to reported abuse aborting mod logic"
+                    write_mod_info "${DOCKER_MOD} is banned from use due to reported abuse aborting mod logic"
                     return
                 else
-                    echo "[mod-init] You have chosen to run banned mods ${DOCKER_MOD} will be applied"
+                    write_mod_info "You have chosen to run banned mods ${DOCKER_MOD} will be applied"
                 fi
             fi
         done
-        echo "[mod-init] Adding ${DOCKER_MOD} to container"
+        write_mod_info "Adding ${DOCKER_MOD} to container"
         # Get registry token for api operations
         TOKEN="$(
             curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
                 ${CURL_NOISE_LEVEL} \
-                --request GET \
                 "${AUTH_URL}" |
                 jq -r '.token'
         )"
         # If we're using lscr try and get the manifest from ghcr, if it fails re-request a token from Docker Hub
         if [[ "${REGISTRY}" == "lscr.io" ]]; then
             if [[ -n $(curl --user-agent "${MOD_UA}" -sLH "Authorization: Bearer ${TOKEN}" "${MANIFEST_URL}/${TAG}" | jq -r '.errors' >/dev/null 2>&1) ]]; then
+                write_mod_debug "Couldn't fetch manifest from ghcr.io, trying docker.io"
                 AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
                 TOKEN="$(
                     curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
                         ${CURL_NOISE_LEVEL} \
-                        --request GET \
                         "${AUTH_URL}" |
                         jq -r '.token'
                 )"
             fi
         fi
-        if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
-            echo "[mod-init] Using ${AUTH_URL} as auth endpoint"
-        fi
+        write_mod_debug "Using ${AUTH_URL} as auth endpoint"
+        ARCH=$(get_arch)
+        write_mod_debug "Arch detected as ${ARCH}"
         # Determine first and only layer of image
-        SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}")
+        SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}" "${ARCH:=-amd64}")
         if [[ -z "${SHALAYER}" ]]; then
-            echo "[mod-init] ${DOCKER_MOD} could not be found on ${REGISTRY}"
+            write_mod_error "${DOCKER_MOD} digest could not be fetched from ${REGISTRY}"
             continue
         fi
         # Check if we have allready applied this layer
         if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
-            echo "[mod-init] ${DOCKER_MOD} at ${SHALAYER} has been previously applied skipping"
+            write_mod_info "${DOCKER_MOD} at ${SHALAYER} has been previously applied skipping"
         else
-            echo "[mod-init] Downloading ${DOCKER_MOD} from ${REGISTRY}"
+            write_mod_info "Downloading ${DOCKER_MOD} from ${REGISTRY}"
             # Download and extract layer to /
             curl -f --retry 10 --retry-max-time 60 --retry-all-errors \
                 ${CURL_NOISE_LEVEL} \
                 --location \
-                --request GET \
                 --header "Authorization: Bearer ${TOKEN}" \
                 --user-agent "${MOD_UA}" \
                 "${BLOB_URL}${SHALAYER}" -o \
                 /modtarball.tar.xz
             mkdir -p /tmp/mod
             if ! tar -tzf /modtarball.tar.xz >/dev/null 2>&1; then
-                echo "[mod-init] Invalid tarball, could not download ${DOCKER_MOD} from ${REGISTRY}"
+                write_mod_error "Invalid tarball, could not download ${DOCKER_MOD} from ${REGISTRY}"
                 continue
             fi
-            echo "[mod-init] Installing ${DOCKER_MOD}"
+            write_mod_info "Installing ${DOCKER_MOD}"
             tar xzf /modtarball.tar.xz -C /tmp/mod
             if [[ -d /tmp/mod/etc/s6-overlay ]]; then
                 if [[ -d /tmp/mod/etc/cont-init.d ]]; then
@@ -358,7 +409,44 @@ run_mods() {
             rm -rf /tmp/mod
             rm -rf /modtarball.tar.xz
             echo "${SHALAYER}" >"/${FILENAME}"
-            echo "[mod-init] ${DOCKER_MOD} applied to container"
+            write_mod_info "${DOCKER_MOD} applied to container"
+        fi
+    done
+}
+
+run_mods_local() {
+    write_mod_info "Running Local Docker Modification Logic"
+    for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
+        # Check mod file exists
+        if [[ -n "$(/bin/ls -A "/mods/${DOCKER_MOD}.tar" 2>/dev/null)" ]]; then
+            # Caculate mod bits
+            FILENAME="${DOCKER_MOD}.local"
+            SHALAYER=$(sha256sum "/mods/${DOCKER_MOD}.tar" | cut -d " " -f 1)
+            # Check if we have allready applied this layer
+            if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
+                write_mod_info "${DOCKER_MOD} at ${SHALAYER} has been previously applied, skipping"
+            else
+                write_mod_info "Installing ${DOCKER_MOD}"
+                mkdir -p "/tmp/mod/${DOCKER_MOD}"
+                tar xf "/mods/${DOCKER_MOD}.tar" -C /tmp/mod --strip-components=1
+                tar xf "/tmp/mod/layer.tar" -C "/tmp/mod/${DOCKER_MOD}"
+                if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/s6-overlay" ]]; then
+                    if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d" ]]; then
+                        rm -rf "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d"
+                    fi
+                    if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/services.d" ]]; then
+                        rm -rf "/tmp/mod/${DOCKER_MOD}/etc/services.d"
+                    fi
+                fi
+                shopt -s dotglob
+                cp -R "/tmp/mod/${DOCKER_MOD}"/* /
+                shopt -u dotglob
+                rm -rf "/tmp/mod/${DOCKER_MOD}"
+                echo "${SHALAYER}" >"/${FILENAME}.local"
+                write_mod_info "${DOCKER_MOD} applied to container"
+            fi
+        else
+            write_mod_error "${DOCKER_MOD}.tar not found in /mods, skipping"
         fi
     done
 }
@@ -368,12 +456,12 @@ run_branding() {
   cat <<-EOF >/etc/s6-overlay/s6-rc.d/init-adduser/branding
 	───────────────────────────────────────
 
-	      ██╗     ███████╗██╗ ██████╗ 
+	      ██╗     ███████╗██╗ ██████╗
 	      ██║     ██╔════╝██║██╔═══██╗
 	      ██║     ███████╗██║██║   ██║
 	      ██║     ╚════██║██║██║   ██║
 	      ███████╗███████║██║╚██████╔╝
-	      ╚══════╝╚══════╝╚═╝ ╚═════╝ 
+	      ╚══════╝╚══════╝╚═╝ ╚═════╝
 
 	   Brought to you by linuxserver.io
 	───────────────────────────────────────
@@ -386,17 +474,15 @@ create_with_contenv_alias
 
 # Main script loop
 
-if [[ ${S6_VERBOSITY} -ge 2 ]]; then
-    echo "[mod-init] Version ${MOD_SCRIPT_VER}"
-fi
-
 if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
     tamper_check
     process_custom_services
 fi
 
 # Run mod logic
-if [[ -n "${DOCKER_MODS+x}" ]]; then
+if [[ -n "${DOCKER_MODS+x}" ]] && [[ "${DOCKER_MODS_SIDELOAD,,}" = "true" ]]; then
+    run_mods_local
+elif [[ -n "${DOCKER_MODS+x}" ]]; then
     curl_check
     run_mods
 fi
