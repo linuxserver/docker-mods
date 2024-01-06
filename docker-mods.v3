@@ -248,9 +248,9 @@ get_auth_url() {
     write_mod_debug "${auth_header}"
     if [[ -n "${auth_header}" ]]; then
         # Extract realm URL from www-authenticate header
-        realm_url=$(echo "$auth_header" | grep -oP 'realm="\K[^"]+')
-        service=$(echo "$auth_header" | grep -oP 'service="\K[^"]+')
-        scope=$(echo "$auth_header" | grep -oP 'scope="\K[^"]+')
+        realm_url=$(echo "$auth_header" | awk -F'[="]+' '/realm=/{print $2}')
+        service=$(echo "$auth_header" | awk -F'[="]+' '/service=/{print $4}')
+        scope=$(echo "$auth_header" | awk -F'[="]+' '/scope=/{print $6}')
         echo "$realm_url?service=$service&scope=$scope"
     else
         exit 1
