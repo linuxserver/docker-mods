@@ -5,7 +5,7 @@ mods:
       - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
       - dtrpg-metadata: https://github.com/linuxserver/docker-mods/tree/calibre-web-dtrpg-metadata
   code-server:
-    mod_count: 25
+    mod_count: 26
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
@@ -26,6 +26,7 @@ mods:
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
       - ros2: https://github.com/linuxserver/docker-mods/tree/code-server-ros2
+      - rust: https://github.com/linuxserver/docker-mods/tree/code-server-rust
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
       - ssl: https://github.com/linuxserver/docker-mods/tree/code-server-ssl
@@ -76,7 +77,7 @@ mods:
       - rsync: https://github.com/linuxserver/docker-mods/tree/openssh-server-rsync
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   openvscode-server:
-    mod_count: 23
+    mod_count: 24
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
@@ -96,6 +97,7 @@ mods:
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
+      - rust: https://github.com/linuxserver/docker-mods/tree/code-server-rust
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
       - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
       - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
