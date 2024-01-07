@@ -1,0 +1,34 @@
+#!/usr/bin/with-contenv bash
+
+set -e
+
+RUST_BINS_PATH="/rust-bins"
+PACKAGES_TO_INSTALL_LIST="/mod-repo-packages-to-install.list"
+
+ARCH=$(uname -m)
+SUPPORTED_ARCHS=("x86_64" "aarch64")
+
+if [[ ! " ${SUPPORTED_ARCHS[@]} " =~ " ${ARCH} " ]]; then
+  echo "**** unsupported architecture: $ARCH ****"
+  exit 1
+fi
+
+if ! dpkg -l | grep build-essential >/dev/null; then
+  echo "**** adding build-essential to install list ****"
+  echo "build-essential" >>"$PACKAGES_TO_INSTALL_LIST"
+else
+  echo "**** build-essential already installed ****"
+fi
+
+RUST_BINARY_ARCHIVE_PATH="$RUST_BINS_PATH/rust-$ARCH-gnu.tar.gz"
+
+if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
+  echo "**** unpacking rust tar ****"
+  tar -xzf "$RUST_BINARY_ARCHIVE_PATH" -C "$RUST_BINS_PATH" --strip-components=1
+
+  echo "**** installing rust ****"
+  "$RUST_BINS_PATH/install.sh"
+  rm -rf "$RUST_BINS_PATH"
+else
+  echo "**** latest rust is already installed ****"
+fi
