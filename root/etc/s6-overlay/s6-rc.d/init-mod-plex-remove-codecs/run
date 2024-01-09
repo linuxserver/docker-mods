@@ -1,0 +1,7 @@
+#!/usr/bin/with-contenv bash 
+
+echo "Remove codecs: start"
+
+find "/config/Library/Application Support/Plex Media Server/Codecs/"* -type d -exec rm -rv {} +
+
+echo "Remove codecs: end"
