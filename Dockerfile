@@ -2,7 +2,6 @@
 
 FROM scratch
 
-LABEL maintainer="username"
+LABEL maintainer="nemchik"
 
-# copy local files
 COPY root/ /
