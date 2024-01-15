@@ -630,6 +630,9 @@ elif [ -f "$flac2mp3_config" ]; then
   # Check for localhost
   [[ $flac2mp3_bindaddress = "*" ]] && flac2mp3_bindaddress=localhost
 
+  # Strip leading and trailing forward slashes from URL base
+  flac2mp3_urlbase="$(echo "$flac2mp3_urlbase" | sed -re 's/^\/+//; s/\/+$//')"
+
   # Build URL to Lidarr API
   flac2mp3_api_url="http://$flac2mp3_bindaddress:$flac2mp3_port${flac2mp3_urlbase:+/$flac2mp3_urlbase}/api/v1"
 
