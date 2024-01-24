@@ -14,12 +14,12 @@ RUN \
     echo "Downloading x86_64 tarball" && \
     curl -o \
       /root-layer/powershell/powershell.tar.gz -L \
-      "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-x64.tar.gz";
+      "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-x64.tar.gz"; \
   elif [[ $(uname -m) == "aarch64" ]]; then \
     echo "Downloading aarch64 tarball" && \
     curl -o \
       /root-layer/powershell/powershell.tar.gz -L \
-      "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-arm64.tar.gz";
+      "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-arm64.tar.gz"; \
   fi && \
   echo "******** run basic test to validate tarball *********" && \
   mkdir -p /tmp/powershell && \
