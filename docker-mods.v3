@@ -11,7 +11,7 @@ MOD_SCRIPT_VER="3"
 SCRIPTS_DIR="/custom-cont-init.d"
 SERVICES_DIR="/custom-services.d"
 
-if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
+if [[ ${DOCKER_MODS_DEBUG_CURL,,} = "true" ]]; then
   CURL_NOISE_LEVEL="-v"
 else
   CURL_NOISE_LEVEL="--silent"
@@ -212,19 +212,29 @@ get_blob_sha() {
         --header "Accept: application/vnd.oci.image.index.v1+json" \
         --header "Authorization: Bearer ${1}" \
         --user-agent "${MOD_UA}" \
-        "${2}/${3}" | jq -r ".manifests[]? | select(.platform.architecture == \"${4}\").digest?")
-    if [[ -z "${MULTIDIGEST}" ]]; then
-        if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
-            ${CURL_NOISE_LEVEL} \
-            --location \
-            --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-            --header "Accept: application/vnd.oci.image.manifest.v1+json" \
-            --header "Authorization: Bearer ${1}" \
-            --user-agent "${MOD_UA}" \
-            "${2}/${3}"); then
-            echo "${DIGEST}" | jq -r '.layers[0].digest';
-        fi
+        "${2}/${3}")
+    if echo "${MULTIDIGEST}" | jq -e '.layers // empty' >/dev/null 2>&1; then
+        # If there's a layer element it's a single-arch manifest so just get that digest
+        echo "${MULTIDIGEST}" | jq -r '.layers[0].digest';
     else
+        # Otherwise it's multi-arch or has an attestation manifest
+        if echo "${MULTIDIGEST}" | jq -e '.manifests[]?.annotations // empty' >/dev/null 2>&1; then
+            # Check for attestation manifest and delete if found
+            write_mod_debug "Mod has an attestation-manifest" >&2
+            MULTIDIGEST=$(echo "${MULTIDIGEST}" | jq 'del(.manifests[] | select(.annotations))')
+        fi
+        if [[ $(echo "${MULTIDIGEST}" | jq '.manifests | length') -gt 1 ]]; then
+            # If there's still more than one manifest, it's multi-arch
+            write_mod_debug "Mod has a multi-arch manifest" >&2
+            MULTIDIGEST=$(echo "${MULTIDIGEST}" | jq -r ".manifests[] | select(.platform.architecture == \"${4}\").digest?")
+            if [[ -z "${MULTIDIGEST}" ]]; then
+                exit 1
+            fi
+        else
+            # Otherwise it's single arch
+            write_mod_debug "Mod only has a single arch manifest" >&2
+            MULTIDIGEST=$(echo "${MULTIDIGEST}" | jq -r ".manifests[].digest?")
+        fi
         if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             ${CURL_NOISE_LEVEL} \
             --location \
@@ -371,7 +381,10 @@ run_mods() {
         write_mod_debug "Arch detected as ${ARCH}"
         # Determine first and only layer of image
         SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}" "${ARCH:=-amd64}")
-        if [[ -z "${SHALAYER}" ]]; then
+        if [[ $? -eq 1 ]]; then
+            write_mod_error "No manifest available for arch ${ARCH:=-amd64}, cannot fetch mod"
+            continue
+        elif [[ -z "${SHALAYER}" ]]; then
             write_mod_error "${DOCKER_MOD} digest could not be fetched from ${REGISTRY}"
             continue
         fi
