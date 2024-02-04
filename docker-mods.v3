@@ -213,27 +213,27 @@ get_blob_sha() {
         --header "Authorization: Bearer ${1}" \
         --user-agent "${MOD_UA}" \
         "${2}/${3}")
-    if echo "${MULTIDIGEST}" | jq -e '.layers // empty' >/dev/null 2>&1; then
+    if jq -e '.layers // empty' <<< "${MULTIDIGEST}" >/dev/null 2>&1; then
         # If there's a layer element it's a single-arch manifest so just get that digest
-        echo "${MULTIDIGEST}" | jq -r '.layers[0].digest';
+        jq -r '.layers[0].digest' <<< "${MULTIDIGEST}";
     else
-        # Otherwise it's multi-arch or has an attestation manifest
-        if echo "${MULTIDIGEST}" | jq -e '.manifests[]?.annotations // empty' >/dev/null 2>&1; then
-            # Check for attestation manifest and delete if found
-            write_mod_debug "Mod has an attestation-manifest" >&2
-            MULTIDIGEST=$(echo "${MULTIDIGEST}" | jq 'del(.manifests[] | select(.annotations))')
+        # Otherwise it's multi-arch or has a manifest annotations
+        if jq -e '.manifests[]?.annotations // empty' <<< "${MULTIDIGEST}" >/dev/null 2>&1; then
+            # Check for manifest annotations and delete if found
+            write_mod_debug "Mod has one or more manifest annotations" >&2
+            MULTIDIGEST=$(jq 'del(.manifests[] | select(.annotations))' <<< "${MULTIDIGEST}")
         fi
-        if [[ $(echo "${MULTIDIGEST}" | jq '.manifests | length') -gt 1 ]]; then
-            # If there's still more than one manifest, it's multi-arch
+        if [[ $(jq '.manifests | length' <<< "${MULTIDIGEST}") -gt 1 ]]; then
+            # If there's still more than one digest, it's multi-arch
             write_mod_debug "Mod has a multi-arch manifest" >&2
-            MULTIDIGEST=$(echo "${MULTIDIGEST}" | jq -r ".manifests[] | select(.platform.architecture == \"${4}\").digest?")
+            MULTIDIGEST=$(jq -r ".manifests[] | select(.platform.architecture == \"${4}\").digest?" <<< "${MULTIDIGEST}")
             if [[ -z "${MULTIDIGEST}" ]]; then
                 exit 1
             fi
         else
             # Otherwise it's single arch
             write_mod_debug "Mod only has a single arch manifest" >&2
-            MULTIDIGEST=$(echo "${MULTIDIGEST}" | jq -r ".manifests[].digest?")
+            MULTIDIGEST=$(jq -r ".manifests[].digest?" <<< "${MULTIDIGEST}")
         fi
         if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
             ${CURL_NOISE_LEVEL} \
@@ -243,7 +243,7 @@ get_blob_sha() {
             --header "Authorization: Bearer ${1}" \
             --user-agent "${MOD_UA}" \
             "${2}/${MULTIDIGEST}"); then
-            echo "${DIGEST}" | jq -r '.layers[0].digest';
+            jq -r '.layers[0].digest' <<< "${DIGEST}";
         fi
     fi
 }
