@@ -217,7 +217,7 @@ get_blob_sha() {
         # If there's a layer element it's a single-arch manifest so just get that digest
         jq -r '.layers[0].digest' <<< "${MULTIDIGEST}";
     else
-        # Otherwise it's multi-arch or has a manifest annotations
+        # Otherwise it's multi-arch or has manifest annotations
         if jq -e '.manifests[]?.annotations // empty' <<< "${MULTIDIGEST}" >/dev/null 2>&1; then
             # Check for manifest annotations and delete if found
             write_mod_debug "Mod has one or more manifest annotations" >&2
