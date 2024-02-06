@@ -71,9 +71,9 @@ sed -i -r "s|MODE=.*$|MODE=${CROWDSEC_MODE:-live}|" "${CONFIG_PATH}crowdsec-ngin
 sed -i -r "s|UPDATE_FREQUENCY=.*$|UPDATE_FREQUENCY=${CROWDSEC_UPDATE_FREQUENCY:-10}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
 if grep -q "^APPSEC_URL=" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"; then
-    sed -i -r "s|APPSEC_URL=.*$|APPSEC_URL=${APPSEC_URL}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+    sed -i -r "s|APPSEC_URL=.*$|APPSEC_URL=${CROWDSEC_APPSEC_URL}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 else
-    echo "APPSEC_URL=${APPSEC_URL}" >> "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+    echo "APPSEC_URL=${CROWDSEC_APPSEC_URL}" >> "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 fi
 
 # Change config path
