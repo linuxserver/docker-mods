@@ -309,6 +309,10 @@ run_mods() {
             [[ ${DOCKER_MODS_FORCE_REGISTRY,,} = "true" ]] && REGISTRY="ghcr.io" || REGISTRY="lscr.io"
             DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
             ;;
+        docker.io/* )
+            REGISTRY="registry-1.docker.io"
+            DOCKER_MOD="${DOCKER_MOD#docker.io/*}"
+            ;;
         * )
             # Default assumption is docker.io
             REGISTRY="registry-1.docker.io"
