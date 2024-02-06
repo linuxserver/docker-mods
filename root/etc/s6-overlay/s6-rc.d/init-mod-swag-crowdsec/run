@@ -5,7 +5,7 @@ CONFIG_PATH="/config/crowdsec/"
 LIB_PATH="/usr/local/lua/crowdsec/"
 DATA_PATH="/var/lib/crowdsec/lua/"
 
-if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then
+if [[ ${DOCKER_MODS_DEBUG_CURL,,} = "true" ]]; then
   CURL_NOISE_LEVEL="-v"
 else
   CURL_NOISE_LEVEL="--silent"
