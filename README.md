@@ -29,11 +29,12 @@ Set the following environment variables on your SWAG container.
 | `CROWDSEC_LAPI_URL` | **Required** | Your local CrowdSec API endpoint, for example `http://crowdsec:8080` |
 | `CROWDSEC_SITE_KEY` | **Optional** | CAPTCHA Site Key |
 | `CROWDSEC_SECRET_KEY` | **Optional** | CAPTCHA Secret Key |
-| `CROWDSEC_CAPTCHA_PROVIDER` | **Optional** | CAPTCHA Provider (currently supported providers are `recaptcha`, `hcaptcha`, `turnstile`), requires v1.0.5 or newer. |
-| `CROWDSEC_VERSION` | **Optional** | Specify a version of the bouncer to install instead of using the latest release, for example `v1.0.0`. Must be a valid [release tag](https://github.com/crowdsecurity/cs-nginx-bouncer/tags). **Does not support versions older than v1.0.0**.
+| `CROWDSEC_CAPTCHA_PROVIDER` | **Optional** | CAPTCHA Provider (currently supported providers are `recaptcha`, `hcaptcha`, `turnstile`), requires bouncer v1.0.5 or newer. |
+| `CROWDSEC_VERSION` | **Optional** | Specify a version of the bouncer to install instead of using the latest release, for example `v1.0.0`. Must be a valid [release tag](https://github.com/crowdsecurity/cs-nginx-bouncer/tags). **Does not support versions older than v1.0.0**. |
 | `CROWDSEC_F2B_DISABLE` | **Optional** | Set to `true` to disable swag's built-in fail2ban service if you don't need it |
 | `CROWDSEC_MODE` | **Optional** | Set to `live` (immediate update) or `stream` to update requests every CROWDSEC_UPDATE_FREQUENCY seconds. Defaults to `live` |
 | `CROWDSEC_UPDATE_FREQUENCY` | **Optional** | Set update frequency for use with `stream` mode. Defaults to `10`. |
+| `CROWDSEC_APPSEC_URL` | **Optional** | Set URL for AppSec component, requires bouncer v1.0.6 or newer and Crowdsec v1.6.0 or newer. |
 | | | |
 
 The variables need to remain in place while you are using the mod. If you remove **required** variables the bouncer will be disabled the next time you recreate the container, if you remove **optional** variables the associated features will be disabled the next time you recreate the container.
