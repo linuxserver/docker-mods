@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3"
+MOD_SCRIPT_VER="3.20240206"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -309,6 +309,10 @@ run_mods() {
             [[ ${DOCKER_MODS_FORCE_REGISTRY,,} = "true" ]] && REGISTRY="ghcr.io" || REGISTRY="lscr.io"
             DOCKER_MOD="${DOCKER_MOD#ghcr.io/*}"
             ;;
+        docker.io/* )
+            REGISTRY="registry-1.docker.io"
+            DOCKER_MOD="${DOCKER_MOD#docker.io/*}"
+            ;;
         * )
             # Default assumption is docker.io
             REGISTRY="registry-1.docker.io"
@@ -343,15 +347,18 @@ run_mods() {
             "registry-1.docker.io") AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull";;
             *) AUTH_URL=$(get_auth_url "${MANIFEST_URL}" "${TAG}")
         esac
-        if [[ -z "${AUTH_URL}" ]]; then write_mod_error "Could not fetch auth URL from registry, skipping mod";fi
+        if [[ -z "${AUTH_URL}" ]]; then
+            write_mod_error "Could not fetch auth URL from registry for ${DOCKER_MOD}, skipping mod"
+            continue
+        fi
         # Kill off modification logic if any of the usernames are banned
         for BANNED in $(curl -s https://raw.githubusercontent.com/linuxserver/docker-mods/master/blacklist.txt); do
             if [[ "${BANNED,,}" == "${USERNAME,,}" ]]; then
                 if [[ -z ${RUN_BANNED_MODS+x} ]]; then
-                    write_mod_info "${DOCKER_MOD} is banned from use due to reported abuse aborting mod logic"
-                    return
+                    write_mod_info "${DOCKER_MOD} is banned from use due to reported abuse, skipping mod"
+                    continue
                 else
-                    write_mod_info "You have chosen to run banned mods ${DOCKER_MOD} will be applied"
+                    write_mod_info "You have chosen to run banned mods, ${DOCKER_MOD} will be applied"
                 fi
             fi
         done
