@@ -70,6 +70,12 @@ sed -i -r "s|CAPTCHA_PROVIDER=.*$|CAPTCHA_PROVIDER=${CROWDSEC_CAPTCHA_PROVIDER}|
 sed -i -r "s|MODE=.*$|MODE=${CROWDSEC_MODE:-live}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 sed -i -r "s|UPDATE_FREQUENCY=.*$|UPDATE_FREQUENCY=${CROWDSEC_UPDATE_FREQUENCY:-10}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
 
+if grep -q "^APPSEC_URL=" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"; then
+    sed -i -r "s|APPSEC_URL=.*$|APPSEC_URL=${APPSEC_URL}|" "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+else
+    echo "APPSEC_URL=${APPSEC_URL}" >> "${CONFIG_PATH}crowdsec-nginx-bouncer.conf"
+fi
+
 # Change config path
 sed -i "s|/etc/crowdsec/bouncers/|${CONFIG_PATH}|" /tmp/crowdsec/nginx/crowdsec_nginx.conf
 
