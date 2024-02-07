@@ -47,6 +47,7 @@ e.g. `resolver  127.0.0.11 valid=30s ipv6=off;`
 
 ## Versions
 
+* **06.02.24:** - Add AppSec support.
 * **29.03.23:** - Support multiple captcha providers from upstream.
 * **28.01.23:** - Support mode selection, handle s6v3 init.
 * **25.08.22:** - Make hybrid mod.
