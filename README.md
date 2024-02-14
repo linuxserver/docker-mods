@@ -269,7 +269,7 @@ GitHub Actions will trigger a build off of your repo when you commit. The image 
 * Inspect the `root` folder contents. Edit, add and remove as necessary.
 * After all init scripts and services are created, run `find ./ -path "./.git" -prune -o ( -name "run" -o -name "finish" -o -name "check" ) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
 * Edit the readme with pertinent info.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic if needed.
+* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic and `MULTI_ARCH` if needed.
 * Ask the team to create a new branch named `<baseimagename>-<modname>` in this repo. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the [template branch](https://github.com/linuxserver/docker-mods/tree/template).
 * Submit PR against the branch created by the team.
 * Make sure that the commits in the PR are squashed.
