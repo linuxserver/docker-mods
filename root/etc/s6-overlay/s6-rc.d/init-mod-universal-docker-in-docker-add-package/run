@@ -41,10 +41,10 @@ fi
 if [ -d "/docker-tgz" ] ; then
     echo "Copying over docker and docker-compose binaries"
     mkdir -p /usr/local/lib/docker/cli-plugins
-    mv "/docker-tgz/docker-compose_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-compose
-    mv "/docker-tgz/docker-buildx_${ARCH}" /usr/local/lib/docker/cli-plugins/docker-buildx
-    mv "/docker-tgz/compose-switch_${ARCH}" /usr/local/bin/docker-compose
-    tar xf /docker-tgz/docker_${ARCH}.tgz \
+    mv "/docker-tgz/docker-compose" /usr/local/lib/docker/cli-plugins/docker-compose
+    mv "/docker-tgz/docker-buildx" /usr/local/lib/docker/cli-plugins/docker-buildx
+    mv "/docker-tgz/compose-switch" /usr/local/bin/docker-compose
+    tar xf /docker-tgz/docker.tgz \
         --strip-components=1 -C \
         /usr/local/bin/
     rm -rf /docker-tgz
