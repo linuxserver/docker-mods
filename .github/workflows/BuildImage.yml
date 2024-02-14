@@ -7,6 +7,7 @@ env:
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "universal" #replace
   MODNAME: "docker" #replace
+  MULTI_ARCH: "true" #set to true if needed
 
 jobs:
   set-vars:
@@ -19,6 +20,7 @@ jobs:
           echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_OUTPUT
           echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_OUTPUT
           echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_OUTPUT
+          echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_OUTPUT
           # **** If the mod needs to be versioned, set the versioning logic below. Otherwise leave as is. ****
           COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||')
           DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||')
@@ -29,6 +31,7 @@ jobs:
       ENDPOINT: ${{ steps.outputs.outputs.ENDPOINT }}
       BASEIMAGE: ${{ steps.outputs.outputs.BASEIMAGE }}
       MODNAME: ${{ steps.outputs.outputs.MODNAME }}
+      MULTI_ARCH: ${{ steps.outputs.outputs.MULTI_ARCH }}
       MOD_VERSION: ${{ steps.outputs.outputs.MOD_VERSION }}
 
   build:
@@ -44,4 +47,5 @@ jobs:
       ENDPOINT: ${{ needs.set-vars.outputs.ENDPOINT }}
       BASEIMAGE: ${{ needs.set-vars.outputs.BASEIMAGE }}
       MODNAME: ${{ needs.set-vars.outputs.MODNAME }}
+      MULTI_ARCH: ${{ needs.set-vars.outputs.MULTI_ARCH }}
       MOD_VERSION: ${{ needs.set-vars.outputs.MOD_VERSION }}
