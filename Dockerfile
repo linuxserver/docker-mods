@@ -6,7 +6,7 @@ ARG MOD_VERSION
 
 RUN \
   echo "**** retrieve latest docker and compose versions ****" && \
-  if [[ -z "${MOD_VERSION+x}" ]]; then \
+  if [ -z "${MOD_VERSION+x}" ]; then \
     DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
       | awk '/tag_name/{print $4;exit}' FS='[""]' \
       | sed 's|^v||'); \
@@ -31,7 +31,7 @@ RUN \
   mkdir -p \
     /root-layer/docker-bins \
     /tmp/docker && \
-  if [[ $(uname -m) == "x86_64" ]]; then \
+  if [ $(uname -m) = "x86_64" ]; then \
     echo "**** grab x86_64 tarballs and binaries ****" && \
     curl -fo \
       /tmp/docker.tgz -L \
@@ -49,7 +49,7 @@ RUN \
     curl -fo \
       /root-layer/docker-bins/docker-buildx -L \
       "https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-amd64"; \
-  elif [[ $(uname -m) == "aarch64" ]]; then \
+  elif [ $(uname -m) = "aarch64" ]; then \
     echo "**** grab aarch64 tarballs and binaries ****" && \
     curl -fo \
       /tmp/docker.tgz -L \
