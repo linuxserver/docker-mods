@@ -30,6 +30,7 @@ Consumption of a Docker Mod is intended to be as user friendly as possible and c
 
 Full example:
 
+docker run
 ```bash
 docker create \
   --name=nzbget \
@@ -42,6 +43,26 @@ docker create \
   -v <path/to/downloads>:/downloads \
   --restart unless-stopped \
   linuxserver/nzbget
+```
+ docker-compose
+```yaml
+---
+version: "2.1"
+services:
+  nzbget:
+    image: linuxserver/nzbget:latest
+    container_name: nzbget
+    environment:
+      - DOCKER_MODS=taisun/nzbget-mod:latest
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - /path/to/data:/config
+      - /path/to/downloads:/downloads #optional
+    ports:
+      - 6789:6789
+    restart: unless-stopped
 ```
 
 This will spinup an nzbget container and apply the custom logic found in the following repository:
