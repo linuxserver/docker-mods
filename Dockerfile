@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 ARG MOD_VERSION
 
@@ -10,20 +10,20 @@ RUN \
       | sed 's|.*tag/v||g'); \
   fi && \
   mkdir -p /root-layer/powershell && \
-  curl -o \
-    /root-layer/powershell/powershell_x86_64.tar.gz -L \
-    "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-x64.tar.gz" && \
-  curl -o \
-    /root-layer/powershell/powershell_armv7l.tar.gz -L \
-    "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-arm32.tar.gz" && \
-  curl -o \
-    /root-layer/powershell/powershell_aarch64.tar.gz -L \
-    "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-arm64.tar.gz" && \
-  echo "******** run basic test to validate tarballs *********" && \
-  for i in x86_64 armv7l aarch64; do \
-    mkdir -p "/tmp/${i}"; \
-    tar xzf "/root-layer/powershell/powershell_${i}.tar.gz" -C "/tmp/${i}"; \
-  done
+  if [[ $(uname -m) == "x86_64" ]]; then \
+    echo "Downloading x86_64 tarball" && \
+    curl -o \
+      /root-layer/powershell/powershell.tar.gz -L \
+      "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-x64.tar.gz"; \
+  elif [[ $(uname -m) == "aarch64" ]]; then \
+    echo "Downloading aarch64 tarball" && \
+    curl -o \
+      /root-layer/powershell/powershell.tar.gz -L \
+      "https://github.com/PowerShell/PowerShell/releases/download/v${MOD_VERSION}/powershell-${MOD_VERSION}-linux-arm64.tar.gz"; \
+  fi && \
+  echo "******** run basic test to validate tarball *********" && \
+  mkdir -p /tmp/powershell && \
+  tar xzf /root-layer/powershell/powershell.tar.gz -C /tmp/powershell
 
 COPY root/ /root-layer/
 
