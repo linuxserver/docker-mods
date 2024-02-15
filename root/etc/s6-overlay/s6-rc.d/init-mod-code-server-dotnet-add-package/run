@@ -23,7 +23,7 @@ if [ -d /dotnet ]; then
     DOTNET_VERSIONS=$(cat /dotnet/versions.txt)
     for i in $DOTNET_VERSIONS; do
         mkdir -p "/dotnet_${i}"
-        tar xzf "/dotnet/dotnetsdk_${i}_${ARCH}.tar.gz" -C "/dotnet_${i}"
+        tar xzf "/dotnet/dotnetsdk_${i}.tar.gz" -C "/dotnet_${i}"
     done
     rm -rf /dotnet
     # symlink latest dotnet binary
