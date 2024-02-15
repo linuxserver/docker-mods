@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 ARG MOD_VERSION
 
@@ -16,7 +16,8 @@ RUN \
   mkdir -p /root-layer/themes/flood-for-transmission && \
   tar xzf \
     /tmp/flood.tar.gz -C \
-    /root-layer/themes/flood-for-transmission --strip-components=1
+    /root-layer/themes/flood-for-transmission --strip-components=1 && \
+  ln -s /config/themes/flood-for-transmission/config.json /root-layer/themes/flood-for-transmission/config.json
 
 # copy local files
 COPY root/ /root-layer/

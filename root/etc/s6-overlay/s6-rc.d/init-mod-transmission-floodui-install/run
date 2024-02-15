@@ -1,6 +1,15 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
+mkdir -p /config/themes/flood-for-transmission
+if [ ! -f /config/themes/flood-for-transmission/config.json ]; then
+    cp /themes/flood-for-transmission/config.json.defaults /config/themes/flood-for-transmission/config.json
+fi
+# Keep an up-to-date copy of the defaults in case there are breaking changes to the config.json and the user needs to manually update
+cp /themes/flood-for-transmission/config.json.defaults /config/themes/flood-for-transmission/config.json.defaults
+
 printf "/themes/flood-for-transmission" > /var/run/s6/container_environment/TRANSMISSION_WEB_HOME
 
-lsiown -R abc:abc /themes
+lsiown -R abc:abc \
+    /themes \
+    /config/themes/flood-for-transmission
