@@ -44,10 +44,9 @@ docker create \
   --restart unless-stopped \
   linuxserver/nzbget
 ```
- docker-compose
+ docker compose
 ```yaml
 ---
-version: "2.1"
 services:
   nzbget:
     image: linuxserver/nzbget:latest
