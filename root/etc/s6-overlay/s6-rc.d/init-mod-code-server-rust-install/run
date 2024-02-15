@@ -2,33 +2,25 @@
 
 set -e
 
-RUST_BINS_PATH="/rust-bins"
-PACKAGES_TO_INSTALL_LIST="/mod-repo-packages-to-install.list"
-
 ARCH=$(uname -m)
-SUPPORTED_ARCHS=("x86_64" "aarch64")
-
-if [[ ! " ${SUPPORTED_ARCHS[@]} " =~ " ${ARCH} " ]]; then
-  echo "**** unsupported architecture: $ARCH ****"
-  exit 1
+if [[ "${ARCH}" = "armv7l" ]]; then
+  echo "**** The docker mods no longer support arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
+  exit 0
 fi
 
 if ! dpkg -l | grep build-essential >/dev/null; then
   echo "**** adding build-essential to install list ****"
-  echo "build-essential" >>"$PACKAGES_TO_INSTALL_LIST"
+  echo "build-essential" >> /mod-repo-packages-to-install.list
 else
   echo "**** build-essential already installed ****"
 fi
 
-RUST_BINARY_ARCHIVE_PATH="$RUST_BINS_PATH/rust-$ARCH-gnu.tar.gz"
-
-if [[ -f "$RUST_BINARY_ARCHIVE_PATH" ]]; then
+if [[ -f /rust-bins/rust.tar.gz ]]; then
   echo "**** unpacking rust tar ****"
-  tar -xzf "$RUST_BINARY_ARCHIVE_PATH" -C "$RUST_BINS_PATH" --strip-components=1
-
+  tar -xzf /rust-bins/rust.tar.gz -C /rust-bins --strip-components=1
   echo "**** installing rust ****"
-  "$RUST_BINS_PATH/install.sh"
-  rm -rf "$RUST_BINS_PATH"
+  /rust-bins/install.sh
+  rm -rf /rust-bins/rust.tar.gz
 else
   echo "**** latest rust is already installed ****"
 fi
