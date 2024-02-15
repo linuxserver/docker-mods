@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.17 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 RUN \
   echo "**** install packages ****" && \
@@ -9,9 +9,17 @@ RUN \
     curl && \
   echo "**** grab rclone ****" && \
   mkdir -p /root-layer && \
-  curl -o \
-    /root-layer/rclone.deb -L \
-    "https://downloads.rclone.org/v1.47.0/rclone-v1.47.0-linux-amd64.deb"
+  if [ $(uname -m) = "x86_64" ]; then \
+    echo "Downloading x86_64 tarball" && \
+    curl -o \
+      /root-layer/rclone.deb -L \
+      "https://downloads.rclone.org/v1.47.0/rclone-v1.47.0-linux-amd64.deb"; \
+  elif [ $(uname -m) = "aarch64" ]; then \
+    echo "Downloading aarch64 tarball" && \
+    curl -o \
+      /root-layer/rclone.deb -L \
+      "https://downloads.rclone.org/v1.47.0/rclone-v1.47.0-linux-arm64.deb"; \
+  fi && \
 
 # copy local files
 COPY root/ /root-layer/
