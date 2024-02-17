@@ -7,7 +7,7 @@ env:
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "radarr" #replace
   MODNAME: "striptracks" #replace
-  MULTI_ARCH: "true" #set to true if needed
+  MULTI_ARCH: "false" #set to true if needed
 
 jobs:
   set-vars:
