@@ -3,18 +3,23 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 ARG MOD_VERSION
 
-RUN if [ -z "$MOD_VERSION" ]; then \
+RUN \
+  echo "**** Retrieving rust version ****" && \
+  if [ -z "$MOD_VERSION" ]; then \
     MOD_VERSION=$(curl -s https://api.github.com/repos/rust-lang/rust/releases/latest | jq -r .tag_name); \
   fi && \
   mkdir -p /root-layer/rust-bins && \
-  SUPPORTED_PLATFORMS="x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu" && \
-  for PLATFORM in $SUPPORTED_PLATFORMS; do \
-    ARCH=${PLATFORM%%-*}; \
-    RUST_BINS=/root-layer/rust-bins/rust-${ARCH}-gnu.tar.gz; \
-    RUST_BINS_URL=https://static.rust-lang.org/dist/rust-${MOD_VERSION}-${PLATFORM}.tar.gz; \
-    echo "Downloading rust for $PLATFORM";  \
-    curl -o $RUST_BINS -sSf $RUST_BINS_URL;  \
-  done;
+  if [ $(uname -m) = "x86_64" ]; then \
+    echo "**** Downloading x86_64 tarball ****" && \
+    curl -fo \
+      /root-layer/rust-bins/rust.tar.gz -L \
+      "https://static.rust-lang.org/dist/rust-${MOD_VERSION}-x86_64-unknown-linux-gnu.tar.gz"; \
+  elif [ $(uname -m) = "aarch64" ]; then \
+    echo "**** Downloading aarch64 tarball ****" && \
+    curl -fo \
+      /root-layer/rust-bins/rust.tar.gz -L \
+      "https://static.rust-lang.org/dist/rust-${MOD_VERSION}-aarch64-unknown-linux-gnu.tar.gz"; \
+  fi
 
 COPY root/ /root-layer/
 
