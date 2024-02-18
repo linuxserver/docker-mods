@@ -17,16 +17,15 @@ else
 fi
 echo "**** Linux architecture found: ${ARCH} ****"
 
-echo "**** Checking for cloudflared setup script dependencies... ****"
-YQARCH="${ARCH}"
-echo "**** Temporarily installing /tmp/yq... ****"
-curl -sLo /tmp/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQARCH}
-chmod +x /tmp/yq
-
 echo "**** Installing cloudflared...****"
 if [ -d "/cloudflared/" ]; then
-  echo "**** Moving /cloudflared/cloudflared-${ARCH} to /usr/local/bin/cloudflared... ****"
-  mv /cloudflared/cloudflared-${ARCH} /usr/local/bin/cloudflared
+  if ! command -v yq || ! yq --help | grep -q 'mikefarah'; then
+    echo "**** Installing yq ****"
+    mv /cloudflared/yq /usr/local/bin/yq
+  fi
+
+  echo "**** Moving /cloudflared/cloudflared to /usr/local/bin/cloudflared... ****"
+  mv /cloudflared/cloudflared /usr/local/bin/cloudflared
 
   echo "**** Deleting tmp /cloudflared dir... ****"
   rm -rf /cloudflared 
@@ -92,14 +91,14 @@ if [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_T
     printf "credentials-file: /etc/cloudflared/${CF_TUNNEL_ID}.json\n" >> "/etc/cloudflared/config.yml"
     printf "no-autoupdate: true\n\n" >> "/etc/cloudflared/config.yml"
     printf "${CF_TUNNEL_CONFIG}" >> "/etc/cloudflared/config.yml"
-    /tmp/yq e /etc/cloudflared/config.yml
+    yq e /etc/cloudflared/config.yml
     echo "**** Config for cloudflare tunnel (${CF_TUNNEL_NAME}) saved to /etc/cloudflared/config.yml ****"
 
     echo "**** Validating cloudflared tunnel rules... ****"
     cloudflared tunnel ingress validate
 
     echo "**** Updating cloudflare zone... ****"
-    for HOSTNAME in $(/tmp/yq e ".ingress.[].hostname" /etc/cloudflared/config.yml); do
+    for HOSTNAME in $(yq e ".ingress.[].hostname" /etc/cloudflared/config.yml); do
       if [ ! "${HOSTNAME}" = "null" ]; then
         echo "**** Searching zone for hostname (${HOSTNAME}) via API... ****"
         JSON_RESULT=$(curl -sX \
