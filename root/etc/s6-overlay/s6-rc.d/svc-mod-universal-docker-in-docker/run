@@ -31,4 +31,4 @@ fi
 exec \
     s6-notifyoncheck -d -n 300 -w 1000 -c "docker version" \
         2>&1 /usr/local/bin/dockerd \
-            --data-root "/config/var/lib/docker"
+            --data-root "${MODS_DIND_PERSISTENCE:-/config/var/lib/docker}"
