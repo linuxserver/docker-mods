@@ -2,8 +2,8 @@
 
 if [ -n "${LOGS_TO_STDOUT}" ]; then
     IFS='|' read -ra TAIL_LOGS <<< "$LOGS_TO_STDOUT"
-    echo "Executing: tail -F ${TAIL_LOGS[@]}"
-    tail -F "${TAIL_LOGS[@]}"
+    echo "Executing: tail -Fc0 ${TAIL_LOGS[@]}"
+    tail -Fc0 "${TAIL_LOGS[@]}"
 else
     echo "**** Env var LOGS_TO_STDOUT is not set, sleeping ****"
 fi
