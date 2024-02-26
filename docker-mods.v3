@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20240206"
+MOD_SCRIPT_VER="3.20240225"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -255,8 +255,8 @@ get_auth_url() {
     local scope
     # Call to get manifests and extract www-authenticate header
     auth_header=$(curl -sLI ${CURL_NOISE_LEVEL} "${1}/${2}" | grep -i www-authenticate | tr -d '\r')
-    write_mod_debug "${auth_header}"
     if [[ -n "${auth_header}" ]]; then
+        write_mod_debug "${auth_header}" >&2
         # Extract realm URL from www-authenticate header
         realm_url=$(echo "$auth_header" | awk -F'[="]+' '/realm=/{print $2}')
         service=$(echo "$auth_header" | awk -F'[="]+' '/service=/{print $4}')
@@ -347,10 +347,6 @@ run_mods() {
             "registry-1.docker.io") AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull";;
             *) AUTH_URL=$(get_auth_url "${MANIFEST_URL}" "${TAG}")
         esac
-        if [[ -z "${AUTH_URL}" ]]; then
-            write_mod_error "Could not fetch auth URL from registry for ${DOCKER_MOD}, skipping mod"
-            continue
-        fi
         # Kill off modification logic if any of the usernames are banned
         for BANNED in $(curl -s https://raw.githubusercontent.com/linuxserver/docker-mods/master/blacklist.txt); do
             if [[ "${BANNED,,}" == "${USERNAME,,}" ]]; then
@@ -362,14 +358,18 @@ run_mods() {
                 fi
             fi
         done
+        if [[ -n "${AUTH_URL}" ]]; then
+            # Get registry token for api operations
+            TOKEN="$(
+                curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                    ${CURL_NOISE_LEVEL} \
+                    "${AUTH_URL}" |
+                    jq -r '.token'
+            )"
+        else
+            write_mod_info "Could not fetch auth URL from registry for ${DOCKER_MOD}, attempting unauthenticated fetch"
+        fi
         write_mod_info "Adding ${DOCKER_MOD} to container"
-        # Get registry token for api operations
-        TOKEN="$(
-            curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
-                ${CURL_NOISE_LEVEL} \
-                "${AUTH_URL}" |
-                jq -r '.token'
-        )"
         # If we're using lscr try and get the manifest from ghcr, if it fails re-request a token from Docker Hub
         if [[ "${REGISTRY}" == "lscr.io" ]]; then
             if [[ -n $(curl --user-agent "${MOD_UA}" -sLH "Authorization: Bearer ${TOKEN}" "${MANIFEST_URL}/${TAG}" | jq -r '.errors' >/dev/null 2>&1) ]]; then
@@ -383,7 +383,9 @@ run_mods() {
                 )"
             fi
         fi
-        write_mod_debug "Using ${AUTH_URL} as auth endpoint"
+        if [[ -n "${AUTH_URL}" ]]; then
+            write_mod_debug "Using ${AUTH_URL} as auth endpoint"
+        fi
         ARCH=$(get_arch)
         write_mod_debug "Arch detected as ${ARCH}"
         # Determine first and only layer of image

@@ -2,6 +2,7 @@
 
 These files are used by Linuxserver build processes to handle mods in our images. Not for end-user consumption.
 
+* **25.02.24:** - Support unauthenticated registries.
 * **29.01.24:** - Handle single-arch mods with attestation information.
 * **03.01.24:** - Support arbitrary mod registries and multiarch mods.
 * **14.09.23:** - Fix lsiown edge cases.
