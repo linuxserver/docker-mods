@@ -33,6 +33,7 @@ Remove the allow/deny lines in `/config/nginx/proxy-confs/dashboard.subdomain.co
 - Either [Swag Maxmind mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind) or [Swag DBIP mod](https://github.com/linuxserver/docker-mods/tree/swag-dbip) are required to enable the geo location graph.
 - The host's fail2ban can be supported by mounting it to swag `- /path/to/host/fail2ban.sqlite3:/dashboard/fail2ban.sqlite3:ro`
 - The host's logs can be supported by mounting it to swag `- /path/to/host/logs:/dashboard/logs:ro`
+- To clear the dashboard stats, you must remove the logs (/config/log/nginx) and **recreate** the container.
 
 # Example
 ![Example](.assets/example.png)
