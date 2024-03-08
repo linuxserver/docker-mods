@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/unrar:version-6.2.12 as unrar
+FROM ghcr.io/linuxserver/unrar:arm64v8-version-6.2.12 as unrar
 
 FROM scratch as buildstage
 
