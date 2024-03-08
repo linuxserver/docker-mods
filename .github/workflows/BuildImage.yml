@@ -7,7 +7,7 @@ env:
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "replace_baseimage" #replace
   MODNAME: "replace_modname" #replace
-  MULTI_ARCH: "false" #set to true if needed
+  MULTI_ARCH: "true" #set to false if not needed
 
 jobs:
   set-vars:
