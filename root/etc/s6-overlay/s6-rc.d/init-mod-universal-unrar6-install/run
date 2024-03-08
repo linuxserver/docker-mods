@@ -7,5 +7,5 @@ elif [[ -f /sbin/apk ]]; then
     # Alpine
     cp /unrar6/unrar-alpine /usr/bin/unrar
 else
-    echo "*** This mod only supports Ubuntu and Alpine-based containers ***"
+    echo "*** The universal-unrar6 mod only supports Ubuntu and Alpine-based containers ***"
 fi
