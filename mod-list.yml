@@ -149,7 +149,7 @@ mods:
       - transmissionic: https://github.com/linuxserver/docker-mods/tree/transmission-transmissionic
       - transmission-web-control: https://github.com/linuxserver/docker-mods/tree/transmission-transmission-web-control
   universal:
-    mod_count: 11
+    mod_count: 12
     container_mods:
       - apprise: https://github.com/linuxserver/docker-mods/tree/universal-apprise
       - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
@@ -162,3 +162,4 @@ mods:
       - package-install: https://github.com/linuxserver/docker-mods/tree/universal-package-install
       - stdout-logs: https://github.com/linuxserver/docker-mods/tree/universal-stdout-logs
       - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
+      - unrar6: https://github.com/linuxserver/docker-mods/tree/universal-unrar6
