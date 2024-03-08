@@ -4,8 +4,10 @@
 
 Make sure that the line below, under virtual hosts, is in your nginx.conf, otherwise crowdsec-bouncer will not work. More information here https://info.linuxserver.io/issues/2022-08-20-nginx-base/
 
-    # Includes virtual hosts configs.
-    include /etc/nginx/http.d/*.conf;
+```nginx
+# Includes virtual hosts configs.
+include /etc/nginx/http.d/*.conf;
+```
 
 This mod adds the [CrowdSec](https://crowdsec.net) [nginx bouncer](https://github.com/crowdsecurity/cs-nginx-bouncer/) to SWAG, to be installed/updated during container start.
 
@@ -38,6 +40,28 @@ Set the following environment variables on your SWAG container.
 | | | |
 
 The variables need to remain in place while you are using the mod. If you remove **required** variables the bouncer will be disabled the next time you recreate the container, if you remove **optional** variables the associated features will be disabled the next time you recreate the container.
+
+### Captcha & AppSec Limitations
+
+Due to limitations in the nginx Lua module, if you enable Captcha or AppSec support in the bouncer you cannot safely use http/2 for any of your services. By default Swag ships with http/2 enabled, and so this will need to be changed in any and all active proxy confs as well as the default.conf. For example, in the [subdomain template conf](https://github.com/linuxserver/reverse-proxy-confs/blob/master/_template.subdomain.conf.sample#L9-L10) you would replace
+
+```nginx
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+```
+
+with
+
+```nginx
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+```
+
+You can automate this using something like `find /path/to/swag/config/nginx -name "*.conf" -type f -exec sed -i -E 's/^(\s+listen.*)http2(.*)/\1\2/g' {} \;`
+
+If you are not using Captcha or AppSec components make sure to omit or leave blank the related environment variables to avoid causing unnecessary issues.
 
 ### reCAPTCHA Support Notes
 
