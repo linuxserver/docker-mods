@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+
+if [[ -f /usr/bin/apt ]]; then
+    # Ubuntu
+    cp /unrar6/unrar-ubuntu /usr/bin/unrar
+elif [[ -f /sbin/apk ]]; then
+    # Alpine
+    cp /unrar6/unrar-alpine /usr/bin/unrar
+else
+    echo "*** The universal-unrar6 mod only supports Ubuntu and Alpine-based containers ***"
+fi
