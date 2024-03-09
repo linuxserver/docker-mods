@@ -337,7 +337,7 @@ fi
 function log {(
   while read
   do
-    echo $(date +"%y-%-m-%-d %H:%M:%S.%1N")\|"[$flac2mp3_pid]$REPLY" >>"$flac2mp3_log"
+    echo $(date +"%Y-%m-%d %H:%M:%S.%1N")\|"[$flac2mp3_pid]$REPLY" >>"$flac2mp3_log"
     local flac2mp3_filesize=$(stat -c %s "$flac2mp3_log")
     if [ $flac2mp3_filesize -gt $flac2mp3_maxlogsize ]
     then
