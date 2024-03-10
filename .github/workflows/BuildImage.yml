@@ -5,9 +5,9 @@ on: [push, pull_request_target, workflow_dispatch]
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "nextcloud" #replace
-  MODNAME: "notify-push" #replace
-  MULTI_ARCH: "true" #set to false if not needed
+  BASEIMAGE: "nextcloud"
+  MODNAME: "notify-push"
+  MULTI_ARCH: "false"
 
 jobs:
   set-vars:

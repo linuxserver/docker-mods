@@ -5,6 +5,17 @@ export ALLOW_SELF_SIGNED=true
 NEXTCLOUD_BASE="/config/www/nextcloud"
 NOTIFY_PUSH_BIN="$NEXTCLOUD_BASE/apps/notify_push/bin/$(arch)/notify_push"
 
+# Check if notify-push is installed
+if [ ! -d "$NEXTCLOUD_BASE/apps/notify_push/" ]; then
+  echo "**** Notify-push folder not found. Install the notify-push/client-push app and restart the container. ****"
+  sleep infinity
+fi 
+# Check cpu arch
+if [ ! -f "$NOTIFY_PUSH_BIN" ]; then
+  echo "**** Did not find a matching notify-push binary for your cpu arch: $(arch) ****"
+  sleep infinity
+fi
+
 # run notify-push binary 
 echo "**** Starting notify-push ****"
 s6-setuidgid abc "$NOTIFY_PUSH_BIN" "$NEXTCLOUD_BASE/config/config.php"
