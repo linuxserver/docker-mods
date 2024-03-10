@@ -5,8 +5,8 @@ on: [push, pull_request_target, workflow_dispatch]
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "swag" #replace
+  MODNAME: "auto-uptime-kuma" #replace
   MULTI_ARCH: "true" #set to false if not needed
 
 jobs:
