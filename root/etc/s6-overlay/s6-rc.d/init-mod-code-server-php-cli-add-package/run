@@ -1,0 +1,76 @@
+#!/usr/bin/with-contenv bash
+
+PHP_VERSION=${PHP_VERSION:=8.2}
+
+HAS_PHP="no"
+if command -v php${PHP_VERSION} &> /dev/null; then
+    HAS_PHP="yes"
+fi
+
+if [ "${HAS_PHP}" = "no" ]; then
+    echo "**** Installing PHP ${PHP_VERSION} ****"
+
+    if [ ! -f "/etc/apt/sources.list.d/php8source.list" ]; then
+        echo "**** Setting up APT repository ****"
+
+        source /etc/lsb-release
+
+        curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c" | gpg --dearmor | tee /usr/share/keyrings/php8.gpg >/dev/null
+        echo "deb [signed-by=/usr/share/keyrings/php8.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu ${DISTRIB_CODENAME} main" \
+            > /etc/apt/sources.list.d/php8source.list
+
+        apt-get update
+    fi
+
+    if apt-cache show php${PHP_VERSION}-cli &> /dev/null; then
+        echo "\
+            php${PHP_VERSION}-cli" >> /mod-repo-packages-to-install.list
+
+        HAS_PHP="yes"
+    else
+        echo "** PHP ${PHP_VERSION} not found! (please specify minor version too!) **"
+    fi
+else
+    echo "**** PHP ${PHP_VERSION} already installed, skipping ****"
+fi
+
+if [ "${HAS_PHP}" = "yes" ]; then
+    if [ -z "${PHP_EXTENSIONS+x}" ]; then
+        echo "**** No PHP extensions to install ****"
+        exit 0
+    fi
+
+    IFS='|'
+    PHP_EXTENSIONS=(${PHP_EXTENSIONS})
+    for EXT in "${PHP_EXTENSIONS[@]}"; do
+        if apt-cache show php${PHP_VERSION}-${EXT} &> /dev/null; then
+            echo "**** Installing PHP extension php${PHP_VERSION}-${EXT} ****"
+            echo "\
+                php${PHP_VERSION}-${EXT}" >> /mod-repo-packages-to-install.list
+        else
+            echo "**** PHP extension php${PHP_VERSION}-${EXT} not found! ****"
+        fi
+    done
+else
+    echo "**** PHP ${PHP_VERSION} is not installed! Check log! ****"
+fi
+
+if [ "${ENABLE_COMPOSER}" = "yes" ] && [ "${HAS_PHP}" = yes ]; then
+    echo "**** Installing composer dependencies ****"
+
+    if ! command -v unrar &> /dev/null; then
+        echo "\
+            unrar" >> /mod-repo-packages-to-install.list
+    fi
+
+    if ! command -v unzip &> /dev/null; then
+        echo "\
+                unzip" >> /mod-repo-packages-to-install.list
+    fi
+
+    if ! command -v 7z &> /dev/null; then
+        echo "\
+                p7zip-full\
+                p7zip-rar" >> /mod-repo-packages-to-install.list
+    fi
+fi

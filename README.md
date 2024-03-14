@@ -1,25 +1,38 @@
-# Rsync - Docker mod for openssh-server
+# PHP-CLI - Docker mod for code-server/openvscode-server
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds php-cli and composer to code-server/openvscode-server, to be installed/updated during container start.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+In code-server/openvscode-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-php-cli`
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-php-cli|linuxserver/mods:code-server-mod2`
 
-# Mod creation instructions
+## Installing specific PHP version
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic and `MULTI_ARCH` if needed.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+To install a specific PHP version simply define the environment variable `PHP_VERSION` with the version of your choice. As this mod uses the `ondrej/php` repository you can choose from the available versions there.
 
+As default this mod will install PHP 8.2.
 
-## Tips and tricks
+Example: `PHP_VERSION=8.1`
 
-* Some images have helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+__WARNING__\
+Composer requires at least PHP 7.4 to run!
+
+## Installing PHP extensions
+
+To install PHP extensions simply define the environment variable `PHP_EXTENSIONS`. If you want to install multiple extensions, seperate them with `|`.
+
+Example: `PHP_EXTENSIONS=simplexml|gd|zip`
+
+## Enable Composer binary
+
+To enable the installation of the `composer` binary, set the environment variable `ENABLE_COMPOSER` to `yes`.
+
+Example: `ENABLE_COMPOSER=yes`
+
+__WARNING__\
+Composer requires at least PHP 7.4 to run!
+
+## PHP configuration files
+
+You can find all the PHP configuration files at `/config/.php`.
+They are symlinked to `/etc/php`
