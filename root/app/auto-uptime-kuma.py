@@ -1,68 +1,135 @@
-from swagDocker import SwagDocker
-from swagUptimeKuma import SwagUptimeKuma
-import sys
-import argparse
-import os
+from auto_uptime_kuma.config_service import ConfigService
+from auto_uptime_kuma.uptime_kuma_service import UptimeKumaService
+from auto_uptime_kuma.docker_service import DockerService
+from auto_uptime_kuma.log import Log
+import sys, os
 
 
-def parseCommandLine():
-    """
-    Different application behavior if executed from CLI
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-purge', action='store_true')
-    args = parser.parse_args()
+def add_or_update_monitors(
+    docker_service: DockerService,
+    config_service: ConfigService,
+    uptime_kuma_service: UptimeKumaService,
+):
+    for container in docker_service.get_swag_containers():
+        container_config = docker_service.parse_container_labels(
+            container.labels, ".monitor."
+        )
+        container_name = container.name
+        monitor_data = uptime_kuma_service.build_monitor_data(
+            container_name, container_config
+        )
 
-    if (args.purge == True):
-        swagUptimeKuma.purgeData()
-        swagUptimeKuma.disconnect()
-        sys.exit(0)
-
-
-def addOrUpdateMonitors(domainName, swagContainers):
-    for swagContainer in swagContainers:
-        containerConfig = swagDocker.parseContainerLabels(
-            swagContainer.labels, ".monitor.")
-        containerName = swagContainer.name
-        monitorData = swagUptimeKuma.parseMonitorData(
-            containerName, domainName, containerConfig)
-
-        if (not swagUptimeKuma.monitorExists(containerName)):
-            swagUptimeKuma.addMonitor(containerName, domainName, monitorData)
+        if not uptime_kuma_service.monitor_exists(container_name):
+            uptime_kuma_service.create_monitor(container_name, container_config)
         else:
-            swagUptimeKuma.updateMonitor(
-                containerName, domainName, monitorData)
+            if not config_service.config_exists(container_name):
+                Log.info(
+                    f"Monitor '{monitor_data['name']}' for container '{container_name}'"
+                    " exists but no preset config found, generating from scratch"
+                )
+                config_service.create_config(container_name, monitor_data)
+            uptime_kuma_service.edit_monitor(container_name, monitor_data)
 
 
-def getMonitorsToBeRemoved(swagContainers, apiMonitors):
-    # Monitors to be removed are those that no longer have an existing container
-    # Monitor <-> Container link is done by comparing the container name with the monitor swag tag value
-    existingMonitorNames = [swagUptimeKuma.getMonitorSwagTagValue(
-        monitor) for monitor in apiMonitors]
-    existingContainerNames = [container.name for container in swagContainers]
+def delete_removed_monitors(
+    docker_service: DockerService, uptime_kuma_service: UptimeKumaService
+):
+    Log.info("Searching for Monitors that should be deleted")
+    # Monitors to be deleted are those that no longer have an existing container
+    # Monitor <-> Container link is done by comparing the container name
+    # with the monitor swag tag value
+    existing_monitor_names = [
+        uptime_kuma_service.get_monitor_swag_tag_value(monitor)
+        for monitor in uptime_kuma_service.monitors
+    ]
+    existing_container_names = [
+        container.name for container in docker_service.get_swag_containers()
+    ]
 
-    monitorsToBeRemoved = [
-        containerName for containerName in existingMonitorNames if containerName not in existingContainerNames]
-    return monitorsToBeRemoved
+    monitors_to_be_deleted = [
+        containerName
+        for containerName in existing_monitor_names
+        if containerName not in existing_container_names
+    ]
+
+    monitors_to_be_deleted = list(filter(None, monitors_to_be_deleted))
+
+    uptime_kuma_service.delete_monitors(monitors_to_be_deleted)
+
+
+def delete_removed_groups(uptime_kuma_service: UptimeKumaService):
+    Log.info("Searching for Groups that should be deleted")
+    # Groups to be deleted are those that no longer have any child Monitors
+    existing_monitor_group_ids = [
+        monitor["parent"] for monitor in uptime_kuma_service.monitors
+    ]
+
+    # remove empty values
+    existing_monitor_group_ids = list(filter(None, existing_monitor_group_ids))
+    # get unique values
+    existing_monitor_group_ids = list(set(existing_monitor_group_ids))
+
+    groups_to_be_deleted = []
+
+    for group in uptime_kuma_service.groups:
+        if group["id"] not in existing_monitor_group_ids:
+            groups_to_be_deleted.append(group["name"])
+
+    uptime_kuma_service.delete_groups(groups_to_be_deleted)
+
+
+def execute_cli_mode(
+    config_service: ConfigService, uptime_kuma_service: UptimeKumaService
+):
+    Log.info("Mod was executed from CLI. Running manual tasks.")
+    args = config_service.get_cli_args()
+    if args.purge:
+        uptime_kuma_service.purge_data()
+
+        config_service.purge_data()
+    if args.monitor:
+        Log.info(f"Requesting data for Monitor '{args.monitor}'")
+        print(uptime_kuma_service.get_monitor(args.monitor))
+
+    uptime_kuma_service.disconnect()
 
 
 if __name__ == "__main__":
-    url = os.environ['UPTIME_KUMA_URL']
-    username = os.environ['UPTIME_KUMA_USERNAME']
-    password = os.environ['UPTIME_KUMA_PASSWORD']
-    domainName = os.environ['URL']
+    Log.init("mod-auto-uptime-kuma")
 
-    swagDocker = SwagDocker("swag.uptime-kuma")
-    swagUptimeKuma = SwagUptimeKuma(url, username, password)
+    url = os.environ["UPTIME_KUMA_URL"]
+    username = os.environ["UPTIME_KUMA_USERNAME"]
+    password = os.environ["UPTIME_KUMA_PASSWORD"]
+    domainName = os.environ["URL"]
 
-    parseCommandLine()
+    configService = ConfigService(domainName)
+    uptimeKumaService = UptimeKumaService(configService)
+    dockerService = DockerService("swag.uptime-kuma")
+    is_connected = uptimeKumaService.connect(url, username, password)
 
-    swagContainers = swagDocker.getSwagContainers()
+    if not is_connected:
+        sys.exit()
 
-    addOrUpdateMonitors(domainName, swagContainers)
+    uptimeKumaService.load_data()
+    if uptimeKumaService.default_notifications:
+        notification_names = [
+            f"{notification['id']}:{notification['name']}"
+            for notification in uptimeKumaService.default_notifications
+        ]
+        Log.info(
+            f"The following notifications are enabled by default: {notification_names}"
+        )
 
-    monitorsToBeRemoved = getMonitorsToBeRemoved(
-        swagContainers, swagUptimeKuma.apiMonitors)
-    swagUptimeKuma.deleteMonitors(monitorsToBeRemoved)
+    if configService.is_cli_mode():
+        execute_cli_mode(configService, uptimeKumaService)
+        sys.exit()
 
-    swagUptimeKuma.disconnect()
+    add_or_update_monitors(dockerService, configService, uptimeKumaService)
+
+    # reload data after the sync above
+    uptimeKumaService.load_data()
+    # cleanup
+    delete_removed_monitors(dockerService, uptimeKumaService)
+    delete_removed_groups(uptimeKumaService)
+
+    uptimeKumaService.disconnect()
