@@ -4,7 +4,7 @@
 if [[ -f "/mod-pip-packages-to-install.list" ]]; then
     IFS=' ' read -ra PIP_PACKAGES <<< "$(tr '\n' ' ' < /mod-pip-packages-to-install.list)"
     if [[ ${#PIP_PACKAGES[@]} -ne 0 ]] && [[ ${PIP_PACKAGES[*]} != "" ]]; then
-        if ! command -v python3; then
+        if [[ ! -e /lsiopy/bin/python3 ]]; then
             CREATE_VENV="true"
             if [[ -f /usr/bin/apt ]]; then
                 echo "python3-venv" >> /mod-repo-packages-to-install.list
