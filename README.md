@@ -8,15 +8,13 @@ This mod adds a service to start the [notify-push](https://github.com/nextcloud/
 
 ## Setup
 
-1. Download and install the "client-push" (``notify-push``) app from the Nextcloud store.
+1. Add ``DOCKER_MODS=linuxserver/mods:nextcloud-notify-push`` to your env.
 
-2. Add ``DOCKER_MODS=linuxserver/mods:nextcloud-notify-push`` to your env.
+2. Make sure that Redis is already configured with Nextcloud.
 
-3. notify_push should be running and ``**** Starting notify-push ****`` appear in the log. Also check for errors.
+3. [Configure your reverse proxy for notify push.](https://github.com/nextcloud/notify_push#reverse-proxy)
 
-4. [Configure your reverse proxy for notify push.](https://github.com/nextcloud/notify_push#reverse-proxy)
-
-5. run ``occ notify_push:setup https://cloud.example.org/push`` to test and enable notify-push, replace "*cloud.example.org*" with your domain.
+4. notify_push should be running and ``**** Starting notify-push ****`` appear in the log. Also check for errors.
 
 ### SWAG configuration
 
