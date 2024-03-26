@@ -18,6 +18,10 @@ This mod adds a service to start the [notify-push](https://github.com/nextcloud/
 
 5. run ``occ notify_push:setup https://cloud.example.org/push`` to test and enable notify-push, replace "*cloud.example.org*" with your domain.
 
+### SWAG configuration
+
+SWAG's preset proxy conf for Nextcloud has been updated to support this mod out of the box. Make sure you are using the updated conf (to update an existing one, you can simply delete your existing conf, rename the sample to `nextcloud.subdomain.conf` and restart SWAG).
+
 ### Traefik configuration
 
 notify-push listens on its own port, therefore we need to to forward all traffic under example.org/push/* to port 7867.
