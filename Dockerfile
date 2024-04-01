@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.18 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 ARG MOD_VERSION
 
@@ -15,8 +15,9 @@ RUN \
   mkdir -p /root-layer/opencl-intel && \
   for i in $COMP_RT_URLS; do \
     echo "**** downloading ${i%$'\r'} ****" && \
-    curl -o /root-layer/opencl-intel/$(basename "${i%$'\r'}") \
-      -fL "${i%$'\r'}"; \
+    curl -fS --retry 3 --retry-connrefused -o \
+      /root-layer/opencl-intel/$(basename "${i%$'\r'}") -L \
+      "${i%$'\r'}" || exit 1; \
   done
 
 # copy local files
