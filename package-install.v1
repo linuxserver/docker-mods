@@ -15,7 +15,7 @@ write_mod_debug() {
     if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo "[pkg-install-init] (DEBUG) $MSG"; fi
 }
 
-write_mod_debug "Package install script version ${MOD_SCRIPT_VER}"
+write_mod_debug "Package install script version ${PKG_SCRIPT_VER}"
 
 if [[ -f "/mod-pip-packages-to-install.list" ]]; then
     IFS=' ' read -ra PIP_PACKAGES <<< "$(tr '\n' ' ' < /mod-pip-packages-to-install.list)"
