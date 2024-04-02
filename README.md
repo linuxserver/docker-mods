@@ -12,63 +12,11 @@ This mod adds a service to start the [notify-push](https://github.com/nextcloud/
 
 2. Make sure that Redis is already configured with Nextcloud.
 
-3. [Configure your reverse proxy for notify push.](https://github.com/nextcloud/notify_push#reverse-proxy)
+3. notify_push should be running and ``**** Starting notify-push ****`` appear in the log. Also check for errors.
 
-4. notify_push should be running and ``**** Starting notify-push ****`` appear in the log. Also check for errors.
+### Reverse Proxy
 
-### SWAG configuration
-
-SWAG's preset proxy conf for Nextcloud has been updated to support this mod out of the box. Make sure you are using the updated conf (to update an existing one, you can simply delete your existing conf, rename the sample to `nextcloud.subdomain.conf` and restart SWAG).
-
-### Traefik configuration
-
-notify-push listens on its own port, therefore we need to to forward all traffic under example.org/push/* to port 7867.
-
-We need to add an additional router and service to the container. Having more than one router requires to explicitly configure more options. Additionally a new middleware to strip the /push prefix.
-
-Replace "*cloud.example.org*" for both routers with your domain!
-
-#### Before
-
-```yaml
-    ...
-    labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.nextcloud.entryPoints=https"
-        - "traefik.http.routers.nextcloud.rule=Host(`cloud.example.org`)"
-        - "traefik.http.services.nextcloud.loadbalancer.server.port=443"
-```
-
-#### After
-
-```yaml
-    ...
-    labels:
-        # Nextcloud
-        - "traefik.enable=true"
-        - "traefik.http.routers.nextcloud.entryPoints=https"
-        - "traefik.http.routers.nextcloud.rule=Host(`cloud.example.org`)"
-        - "traefik.http.services.nextcloud.loadbalancer.server.port=443"
-        # add service
-        - "traefik.http.routers.nextcloud.service=nextcloud"
-
-        #Notify-push
-        # forward cloud.example.org/push/*
-        - "traefik.http.routers.nextcloud_push.rule=Host(`cloud.example.org`) && PathPrefix(`/push`)"
-        # entry point
-        - "traefik.http.routers.nextcloud_push.entryPoints=https"
-        # set protocol to http
-        - "traefik.http.services.nextcloud_push.loadbalancer.server.scheme=http"
-        # set port
-        - "traefik.http.services.nextcloud_push.loadbalancer.server.port=7867"
-        # use middleware
-        - "traefik.http.routers.nextcloud_push.middlewares=nextcloud_strip_push"
-        # define middleware
-        - "traefik.http.middlewares.nextcloud_strip_push.stripprefix.prefixes=/push"
-        # add service
-        - "traefik.http.routers.nextcloud_push.service=nextcloud_push"
-
-```
+The reverse proxy of the `notify_push` service at subfolder `/push` is handled within the Nextcloud container's Nginx site conf. Make sure you are on the latest version. If not sure, make sure your Nextcloud container is up to date, then you can delete the existing site conf at `/config/nginx/site-confs/default.conf` and restart the container. A new conf with the reverse proxy support will be created.
 
 ## Validation
 
