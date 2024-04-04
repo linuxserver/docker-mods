@@ -58,10 +58,11 @@ mods:
     container_mods:
       - flac2mp3: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
   nextcloud:
-    mod_count: 2
+    mod_count: 3
     container_mods:
       - mediadc: https://github.com/linuxserver/docker-mods/tree/nextcloud-mediadc
       - memories: https://github.com/linuxserver/docker-mods/tree/nextcloud-memories
+      - notify-push: https://github.com/linuxserver/docker-mods/tree/nextcloud-notify-push
   nginx:
     mod_count: 5
     container_mods:
