@@ -1,0 +1,48 @@
+#!/usr/bin/with-contenv bash
+
+export NEXTCLOUD_URL="https://localhost"
+export ALLOW_SELF_SIGNED=true
+export NEXTCLOUD_BASE="/config/www/nextcloud"
+export NOTIFY_PUSH_BIN="$NEXTCLOUD_BASE/apps/notify_push/bin/$(arch)/notify_push"
+
+installed_version=$(php -r "require '/config/www/nextcloud/config/config.php'; echo \$CONFIG['version'];" 2>/dev/null)
+if [ "${installed_version}" = "" ]; then
+    echo "**** Nextcloud not installed yet. Please go through the wizard and restart the container. Then notify_push will be enabled. ****"
+    sleep infinity
+fi
+# Check redis
+if ! occ config:system:get redis >/dev/null; then
+    echo "**** Redis does not seem to be configued. Notify_push will not start ****"
+    sleep infinity
+fi
+
+echo "**** Making sure the Nextcloud Client Push plugin is installed and enabled ****"
+occ app:install notify_push
+occ app:enable notify_push
+
+# Check if notify-push is installed
+if [ ! -d "$NEXTCLOUD_BASE/apps/notify_push/" ]; then
+    echo "**** Notify-push folder not found. Install the notify-push/client-push app and restart the container. ****"
+    sleep infinity
+fi 
+# Check cpu arch
+if [ ! -f "$NOTIFY_PUSH_BIN" ]; then
+    echo "**** Did not find a matching notify-push binary for your cpu arch: $(arch) ****"
+    sleep infinity
+fi
+
+# add to trusted proxies
+if ! occ config:system:get trusted_proxies | grep -q "127.0.0.1"; then
+    NO_OF_PROXIES=$(occ config:system:get trusted_proxies --output=json | jq 'length')
+    if [[ -z "${NO_OF_PROXIES}" ]]; then
+        NO_OF_PROXIES="0"
+    fi
+    echo "**** Adding notify_push to trusted proxies ****"
+    occ config:system:set trusted_proxies "${NO_OF_PROXIES}" --value=127.0.0.1
+fi
+
+# run notify-push binary 
+echo "**** Starting notify-push ****"
+exec \
+    s6-notifyoncheck  -d -n 300 -w 1000 -c "nc -z localhost 7867" \
+        s6-setuidgid abc "$NOTIFY_PUSH_BIN" "$NEXTCLOUD_BASE/config/config.php"

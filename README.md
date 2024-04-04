@@ -1,25 +1,39 @@
-# Rsync - Docker mod for openssh-server
+# nextcloud-notify-push - Docker mod for Nextcloud  
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds a service to start the [notify-push](https://github.com/nextcloud/notify_push) binary.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+## Requirements
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+- Redis configured in your config.php
 
-# Mod creation instructions
+## Setup
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic and `MULTI_ARCH` if needed.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+1. Add ``DOCKER_MODS=linuxserver/mods:nextcloud-notify-push`` to your env.
 
+2. Make sure that Redis is already configured with Nextcloud.
 
-## Tips and tricks
+3. notify_push should be running and ``**** Starting notify-push ****`` appear in the log. Also check for errors.
 
-* Some images have helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+### Reverse Proxy
+
+The reverse proxy of the `notify_push` service at subfolder `/push` is handled within the Nextcloud container's Nginx site conf. Make sure you are on the latest version. If not sure, make sure your Nextcloud container is up to date, then you can delete the existing site conf at `/config/nginx/site-confs/default.conf` and restart the container. A new conf with the reverse proxy support will be created.
+
+## Validation
+
+1. Read the section about the [Test client](https://github.com/nextcloud/notify_push#test-client). Create an app password and connect to your server
+
+    ```sh
+    test_client https://cloud.example.com username password
+    ```
+
+2. Run ``occ notify_push:metrics``. Step 1 can be skipped if real clients are already connected.
+
+    ```sh
+    root@1d0f9bf7fff9:/# occ notify_push:metrics
+    Active connection count: 2
+    Active user count: 1
+    Total connection count: 5
+    Total database query count: 1
+    Events received: 13
+    Messages sent: 3
+    ```
