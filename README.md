@@ -10,12 +10,12 @@ If adding multiple mods, enter them in an array separated by `|`, such as `DOCKE
 
 ## Security consideration:
 
-Mapping `docker.sock` is a potential security liability because docker has root access on the host and any process that has full access to `docker.sock` would also have root access on the host. Docker api has no built-in way to set limitations on access, however you can use a proxy for the `docker.sock` via a solution like [tecnativa/docker-socket-proxy](https://hub.docker.com/r/tecnativa/docker-socket-proxy), which adds the ability to limit access. Then you would just set `DOCKER_HOST=` environment variable to point to the proxy address.
+Mapping `docker.sock` is a potential security liability because docker has root access on the host and any process that has full access to `docker.sock` would also have root access on the host. Docker api has no built-in way to set limitations on access, however you can use a proxy for the `docker.sock` via a solution like [our docker socket proxy](https://github.com/linuxserver/docker-socket-proxy), which adds the ability to limit access. Then you would just set `DOCKER_HOST=` environment variable to point to the proxy address.
 
 Here's a sample compose yaml snippet for tecnativa/docker-socket-proxy:
 ```yaml
   dockerproxy:
-    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    image: lscr.io/linuxserver/socket-proxy:latest
     container_name: dockerproxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
