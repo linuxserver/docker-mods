@@ -5,7 +5,8 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20240225"
+# 2024-04-13 - Let lsiown ignore broken symlinks (requires gnu find)
+MOD_SCRIPT_VER="3.20240413"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
