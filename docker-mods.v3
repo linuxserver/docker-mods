@@ -5,7 +5,8 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20240225"
+# 2024-04-13 - Let lsiown ignore broken symlinks (requires gnu find)
+MOD_SCRIPT_VER="3.20240413"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -132,7 +133,7 @@ create_lsiown_alias() {
 
 	ERROR='**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
 	PATH=("${@:2}")
-	/usr/bin/find "${PATH[@]}" "${MAXDEPTH[@]}" \( ! -group "${GROUP}" -o ! -user "${USER}" \) -exec chown "${OPTIONS[@]}" "${USER}":"${GROUP}" {} + || printf "${ERROR}"
+	/usr/bin/find "${PATH[@]}" "${MAXDEPTH[@]}" ! -xtype l \( ! -group "${GROUP}" -o ! -user "${USER}" \) -exec chown "${OPTIONS[@]}" "${USER}":"${GROUP}" {} + || printf "${ERROR}"
 	EOF
     chmod +x /usr/bin/lsiown
 }
