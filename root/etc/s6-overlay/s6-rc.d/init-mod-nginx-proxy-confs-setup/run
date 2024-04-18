@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 
 ###
-# SWAG LOGIC https://github.com/linuxserver/docker-swag/blob/master/root/etc/cont-init.d/50-config
+# SWAG LOGIC https://github.com/linuxserver/docker-swag/blob/master/root/etc/s6-overlay/s6-rc.d
 ###
 
 # make our folders and links
@@ -17,7 +17,7 @@ if [[ -d /defaults/nginx/proxy-confs/ ]]; then
         -maxdepth 1 \
         -name "*.conf.sample" \
         -type f \
-        -exec cp "{}" /config/nginx/proxy-confs/ +
+        -exec cp "{}" /config/nginx/proxy-confs/ \;
 fi
 
 # copy reverse proxy configs
@@ -28,5 +28,5 @@ if [[ ! -f /config/nginx/proxy.conf ]]; then
     cp /defaults/nginx/proxy.conf.sample /config/nginx/proxy.conf
 fi
 # permissions
-chown -R abc:abc \
+lsiown -R abc:abc \
   /config/nginx/{proxy.conf,ssl.conf,dhparams.pem,proxy-confs/}
