@@ -2,6 +2,8 @@
 
 These files are used by Linuxserver build processes to handle mods in our images. Not for end-user consumption.
 
+* **13.04.24:** - Let lsiown ignore broken symlinks (requires gnu find).
+* **26.03.24:** - Add versioning and debug logging to package install script, force venv creation when python packages are to be installed.
 * **25.02.24:** - Support unauthenticated registries.
 * **29.01.24:** - Handle single-arch mods with attestation information.
 * **03.01.24:** - Support arbitrary mod registries and multiarch mods.
