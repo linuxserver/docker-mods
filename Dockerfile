@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM lsiobase/alpine:3.17 as buildstage
+FROM lscr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 
 RUN \
   apk add --no-cache \
