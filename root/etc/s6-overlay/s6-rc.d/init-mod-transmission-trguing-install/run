@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+printf "/themes/trguing" > /var/run/s6/container_environment/TRANSMISSION_WEB_HOME
+
+lsiown -R abc:abc /themes
