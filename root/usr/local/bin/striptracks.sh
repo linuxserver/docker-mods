@@ -1216,6 +1216,10 @@ BEGIN {
   MKVMerge = "/usr/bin/mkvmerge"
   FS = "[\t\n: ]"
   IGNORECASE = 1
+  split("", AudioCommand)
+  split("", SubsCommand)
+  split("", AudRmvLog)
+  split("", SubsRmvLog)
 }
 /^Track ID/ {
   FieldCount = split($0, Fields)
