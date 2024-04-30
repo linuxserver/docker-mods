@@ -5,19 +5,19 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
 ARG MOD_VERSION
 
 RUN \
-  echo "**** grab transmission-web-control ****" && \
+  echo "**** grab transmission trguing ****" && \
   mkdir -p /root-layer/themes && \
   if [ -z ${MOD_VERSION} ]; then \
-    MOD_VERSION=$(curl -s "https://api.github.com/repos/transmission-web-control/transmission-web-control/releases/latest" \
+    MOD_VERSION=$(curl -s "https://api.github.com/repos/openscopeproject/TrguiNG/releases/latest" \
     | jq -rc ".tag_name"); \
   fi && \
   curl -o \
-    /tmp/transmission-web-control.tar.gz -L \
-    "https://github.com/transmission-web-control/transmission-web-control/releases/download/${MOD_VERSION}/dist.tar.gz" && \
-  mkdir -p /root-layer/themes/transmission-web-control && \
-  tar xzf \
-    /tmp/transmission-web-control.tar.gz -C \
-    /root-layer/themes/transmission-web-control --strip-components=2
+    /tmp/trguing-web.zip -L \
+    "https://github.com/openscopeproject/TrguiNG/releases/download/${MOD_VERSION}/trguing-web-${MOD_VERSION}.zip" && \
+  mkdir -p /root-layer/themes/trguing && \
+  unzip \
+    /tmp/trguing-web.zip -d \
+    /root-layer/themes/trguing
 
 # copy local files
 COPY root/ /root-layer/
@@ -25,7 +25,7 @@ COPY root/ /root-layer/
 # ## Single layer deployed image ##
 FROM scratch
 
-LABEL maintainer="FujiZ"
+LABEL maintainer="Azlux"
 
 # # Add files from buildstage
 COPY --from=buildstage /root-layer/ /
