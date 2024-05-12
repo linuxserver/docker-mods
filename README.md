@@ -75,10 +75,10 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
    ![striptracks v3](.assets/striptracks-v3-custom-script.png "Radarr/Sonarr custom script settings")
 
    The script will detect the language(s) defined in Radarr/Sonarr for the movie or TV show and only keep the audio and subtitles selected.  
-   Alternatively, a wrapper script may be used to more granularly define which tracks to keep.  See [Wrapper Scripts](./README.md#wrapper-scripts) for more details.
+   Alternatively, a wrapper script or an environment variable may be used to more granularly define which tracks to keep.  See [Wrapper Scripts](./README.md#wrapper-scripts) or [Environment Variable](./README.md#environment-variable) for more details.
 
 # Usage
-The source video can be any mkvtoolnix supported video format. The output is an MKV file with the same name.  
+The source video can be any mkvtoolnix supported video format. The output is an MKV file with the same name and the same permissions. Owner is preserved if the script is executed as root.  
 Chapters, if they exist, are preserved. The Title attribute in the MKV is set to the movie title plus year  
 (ex: `The Sting (1973)`) or the series title plus episode information (ex: `Happy! 01x01 - What Smiles Are For`).  
 The language of the video file will be updated in the Radarr or Sonarr database to reflect the actual languages preserved in the remuxed video, and the video will be renamed according to the Radarr/Sonarr rules if needed (for example, if a removed track would trigger a name change.)
@@ -135,7 +135,7 @@ graph LR
 ```
 
 Descriptively, these steps are:
-1. Command-line options override all automatic language selection.
+1. Command-line options (or environment variable) override all automatic language selection.
 2. If there are no command-line options, the video's *Quality Profile* is examined for a language configuration (only supported in Radarr).
 3. If there is no *Quality Profile* language **or** it is set to 'Any', then examine the *Custom Formats* and scores associated with the quality profile.  All language conditions with positive scores *and* negated conditions with negative score are selected.
 4. If the *Custom Format* scores are zero (0) or there are none with configured language conditions, examine the *Language Profile* (only supported in Sonarr v3)
@@ -173,7 +173,7 @@ For example:
 
 Multiple codes may be concatenated, such as `:eng:spa` for both English and Spanish.  Order is unimportant.
 
->![warning] **NOTE:** If no subtitle language is detected in the profile or specified on the command-line, all subtitles are removed.
+>![warning] **NOTE:** If no subtitle language is detected via Radarr/Sonarr configuration or specified on the command-line, all subtitles are removed.
 
 ### Any language code
 The `:any` language code is a special code. When used, the script will preserve all language tracks, regardless of how they are tagged in the source video.
@@ -215,7 +215,7 @@ There is no way to force the script to remove audio tracks with these codes.
 ```
 
 ## Wrapper Scripts
-To supply arguments to the script, one of the included wrapper scripts may be used or a custom wrapper script must be created.
+To supply arguments to the script, you must either use one of the included wrapper scripts, create a custom wrapper script, or set the `STRIPTRACKS_ARGS` [environment variable](./README.md#environment-variable).
 
 ### Included Wrapper Scripts
 For your convenience, several wrapper scripts are included in the `/usr/local/bin/` directory.  
@@ -258,8 +258,29 @@ Then put `/config/striptracks-custom.sh` in the **Path** field in place of `/usr
 
 >**Note:** If you followed the Linuxserver.io recommendations when configuring your container, the `/config` directory will be mapped to an external storage location.  It is therefore recommended to place custom scripts in the `/config` directory so they will survive container updates, but they may be placed anywhere that is accessible by Radarr or Sonarr.
 
+## Environment Variable
+The `striptracks.sh` script also allows the use of arguments provided by the `STRIPTRACKS_ARGS` environment variable. This allows advanced use cases without having to provide a custom script.
+
+For example, the following value in your `docker run` command would Keep English, Japanese, and Unknown audio and English subtitles:
+
+```shell
+-e STRIPTRACKS_ARGS='--audio :eng:jpn:und --subs :eng'
+```
+
+In Docker Compose this will look like this:
+
+```yaml
+environment:
+  - STRIPTRACKS_ARGS=--audio :eng:jpn:und --subs :eng
+```
+
+*Example Synology Configuration*  
+![striptracks](.assets/striptracks-synology-2.png "Synology container settings")
+
+>**NOTE:** The environment variable settings are *only* used when **no** command-line arguments are present. **Any** command-line argument will disable the use of the environment variable.
+
 ## Triggers
-The only events/notification triggers that have been tested are **On Import** and **On Upgrade**
+The only events/notification triggers that are supported are **On Import** and **On Upgrade**
 
 ## Batch Mode
 Batch mode allows the script to be executed independently of Radarr or Sonarr.  It converts the file specified on the command-line and ignores any environment variables that are normally expected to be set by the video management program.

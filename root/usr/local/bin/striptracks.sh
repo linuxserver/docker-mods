@@ -41,6 +41,7 @@
 # 11 - source video had no audio or subtitle tracks
 # 12 - log file is not writable
 # 13 - awk script exited abnormally
+# 15 - could not set permissions and/or owner on new file
 # 16 - could not delete the original file
 # 17 - Radarr/Sonarr API error
 # 18 - Radarr/Sonarr job timeout
@@ -70,6 +71,9 @@ Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
   $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-d|--debug} [<level>]]
+
+  Options can also be set via the STRIPTRACKS_ARGS environment variable.
+  Command-line arguments override the environment variable.
 
 Options and Arguments:
   -a, --audio <audio_languages>    Audio languages to keep
@@ -124,6 +128,17 @@ Examples:
 "
   echo "$usage" >&2
 }
+
+# Check for environment variable arguments
+if [ -n "$STRIPTRACKS_ARGS" ]; then
+  if [ $# -ne 0 ]; then
+    striptracks_prelogmessage="Warning|STRIPTRACKS_ARGS environment variable set but will be ignored because command line arguments were also specified."
+  else
+    # Move the environment variable arguments to the command line for processing
+    striptracks_prelogmessage="Info|Using settings from environment variable."
+    eval set -- "$STRIPTRACKS_ARGS"
+  fi
+fi
 
 # Process arguments
 # Taken from Drew Strokes post 3/24/2015:
@@ -845,8 +860,23 @@ if [ $striptracks_debug -ge 1 ]; then
   echo "$striptracks_message" >&2
 fi
 
+# Log STRIPTRACKS_ARGS usage
+if [ -n "$striptracks_prelogmessage" ]; then
+  # striptracks_prelogmessage is set above, before argument processing
+  echo "$striptracks_prelogmessage" | log
+  [ $striptracks_debug -ge 1 ] && echo "Debug|STRIPTRACKS_ARGS: ${STRIPTRACKS_ARGS}" | log
+fi
+
 # Log environment
 [ $striptracks_debug -ge 2 ] && printenv | sort | sed 's/^/Debug|/' | log
+
+# Check for invalid _eventtypes
+if [[ "${!striptracks_eventtype}" =~ Grab|Rename|MovieAdded|MovieDelete|MovieFileDelete|SeriesAdd|SeriesDelete|EpisodeFileDelete|HealthIssue|ApplicationUpdate ]]; then
+  striptracks_message="Error|${striptracks_type^} event ${!striptracks_eventtype} is not supported. Exiting."
+  echo "$striptracks_message" | log
+  echo "$striptracks_message" >&2
+  end_script 20
+fi
 
 # Handle Test event
 if [[ "${!striptracks_eventtype}" = "Test" ]]; then
@@ -1351,6 +1381,30 @@ if [ ! -s "$striptracks_tempvideo" ]; then
   echo "$striptracks_message" >&2
   end_script 10
 fi
+
+# Checking that we're running as root
+if [ "$(id -u)" -eq 0 ]; then
+  # Set owner
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Changing owner of file \"$striptracks_tempvideo\"" | log
+  chown --reference="$striptracks_video" "$striptracks_tempvideo" >&2
+  striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
+    striptracks_message="Error|[$striptracks_return] Error when changing owner of file: \"$striptracks_tempvideo\""
+    echo "$striptracks_message" | log
+    echo "$striptracks_message" >&2
+    striptracks_exitstatus=15
+  }
+else
+  # Unable to change owner when not running as root
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Unable to change owner of file when running as user '$(id -un)'" | log
+fi
+# Set permissions
+chmod --reference="$striptracks_video" "$striptracks_tempvideo" >&2
+striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
+  striptracks_message="Error|[$striptracks_return] Error when changing permissions of file: \"$striptracks_tempvideo\""
+  echo "$striptracks_message" | log
+  echo "$striptracks_message" >&2
+  striptracks_exitstatus=15
+}
 
 # Just delete the original video if running in batch mode
 if [ "$striptracks_type" = "batch" ]; then
