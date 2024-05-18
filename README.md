@@ -41,6 +41,7 @@ services:
       - RFFMPEG_WOL=api
       - RFFMPEG_HOST=transcode
       - RFFMPEG_HOST_MAC="12:ab:34:cd:ef:56"
+      - FFMPEG_PATH=/usr/local/bin/ffmpeg #override the default ffmpeg path
       - WOL_API=192.168.1.5  #docker host IP
       - WOL_API_PORT=8431
       - WOL_WAIT=10  #time transcode host takes to start
@@ -72,14 +73,11 @@ If you want to run rffmpeg commands they must be run as ABC inside the container
 * To test connection ``` docker exec -it jellyfin s6-setuidgid abc /usr/local/bin/ffprobe -version ```
 * To view all commands ``` docker exec -it jellyfin s6-setuidgid abc /usr/local/bin/rffmpeg -h ```
 
-You then need to set your FFMPEG binary in Jellyfin to:
-* /usr/local/bin/ffmpeg - Normal rffmpeg without WOL support
-* /usr/local/bin/wol_rffmpeg/ffmpeg - rffmpeg with WOL support
-
 WOL Support
 Native WOL support is available if you are running in host network mode. If not you can use the WOL_API container https://hub.docker.com/r/rix1337/docker-wol_api. Note the image name is rix1337/docker-wol_api
 
 WOL ENV:
+* FFMPEG_PATH=/usr/local/bin/wol_rffmpeg/ffmpeg
 * RFFMPEG_WOL= native or api
 * RFFMPEG_HOST= remote host to wake
 * RFFMPEG_HOST_MAC= remote host to wake mac enclosed in " " eg "aa:12:34:bb:cc:56" 
