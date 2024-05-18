@@ -4,7 +4,7 @@ on: [push, pull_request_target, workflow_dispatch]
 
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
-  ENDPOINT: "apriestley64/mods" #don't modify
+  ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "jellyfin" #replace
   MODNAME: "rffmpeg" #replace
 
