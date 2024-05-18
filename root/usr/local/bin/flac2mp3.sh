@@ -63,6 +63,9 @@ Source: https://github.com/TheCaptain989/lidarr-flac2mp3
 Usage:
   $0 [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} \"<options>\" {-e|--extension} <extension>] [{-f|--file} <audio_file>] [{-k|--keep-file}] [{-o|--output} <directory>] [{-r|--regex} '<regex>'] [{-t|--tags} <taglist>] [{-l|--log} <log_file>] [{-d|--debug} [<level>]]
 
+  Options can also be set via the FLAC2MP3_ARGS environment variable.
+  Command-line arguments override the environment variable.
+
 Options:
   -b, --bitrate <bitrate>       Set output quality in constant bits per second
                                 [default: 320k]
@@ -321,12 +324,14 @@ if [[ "${flac2mp3_type,,}" = "batch" ]]; then
   # Batch mode
   export lidarr_eventtype="Convert"
 elif [[ "${flac2mp3_type,,}" = "lidarr" ]]; then
+  # shellcheck disable=SC2154
   export flac2mp3_tracks="$lidarr_addedtrackpaths"
   # Catch for other environment variable
+  # shellcheck disable=SC2154
   [ -z "$flac2mp3_tracks" ] && flac2mp3_tracks="$lidarr_trackfile_path"
 else
   # Called in an unexpected way
-  echo -e "Error|Unknown or missing 'lidarr_eventtype' environment variable: ${flac2mp3_type}\nNot called from Lidarr.\nTry using Batch Mode option: -f <file>"
+  echo -e "Error|Unknown or missing '*_eventtype' environment variable: ${flac2mp3_type}\nNot called from Lidarr.\nTry using Batch Mode option: -f <file>"
   exit 7
 fi
 
@@ -335,9 +340,10 @@ fi
 # Can still go over flac2mp3_maxlog if read line is too long
 #  Must include whole function in subshell for read to work!
 function log {(
-  while read
+  while read -r
   do
-    echo $(date +"%y-%-m-%-d %H:%M:%S.%1N")\|"[$flac2mp3_pid]$REPLY" >>"$flac2mp3_log"
+    # shellcheck disable=2046
+    echo $(date +"%Y-%m-%d %H:%M:%S.%1N")\|"[$flac2mp3_pid]$REPLY" >>"$flac2mp3_log"
     local flac2mp3_filesize=$(stat -c %s "$flac2mp3_log")
     if [ $flac2mp3_filesize -gt $flac2mp3_maxlogsize ]
     then
@@ -352,7 +358,7 @@ function log {(
 # Inspired by https://stackoverflow.com/questions/893585/how-to-parse-xml-in-bash
 function read_xml {
   local IFS=\>
-  read -d \< flac2mp3_xml_entity flac2mp3_xml_content
+  read -r -d \< flac2mp3_xml_entity flac2mp3_xml_content
 }
 # Check Lidarr version
 function get_version {
@@ -426,6 +432,7 @@ function check_job {
 # Get all track files from album
 function get_trackfile_info {
   local url="$flac2mp3_api_url/trackFile"
+  # shellcheck disable=SC2154
   local data="albumId=$lidarr_album_id"
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Getting track file info for album id $lidarr_album_id. Calling Lidarr API using GET and URL '$url?$data'" | log
   unset flac2mp3_result
@@ -472,6 +479,7 @@ function delete_track {
 # Get file details on possible files to import into Lidarr
 function get_import_info {
   local url="$flac2mp3_api_url/manualimport"
+  # shellcheck disable=SC2154
   local data="artistId=$lidarr_artist_id&folder=$lidarr_artist_path&filterExistingFiles=true&replaceExistingFiles=false"
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Getting list of files that can be imported. Calling Lidarr API using GET and URL '$url?$data'" | log
   unset flac2mp3_result
@@ -597,8 +605,17 @@ if [ -n "$flac2mp3_prelogmessage" ]; then
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|FLAC2MP3_ARGS: ${FLAC2MP3_ARGS}" | log
 fi
 
-# Log environment
+# Log environment and user
+[ $flac2mp3_debug -ge 2 ] && id | sed 's/^/Debug|Running as: /' | log
 [ $flac2mp3_debug -ge 2 ] && printenv | sort | sed 's/^/Debug|/' | log
+
+# Check for invalid _eventtypes
+if [[ "$lidarr_eventtype" =~ Grab|Rename|TrackRetag|ArtistAdd|ArtistDeleted|AlbumDeleted|ApplicationUpdate|HealthIssue ]]; then
+  flac2mp3_message="Error|Lidarr event ${lidarr_eventtype} is not supported. Exiting."
+  echo "$flac2mp3_message" | log
+  echo "$flac2mp3_message" >&2
+  end_script 20
+fi
 
 # Handle Lidarr Test event
 if [[ "$lidarr_eventtype" = "Test" ]]; then
@@ -692,6 +709,7 @@ fi
 # Build dynamic log message
 flac2mp3_message="Info|Lidarr event: ${lidarr_eventtype}"
 if [ "$flac2mp3_type" != "batch" ]; then
+  # shellcheck disable=SC2154
   flac2mp3_message+=", Artist: ${lidarr_artist_name} (${lidarr_artist_id}), Album: ${lidarr_album_title} (${lidarr_album_id})"
 fi
 if [ -z "$flac2mp3_ffmpegadv" ]; then
@@ -769,6 +787,7 @@ for flac2mp3_track in $flac2mp3_tracks; do
     # Get track metadata
     if ffprobe "$flac2mp3_track"; then
       for flac2mp3_tag in $(echo $flac2mp3_tags | tr ',' '|'); do
+        # shellcheck disable=SC2089
         case "$flac2mp3_tag" in
           title )  # Fix for parenthesis in titles for live and mix names
             flac2mp3_tag_title=$(echo "$flac2mp3_ffprobe_json" | jq -crM '.format.tags | to_entries[] | select(.key | match("title"; "i")).value')
@@ -803,6 +822,8 @@ for flac2mp3_track in $flac2mp3_tracks; do
           ;;
         esac
       done
+      # shellcheck disable=SC2090
+      [ $flac2mp3_debug -ge 1 ] && echo "Debug|New metadata: echo ${flac2mp3_ffmpeg_metadata//-metadata /}" | log
     else
       echo "Warn|ffprobe did not return any data when querying track: \"$flac2mp3_track\"" | log
       flac2mp3_exitstatus=12
@@ -830,12 +851,25 @@ for flac2mp3_track in $flac2mp3_tracks; do
     continue
   fi
 
-  # Set owner and permissions
-  [ $flac2mp3_debug -ge 1 ] && echo "Debug|Changing ownership and permissions of \"$flac2mp3_newTrack\"" | log
-  chown --reference="$flac2mp3_track" "$flac2mp3_newTrack" >&2
+  # Checking that we're running as root
+  if [ "$(id -u)" -eq 0 ]; then
+    # Set owner
+    [ $flac2mp3_debug -ge 1 ] && echo "Debug|Changing owner of file \"$flac2mp3_newTrack\"" | log
+    chown --reference="$flac2mp3_track" "$flac2mp3_newTrack" >&2
+    flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
+      flac2mp3_message="Error|[$flac2mp3_return] Error when changing owner of track: \"$flac2mp3_newTrack\""
+      echo "$flac2mp3_message" | log
+      echo "$flac2mp3_message" >&2
+      flac2mp3_exitstatus=15
+    }
+  else
+    # Unable to change owner when not running as root
+    [ $flac2mp3_debug -ge 1 ] && echo "Debug|Unable to change owner of track when running as user '$(id -un)'" | log
+  fi
+  # Set permissions
   chmod --reference="$flac2mp3_track" "$flac2mp3_newTrack" >&2
   flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
-    flac2mp3_message="Error|[$flac2mp3_return] Error when changing ownership or permissions of track: \"$flac2mp3_newTrack\""
+    flac2mp3_message="Error|[$flac2mp3_return] Error when changing permissions of track: \"$flac2mp3_newTrack\""
     echo "$flac2mp3_message" | log
     echo "$flac2mp3_message" >&2
     flac2mp3_exitstatus=15
