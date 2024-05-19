@@ -644,6 +644,12 @@ elif [ -f "$flac2mp3_config" ]; then
     [[ $flac2mp3_xml_entity = "ApiKey" ]] && flac2mp3_apikey=$flac2mp3_xml_content
   done < $flac2mp3_config
 
+  # Allow use of environment variables from https://github.com/Lidarr/Lidarr/pull/4812
+  [ -n "${LIDARR__SERVER__PORT}" ] && flac2mp3_port="${LIDARR__SERVER__PORT}"
+  [ -n "${LIDARR__SERVER__URLBASE}" ] && flac2mp3_urlbase="${LIDARR__SERVER__URLBASE}"
+  [ -n "${LIDARR__SERVER__BINDADDRESS}" ] && flac2mp3_bindaddress="${LIDARR__SERVER__BINDADDRESS}"
+  [ -n "${LIDARR__AUTH__APIKEY}" ] && flac2mp3_apikey="${LIDARR__AUTH__APIKEY}"
+
   # Check for localhost
   [[ $flac2mp3_bindaddress = "*" ]] && flac2mp3_bindaddress=localhost
 

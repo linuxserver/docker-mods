@@ -9,6 +9,7 @@ Production Container info: ![Docker Image Size](https://img.shields.io/docker/im
 Development Container info:
 ![Docker Image Size](https://img.shields.io/docker/image-size/thecaptain989/lidarr-flac2mp3 "Container Size")
 ![Docker Pulls](https://img.shields.io/docker/pulls/thecaptain989/lidarr-flac2mp3 "Container Pulls")
+[![GitHub Super-Linter](https://github.com/TheCaptain989/lidarr-flac2mp3/actions/workflows/linter.yml/badge.svg)](https://github.com/TheCaptain989/lidarr-flac2mp3/actions/workflows/linter.yml "Linter Job")  
 
 # Installation
 1. Pull the [linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "LinuxServer.io's Lidarr container") docker image from GitHub Container Registry or Docker Hub:  
