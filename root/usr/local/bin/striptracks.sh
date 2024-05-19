@@ -911,6 +911,16 @@ elif [ -f "$striptracks_arr_config" ]; then
     [[ $striptracks_xml_entity = "ApiKey" ]] && striptracks_apikey=$striptracks_xml_content
   done < $striptracks_arr_config
 
+  # Allow use of environment variables from https://github.com/Sonarr/Sonarr/pull/6746
+  striptracks_port_var="${striptracks_type^^}__SERVER__PORT"
+  [ -n "${!striptracks_port_var}" ] && striptracks_port="${!striptracks_port_var}"
+  striptracks_urlbase_var="${striptracks_type^^}__SERVER__URLBASE"
+  [ -n "${!striptracks_urlbase_var}" ] && striptracks_urlbase="${!striptracks_urlbase_var}"
+  striptracks_bindaddress_var="${striptracks_type^^}__SERVER__BINDADDRESS"
+  [ -n "${!striptracks_bindaddress_var}" ] && striptracks_bindaddress="${!striptracks_bindaddress_var}"
+  striptracks_apikey_var="${striptracks_type^^}__AUTH__APIKEY"
+  [ -n "${!striptracks_apikey_var}" ] && striptracks_apikey="${!striptracks_apikey_var}"
+
   # Check for localhost
   [[ $striptracks_bindaddress = "*" ]] && striptracks_bindaddress=localhost
 
