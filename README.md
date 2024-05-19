@@ -10,13 +10,9 @@ In Jellyfin docker arguments, set an environment variable `DOCKER_MODS=linuxserv
 
 If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:jellyfin-rffmpeg|linuxserver/mods:jellyfin-mod2`
 
-This mod requires you to update the rffmpeg.yml located in "Your jellyfin config dir"/rffmpeg/rffmpeg.yml with your remote SSH username. You also need to add your authorized SSH file to "Your jellyfin config dir"/rffmpeg/.ssh/id_rsa"
+This mod requires you to add your preferred SSH ID to "Your jellyfin config dir"/rffmpeg/.ssh/id_rsa". This ID also needs to be able to ssh into your remote Transcode host.
 
-You can specify the remote SSH username and host using ENV, note currently only supports 1 host and doesn't overwrite values other than defaults:
-* RFFMPEG_USER= remote SSH username
-* RFFMPEG_HOST= remote server name or IP
-
-You also need to ensure that /cache inside the container is exported on the host so it can be mapped on the remote host. Eg for docker compose. 
+You also need to ensure that /cache inside the container is exported on the host so it can be mapped on the remote transcode host. Eg for docker compose. 
 ```yaml
     volumes:
       - "Your jellyfin config dir":/config
@@ -24,26 +20,37 @@ You also need to ensure that /cache inside the container is exported on the host
 ```
 See https://github.com/joshuaboniface/rffmpeg/blob/master/SETUP.md NFS setup for more details
       
-EXAMPLE Docker-Compose file with WOL support via API:
+EXAMPLE Docker-Compose file:
 
 ```yaml
 ---
-version: "2.1"
 services:
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
-      - RFFMPEG_USER=jellyfin
-      - RFFMPEG_WOL=api
-      - RFFMPEG_HOST=transcode
-      - RFFMPEG_HOST_MAC="12:ab:34:cd:ef:56"
-      - WOL_API=192.168.1.5  #docker host IP
-      - WOL_API_PORT=8431
-      - WOL_WAIT=10  #time transcode host takes to start
+      - PUID=1000 # Docker host user for folder mapping
+      - PGID=1000 # Docker host group for folder mapping
+      - TZ=Europe/London # timezone
+      - RFFMPEG_USER=jellyfin # ssh user for rffmpeg, added to rffmpeg.yml located in "Your jellyfin config dir"/rffmpeg/rffmpeg.yml on first run only
+      - RFFMPEG_HOST=transcode # DNS or IP of rffmepg host, added to rffmpeg database on first run only
+      - FFMPEG_PATH= # Optional, defaults to /usr/local/bin/wol_rffmpeg/ffmpeg - rffmpeg with optional WOL support. Can be set to /usr/local/bin/ffmpeg to bypass WOL wrapper and use rffmpeg directly.
+      
+      ## For WOL support use either WOL API or WOL Native
+
+      ## WOL API settings
+      #- RFFMPEG_HOST_MAC="12:ab:34:cd:ef:56" # Optional - Used for WOL.Transcode server mac enclosed in " " eg "aa:12:34:bb:cc:56"
+      #- WOL_WAIT=10  # Optional - time transcode host takes to start in seconds (defaults to 30 if not set)
+      #- RFFMPEG_WOL=api # Optional - set api to use wol_api container
+      #- WOL_API=192.168.1.5  # Optional - WOL docker host IP
+      #- WOL_API_PORT=8431  #  Optional - port wol_api is running on
+
+      ## WOL Native setting
+      #- RFFMPEG_HOST_MAC="12:ab:34:cd:ef:56" # Optional - Used for WOL.Transcode server mac enclosed in " " eg "aa:12:34:bb:cc:56"
+      #- WOL_WAIT=10  # Optional - time transcode host takes to start in seconds (defaults to 30 if not set)
+      #- RFFMPEG_WOL=native # Optional - set to native for inbuilt WOL support within this container
+      #- WOL_NATIVE_HOST # Optional - IP of NAT gateway with forwarded port for WoL. Only applicable when not using the WoL docker service API and when waking from outside NAT is required. Omit, or leave blank otherwise.
+      #- WOL_NATIVE_PORT # Optional - External port on gateway for forwarding. Ensure that it is mapped to your target machine IP on port 9. Only applicable when not using the WoL docker service API and when waking from outside NAT is required. Omit, or leave blank otherwise.
     volumes:
       - /path/to/jellyfin/config:/config
       - /path/to/jellyfin/config/cache:/cache
@@ -56,7 +63,7 @@ services:
     restart: unless-stopped
     depends_on:
       - wol_api
-  wol_api:
+  wol_api:  # Optional WOL API container
      image: rix1337/docker-wol_api
      container_name: wol_api
      environment: 
@@ -72,21 +79,5 @@ If you want to run rffmpeg commands they must be run as ABC inside the container
 * To test connection ``` docker exec -it jellyfin s6-setuidgid abc /usr/local/bin/ffprobe -version ```
 * To view all commands ``` docker exec -it jellyfin s6-setuidgid abc /usr/local/bin/rffmpeg -h ```
 
-You then need to set your FFMPEG binary in Jellyfin to:
-* /usr/local/bin/ffmpeg - Normal rffmpeg without WOL support
-* /usr/local/bin/wol_rffmpeg/ffmpeg - rffmpeg with WOL support
-
 WOL Support
-Native WOL support is available if you are running in host network mode. If not you can use the WOL_API container https://hub.docker.com/r/rix1337/docker-wol_api. Note the image name is rix1337/docker-wol_api
-
-WOL ENV:
-* RFFMPEG_WOL= native or api
-* RFFMPEG_HOST= remote host to wake
-* RFFMPEG_HOST_MAC= remote host to wake mac enclosed in " " eg "aa:12:34:bb:cc:56" 
-* WOL_API = IP of docker host
-* WOL_API_PORT= port wol_api is running on
-* WOL_WAIT= time in seconds to wait for host to wake
-* WOL_NATIVE_HOST = IP of NAT gateway with forwarded port for WoL *
-* WOL_NATIVE_PORT = External port on gateway for forwarding. Ensure that it is mapped to your target machine IP on port 9. *
-
-*Optional. Only applicable when not using the WoL docker service API and when waking from outside NAT is required. Omit, or leave blank otherwise.
+Native WOL support is available if you are running in Jellyfin in host network mode. If not you can use the WOL_API container https://hub.docker.com/r/rix1337/docker-wol_api. Note the image name is rix1337/docker-wol_api
