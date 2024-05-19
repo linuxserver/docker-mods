@@ -41,3 +41,8 @@ else
         s6-setuidgid abc /usr/local/bin/rffmpeg add --weight 1 $RFFMPEG_HOST
     fi
 fi
+
+#Set ffmpeg path if not set by user
+if [ -z "$FFMPEG_PATH" ]; then
+    printf "/usr/local/bin/wol_rffmpeg/ffmpeg" > /var/run/s6/container_environment/FFMPEG_PATH
+fi
