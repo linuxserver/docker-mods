@@ -5,6 +5,7 @@ import json
 import os
 import re
 import socket
+import sys
 import urllib3
 
 PROXY_REGEX = r"\s+set \$upstream_app (?P<name>\S+?);.*\n(\s+)set \$upstream_port (?P<port>\d+);.*\n(\s+)set \$upstream_proto (?P<proto>\w+);.*"
@@ -14,14 +15,14 @@ BASIC_AUTH_REGEX = r"\n\s+auth_basic.*"
 LDAP_REGEX = r"\n\s+include \/config\/nginx\/ldap-location\.conf;.*"
 
 
-def find_apps():
+def find_apps(fast=False):
     apps = {}
     auths = collections.defaultdict(dict)
     file_paths = glob.glob("/config/nginx/**/**", recursive=True)
     auto_confs = glob.glob("/etc/nginx/http.d/*", recursive=True)
     file_paths.extend(auto_confs)
     for file_path in file_paths:
-        if not os.path.isfile(file_path):
+        if not os.path.isfile(file_path) or (fast and file_path.endswith(".sample")):
             continue
         file = open(file_path, "r")
         content = file.read()
@@ -67,7 +68,8 @@ def is_available(url):
 
 
 urllib3.disable_warnings()
-apps, auths = find_apps()
+fast = (len(sys.argv) > 1)
+apps, auths = find_apps(fast)
 discovered_apps = collections.defaultdict(dict)
 with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
     futures = {executor.submit(is_available, app): app for app in apps.keys()}
