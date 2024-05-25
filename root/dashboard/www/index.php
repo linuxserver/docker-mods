@@ -310,10 +310,49 @@
         HTML;
     }
     
-    $goaccess = GetGoaccess();
-    $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . "<div class='wrap-general'>";
-    $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
-    $ssl = GetCertificate() . "<div class='pull-right hide'>";
-    $page = str_replace("<div class='pull-right'>", $ssl, $page);
-    echo $page;
+    function GetStats() {
+        $output = shell_exec("if test -f /lsiopy/bin/python3; then /lsiopy/bin/python3 /dashboard/swag-f2b.py; else python3 /dashboard/swag-f2b.py; fi");
+        $jails = json_decode($output, true);
+        $banned = 0;
+        foreach($jails as $jail){
+            $banned = $banned + $jail["bans"];
+        }
+
+        $output = shell_exec("if test -f /lsiopy/bin/python3; then /lsiopy/bin/python3 /dashboard/swag-proxies.py fast; else python3 /dashboard/swag-proxies.py fast; fi");
+        $results = json_decode($output);
+        $proxied = 0;
+        $auth = 0;
+        foreach($results as $result => $data){
+            if (!empty($data->locations)){
+                $proxied++;
+                if ($data->auth_status == 1) {
+                    $auth++;
+                }
+            }
+        }
+
+        $output = shell_exec("/etc/s6-overlay/s6-rc.d/init-version-checks/run");
+        $outdated = 0;
+        foreach(explode(PHP_EOL, $output) as $line) {
+            if(str_contains($line, "/config/")) {
+                $outdated++;
+            }
+        }
+
+        return array("proxied" => "$proxied", "auth" => "$auth", "outdated" => "$outdated", "banned" => "$banned");
+    }
+
+    $stats = $_GET['stats'] == 'true' ? true : false;
+    if($stats) {
+        $page = GetStats();
+        header("Content-Type: application/json");
+        echo json_encode($page);
+    } else {
+        $goaccess = GetGoaccess();
+        $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . "<div class='wrap-general'>";
+        $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
+        $ssl = GetCertificate() . "<div class='pull-right hide'>";
+        $page = str_replace("<div class='pull-right'>", $ssl, $page);
+        echo $page;
+    }
 ?>
