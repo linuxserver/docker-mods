@@ -32,14 +32,16 @@ if [ ! -f "$NOTIFY_PUSH_BIN" ]; then
 fi
 
 # add to trusted proxies
-if ! occ config:system:get trusted_proxies | grep -q "127.0.0.1"; then
-    NO_OF_PROXIES=$(occ config:system:get trusted_proxies --output=json | jq 'length')
-    if [[ -z "${NO_OF_PROXIES}" ]]; then
-        NO_OF_PROXIES="0"
+for PROXY in '127.0.0.1' '::1'; do
+    if ! occ config:system:get trusted_proxies | grep -q "${PROXY}"; then
+        NO_OF_PROXIES=$(occ config:system:get trusted_proxies --output=json | jq 'length')
+        if [[ -z "${NO_OF_PROXIES}" ]]; then
+            NO_OF_PROXIES="0"
+        fi
+        echo "**** Adding notify_push (${PROXY}) to trusted proxies ****"
+        occ config:system:set trusted_proxies "${NO_OF_PROXIES}" --value="${PROXY}"
     fi
-    echo "**** Adding notify_push to trusted proxies ****"
-    occ config:system:set trusted_proxies "${NO_OF_PROXIES}" --value=127.0.0.1
-fi
+done
 
 # run notify-push binary 
 echo "**** Starting notify-push ****"
