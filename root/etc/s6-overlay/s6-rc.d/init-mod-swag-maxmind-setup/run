@@ -12,7 +12,12 @@ if [[ ! -d /var/lib/libmaxminddb ]]; then
     ln -s /config/geoip2db /var/lib/libmaxminddb
 fi
 # check GeoIP2 database
-if [[ -n "$MAXMINDDB_LICENSE_KEY" ]]; then
+if [[ -n "${MAXMINDDB_USER_ID}" ]]; then
+    sed -i "s|.*MAXMINDDB_USER_ID.*|MAXMINDDB_USER_ID=\"${MAXMINDDB_USER_ID}\"|g" /etc/libmaxminddb.cron.conf
+else
+    echo "Starting with Alpine 3.20 rebase, MaxMindDB now requires setting the env var MAXMINDDB_USER_ID with your account's user id."
+fi
+if [[ -n "${MAXMINDDB_LICENSE_KEY}" ]]; then
     sed -i "s|.*MAXMINDDB_LICENSE_KEY.*|MAXMINDDB_LICENSE_KEY=\"${MAXMINDDB_LICENSE_KEY}\"|g" /etc/libmaxminddb.cron.conf
     if [[ ! -f /var/lib/libmaxminddb/GeoLite2-City.mmdb ]]; then
         echo "Downloading GeoIP2 City database."
