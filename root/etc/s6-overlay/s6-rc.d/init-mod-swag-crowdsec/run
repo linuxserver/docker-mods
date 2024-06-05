@@ -24,6 +24,7 @@ echo "\
     lua5.1 \
     lua5.1-cjson \
     lua-resty-http \
+    lua-resty-string \
     lua-sec \
     nginx-mod-http-lua" >> /mod-repo-packages-to-install.list
 
