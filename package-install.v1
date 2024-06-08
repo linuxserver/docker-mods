@@ -3,7 +3,7 @@
 
 # Version 1
 # 2024-03-26 - Initial Version
-PKG_SCRIPT_VER="3.20240326"
+PKG_SCRIPT_VER="1.20240608"
 
 write_mod_info() {
     local MSG=$*
@@ -46,7 +46,7 @@ if [[ -f "/mod-repo-packages-to-install.list" ]]; then
     IFS=' ' read -ra REPO_PACKAGES <<< "$(tr '\n' ' ' < /mod-repo-packages-to-install.list)"
     if [[ ${#REPO_PACKAGES[@]} -ne 0 ]] && [[ ${REPO_PACKAGES[*]} != "" ]]; then
         write_mod_info "Installing all mod packages"
-        write_mod_debug "Defined packages: ${REPO_PACKAGES[@]}"
+        write_mod_debug "Defined packages: ${REPO_PACKAGES[*]}"
         if [[ -f /usr/bin/apt ]]; then
             export DEBIAN_FRONTEND="noninteractive"
             apt-get update
@@ -86,8 +86,8 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
             ALPINE_VER=$(grep main /etc/apk/repositories | sed 's|.*alpine/v||' | sed 's|/main.*||')
             PIP_ARGS+=("-f" "https://wheel-index.linuxserver.io/alpine-${ALPINE_VER}/")
         fi
-        write_mod_debug "Installing defined pip packages: ${PIP_PACKAGES[@]}"
-        write_mod_debug "Using pip args ${PIP_ARGS[@]}"
+        write_mod_debug "Installing defined pip packages: ${PIP_PACKAGES[*]}"
+        write_mod_debug "Using pip args ${PIP_ARGS[*]}"
         python3 -m pip install \
             "${PIP_ARGS[@]}" \
             "${PIP_PACKAGES[@]}"
@@ -95,6 +95,9 @@ if [[ -f "/mod-pip-packages-to-install.list" ]]; then
 fi
 
 write_mod_debug "Deleting temporary install lists for os and pip packages."
-rm -rf \
-    /mod-repo-packages-to-install.list \
-    /mod-pip-packages-to-install.list
+if [[ -f "/mod-repo-packages-to-install.list" ]]; then
+    rm -rf /mod-repo-packages-to-install.list
+fi
+if [[ -f "/mod-pip-packages-to-install.list" ]]; then
+    rm -rf /mod-pip-packages-to-install.list
+fi
