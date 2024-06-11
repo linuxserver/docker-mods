@@ -11,9 +11,10 @@ cp /defaults/auto-proxy-readme /etc/nginx/http.d/auto-proxy-readme
 rm -rf /auto-proxy
 mkdir /auto-proxy
 
-if ! grep -q "/app/auto-proxy.sh" /config/crontabs/root; then
-    echo "*       *       *       *       *       /app/auto-proxy.sh" >> /config/crontabs/root
+if ! grep -q "/app/docker-wrap.sh" /config/crontabs/root; then
+    echo "*       *       *       *       *       /app/docker-wrap.sh" >> /config/crontabs/root
     cp /config/crontabs/root /etc/crontabs/root
 fi
 
-/app/auto-proxy.sh
+FIRST_RUN=true
+. /app/docker-wrap.sh
