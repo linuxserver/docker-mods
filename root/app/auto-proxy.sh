@@ -124,10 +124,28 @@ DUDE
         sed -i "s|<container_name>|${swag_address}|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER_ID}.subdomain.conf"
         echo "**** Setting upstream address ${swag_address} for ${CONTAINER_ID} ****"
         if [ -z "${swag_port}" ]; then
-            swag_port=$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports | keys[0]' | sed 's|/.*||')
-            if [ "${swag_port}" == "null" ]; then
+            if [[ -v UPSTREAM_HOST ]];then
+              # assuming different network.
+              # Try to find 80
+              if [ "$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports |  has("80/tcp")')" == "true" ]; then
+                swag_port="$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports."80/tcp"[0].HostPort')"
+              # Try to find 8080
+              elif [ "$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports |  has("8080/tcp")')" == "true" ]; then
+                swag_port="$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports."8080/tcp"[0].HostPort')"
+              # If there are any exposed ports use the first one found
+              elif [ "$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports | to_entries | length')" != "0" ]; then
+                swag_port="$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports | to_entries | .[0].value[0].HostPort')"
+              else
                 echo "**** No exposed ports found for ${CONTAINER_ID}. Setting reverse proxy port to 80. ****"
                 swag_port="80"
+               swag_address="${UPSTREAM_HOST}"
+              fi
+            else
+              swag_port=$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports | keys[0]' | sed 's|/.*||')
+              if [ "${swag_port}" == "null" ]; then
+                  echo "**** No exposed ports found for ${CONTAINER_ID}. Setting reverse proxy port to 80. ****"
+                  swag_port="80"
+              fi
             fi
         fi
         sed -i "s|set \$upstream_port .*|set \$upstream_port ${swag_port};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER_ID}.subdomain.conf"
