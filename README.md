@@ -2,6 +2,7 @@
 
 These files are used by Linuxserver build processes to handle mods in our images. Not for end-user consumption.
 
+* **10.06.24:** - Move lsiown to its own file. Remove support for legacy v2 and hybrid mods.
 * **13.04.24:** - Let lsiown ignore broken symlinks (requires gnu find).
 * **26.03.24:** - Add versioning and debug logging to package install script, force venv creation when python packages are to be installed.
 * **25.02.24:** - Support unauthenticated registries.

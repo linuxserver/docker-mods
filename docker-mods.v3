@@ -18,14 +18,6 @@ else
   CURL_NOISE_LEVEL="--silent"
 fi
 
-# Set executable bit on cont-init and services built into the image
-set_legacy_executable_bits() {
-    mkdir -p /etc/{cont-init.d,services.d}
-    chmod +x \
-        /etc/cont-init.d/* \
-        /etc/services.d/*/* 2>/dev/null || true
-}
-
 tamper_check() {
     # Tamper check custom service locations
     if [[ -d "${SERVICES_DIR}" ]] && [[ -n "$(find ${SERVICES_DIR}/* ! -user root 2>/dev/null)" ]]; then
@@ -103,39 +95,6 @@ process_custom_services() {
     else
         echo "[custom-init] No custom services found, skipping..."
     fi
-}
-
-# Create our noisy chown alias to handle read-only/remote volumes
-create_lsiown_alias() {
-    # intentional tabs in the heredoc
-    cat <<-'EOF' >/usr/bin/lsiown
-	#!/bin/bash
-
-	MAXDEPTH=("-maxdepth" "0")
-	OPTIONS=()
-	while getopts RcfvhHLP OPTION
-	do
-	    if [[ "${OPTION}" != "?" && "${OPTION}" != "R" ]]; then
-	        OPTIONS+=("-${OPTION}")
-	    fi
-	    if [[ "${OPTION}" = "R" ]]; then
-	        MAXDEPTH=()
-	    fi
-	done
-
-	shift $((OPTIND - 1))
-	OWNER=$1
-	IFS=: read -r USER GROUP <<< "${OWNER}"
-	if [[ -z "${GROUP}" ]]; then
-	    printf '**** Permissions could not be set. Group is missing or incorrect, expecting user:group. ****\n'
-	    exit 0
-	fi
-
-	ERROR='**** Permissions could not be set. This is probably because your volume mounts are remote or read-only. ****\n**** The app may not work properly and we will not provide support for it. ****\n'
-	PATH=("${@:2}")
-	/usr/bin/find "${PATH[@]}" "${MAXDEPTH[@]}" ! -xtype l \( ! -group "${GROUP}" -o ! -user "${USER}" \) -exec chown "${OPTIONS[@]}" "${USER}":"${GROUP}" {} + || printf "${ERROR}"
-	EOF
-    chmod +x /usr/bin/lsiown
 }
 
 # Create our with-contenv alias with umask support
@@ -418,13 +377,12 @@ run_mods() {
             fi
             write_mod_info "Installing ${DOCKER_MOD}"
             tar xzf /modtarball.tar.xz -C /tmp/mod
-            if [[ -d /tmp/mod/etc/s6-overlay ]]; then
-                if [[ -d /tmp/mod/etc/cont-init.d ]]; then
-                    rm -rf /tmp/mod/etc/cont-init.d
-                fi
-                if [[ -d /tmp/mod/etc/services.d ]]; then
-                    rm -rf /tmp/mod/etc/services.d
-                fi
+            # Remove any v2 mod elements as they're no longer supported
+            if [[ -d /tmp/mod/etc/cont-init.d ]]; then
+                rm -rf /tmp/mod/etc/cont-init.d
+            fi
+            if [[ -d /tmp/mod/etc/services.d ]]; then
+                rm -rf /tmp/mod/etc/services.d
             fi
             shopt -s dotglob
             cp -R /tmp/mod/* /
@@ -453,13 +411,12 @@ run_mods_local() {
                 mkdir -p "/tmp/mod/${DOCKER_MOD}"
                 tar xf "/mods/${DOCKER_MOD}.tar" -C /tmp/mod --strip-components=1
                 tar xf "/tmp/mod/layer.tar" -C "/tmp/mod/${DOCKER_MOD}"
-                if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/s6-overlay" ]]; then
-                    if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d" ]]; then
-                        rm -rf "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d"
-                    fi
-                    if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/services.d" ]]; then
-                        rm -rf "/tmp/mod/${DOCKER_MOD}/etc/services.d"
-                    fi
+                # Remove any v2 mod elements as they're no longer supported
+                if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d" ]]; then
+                    rm -rf "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d"
+                fi
+                if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/services.d" ]]; then
+                    rm -rf "/tmp/mod/${DOCKER_MOD}/etc/services.d"
                 fi
                 shopt -s dotglob
                 cp -R "/tmp/mod/${DOCKER_MOD}"/* /
@@ -492,11 +449,9 @@ run_branding() {
 }
 
 # Run alias creation functions
-create_lsiown_alias
 create_with_contenv_alias
 
 # Main script loop
-
 if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
     tamper_check
     process_custom_services
@@ -513,6 +468,3 @@ fi
 if [[ "${LSIO_FIRST_PARTY}" = "true" ]]; then
     run_branding
 fi
-
-# Set executable bit on legacy cont-init and services built into the image and anything legacy unpacked by mods
-set_legacy_executable_bits
