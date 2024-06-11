@@ -41,23 +41,58 @@ Then the env var in SWAG can be set as `DOCKER_HOST=dockerproxy`. This will allo
 
 If both `DOCKER_HOST` and `docker.sock` volumes are provided this mod will detect containers using both connections. As noted in the [requirements](#requirements), containers detected via `docker.sock` must be in the same user defined network or have `swag_address` label set.
 
-Multiple remote hosts can be used via `DOCKER_HOST` by separating hosts with a comma. Additionally, a friendly host name can be assigned by suffixing the host with `|friendlyName`. If the host is not assigned a friendly name it will have a default generated like `hostN` where N is the position of the host in `DOCKER_HOST`. Example:
+Multiple remote hosts can be used via `DOCKER_HOST` by separating hosts with a comma. Additional per-host settings can be assigned by separating with a pipe `|`. The syntax for per-host configuration:
 
 ```
-DOCKER_HOST=192.168.0.100:2375|serverA,192.168.0.110:2375|serverB,192.168.0.130:2375
+host:port|friendly_name|default_tld
 ```
 
-* Host: `192.168.0.100:2375` -- Friendly Name: `serverA`
-* Host: `192.168.0.110:2375` -- Friendly Name: `serverB`
-* Host: `192.168.0.130:2375` -- Friendly Name: `host3`
 
-If the detected containers for each host do not have the `swag_address` label set then the host IP will be used.
+```
+DOCKER_HOST=192.168.0.100:2375|serverA,192.168.0.110:2375|serverB|local.test,192.168.0.130:2375
+```
 
-If the detected containers for each host do not have the `swag_url` label set then the default can be configured with friendly host name inserted into the url as either a suffix or prefix using the env `HOST_INSERT`. Example:
+* Host: `192.168.0.100:2375` -- Friendly Name: `serverA` -- TLD: `*`
+* Host: `192.168.0.110:2375` -- Friendly Name: `serverB` -- TLD: `local.test`
+* Host: `192.168.0.130:2375` -- Friendly Name: `host3` -- TLD: `*`
 
-* container name: `swag`
-* `DOCKER_HOST=192.168.0.100:2375|serverA`
-* `HOST_INSERT`
-  * (unset) => nginx `server_name swag.*`
-  * `prefix` => nginx `server_name serverA-swag.*`
-  * `suffix` => nginx `server_name swag-serverA.*`
+### Upstream IP and Port
+
+When using a remote docker host from `DOCKER_HOST` auto-proxy assumes the detected containers on not on the same network as SWAG:
+
+* If the detected containers do not have the `swag_address` label set then the Host IP will be used.
+* If the detected containers do not have the `swag_port` label set then auto-proxy attempts to find a mapped **host port** on the container and will use it based on **container port** in this order:
+  * 80
+  * 8080
+  * The first mapped port, if any
+
+### Subdomains and TLD
+
+If a detected container does not have `swag_url` label set then the subdomain and TLD can be programmatically generated.
+
+The default TLD used in nginx [`server_name` directive](https://nginx.org/en/docs/http/server_names.html) can be set using `HOST_TLD`. This can also be set per-host using the syntax described in [`DOCKER_HOST` for `default_tld`.](#multiple-hosts)
+
+The subdomain used for a container can optionally be modified to include the Host's `friendly_name` described in the `DOCKER_HOST` syntax by setting the `HOST_INSERT` to either `prefix` or `suffix`
+
+Examples using a container named `overseer`:
+
+* Using only HOST_INSERT to modify subdomain
+  * `DOCKER_HOST=192.168.0.100:2375|serverA`
+  * `HOST_TLD` (not set, defaults to `*`)
+  * `HOST_INSERT`
+    * (unset) => nginx `server_name swag.*`
+    * `prefix` => nginx `server_name serverA-overseer.*`
+    * `suffix` => nginx `server_name overseer-serverA.*`
+* Using HOST_INSERT prefix and HOST_TLD
+  * `DOCKER_HOST=192.168.0.100:2375|serverA`
+  * `HOST_TLD=test.home`
+  * `HOST_INSERT=prefix`
+    * `server_name serverA-overseer.test.home`
+* Using HOST_INSERT prefix and default_tld
+  * `DOCKER_HOST=192.168.0.100:2375|serverA|myserver.home`
+  * `HOST_INSERT=prefix`
+    * `server_name serverA-overseer.myserver.home`
+* Using HOST_TLD only
+  * `DOCKER_HOST=192.168.0.100:2375`
+  * `HOST_TLD=myserver.home`
+    * `server_name overseer.myserver.home`

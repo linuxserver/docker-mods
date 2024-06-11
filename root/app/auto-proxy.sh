@@ -157,11 +157,11 @@ DUDE
         echo "**** Setting proto ${swag_proto} for ${CONTAINER_ID} ****"
         if [ -z "${swag_url}" ]; then
             if [ "$HOST_INSERT" == "suffix" ]; then
-              swag_url="${CONTAINER}-${DOCKER_HOST_NAME}.*"
+              swag_url="${CONTAINER}-${DOCKER_HOST_NAME}.${HOST_TLD}"
             elif [ "$HOST_INSERT" == "prefix" ]; then
-              swag_url="${DOCKER_HOST_NAME}-${CONTAINER}.*"
+              swag_url="${DOCKER_HOST_NAME}-${CONTAINER}.${HOST_TLD}"
             else
-              swag_url="${CONTAINER}.*"
+              swag_url="${CONTAINER}.${HOST_TLD}"
             fi
         fi
         sed -i "s|server_name .*|server_name ${swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER_ID}.subdomain.conf"
