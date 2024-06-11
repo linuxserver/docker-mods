@@ -58,7 +58,7 @@ DOCKER_HOST=192.168.0.100:2375|serverA,192.168.0.110:2375|serverB|local.test,192
 
 ### Upstream IP and Port
 
-When using a remote docker host from `DOCKER_HOST` auto-proxy assumes the detected containers on not on the same network as SWAG:
+When using a remote docker host from `DOCKER_HOST` auto-proxy assumes the detected containers are not on the same network as SWAG:
 
 * If the detected containers do not have the `swag_address` label set then the Host IP will be used.
 * If the detected containers do not have the `swag_port` label set then auto-proxy attempts to find a mapped **host port** on the container and will use it based on **container port** in this order:
@@ -68,11 +68,11 @@ When using a remote docker host from `DOCKER_HOST` auto-proxy assumes the detect
 
 ### Subdomains and TLD
 
-If a detected container does not have `swag_url` label set then the subdomain and TLD can be programmatically generated.
+If a detected container does not have the `swag_url` label set then the subdomain and TLD can be programmatically generated.
 
 The default TLD used in nginx [`server_name` directive](https://nginx.org/en/docs/http/server_names.html) can be set using `HOST_TLD`. This can also be set per-host using the syntax described in [`DOCKER_HOST` for `default_tld`.](#multiple-hosts)
 
-The subdomain used for a container can optionally be modified to include the Host's `friendly_name` described in the `DOCKER_HOST` syntax by setting the `HOST_INSERT` to either `prefix` or `suffix`
+The subdomain used for a container can optionally be modified to include the Host's `friendly_name` described in the `DOCKER_HOST` syntax by setting `HOST_INSERT` to either `prefix` or `suffix`
 
 Examples using a container named `overseer`:
 
@@ -80,7 +80,7 @@ Examples using a container named `overseer`:
   * `DOCKER_HOST=192.168.0.100:2375|serverA`
   * `HOST_TLD` (not set, defaults to `*`)
   * `HOST_INSERT`
-    * (unset) => nginx `server_name swag.*`
+    * (unset) => nginx `server_name overseer.*`
     * `prefix` => nginx `server_name serverA-overseer.*`
     * `suffix` => nginx `server_name overseer-serverA.*`
 * Using HOST_INSERT prefix and HOST_TLD
