@@ -1,5 +1,9 @@
 #!/usr/bin/with-contenv bash
 
+RELOAD_NGINX="false"
+NGINX_VALID="true"
+DIAG_EXIT="true"
+
 HOST_TLD_ORIG=${AUTO_PROXY_HOST_TLD:=*}
 if [[ -v FIRST_RUN ]];then
   echo '**** Auto Proxy - first-run ****'
@@ -33,6 +37,12 @@ if [[ -v DOCKER_HOST ]];then
       echo "**** Auto Proxy - Generating proxies for => Host: ${DOCKER_HOST} | Name: ${DOCKER_HOST_NAME:-N/A} | Default Upstream IP: ${UPSTREAM_HOST} | Host TLD: ${AUTO_PROXY_HOST_TLD} ****"
     fi
     . /app/auto-proxy.sh
+    RES=$?
+    if [ $RES == 201 ]; then
+      NGINX_VALID="false"
+    elif [ $RES == 200 ]; then
+      RELOAD_NGINX="true"
+    fi
 
     let INDEX=${INDEX}+1
   done
@@ -46,7 +56,19 @@ if [ -S /var/run/docker.sock ]; then
   unset DOCKER_HOST
   unset UPSTREAM_HOST
   . /app/auto-proxy.sh
+  RES=$?
+  if [ $RES == 201 ]; then
+    NGINX_VALID="false"
+  elif [ $RES == 200 ]; then
+    RELOAD_NGINX="true"
+  fi
 fi
+
+if [ "${NGINX_VALID}" == "true" ] && [ "${RELOAD_NGINX}" == "true" ]; then
+  echo "**** All changes to nginx config are valid, reloading nginx ****"
+  /usr/sbin/nginx -c /config/nginx/nginx.conf -s reload
+fi
+
 if [[ -v FIRST_RUN ]];then
   echo '**** Auto Proxy - first-run finished ****'
 fi

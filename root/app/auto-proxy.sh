@@ -1,6 +1,7 @@
 #!/usr/bin/with-contenv bash
 
 AUTO_GEN=""
+REMOVED_CONTAINERS=""
 # figure out which containers to generate confs for or which confs to remove
 if [ ! -f /auto-proxy/enabled_containers_"$DOCKER_HOST_NAME" ]; then
     docker ps --filter "label=swag=enable" --format "{{.Names}}" > /auto-proxy/enabled_containers_"$DOCKER_HOST_NAME"
@@ -187,11 +188,26 @@ DUDE
     fi
 done
 
-if ([ -n "${AUTO_GEN}" ] || [ "${REMOVED_CONTAINERS}" == "true" ]) && ps aux | grep [n]ginx: > /dev/null; then 
-    if /usr/sbin/nginx -c /config/nginx/nginx.conf -t; then
-        echo "**** Changes to nginx config are valid, reloading nginx ****"
-        /usr/sbin/nginx -c /config/nginx/nginx.conf -s reload
-    else
-        echo "**** Changes to nginx config are not valid, skipping nginx reload. Please double check the config including the auto-proxy confs. ****"
-    fi
+if [ "${DIAG_EXIT}" == "true" ]; then
+  if ([ -n "${AUTO_GEN}" ] || [ "${REMOVED_CONTAINERS}" == "true" ]) && ps aux | grep [n]ginx: > /dev/null; then
+        if /usr/sbin/nginx -c /config/nginx/nginx.conf -t; then
+            echo "**** $DOCKER_HOST_NAME - Changes to nginx config are valid ****"
+            return 200;
+        else
+            echo "**** $DOCKER_HOST_NAME - Changes to nginx config are not valid. Please double check the config including the auto-proxy confs. ****"
+            return 201;
+        fi
+  else
+    return 0;
+  fi
+else
+  if ([ -n "${AUTO_GEN}" ] || [ "${REMOVED_CONTAINERS}" == "true" ]) && ps aux | grep [n]ginx: > /dev/null; then
+      if /usr/sbin/nginx -c /config/nginx/nginx.conf -t; then
+          echo "**** $DOCKER_HOST_NAME - Changes to nginx config are valid, reloading nginx ****"
+          /usr/sbin/nginx -c /config/nginx/nginx.conf -s reload
+      else
+          echo "**** $DOCKER_HOST_NAME - Changes to nginx config are not valid, skipping nginx reload. Please double check the config including the auto-proxy confs. ****"
+      fi
+  fi
 fi
+
