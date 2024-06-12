@@ -61,7 +61,7 @@ DOCKER_HOST=192.168.0.100:2375|serverA,192.168.0.110:2375|serverB|local.test,192
 When using a remote docker host from `DOCKER_HOST` auto-proxy assumes the detected containers are not on the same network as SWAG:
 
 * If the detected containers do not have the `swag_address` label set then the Host IP will be used.
-* If the detected containers do not have the `swag_port` label set then auto-proxy attempts to find a mapped **host port** on the container and will use it based on **container port** in this order:
+* If the detected containers do not have the `swag_port` label set then auto-proxy looks for exposed **container ports** and uses the corresponding **host port** as the upstream port. Container ports are checked in this order:
   * 80
   * 8080
   * The first mapped port, if any
@@ -70,29 +70,29 @@ When using a remote docker host from `DOCKER_HOST` auto-proxy assumes the detect
 
 If a detected container does not have the `swag_url` label set then the subdomain and TLD can be programmatically generated.
 
-The default TLD used in nginx [`server_name` directive](https://nginx.org/en/docs/http/server_names.html) can be set using `HOST_TLD`. This can also be set per-host using the syntax described in [`DOCKER_HOST` for `default_tld`.](#multiple-hosts)
+The default TLD used in nginx [`server_name` directive](https://nginx.org/en/docs/http/server_names.html) can be set using `AUTO_PROXY_HOST_TLD`. This can also be set per-host using the syntax described in [`DOCKER_HOST` for `default_tld`.](#multiple-hosts)
 
-The subdomain used for a container can optionally be modified to include the Host's `friendly_name` described in the `DOCKER_HOST` syntax by setting `HOST_INSERT` to either `prefix` or `suffix`
+The subdomain used for a container can optionally be modified to include the Host's `friendly_name` described in the `DOCKER_HOST` syntax by setting `AUTO_PROXY_HOST_INSERT` to either `prefix` or `suffix`
 
 Examples using a container named `overseer`:
 
-* Using only HOST_INSERT to modify subdomain
+* Using only AUTO_PROXY_HOST_INSERT to modify subdomain
   * `DOCKER_HOST=192.168.0.100:2375|serverA`
-  * `HOST_TLD` (not set, defaults to `*`)
-  * `HOST_INSERT`
+  * `AUTO_PROXY_HOST_TLD` (not set, defaults to `*`)
+  * `AUTO_PROXY_HOST_INSERT`
     * (unset) => nginx `server_name overseer.*`
     * `prefix` => nginx `server_name serverA-overseer.*`
     * `suffix` => nginx `server_name overseer-serverA.*`
-* Using HOST_INSERT prefix and HOST_TLD
+* Using AUTO_PROXY_HOST_INSERT prefix and AUTO_PROXY_HOST_TLD
   * `DOCKER_HOST=192.168.0.100:2375|serverA`
-  * `HOST_TLD=test.home`
-  * `HOST_INSERT=prefix`
+  * `AUTO_PROXY_HOST_TLD=test.home`
+  * `AUTO_PROXY_HOST_INSERT=prefix`
     * `server_name serverA-overseer.test.home`
-* Using HOST_INSERT prefix and default_tld
+* Using AUTO_PROXY_HOST_INSERT prefix and default_tld
   * `DOCKER_HOST=192.168.0.100:2375|serverA|myserver.home`
-  * `HOST_INSERT=prefix`
+  * `AUTO_PROXY_HOST_INSERT=prefix`
     * `server_name serverA-overseer.myserver.home`
-* Using HOST_TLD only
+* Using AUTO_PROXY_HOST_TLD only
   * `DOCKER_HOST=192.168.0.100:2375`
-  * `HOST_TLD=myserver.home`
+  * `AUTO_PROXY_HOST_TLD=myserver.home`
     * `server_name overseer.myserver.home`

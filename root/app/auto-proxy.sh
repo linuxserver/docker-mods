@@ -138,7 +138,6 @@ DUDE
               else
                 echo "**** No exposed ports found for ${CONTAINER_ID}. Setting reverse proxy port to 80. ****"
                 swag_port="80"
-               swag_address="${UPSTREAM_HOST}"
               fi
             else
               swag_port=$(docker inspect ${CONTAINER} | jq -r '.[0].NetworkSettings.Ports | keys[0]' | sed 's|/.*||')
@@ -156,12 +155,12 @@ DUDE
         sed -i "s|set \$upstream_proto .*|set \$upstream_proto ${swag_proto};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER_ID}.subdomain.conf"
         echo "**** Setting proto ${swag_proto} for ${CONTAINER_ID} ****"
         if [ -z "${swag_url}" ]; then
-            if [ "$HOST_INSERT" == "suffix" ]; then
-              swag_url="${CONTAINER}-${DOCKER_HOST_NAME}.${HOST_TLD}"
-            elif [ "$HOST_INSERT" == "prefix" ]; then
-              swag_url="${DOCKER_HOST_NAME}-${CONTAINER}.${HOST_TLD}"
+            if [ "$AUTO_PROXY_HOST_INSERT" == "suffix" ]; then
+              swag_url="${CONTAINER}-${DOCKER_HOST_NAME}.${AUTO_PROXY_HOST_TLD}"
+            elif [ "$AUTO_PROXY_HOST_INSERT" == "prefix" ]; then
+              swag_url="${DOCKER_HOST_NAME}-${CONTAINER}.${AUTO_PROXY_HOST_TLD}"
             else
-              swag_url="${CONTAINER}.${HOST_TLD}"
+              swag_url="${CONTAINER}.${AUTO_PROXY_HOST_TLD}"
             fi
         fi
         sed -i "s|server_name .*|server_name ${swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER_ID}.subdomain.conf"
