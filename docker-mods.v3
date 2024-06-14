@@ -7,7 +7,7 @@
 # 2022-09-25 - Initial Release
 # 2024-04-13 - Let lsiown ignore broken symlinks (requires gnu find)
 # 2024-06-12 - Remove lsiown and legacy s6 handlers
-MOD_SCRIPT_VER="3.20240612"
+MOD_SCRIPT_VER="3.20240613"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -434,7 +434,7 @@ run_mods_local() {
 
 run_branding() {
   # intentional tabs in the heredoc
-  cat <<-EOF >/etc/s6-overlay/s6-rc.d/init-adduser/branding
+  cat <<-EOF | tee /run/branding /etc/s6-overlay/s6-rc.d/init-adduser/branding > /dev/null 2>&1
 	───────────────────────────────────────
 
 	      ██╗     ███████╗██╗ ██████╗
@@ -449,23 +449,43 @@ run_branding() {
 	EOF
 }
 
-# Run alias creation functions
-create_with_contenv_alias
-
 # Main script loop
-if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
-    tamper_check
-    process_custom_services
+if grep -qEe ' / \w+ ro' /proc/mounts; then
+    printf '1' > /run/s6/container_environment/LSIO_READ_ONLY_FS
+    LSIO_READ_ONLY_FS=1
 fi
 
-# Run mod logic
-if [[ -n "${DOCKER_MODS+x}" ]] && [[ "${DOCKER_MODS_SIDELOAD,,}" = "true" ]]; then
-    run_mods_local
-elif [[ -n "${DOCKER_MODS+x}" ]]; then
-    curl_check
-    run_mods
+if [[ ! $(stat /run -c %u) == "0" ]]; then
+    printf '1' > /run/s6/container_environment/LSIO_NON_ROOT_USER
+    LSIO_NON_ROOT_USER=1
 fi
 
 if [[ "${LSIO_FIRST_PARTY}" = "true" ]]; then
     run_branding
+fi
+
+if [[ -z ${LSIO_READ_ONLY_FS} ]] && [[ -z ${LSIO_NON_ROOT_USER} ]]; then
+    # Run alias creation functions
+    create_with_contenv_alias
+
+    if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
+        tamper_check
+        process_custom_services
+    fi
+
+    # Run mod logic
+    if [[ -n "${DOCKER_MODS+x}" ]] && [[ "${DOCKER_MODS_SIDELOAD,,}" = "true" ]]; then
+        run_mods_local
+    elif [[ -n "${DOCKER_MODS+x}" ]]; then
+        curl_check
+        run_mods
+    fi
+
+else
+echo "╔═════════════════════════════════════════════════════════════════════════╗
+║                                                                         ║
+║     You are running this container read-only or as a non-root user:     ║
+║   UMASK, custom services, & docker mod functionality will be disabled   ║
+║                                                                         ║
+╚═════════════════════════════════════════════════════════════════════════╝"
 fi
