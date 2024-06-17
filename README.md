@@ -1,25 +1,24 @@
-# Rsync - Docker mod for openssh-server
+# MediaInfo Plugin Support - Docker mod for Emby
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds support for the Emby's MediaInfo plugin https://github.com/Cheesegeezer/MediaInfoWiki/wiki for Linuxserver.io's Emby container https://github.com/linuxserver/docker-emby.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+Supports the Ubuntu version of the Emby container.  This mod will only work on amd64 because the Roku BIF file creation tool is compiled only for Linux x86 64-bit machines.  See https://developer.roku.com/en-gb/docs/developer-program/media-playback/trick-mode/bif-file-creation.md for more information.
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+In Emby Docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:emby-mediaserver`, such as:
+- docker-compose:
+  ```yaml
+  environment:
+    - DOCKER_MODS=linuxserver/mods:emby-mediaserver-plugin
+  ```
+- docker cli:
+  ```sh
+  -e DOCKER_MODS=linuxserver/mods:emby-mediaserver-plugin
+  ```
 
-# Mod creation instructions
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:emby-mediaserver-plugin|linuxserver/mods:universal-mod2`
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic and `MULTI_ARCH` if needed.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
-
-
-## Tips and tricks
-
-* Some images have helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+# Settings in Emby
+Configure the Media Toolbox plugin, applications installed will be located as follows:
+- MediaInfoCL in `/usr/bin/mediainfo`
+- MKVPropEdit in `/usr/bin/mkvpropedit`
+- BifTool in `/usr/bin/biftool`
