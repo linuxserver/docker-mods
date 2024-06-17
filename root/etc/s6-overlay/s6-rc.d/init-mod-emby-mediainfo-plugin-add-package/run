@@ -1,0 +1,25 @@
+#!/usr/bin/with-contenv bash
+
+# This is the init file used for adding os or pip packages to install lists.
+# It takes advantage of the built-in init-mods-package-install init script that comes with the baseimages.
+# If using this, we need to make sure we set this init as a dependency of init-mods-package-install so this one runs first
+
+# Determine if setup is needed
+if [ ! -f /usr/bin/apt ]; then
+    echo "**** Image is not Ubuntu, exiting emby-mediainfo-plugin install. ****"
+    exit 0
+fi
+
+if [ $(uname -m) != "x86_64" ]; then
+    echo "**** MediaInfo plugin only works on x86_64, see README for more info.  Exiting emby-mediainfo-plugin install. ****"
+    exit 0
+fi
+
+# Ubuntu
+if [ -f /usr/bin/apt ]; then
+    echo "**** Installing packages ****"
+    echo "\
+    mediainfo \
+    mkvtoolnix \
+    unzip" >> /mod-repo-packages-to-install.list
+fi
