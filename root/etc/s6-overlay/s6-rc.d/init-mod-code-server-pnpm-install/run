@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv bash
+echo "**** installing pnpm  ****"
+curl -fsSL https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
