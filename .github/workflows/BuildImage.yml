@@ -4,8 +4,7 @@ on: [push, pull_request_target, workflow_dispatch]
 
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
-  #ENDPOINT: "linuxserver/mods" #don't modify
-  ENDPOINT: "daveoh16/emby-mediainfo-plugin" #added to support building the plugin for testing
+  ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "emby" #replace
   MODNAME: "mediainfo-plugin" #replace
   MULTI_ARCH: "false" #set to false if not needed
