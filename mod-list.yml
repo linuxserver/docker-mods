@@ -5,7 +5,7 @@ mods:
       - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
       - dtrpg-metadata: https://github.com/linuxserver/docker-mods/tree/calibre-web-dtrpg-metadata
   code-server:
-    mod_count: 27
+    mod_count: 28
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
@@ -22,6 +22,7 @@ mods:
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
       - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
       - php-cli: https://github.com/linuxserver/docker-mods/tree/code-server-php-cli
+      - pnpm: https://github.com/linuxserver/docker-mods/tree/code-server-pnpm
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
@@ -79,7 +80,7 @@ mods:
       - rsync: https://github.com/linuxserver/docker-mods/tree/openssh-server-rsync
       - ssh-tunnel: https://github.com/linuxserver/docker-mods/tree/openssh-server-ssh-tunnel
   openvscode-server:
-    mod_count: 26
+    mod_count: 27
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
@@ -96,6 +97,7 @@ mods:
       - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
       - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
       - php-cli: https://github.com/linuxserver/docker-mods/tree/code-server-php-cli
+      - pnpm: https://github.com/linuxserver/docker-mods/tree/code-server-pnpm
       - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
       - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
