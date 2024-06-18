@@ -14,6 +14,8 @@ if [ -d /dotnet ]; then
         echo "libicu66" >> /mod-repo-packages-to-install.list
     elif [ "${DISTRIB_CODENAME}" == "jammy" ]; then
         echo "libicu70" >> /mod-repo-packages-to-install.list
+    elif [ "${DISTRIB_CODENAME}" == "noble" ]; then
+        echo "libicu74" >> /mod-repo-packages-to-install.list
     fi
     # remove existing install if updating
     if ls -d /dotnet_* >/dev/null 2>&1; then
