@@ -1,5 +1,16 @@
 #!/usr/bin/with-contenv bash
 
+echo '
+********************************************
+********************************************
+**                                        **
+**        PHP8 mod is deprecated          **
+**                                        **
+**  Please switch to PHP-PPA mod instead  **
+**                                        **
+********************************************
+********************************************'
+
 source /etc/lsb-release
 if [ ! -f "/etc/apt/sources.list.d/php8source.list" ]; then
     curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c" | gpg --dearmor | tee /usr/share/keyrings/php8.gpg >/dev/null

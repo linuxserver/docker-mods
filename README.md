@@ -1,3 +1,4 @@
+# DEPRECATED, Please switch to the [PHP_PPA mod](https://github.com/linuxserver/docker-mods/tree/code-server-php-ppa)
 # PHP8 - Docker mod for code-server/openvscode-server
 
 This mod adds php8.2 and composer to code-server/openvscode-server, to be installed/updated during container start.
