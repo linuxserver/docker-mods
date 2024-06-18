@@ -1,0 +1,25 @@
+#!/usr/bin/with-contenv bash
+
+PHP_MOD_VERSION=${PHP_MOD_VERSION:-8.3}
+
+source /etc/lsb-release
+if [[ ! -f "/etc/apt/sources.list.d/phpppasource.list" ]]; then
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c" | gpg --dearmor | tee /usr/share/keyrings/php-ppa.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/php-ppa.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu ${DISTRIB_CODENAME} main" \
+        > /etc/apt/sources.list.d/phpppasource.list
+    echo "**** Adding php${PHP_MOD_VERSION} and composer to package install list ****"
+    echo "\
+        php${PHP_MOD_VERSION} \
+        composer" >> /mod-repo-packages-to-install.list
+    if [[ -n "${PHP_MOD_EXTRA_PACKAGES}" ]]; then
+        #Split list of packages on delimiter '|'
+        IFS='|'
+        PHP_MOD_EXTRA_PACKAGES=(${PHP_MOD_EXTRA_PACKAGES})
+        for PKG in "${PHP_MOD_EXTRA_PACKAGES[@]}"; do
+            echo "**** Adding ${PKG} to OS package install list ****"
+            echo "${PKG}" >> /mod-repo-packages-to-install.list
+    else
+        echo "No additional PPA packages requested"
+    fi
+done
+fi
