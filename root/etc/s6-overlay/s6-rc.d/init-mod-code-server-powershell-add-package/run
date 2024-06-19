@@ -16,6 +16,10 @@ if [ -f "/powershell/powershell.tar.gz" ]; then
         echo "\
             libicu70 \
             libunwind8" >> /mod-repo-packages-to-install.list
+    elif [ "${DISTRIB_CODENAME}" == "noble" ]; then
+        echo "\
+            libicu74 \
+            libunwind8" >> /mod-repo-packages-to-install.list
     fi
     tar xf "/powershell/powershell.tar.gz" -C /powershell
     rm -rf \
