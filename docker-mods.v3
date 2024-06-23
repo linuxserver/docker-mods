@@ -480,6 +480,14 @@ if [[ -z ${LSIO_READ_ONLY_FS} ]] && [[ -z ${LSIO_NON_ROOT_USER} ]]; then
         curl_check
         run_mods
     fi
+elif [[ -n ${LSIO_READ_ONLY_FS} ]] && [[ -n ${LSIO_NON_ROOT_USER} ]]; then
+echo "╔═════════════════════════════════════════════════════════════════════════╗
+║                                                                         ║
+║    You are running this container read-only and as a non-root user:     ║
+║              This combination of settings is not supported              ║
+║                  and may result in unwanted behaviour.                  ║
+║                                                                         ║
+╚═════════════════════════════════════════════════════════════════════════╝"
 elif [[ -n ${LSIO_READ_ONLY_FS} ]]; then
 echo "╔═════════════════════════════════════════════════════════════════════════╗
 ║                                                                         ║
@@ -493,14 +501,6 @@ echo "╔═══════════════════════�
 ║           You are running this container as a non-root user:            ║
 ║   UMASK, custom services, & docker mod functionality will be disabled   ║
 ║      and the PUID/PGID environment variables will have no effect.       ║
-║                                                                         ║
-╚═════════════════════════════════════════════════════════════════════════╝"
-else
-echo "╔═════════════════════════════════════════════════════════════════════════╗
-║                                                                         ║
-║    You are running this container read-only and as a non-root user:     ║
-║              This combination of settings is not supported              ║
-║                  and may result in unwanted behaviour.                  ║
 ║                                                                         ║
 ╚═════════════════════════════════════════════════════════════════════════╝"
 fi
