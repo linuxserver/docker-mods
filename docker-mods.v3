@@ -7,7 +7,7 @@
 # 2022-09-25 - Initial Release
 # 2024-04-13 - Let lsiown ignore broken symlinks (requires gnu find)
 # 2024-06-12 - Remove lsiown and legacy s6 handlers
-MOD_SCRIPT_VER="3.20240613"
+MOD_SCRIPT_VER="3.20240626"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
