@@ -6,7 +6,7 @@
 
 # Determine if setup is needed
 if [ ! -f /usr/bin/apt ]; then
-    echo "**** Image is not Ubuntu, exiting emby-mediainfo-plugin instal.l ****"
+    echo "**** Image is not Ubuntu, exiting emby-mediainfo-plugin install. ****"
     exit 0
 fi
 
