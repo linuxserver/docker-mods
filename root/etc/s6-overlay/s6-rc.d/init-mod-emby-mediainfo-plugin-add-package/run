@@ -6,19 +6,19 @@
 
 # Determine if setup is needed
 if [ ! -f /usr/bin/apt ]; then
-    echo "**** Image is not Ubuntu, skipping emby-mediainfo install ****"
+    echo "**** Image is not Ubuntu, exiting emby-mediainfo-plugin instal.l ****"
     exit 0
 fi
 
 if [ $(uname -m) != "x86_64" ]; then
-    echo "**** Mediainfo only works on X86_64, skipping ****"
+    echo "**** MediaInfo plugin only works on x86_64, see README for more info.  Exiting emby-mediainfo-plugin install. ****"
     exit 0
 fi
 
 # Ubuntu
 if [ -f /usr/bin/apt ]; then
-cho "**** Installing packages ****"
-echo "\
+    echo "**** Installing packages ****"
+    echo "\
     mediainfo \
     mkvtoolnix \
     unzip" >> /mod-repo-packages-to-install.list
