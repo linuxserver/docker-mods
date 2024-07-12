@@ -9,7 +9,7 @@ This allows:
 * Zero cost hosting and build pipelines for these modifications leveraging GitHub Container Registry and Dockerhub
 * Full custom configuration management layers for hooking containers into each other using environment variables contained in a compose file
 
-It is important to note to end users of this system that there are not only extreme security implications to consuming files from souces outside of our control, but by leveraging community Mods you essentially lose direct support from the core LinuxServer team. Our first and foremost troubleshooting step will be to remove the `DOCKER_MODS` environment variable when running into issues and replace the container with a clean LSIO one.
+It is important to note to end users of this system that there are not only extreme security implications to consuming files from sources outside of our control, but by leveraging community Mods you essentially lose direct support from the core LinuxServer team. Our first and foremost troubleshooting step will be to remove the `DOCKER_MODS` environment variable when running into issues and replace the container with a clean LSIO one.
 
 Again, when pulling in logic from external sources practice caution and trust the sources/community you get them from.
 
@@ -17,7 +17,7 @@ Again, when pulling in logic from external sources practice caution and trust th
 
 We host and publish official Mods at the [linuxserver/mods](https://github.com/orgs/linuxserver/packages/container/mods/versions) endpoint as separate tags. Each tag is in the format of `<imagename>-<modname>` for the latest versions, and `<imagename>-<modname>-<commitsha>` for the specific versions.
 
-Here's a list of the official Mods we host: <https://mods.linuxserver.io/>
+Here's a list of the official Mods we host: [https://mods.linuxserver.io/](https://mods.linuxserver.io/)
 
 ## Using a Docker Mod
 
@@ -31,6 +31,7 @@ Consumption of a Docker Mod is intended to be as user friendly as possible and c
 Full example:
 
 docker run
+
 ```bash
 docker create \
   --name=nzbget \
@@ -44,7 +45,9 @@ docker create \
   --restart unless-stopped \
   linuxserver/nzbget
 ```
+
  docker compose
+
 ```yaml
 ---
 services:
@@ -64,16 +67,17 @@ services:
     restart: unless-stopped
 ```
 
-This will spinup an nzbget container and apply the custom logic found in the following repository:
+This will spin up an nzbget container and apply the custom logic found in the following repository:
 
-<https://github.com/Taisun-Docker/Linuxserver-Mod-Demo>
+[https://github.com/Taisun-Docker/Linuxserver-Mod-Demo](https://github.com/Taisun-Docker/Linuxserver-Mod-Demo)
 
 This basic demo installs Pip and a couple dependencies for plugins some users leverage with nzbget.
 
 ## Creating and maintaining a Docker Mod
 
-We will always recommend to our users consuming Mods that they leverage ones from active community members or projects so transparency is key here. We understand that image layers can be pushed on the back end behind these pipelines, but every little bit helps.
-In this repository we will be going over two basic methods of making a Mod along with an example of the GitHub Actions build logic to get this into a Dockerhub and/or GitHub Container Registry endpoint. Though we are not officially endorsing GitHub Actions here it is built in to GitHub repositories and forks making it very easy to get started. If you prefer others feel free to use them as long as build jobs are transparent.
+**All of the example files referenced in this section are available in the [template](https://github.com/linuxserver/docker-mods/tree/template) branch of this repo.**
+
+We will always recommend to our users consuming Mods that they leverage ones from active community members or projects so transparency is key here. We understand that image layers can be pushed on the back end behind these pipelines, but every little bit helps. In this repository we will be going over two basic methods of making a Mod along with an example of the GitHub Actions build logic to get this into a Dockerhub and/or GitHub Container Registry endpoint. Though we are not officially endorsing GitHub Actions here it is built in to GitHub repositories and forks making it very easy to get started. If you prefer others feel free to use them as long as build jobs are transparent.
 
 > **Note**
 > One of the core ideas to remember when creating a Mod is that it can only contain a **single image layer**, the examples below will show you how to add files standardly and how to run complex logic to assemble the files in a build layer to copy them over into this single layer.
@@ -186,7 +190,7 @@ In this repository you will find the `Dockerfile.complex` containing:
 
 ```Dockerfile
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.12 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 as buildstage
 
 RUN \
   echo "**** install packages ****" && \
@@ -208,14 +212,14 @@ FROM scratch
 COPY --from=buildstage /root-layer/ /
 ```
 
-Here we are leveraging a multi stage DockerFile to run custom logic and pull down an Rclone deb from the Internet to include in our image layer for distribution. Any amount of logic can be run in this build stage or even multiple build stages as long as the files in the end are combined into a single folder for the COPY command in the final output.
+Here we are leveraging a multi stage DockerFile to run custom logic and pull down an rclone deb from the Internet to include in our image layer for distribution. Any amount of logic can be run in this build stage or even multiple build stages as long as the files in the end are combined into a single folder for the COPY command in the final output.
 
 ## Getting a Mod to Dockerhub
 
 To publish a Mod to DockerHub you will need the following accounts:
 
-* Github- <https://github.com/join>
-* DockerHub- <https://hub.docker.com/signup>
+* Github- [https://github.com/join](https://github.com/join)
+* DockerHub- [https://hub.docker.com/signup](https://hub.docker.com/signup)
 
 We recommend using this repository as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into GitHub Actions/Dockerhub.
 
@@ -232,7 +236,7 @@ Head over to `https://github.com/user/endpoint/settings/secrets` and click on `N
 
 Add `DOCKERUSER` (your DockerHub username) and `DOCKERPASS` (your DockerHub password or token).
 
-You can create a token by visiting <https://hub.docker.com/settings/security>
+You can create a token by visiting [https://hub.docker.com/settings/security](https://hub.docker.com/settings/security)
 
 GitHub Actions will trigger a build off of your repo when you commit. The image will be pushed to Dockerhub on success. This Dockerhub endpoint is the Mod variable you can use to customize your container now.
 
@@ -240,7 +244,7 @@ GitHub Actions will trigger a build off of your repo when you commit. The image 
 
 To publish a Mod to GitHub Container Registry you will need the following accounts:
 
-* Github- <https://github.com/join>
+* Github- [https://github.com/join](https://github.com/join)
 
 We recommend using this repository as a template for your first Mod, so in this section we assume the code is finished and we will only concentrate on plugging into GitHub Actions/GitHub Container Registry.
 
@@ -251,13 +255,13 @@ The only code change you need to make to the build logic file `.github/workflows
   BRANCH: "master"
 ```
 
-User is your GitHub user and endpoint is your own custom name (typically the name of the repository where your mod is). You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
+`user` is your GitHub user and `endpoint` is your own custom name (typically the name of the repository where your mod is). You do not need to create this endpoint beforehand, the build logic will push it and create it on first run.
 
-Head over to `https://github.com/user/endpoint/settings/secrets` and click on `New secret`
+Head over to `https://github.com/<user>/<endpoint>/settings/secrets` and click on `New secret`
 
 Add `CR_USER` (your GitHub username) and `CR_PAT` (a personal access token with `read:packages` and `write:packages` scopes).
 
-You can create a personal access token by visiting <https://github.com/settings/tokens>
+You can create a personal access token by visiting [https://github.com/settings/tokens](https://github.com/settings/tokens)
 
 GitHub Actions will trigger a build off of your repo when you commit. The image will be pushed to GitHub Container Registry on success. This GitHub Container Registry endpoint is the Mod variable you can use to customize your container now.
 
@@ -284,18 +288,20 @@ s6 init files must be encoded in plain `UTF-8`, and not `UTF-8 with BOM`. You ca
 
 To inspect the file contents of external Mods dive is a great CLI tool:
 
-<https://github.com/wagoodman/dive>
+[https://github.com/wagoodman/dive](https://github.com/wagoodman/dive)
 
 Basic usage:
 
-**Unix w/ Docker**
+#### With Docker
+
 ```bash
 docker run --rm -it \
     -v /var/run/docker.sock:/var/run/docker.sock \
     wagoodman/dive:latest <Image Name>
 ```
 
-**w/o Docker**
+#### Without Docker
+
 ```bash
 dive <Image Name>
 ```
