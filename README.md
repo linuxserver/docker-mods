@@ -35,15 +35,15 @@ docker run
 ```bash
 docker create \
   --name=nzbget \
-  -e DOCKER_MODS=taisun/nzbget-mod:latest \
+  -e DOCKER_MODS=lscr.io/linuxserver/mods:universal-tshoot \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
   -p 6789:6789 \
-  -v <path to data>:/config \
-  -v <path/to/downloads>:/downloads \
+  -v /path/to/nzbget/data:/config \
+  -v /path/to/downloads:/downloads \
   --restart unless-stopped \
-  linuxserver/nzbget
+  lscr.io/linuxserver/nzbget
 ```
 
  docker compose
@@ -52,15 +52,15 @@ docker create \
 ---
 services:
   nzbget:
-    image: linuxserver/nzbget:latest
+    image: lscr.io/linuxserver/nzbget:latest
     container_name: nzbget
     environment:
-      - DOCKER_MODS=taisun/nzbget-mod:latest
+      - DOCKER_MODS=lscr.io/linuxserver/mods:universal-tshoot
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
     volumes:
-      - /path/to/data:/config
+      - /path/to/nzbget/data:/config
       - /path/to/downloads:/downloads #optional
     ports:
       - 6789:6789
@@ -69,9 +69,9 @@ services:
 
 This will spin up an nzbget container and apply the custom logic found in the following repository:
 
-[https://github.com/Taisun-Docker/Linuxserver-Mod-Demo](https://github.com/Taisun-Docker/Linuxserver-Mod-Demo)
+[https://github.com/linuxserver/docker-mods/tree/universal-tshoot](https://github.com/linuxserver/docker-mods/tree/universal-tshoot)
 
-This basic demo installs Pip and a couple dependencies for plugins some users leverage with nzbget.
+This mod installs some basic troubleshooting tools such as dig, netstat, nslookup, etc.
 
 ## Creating and maintaining a Docker Mod
 
