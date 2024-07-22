@@ -35,6 +35,10 @@ mods:
       - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
       - terraform: https://github.com/linuxserver/docker-mods/tree/code-server-terraform
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
+  emby:
+    mod_count: 1
+    container_mods:
+      - mediainfo-plugin: https://github.com/linuxserver/docker-mods/tree/emby-mediainfo-plugin
   firefox:
     mod_count: 1
     container_mods:
