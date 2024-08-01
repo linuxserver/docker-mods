@@ -1,7 +1,7 @@
 # Intro
 
 The purpose of the repository is to provide examples and guidance in creating and storing a user consumable modification layer for the Library of Linuxserver.io Containers.
-At it's core a Docker Mod is a tarball of files stored on Dockerhub and/or GitHub Container Registry that is downloaded and extracted on container boot before any init logic is run.
+At its core a Docker Mod is a tarball of files stored on Dockerhub and/or GitHub Container Registry that is downloaded and extracted on container boot before any init logic is run.
 This allows:
 
 * Developers and community users to modify base containers to suit their needs without the need to maintain a fork of the main docker repository
@@ -21,7 +21,7 @@ Here's a list of the official Mods we host: [https://mods.linuxserver.io/](https
 
 ## Using a Docker Mod
 
-Before consuming a Docker Mod ensure that the source code for it is publicly posted along with it's build pipeline pushing to Dockerhub.
+Before consuming a Docker Mod ensure that the source code for it is publicly posted along with its build pipeline pushing to Dockerhub.
 
 Consumption of a Docker Mod is intended to be as user friendly as possible and can be achieved with the following environment variables being passed to the container:
 
