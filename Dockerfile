@@ -9,14 +9,14 @@ RUN chmod +rwx 'kindlegen'
 RUN rm kindlegen.tar.gz
 
 RUN latest_tag=$(curl -s https://api.github.com/repos/ciromattia/kcc/releases/latest | jq -rc ".tag_name") && \
-    curl -L https://github.com/ciromattia/kcc/archive/refs/tags/$latest_tag.tar.gz > kcc.tar.gz && \
-    tar -xzf kcc.tar.gz && \
-    mv kcc-$(echo "$latest_tag" | sed 's/^.\(.*\)/\1/') kcc && \
-    touch kcc/KCC_VERSION && \
-    echo $latest_tag > kcc/KCC_VERSION && \
-    mkdir -p /root-layer/usr/local/bin && \
-    mv kindlegen /root-layer/usr/local/bin/ && \
-    mv kcc /root-layer/usr/local/bin/
+  curl -L https://github.com/ciromattia/kcc/archive/refs/tags/$latest_tag.tar.gz > kcc.tar.gz && \
+  tar -xzf kcc.tar.gz && \
+  mv kcc-$(echo "$latest_tag" | sed 's/^.\(.*\)/\1/') kcc && \
+  touch kcc/KCC_VERSION && \
+  echo $latest_tag > kcc/KCC_VERSION && \
+  mkdir -p /root-layer/usr/local/bin && \
+  mv kindlegen /root-layer/usr/local/bin/ && \
+  mv kcc /root-layer/usr/local/bin/
 
 COPY root/ /root-layer/
 
