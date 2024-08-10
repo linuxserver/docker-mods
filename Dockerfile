@@ -11,10 +11,13 @@ RUN chmod +rwx 'kindlegen'
 RUN rm kindlegen.tar.gz
 
 RUN \
-  if [ -z ${MOD_VERSION+x} ]; then \
-    MOD_VERSION=$(curl -s "https://api.github.com/repos/ciromattia/kcc/releases/latest" \
-    | jq -rc ".tag_name"); \
+  if [ -z ${MOD_VERSION } ]; then \
+    echo "MOD_VERSION is not set. Fetching from GitHub..."; \
+    MOD_VERSION=$(curl -s "https://api.github.com/repos/ciromattia/kcc/releases/latest" | jq -rc ".tag_name"); \
+  else \
+    echo "MOD_VERSION is already set to '${MOD_VERSION}'"; \
   fi && \
+  echo "Using MOD_VERSION=${MOD_VERSION}" && \
   curl -L https://github.com/ciromattia/kcc/archive/refs/tags/${MOD_VERSION}.tar.gz > kcc.tar.gz && \
   tar -xzf kcc.tar.gz && \
   mv kcc-$(echo "${MOD_VERSION}" | sed 's/^.\(.*\)/\1/') kcc && \
