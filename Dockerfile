@@ -11,7 +11,7 @@ RUN chmod +rwx 'kindlegen'
 RUN rm kindlegen.tar.gz
 
 RUN \
-  if [ -z ${MOD_VERSION } ]; then \
+  if [ -z ${MOD_VERSION} ]; then \
     echo "MOD_VERSION is not set. Fetching from GitHub..."; \
     MOD_VERSION=$(curl -s "https://api.github.com/repos/ciromattia/kcc/releases/latest" | jq -rc ".tag_name"); \
   else \
