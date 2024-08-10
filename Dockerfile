@@ -12,7 +12,7 @@ RUN rm kindlegen.tar.gz
 
 RUN \
   if [ -z ${MOD_VERSION+x} ]; then \
-      MOD_VERSION=$(curl -s https://api.github.com/repos/ciromattia/kcc/releases/latest | jq -rc ".tag_name"); \
+    MOD_VERSION=$(curl -s https://api.github.com/repos/ciromattia/kcc/releases/latest | jq -rc ".tag_name"); \
   fi; \
   curl -L https://github.com/ciromattia/kcc/archive/refs/tags/${MOD_VERSION}.tar.gz > kcc.tar.gz && \
   tar -xzf kcc.tar.gz && \
