@@ -10,10 +10,26 @@ RUN tar -zxvf kindlegen.tar.gz kindlegen
 RUN chmod +rwx 'kindlegen'
 RUN rm kindlegen.tar.gz
 
+
+RUN \
+  echo "**** grab transmissionic ****" && \
+  mkdir -p /root-layer/themes && \
+  if [ -z ${MOD_VERSION+x} ]; then \
+    MOD_VERSION=$(curl -s "https://api.github.com/repos/6c65726f79/Transmissionic/releases/latest" \
+    | jq -rc ".tag_name"); \
+  fi && \
+  curl -o \
+    /tmp/transmissionic.zip -L \
+    "https://github.com/6c65726f79/Transmissionic/releases/download/${MOD_VERSION}/Transmissionic-webui-${MOD_VERSION}.zip" && \
+  unzip \
+    /tmp/transmissionic.zip -d \
+    /root-layer/themes && \
+  mv /root-layer/themes/web /root-layer/themes/transmissionic
 RUN \
   if [ -z ${MOD_VERSION+x} ]; then \
-    MOD_VERSION=$(curl -s https://api.github.com/repos/ciromattia/kcc/releases/latest | jq -rc ".tag_name"); \
-  fi; \
+    MOD_VERSION=$(curl -s "https://api.github.com/repos/ciromattia/kcc/releases/latest" \
+    | jq -rc ".tag_name"); \
+  fi && \
   curl -L https://github.com/ciromattia/kcc/archive/refs/tags/${MOD_VERSION}.tar.gz > kcc.tar.gz && \
   tar -xzf kcc.tar.gz && \
   mv kcc-$(echo "${MOD_VERSION}" | sed 's/^.\(.*\)/\1/') kcc && \
