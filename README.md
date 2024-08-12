@@ -43,7 +43,9 @@ The variables need to remain in place while you are using the mod. If you remove
 
 ### Captcha & AppSec Limitations
 
-Due to limitations in the nginx Lua module, if you enable Captcha or AppSec support in the bouncer you cannot safely use http/2 for any of your services. By default Swag ships with http/2 enabled, and so this will need to be changed in any and all active proxy confs as well as the default.conf. For example, in the [subdomain template conf](https://github.com/linuxserver/reverse-proxy-confs/blob/master/_template.subdomain.conf.sample#L9-L10) you would replace
+Due to limitations in the nginx Lua module, if you enable Captcha or AppSec support in the bouncer you cannot safely use http/2 for any of your services. By default Swag ships with http/2 enabled, and so this will need to be changed in the `/config/nginx/nginx.conf` file. Simply change `http2 on;` to `http2 off;` and restart the container.
+
+If you still have old versions of active proxy confs or the `default.conf`, you will need to remove the http2 definitions from them. For example, in the old [subdomain template conf](https://github.com/linuxserver/reverse-proxy-confs/blob/0528b56e12655748834a9314e7b8cd413e6bf7da/_template.subdomain.conf.sample) you would replace:
 
 ```nginx
 server {
