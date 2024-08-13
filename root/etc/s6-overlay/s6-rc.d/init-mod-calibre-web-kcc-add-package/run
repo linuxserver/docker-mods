@@ -1,0 +1,50 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** Adding kcc dependencies (repo and pip) to package install lists ****"
+if ! python3 /usr/local/bin/kcc/kcc-c2e.py > /dev/null 2>&1 ; then
+  echo "\
+    PySide6 \
+    Pillow \
+    psutil \
+    requests \
+    python-slugify \
+    raven \
+    mozjpeg-lossless-optimization \
+    natsort[fast] \
+    distro" >> /mod-pip-packages-to-install.list
+  ## Ubuntu
+  if [ -f /usr/bin/apt ]; then
+    echo "\
+      python3 \
+      python3-pip
+      python3-dev \
+      libpng-dev \
+      libjpeg-dev \
+      p7zip-full \
+      p7zip-rar \
+      unrar-free \
+      libgl1 \
+      python3-pyqt5 \
+      cmake" >> /mod-repo-packages-to-install.list
+  fi
+  # Alpine
+  if [ -f /sbin/apk ]; then
+    echo "\
+      cargo \
+      libffi-dev \
+      openssl-dev \
+      python3 \
+      python3-dev \
+      python3 \
+      py3-pip \
+      libpng-dev \
+      libjpeg \
+      p7zip \
+      unrar \
+      mesa-gl \
+      py3-qt5 \
+      cmake" >> /mod-repo-packages-to-install.list
+    fi
+else
+  echo "**** kcc dependencies already installed, skipping ****"
+fi

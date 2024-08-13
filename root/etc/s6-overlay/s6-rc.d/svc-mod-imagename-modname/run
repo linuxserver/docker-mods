@@ -1,7 +1,0 @@
-#!/usr/bin/with-contenv bash
-
-# This is an example service that would run for the mod
-# It depends on init-services, the baseimage hook for start of all longrun services
-
-exec \
-    s6-setuidgid abc run my app
