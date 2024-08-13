@@ -1,9 +1,10 @@
 mods:
   calibre-web:
-    mod_count: 2
+    mod_count: 3
     container_mods:
       - calibre: https://github.com/linuxserver/docker-mods/tree/universal-calibre
       - dtrpg-metadata: https://github.com/linuxserver/docker-mods/tree/calibre-web-dtrpg-metadata
+      - kcc: https://github.com/linuxserver/docker-mods/tree/calibre-web-kcc
   code-server:
     mod_count: 28
     container_mods:
