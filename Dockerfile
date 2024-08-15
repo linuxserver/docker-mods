@@ -2,7 +2,6 @@
 
 ## Buildstage ##
 FROM ghcr.io/linuxserver/baseimage-alpine:3.20 as buildstage
-
 ARG MOD_VERSION
 
 # copy local files
@@ -17,11 +16,14 @@ RUN \
 
 ## Single layer deployed image ##
 FROM scratch
+ARG MOD_VERSION
 
-LABEL org.opencontainers.image.source=https://github.com/TheCaptain989/radarr-striptracks
+LABEL org.opencontainers.image.title=radarr-striptracks
 LABEL org.opencontainers.image.description="A Docker Mod to Radarr/Sonarr to automatically strip out unwanted audio and subtitle streams"
-LABEL org.opencontainers.image.licenses=GPL-3.0-only
+LABEL org.opencontainers.image.version="${MOD_VERSION}"
+LABEL org.opencontainers.image.source="https://github.com/TheCaptain989/radarr-striptracks"
 LABEL org.opencontainers.image.authors="TheCaptain989 <thecaptain989@protonmail.com>"
+LABEL org.opencontainers.image.licenses=GPL-3.0-only
 
 # Add files from buildstage
 COPY --from=buildstage /root-layer/ /
