@@ -3,6 +3,7 @@
 .gitignore
 .github
 .gitattributes
+.vscode
 .assets
 READMETEMPLATE.md
 README.md

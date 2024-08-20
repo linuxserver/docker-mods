@@ -809,6 +809,63 @@ function check_compat {
   [ $striptracks_debug -ge 1 ] && echo "Debug|Feature $1 is $([ $striptracks_return -eq 1 ] && echo "not ")compatible with ${striptracks_type^} v${striptracks_arr_version}." | log
   return $striptracks_return
 }
+# Get media management configuration
+function get_media_config {
+  local url="$striptracks_api_url/config/mediamanagement"
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Getting ${striptracks_type^} configuration. Calling ${striptracks_type^} API using GET and URL '$url'" | log
+  unset striptracks_result
+  striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
+    -H "Content-Type: application/json" \
+		-H "Accept: application/json" \
+    --get "$url")
+  local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
+    local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\"\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
+    echo "$striptracks_message" | log
+    echo "$striptracks_message" >&2
+  }
+  [ $striptracks_debug -ge 2 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+  if [ "$(echo $striptracks_result | jq -crM '.id?')" != "null" ] && [ "$(echo $striptracks_result | jq -crM '.id?')" != "" ]; then
+    local striptracks_return=0
+  else
+    local striptracks_return=1
+  fi
+  return $striptracks_return
+}
+# Update file metadata in Radarr/Sonarr
+function set_video_info {
+  local url="$striptracks_api_url/$striptracks_video_api/$striptracks_video_id"
+  local data="$(echo $striptracks_videoinfo | jq -crM .monitored='true')"
+  local i=0
+  for ((i=1; i <= 5; i++)); do
+    [ $striptracks_debug -ge 1 ] && echo "Debug|Updating monitored to 'true'. Calling ${striptracks_type^} API using PUT and URL '$url' with data $data" | log
+    unset striptracks_result
+    striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      -d "$data" \
+      -X PUT "$url")
+    local striptracks_curlret=$?; [ $striptracks_curlret -ne 0 ] && {
+      local striptracks_message=$(echo -e "[$striptracks_curlret] curl error when calling: \"$url\" with data $data\nWeb server returned: $(echo $striptracks_result | jq -jcrM .message?)" | awk '{print "Error|"$0}')
+      echo "$striptracks_message" | log
+      echo "$striptracks_message" >&2
+    }
+    [ $striptracks_debug -ge 2 ] && echo "Debug|API returned ${#striptracks_result} bytes." | log
+    [ $striptracks_debug -ge 3 ] && echo "API returned: $striptracks_result" | awk '{print "Debug|"$0}' | log
+    # Exit loop if database is not locked, else wait 1 minute
+    if [[ ! "$(echo $striptracks_result | jq -jcrM .message?)" =~ database\ is\ locked ]]; then
+      break
+    else
+      echo "Warn|Database is locked; system is likely overloaded. Sleeping 1 minute." | log
+      sleep 60
+    fi
+  done
+  if [ $striptracks_curlret -eq 0 -a "${#striptracks_result}" != 0 ]; then
+    local striptracks_return=0
+  else
+    local striptracks_return=1
+  fi
+  return $striptracks_return
+}
 # Exit program
 function end_script {
   # Cool bash feature
@@ -1139,6 +1196,20 @@ elif [ -n "$striptracks_api_url" ]; then
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
     striptracks_exitstatus=17
+  fi
+  # Check if Radarr/Sonarr are configured to unmonitor deleted videos
+  get_media_config
+  striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
+    # No '.id' in returned JSON
+    striptracks_message="Warn|The Media Management Config API returned no id."
+    echo "$striptracks_message" | log
+    echo "$striptracks_message" >&2
+    striptracks_exitstatus=17
+  }
+  if [ "$(echo "$striptracks_result" | jq -crM ".autoUnmonitorPreviouslyDownloaded${striptracks_video_api^}s")" = "true" ]; then
+    striptracks_conf_unmonitor=1
+    striptracks_message="Warn|Will compensate for ${striptracks_type^} configuration to unmonitor deleted ${striptracks_video_api}s."
+    echo "$striptracks_message" | log
   fi
 else
   # No URL means we can't call the API
@@ -1518,8 +1589,18 @@ elif [ -n "$striptracks_api_url" ]; then
 
       # Get new video file id
       if get_video_info; then
-        striptracks_videofile_id="$(echo $striptracks_result | jq -crM .${striptracks_json_quality_root}.id)"
+        striptracks_videoinfo="$striptracks_result"
+        striptracks_videofile_id="$(echo $striptracks_videoinfo | jq -crM .${striptracks_json_quality_root}.id)"
         [ $striptracks_debug -ge 1 ] && echo "Debug|Using new video file id '$striptracks_videofile_id'" | log
+
+        # Check if video is unmonitored after the delete/import
+        if [ $striptracks_conf_unmonitor -eq 1 -a "$(echo "$striptracks_videoinfo" | jq -crM ".monitored")" = "false" ]; then
+          striptracks_message="Warn|'$striptracks_title' is unmonitored after deleting the original video.  Compensating for ${striptracks_type^} configuration."
+          echo "$striptracks_message" | log
+          # Set video to monitored again
+          set_video_info
+        fi
+
         # Get new video file info
         if get_videofile_info; then
           striptracks_videofile_info="$striptracks_result"
