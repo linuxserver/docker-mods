@@ -14,7 +14,7 @@ RUN \
   curl -o \
     /tmp/proxy.tar.gz -L \
     "https://github.com/linuxserver/reverse-proxy-confs/archive/${MOD_VERSION}.tar.gz" && \
-  tar xf \
+  tar xvf \
     /tmp/proxy.tar.gz -C \
     /root/defaults/nginx/proxy-confs \
     --strip-components=1 \
