@@ -3,11 +3,7 @@
 if ! pip list 2> /dev/null | grep -q "slurpit_netbox"; then
     echo "**** Adding slurpit_netbox and their deps to package install lists ****"
     echo "\
-        setuptools" >> /mod-pip-packages-to-install.list
-    if [ $(arch) = "x86_64" ]; then
-        echo "setuptools" >> /mod-pip-packages-to-install.list
-    fi
-    echo "\
+        setuptools \
         slurpit_netbox" >> /mod-pip-packages-to-install.list
 else
     echo "**** slurpit_netbox already installed, skipping ****"
