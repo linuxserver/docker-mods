@@ -7,7 +7,7 @@ env:
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "netbox" #replace
   MODNAME: "slurpit" #replace
-  MULTI_ARCH: "true" #set to false if not needed
+  MULTI_ARCH: "false" #set to false if not needed
 
 jobs:
   set-vars:
