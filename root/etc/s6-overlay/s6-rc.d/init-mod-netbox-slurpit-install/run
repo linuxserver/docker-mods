@@ -12,9 +12,11 @@ if ! command -v python3; then
     exit 1
 else:
     if [ -f /lsiopy/bin/python3 ]; then
+        source /lsiopy/bin/activate
         /lsiopy/bin/python3 -m pip install --no-cache-dir slurpit_netbox
         echo "Please update configuration.py to include "
         echo "PLUGINS = ['slurpit_netbox']"
+        /lsiopy/bin/deactivate
     else:
         echo "/lsiopy/bin/python3 not found!"
         exit 1
