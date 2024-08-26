@@ -1,0 +1,23 @@
+#!/usr/bin/with-contenv bash
+
+# This is an install script that is designed to run after init-mods-package-install
+# so it can take advantage of packages installed
+# init-mods-end depends on this script so that later init and services wait until this script exits
+
+echo "**** Installing Netbox SlurpIT plugin ****"
+echo "**** see https://netboxlabs.com/netbox-plugins/ for more information ****"
+
+if ! command -v python3; then
+    echo "**** Python3 is not installed ****"
+    exit 1
+else:
+    if [ -f /lsiopy/bin/python3 ]; then
+        /lsiopy/bin/python3 -m pip install --no-cache-dir slurpit_netbox
+        echo "Please update configuration.py to include "
+        echo "PLUGINS = ['slurpit_netbox']"
+    else:
+        echo "/lsiopy/bin/python3 not found!"
+        exit 1
+    fi
+fi
+
