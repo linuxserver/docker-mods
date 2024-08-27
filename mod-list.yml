@@ -63,6 +63,10 @@ mods:
     mod_count: 1
     container_mods:
       - flac2mp3: https://github.com/linuxserver/docker-mods/tree/lidarr-flac2mp3
+  netbox:
+    mod_count: 1
+    container_mods:
+      - slurpit: https://github.com/linuxserver/docker-mods/tree/netbox-slurpit
   nextcloud:
     mod_count: 3
     container_mods:
