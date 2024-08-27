@@ -25,6 +25,7 @@ if [ -f "/powershell/powershell.tar.gz" ]; then
     rm -rf \
         /powershell/powershell.tar.gz
     ln -s /powershell/pwsh /usr/bin/pwsh
+    chmod +x /powershell/pwsh
 else
     echo "PowerShell already installed, skipping"
 fi
