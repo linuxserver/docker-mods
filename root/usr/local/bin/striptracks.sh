@@ -1594,7 +1594,7 @@ elif [ -n "$striptracks_api_url" ]; then
         [ $striptracks_debug -ge 1 ] && echo "Debug|Using new video file id '$striptracks_videofile_id'" | log
 
         # Check if video is unmonitored after the delete/import
-        if [ $striptracks_conf_unmonitor -eq 1 -a "$(echo "$striptracks_videoinfo" | jq -crM ".monitored")" = "false" ]; then
+        if [ ${striptracks_conf_unmonitor:-0} -eq 1 -a "$(echo "$striptracks_videoinfo" | jq -crM ".monitored")" = "false" ]; then
           striptracks_message="Warn|'$striptracks_title' is unmonitored after deleting the original video.  Compensating for ${striptracks_type^} configuration."
           echo "$striptracks_message" | log
           # Set video to monitored again
