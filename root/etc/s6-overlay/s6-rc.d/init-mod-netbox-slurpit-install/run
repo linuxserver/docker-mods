@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+
+echo '**** Checking if slurpit_netbox is already installed ****'
+if ! pip list 2>&1 | grep -q "slurpit_netbox"; then
+    echo "**** Adding slurpit_netbox and their deps to package install lists ****"
+    echo "\
+        setuptools \
+        slurpit_netbox" >> /mod-pip-packages-to-install.list
+else
+    echo "**** slurpit_netbox already installed, skipping ****"
+fi
