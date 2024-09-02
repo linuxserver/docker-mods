@@ -8,14 +8,14 @@ In Emby Docker arguments, set an environment variable `DOCKER_MODS=linuxserver/m
 - docker-compose:
   ```yaml
   environment:
-    - DOCKER_MODS=linuxserver/mods:emby-mediaserver-plugin
+    - DOCKER_MODS=linuxserver/mods:emby-mediainfo-plugin
   ```
 - docker cli:
   ```sh
-  -e DOCKER_MODS=linuxserver/mods:emby-mediaserver-plugin
+  -e DOCKER_MODS=linuxserver/mods:emby-mediainfo-plugin
   ```
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:emby-mediaserver-plugin|linuxserver/mods:universal-mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:emby-mediainfo-plugin|linuxserver/mods:universal-mod2`
 
 # Settings in Emby
 Configure the Media Toolbox plugin, applications installed will be located as follows:
