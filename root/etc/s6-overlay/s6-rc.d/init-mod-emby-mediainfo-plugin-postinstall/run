@@ -1,12 +1,12 @@
 #!/usr/bin/with-contenv bash
 
-# This is an install script that is designed to run after init-mods-package-install
-# so it can take advantage of packages installed
-# init-mods-end depends on this script so that later init and services wait until this script exits
-
-echo "**** Installing BIF Tool ****"
-curl -L \
-  "https://github.com/rokudev/samples/raw/master/utilities/bif%20tool/biftool_linux.zip" \
-  -o /tmp/biftool_linux.zip && \
+if [[ ! -f /usr/bin/biftool ]]; then
+  echo "**** Installing BIF Tool ****"
+  curl -fL \
+    "https://github.com/rokudev/samples/raw/master/utilities/bif%20tool/biftool_linux.zip" \
+    -o /tmp/biftool_linux.zip && \
   cd /tmp && \
   unzip -uo biftool_linux.zip -d /usr/bin
+else
+  echo "**** BIF Tool already installed ****"
+fi
