@@ -9,4 +9,4 @@ curl -L \
   "https://github.com/rokudev/samples/raw/master/utilities/bif%20tool/biftool_linux.zip" \
   -o /tmp/biftool_linux.zip && \
   cd /tmp && \
-  unzip biftool_linux.zip -d /usr/bin
+  unzip -uo biftool_linux.zip -d /usr/bin
