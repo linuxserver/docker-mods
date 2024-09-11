@@ -5,6 +5,11 @@ CONFIG_PATH="/config/crowdsec/"
 LIB_PATH="/usr/local/lua/crowdsec/"
 DATA_PATH="/var/lib/crowdsec/lua/"
 
+if [[ ! -e "/crowdsec-nginx-bouncer.tgz" ]]; then
+    # Crowdsec bouncer already configured
+    exit 0
+fi
+
 echo "**** Configuring CrowdSec nginx Bouncer ****"
 
 # If API keys are missing, disable mod and exit
