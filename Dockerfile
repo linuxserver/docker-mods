@@ -6,11 +6,11 @@ ARG MOD_VERSION
 
 RUN \
   mkdir -p /root-layer && \
-  if [[ -z "${MOD_VERSION}" ]]; then \
+  if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -sX GET "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" \
     | jq -r '.tag_name'); \
   fi && \
-  if [[ -z ${MOD_VERSION+x} ]]; then \
+  if [ -z ${MOD_VERSION+x} ]; then \
     echo "**** Could not fetch current bouncer version from Github ****" \
     exit 1; \
   fi && \
