@@ -47,7 +47,7 @@ jobs:
       MOD_VERSION_OVERRIDE: ${{ steps.outputs.outputs.MOD_VERSION_OVERRIDE }}
 
   build:
-    uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v2
+    uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
     needs: set-vars
     secrets:
       CR_USER: ${{ secrets.CR_USER }}
