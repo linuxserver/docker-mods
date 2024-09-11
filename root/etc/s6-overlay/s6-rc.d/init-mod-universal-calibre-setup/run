@@ -17,18 +17,11 @@ fi
 
 export DEBIAN_FRONTEND="noninteractive"
 
-CALIBRE_RELEASE="$(cat /CALIBRE_RELEASE)"
-if [ -z ${CALIBRE_RELEASE+x} ]; then
-    CALIBRE_RELEASE=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" \
-    | awk '/tag_name/{print $4;exit}' FS='[""]'); \
-fi
-
-if [[ ! -e /usr/bin/calibre-server ]] || [[ "${CALIBRE_RELEASE}" != "$(cat /config/.CALIBRE_RELEASE || :)" ]]; then
+if [[ -e /tmp/calibre.txz ]]; then
     tar xf \
         /tmp/calibre.txz \
         -C /app/calibre
-    rm /tmp/calibre.txz
     echo "Installing Calibre version $(cat /CALIBRE_RELEASE)"
     /app/calibre/calibre_postinstall
-    echo "${CALIBRE_RELEASE}" > /config/.CALIBRE_RELEASE
+    rm /tmp/calibre.txz
 fi
