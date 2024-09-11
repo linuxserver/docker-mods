@@ -34,6 +34,7 @@ jobs:
             MOD_VERSION=$(curl -sX GET "https://api.github.com/repos/kovidgoyal/calibre/releases/latest" | jq -r '.tag_name')
           else
             MOD_VERSION=${{ env.MOD_VERSION }}
+            echo "MOD_VERSION_OVERRIDE=true" >> $GITHUB_OUTPUT
           fi
           echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_OUTPUT
     outputs:
@@ -43,9 +44,10 @@ jobs:
       MODNAME: ${{ steps.outputs.outputs.MODNAME }}
       MULTI_ARCH: ${{ steps.outputs.outputs.MULTI_ARCH }}
       MOD_VERSION: ${{ steps.outputs.outputs.MOD_VERSION }}
+      MOD_VERSION_OVERRIDE: ${{ steps.outputs.outputs.MOD_VERSION_OVERRIDE }}
 
   build:
-    uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
+    uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v2
     needs: set-vars
     secrets:
       CR_USER: ${{ secrets.CR_USER }}
@@ -59,3 +61,4 @@ jobs:
       MODNAME: ${{ needs.set-vars.outputs.MODNAME }}
       MULTI_ARCH: ${{ needs.set-vars.outputs.MULTI_ARCH }}
       MOD_VERSION: ${{ needs.set-vars.outputs.MOD_VERSION }}
+      MOD_VERSION_OVERRIDE: ${{ needs.set-vars.outputs.MOD_VERSION_OVERRIDE }}
