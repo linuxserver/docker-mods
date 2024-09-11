@@ -1,0 +1,29 @@
+name: Build Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod_version:
+        type: string
+        required: false
+
+env:
+  MOD_VERSION: ${{ inputs.mod_version }}
+  GITHUB_REPO: "linuxserver/docker-mods" #don't modify
+  ENDPOINT: "linuxserver/mods" #don't modify
+  BASEIMAGE: "master"
+  MODNAME: "dummy"
+  MULTI_ARCH: "false" #set to false if not needed
+
+jobs:
+  set-vars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Vars
+        run: |
+          echo "GITHUB_REPO=${{ env.GITHUB_REPO }}" >> $GITHUB_STEP_SUMMARY
+          echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_STEP_SUMMARY
+          echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_STEP_SUMMARY
+          echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_STEP_SUMMARY
