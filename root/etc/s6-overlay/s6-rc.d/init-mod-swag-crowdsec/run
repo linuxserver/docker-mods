@@ -5,10 +5,9 @@ CONFIG_PATH="/config/crowdsec/"
 LIB_PATH="/usr/local/lua/crowdsec/"
 DATA_PATH="/var/lib/crowdsec/lua/"
 
-if [[ ${DOCKER_MODS_DEBUG_CURL,,} = "true" ]]; then
-  CURL_NOISE_LEVEL="-v"
-else
-  CURL_NOISE_LEVEL="--silent"
+if [[ ! -e "/crowdsec-nginx-bouncer.tgz" ]]; then
+    # Crowdsec bouncer already configured
+    exit 0
 fi
 
 echo "**** Configuring CrowdSec nginx Bouncer ****"
@@ -28,29 +27,11 @@ echo "\
     lua-sec \
     nginx-mod-http-lua" >> /mod-repo-packages-to-install.list
 
-# Download nginx bouncer
-if [[ -z ${CROWDSEC_VERSION+x} ]]; then \
-    CROWDSEC_VERSION=$(curl -s "https://api.github.com/repos/crowdsecurity/cs-nginx-bouncer/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]');
-fi
-
-if [[ -z ${CROWDSEC_VERSION+x} ]]; then \
-    echo "**** Could not fetch current bouncer version from Github ****"
-    exit 1
-fi
-
-curl "${CURL_NOISE_LEVEL}" -Lo \
-    /tmp/crowdsec.tar.gz -L \
-    "https://github.com/crowdsecurity/cs-nginx-bouncer/releases/download/${CROWDSEC_VERSION}/crowdsec-nginx-bouncer.tgz"
-
+# Extract nginx bouncer
 mkdir -p /tmp/crowdsec
 
-if ! tar -tzf /tmp/crowdsec.tar.gz >/dev/null 2>&1; then
-    echo "**** Invalid tarball, could not download crowdsec bouncer ****"
-    exit 1
-fi
-
 tar xf \
-    /tmp/crowdsec.tar.gz -C \
+    /crowdsec-nginx-bouncer.tgz -C \
     /tmp/crowdsec --strip-components=1
 
 mkdir -p "${CONFIG_PATH}"
@@ -97,20 +78,35 @@ if ! grep -q '[^#]include /etc/nginx/http.d/\*.conf;' '/config/nginx/nginx.conf'
     else
         # Warn about missing http.d include
         echo "
-        ********************************************************************
-        *    Warning: Your nginx.conf is missing required settings         *
-        *    Please add:                                                   *
-        *        include /etc/nginx/http.d/*.conf;                         *
-        *    to the http{} block and restart the container.                *
-        *                                                                  *
-        *    The CrowdSec bouncer will not function until this is done.    *
-        ********************************************************************"
+        ┌──────────────────────────────────────────────────────────────────┐
+        │    Warning: Your nginx.conf is missing required settings         │
+        │    Please add:                                                   │
+        │        include /etc/nginx/http.d/*.conf;                         │
+        │    to the http{} block and restart the container.                │
+        │                                                                  │
+        │    The CrowdSec bouncer will not function until this is done.    │
+        └──────────────────────────────────────────────────────────────────┘
+        "
     fi
 fi
 
 # Clean up
 rm -rf \
     /tmp/crowdsec \
-    /tmp/crowdsec.tar.gz
+    /crowdsec-nginx-bouncer.tgz
+
+if [[ -n ${CROWDSEC_VERSION} ]]; then
+    echo "
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                             !! ATTENTION !!                             │
+    │                                                                         │
+    │                        This mod will ignore the                         │
+    │                  CROWDSEC_VERSION environment variable                  │
+    │                                                                         │
+    │                  Versioning is now handled by mod tags                  │
+    │ See https://hub.docker.com/r/linuxserver/mods/tags?name=swag-crowdsec-v │
+    │                     For a list of all available tags                    │
+    └─────────────────────────────────────────────────────────────────────────┘"
+fi
 
 echo "**** Successfully configured CrowdSec nginx Bouncer ${CROWDSEC_VERSION} ****"

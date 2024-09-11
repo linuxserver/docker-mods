@@ -32,7 +32,6 @@ Set the following environment variables on your SWAG container.
 | `CROWDSEC_SITE_KEY` | **Optional** | CAPTCHA Site Key |
 | `CROWDSEC_SECRET_KEY` | **Optional** | CAPTCHA Secret Key |
 | `CROWDSEC_CAPTCHA_PROVIDER` | **Optional** | CAPTCHA Provider (currently supported providers are `recaptcha`, `hcaptcha`, `turnstile`), requires bouncer v1.0.5 or newer. |
-| `CROWDSEC_VERSION` | **Optional** | Specify a version of the bouncer to install instead of using the latest release, for example `v1.0.0`. Must be a valid [release tag](https://github.com/crowdsecurity/cs-nginx-bouncer/tags). **Does not support versions older than v1.0.0**. |
 | `CROWDSEC_F2B_DISABLE` | **Optional** | Set to `true` to disable swag's built-in fail2ban service if you don't need it |
 | `CROWDSEC_MODE` | **Optional** | Set to `live` (immediate update) or `stream` to update requests every CROWDSEC_UPDATE_FREQUENCY seconds. Defaults to `live` |
 | `CROWDSEC_UPDATE_FREQUENCY` | **Optional** | Set update frequency for use with `stream` mode. Defaults to `10`. |
@@ -73,6 +72,7 @@ e.g. `resolver  127.0.0.11 valid=30s ipv6=off;`
 
 ## Versions
 
+* **11.09.24:** - Move versioning to mod tags. Bundle tarball at build time.
 * **05.06.24:** - Add lua-resty-string.
 * **06.02.24:** - Add AppSec support.
 * **29.03.23:** - Support multiple captcha providers from upstream.
