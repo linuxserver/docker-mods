@@ -17,11 +17,12 @@ fi
 
 export DEBIAN_FRONTEND="noninteractive"
 
-if [[ -e /tmp/calibre.txz ]]; then
+if [[ -e /calibre.txz ]]; then
+    mkdir -p /app/calibre
     tar xf \
-        /tmp/calibre.txz \
+        /calibre.txz \
         -C /app/calibre
     echo "Installing Calibre version $(cat /CALIBRE_RELEASE)"
     /app/calibre/calibre_postinstall
-    rm /tmp/calibre.txz
+    rm /calibre.txz
 fi
