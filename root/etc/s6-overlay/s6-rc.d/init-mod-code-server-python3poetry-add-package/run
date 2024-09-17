@@ -1,0 +1,14 @@
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -l | grep python3-dev > /dev/null; then
+    echo "**** Adding python3 to package install list ****"
+    echo "\
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        python3-dev \
+        python3-pip \
+        python3-venv" >> /mod-repo-packages-to-install.list
+else
+    echo "**** python3 already installed ****"
+fi

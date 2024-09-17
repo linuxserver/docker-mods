@@ -4,5 +4,12 @@
 # so it can take advantage of packages installed
 # init-mods-end depends on this script so that later init and services wait until this script exits
 
-echo "**** Setting up apprise ****"
-apprise blah blah
+echo "**** Setting up poetry ****"
+
+# Install poetry
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Add poetry to the path
+echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> /root/.bashrc
+
+echo "**** poetry setup complete ****"
