@@ -13,7 +13,7 @@ env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
   BASEIMAGE: "code-server" #replace
-  MODNAME: "python3poetry" #replace
+  MODNAME: "python3-poetry" #replace
   MOD_VERSION: ${{ inputs.mod_version }} #don't modify
   MULTI_ARCH: "true" #set to false if not needed
 
