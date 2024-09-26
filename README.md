@@ -99,14 +99,16 @@ Selecting this language is functionally equivalent to calling the script with `-
 
 The language selection **'Unknown'** will match tracks with **no configured language** in the video file. Selecting this language is functionally equivalent to calling the script with `--audio :und --subs :und` command-line options. See [Unknown language code](./README.md#unknown-language-code) below for more details.
 
-The Radarr language selection **'Any'** has two purposes:
+The language selection **'Any'** has two purposes (Radarr only):
    1) It will trigger a search of languages in ***Custom Formats***
    2) If none are found, it will preserve **all languages** in the video file. This is functionally equivalent to calling the script with `--audio :any --subs :any` command-line options. See [Any language code](./README.md#any-language-code) below for more details.
 
->**Note:** When using the *Custom Format* conditions and scoring to select languages you may not get the results you expect.
->This can be non-intuitive configuration, especially when using negative scoring and the 'Negate' option.
->The script does not care what custom format is *detected* (aka applied) by Radarr/Sonarr on the video file, only what the *scores* are in the *Quality Profile*.
+>**Note:** When using the *Custom Format* language conditions and scoring you may not get the results you expect.
+>This can be non-intuitive configuration, especially when using negative scoring, the 'Negate' option, and the 'Except Language' option.
+>The script does not care what custom format is *detected* by Radarr/Sonarr on the video file, only what the *scores* are in the *Quality Profile*.
 >If you choose to use Custom Formats, it is **highly recommended** to first run the script with the debug option `-d`, perform some test downloads and script runs, and then examine your results and the script logs closely to be sure things are working the way you want them to.
+
+It is **highly recommended** to review the [TraSH Guides](https://trash-guides.info/Radarr/Tips/How-to-setup-language-custom-formats/) setup instructions for Language Custom Formats.
 
 *Radarr Quality Profile Example*  
 ![radarr profile](.assets/radarr-quality-profile.png "Radarr Quality Profile settings")
@@ -137,10 +139,10 @@ graph LR
 Descriptively, these steps are:
 1. Command-line options (or environment variable) override all automatic language selection.
 2. If there are no command-line options, the video's *Quality Profile* is examined for a language configuration (only supported in Radarr).
-3. If there is no *Quality Profile* language **or** it is set to 'Any', then examine the *Custom Formats* and scores associated with the quality profile.  All language conditions with positive scores *and* negated conditions with negative score are selected.
+3. If there is no *Quality Profile* language **or** it is set to 'Any', then examine the *Custom Formats* and scores associated with the quality profile.  All language conditions with positive scores *and* negated conditions with negative scores *and* non-negated Except Language conditions with negative scores are selected.
 4. If the *Custom Format* scores are zero (0) or there are none with configured language conditions, examine the *Language Profile* (only supported in Sonarr v3)
 
->**Note:** For step 3 above, using *Custom Formats* when 'Any' is in the *Quality Profile* is consistent with the behavior described in [TRaSH Guides](https://trash-guides.info/Sonarr/Tips/How-to-setup-language-custom-formats/ "TraSH Guides: How to setup Language Custom Formats").
+>**Note:** For step 3 above, using *Custom Formats* when 'Any' is in the *Quality Profile* is consistent with the behavior described in [TRaSH Guides](https://trash-guides.info/Radarr/Tips/How-to-setup-language-custom-formats/ "TraSH Guides: How to setup Language Custom Formats").
 
 ## Command-Line Syntax
 
