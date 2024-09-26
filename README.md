@@ -5,7 +5,7 @@ A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.i
 >**NOTE:** This mod supports Linux OSes only.
 <!-- markdownlint-disable -->
 Production Container info: ![Docker Image Size](https://img.shields.io/docker/image-size/linuxserver/mods/radarr-striptracks "Container Size")
-[![linuxserver/docker-mods/mods/radarr-striptracks](https://img.shields.io/badge/dynamic/json?logo=github&url=https%3A%2F%2Fraw.githubusercontent.com%2Fthecaptain989%2Fghcr-pulls%2Fmaster%2Findex.json&query=%24%5B%3F(%40.owner%3D%3D%22linuxserver%22%20%26%26%20%40.repo%3D%3D%22docker-mods%22%20%26%26%20%40.image%3D%3D%22mods%22%20%26%26%20%40.tag%3D%3D%22radarr-striptracks%22)%5D.pulls&label=ghcr%20pulls&color=1572A4)](https://github.com/linuxserver/docker-mods/pkgs/container/mods)  
+[![linuxserver/docker-mods/mods/radarr-striptracks](https://img.shields.io/badge/dynamic/json?logo=github&url=https%3A%2F%2Fraw.githubusercontent.com%2Fthecaptain989%2Fghcr-pulls%2Fmaster%2Findex.json&query=%24%5B0%5D.pulls&label=ghcr%20pulls&color=1572A4)](https://github.com/linuxserver/docker-mods/pkgs/container/mods)  
 Development Container info:
 ![Docker Image Size](https://img.shields.io/docker/image-size/thecaptain989/radarr-striptracks "Container Size")
 ![Docker Pulls](https://img.shields.io/docker/pulls/thecaptain989/radarr-striptracks?logo=docker "Container Pulls")
