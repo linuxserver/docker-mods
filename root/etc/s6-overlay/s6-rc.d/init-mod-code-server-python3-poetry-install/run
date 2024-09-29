@@ -10,6 +10,9 @@ echo "**** Setting up poetry ****"
 curl -sSL https://install.python-poetry.org | python3 -
 
 # Add poetry to the path
-echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> /root/.bashrc
+echo "**** ensuring poetry is in PATH ****"
+if ! grep -q "$HOME/.local/bin" /var/run/s6/container_environment/PATH; then
+    printf ':$HOME/.local/bin' >> /var/run/s6/container_environment/PATH
+fi
 
 echo "**** poetry setup complete ****"
