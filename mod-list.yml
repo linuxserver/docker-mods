@@ -133,10 +133,6 @@ mods:
     mod_count: 1
     container_mods:
       - striptracks: https://github.com/linuxserver/docker-mods/tree/radarr-striptracks
-  sabnzbd:
-    mod_count: 1
-    container_mods:
-      - par2cmdline-turbo: https://github.com/linuxserver/docker-mods/tree/sabnzbd-par2cmdline-turbo
   sonarr:
     mod_count: 1
     container_mods:
@@ -151,7 +147,6 @@ mods:
       - crowdsec: https://github.com/linuxserver/docker-mods/tree/swag-crowdsec
       - dashboard: https://github.com/linuxserver/docker-mods/tree/swag-dashboard
       - dbip: https://github.com/linuxserver/docker-mods/tree/swag-dbip
-      - f2bdiscord: https://github.com/linuxserver/docker-mods/tree/swag-f2bdiscord
       - ffmpeg: https://github.com/linuxserver/docker-mods/tree/swag-ffmpeg
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
