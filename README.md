@@ -1,5 +1,10 @@
 # F2B Discord Notification - Docker mod which allows Fail2Ban Discord embeds
 
+>[!WARNING]
+>This mod is deprecated
+
+<details>
+
 This mod enhances the swag container adding better Fail2Ban notifications for discord.
 
 ## Configuration
@@ -36,3 +41,5 @@ Action arguments:
 ## Example
 
 ![Example picture](.assets/Example.png)
+
+<details/>
