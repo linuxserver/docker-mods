@@ -399,7 +399,7 @@ run_mods_local() {
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
         # Check mod file exists
         if [[ -f "/mods/${DOCKER_MOD}.tar" ]]; then
-            # Caculate mod bits
+            # Calculate mod bits
             FILENAME="${DOCKER_MOD}.local"
             SHALAYER=$(sha256sum "/mods/${DOCKER_MOD}.tar" | cut -d " " -f 1)
             write_mod_debug "Mod checksum is ${SHALAYER}"
@@ -425,7 +425,7 @@ run_mods_local() {
                 write_mod_info "${DOCKER_MOD} applied to container"
             fi
         elif [[ -d "/mods/${DOCKER_MOD}" ]]; then
-            # Caculate mod bits
+            # Calculate mod bits
             FILENAME="${DOCKER_MOD}.local"
             SHALAYER=$(tar c "/mods/${DOCKER_MOD}"  2>/dev/null | sha256sum | cut -d " " -f 1)
             write_mod_debug "Mod checksum is ${SHALAYER}"
