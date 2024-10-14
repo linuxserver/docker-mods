@@ -5,9 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-# 2024-04-13 - Let lsiown ignore broken symlinks (requires gnu find)
-# 2024-06-12 - Remove lsiown and legacy s6 handlers
-MOD_SCRIPT_VER="3.20240626"
+MOD_SCRIPT_VER="3.20240928"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -400,18 +398,18 @@ run_mods_local() {
     write_mod_info "Running Local Docker Modification Logic"
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
         # Check mod file exists
-        if [[ -n "$(/bin/ls -A "/mods/${DOCKER_MOD}.tar" 2>/dev/null)" ]]; then
-            # Caculate mod bits
+        if [[ -f "/mods/${DOCKER_MOD}.tar" ]]; then
+            # Calculate mod bits
             FILENAME="${DOCKER_MOD}.local"
             SHALAYER=$(sha256sum "/mods/${DOCKER_MOD}.tar" | cut -d " " -f 1)
+            write_mod_debug "Mod checksum is ${SHALAYER}"
             # Check if we have allready applied this layer
             if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
                 write_mod_info "${DOCKER_MOD} at ${SHALAYER} has been previously applied, skipping"
             else
-                write_mod_info "Installing ${DOCKER_MOD}"
+                write_mod_info "Installing ${DOCKER_MOD} from /mods/${DOCKER_MOD}.tar"
                 mkdir -p "/tmp/mod/${DOCKER_MOD}"
-                tar xf "/mods/${DOCKER_MOD}.tar" -C /tmp/mod --strip-components=1
-                tar xf "/tmp/mod/layer.tar" -C "/tmp/mod/${DOCKER_MOD}"
+                tar xf "/mods/${DOCKER_MOD}.tar" -C "/tmp/mod/${DOCKER_MOD}"
                 # Remove any v2 mod elements as they're no longer supported
                 if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d" ]]; then
                     rm -rf "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d"
@@ -423,11 +421,37 @@ run_mods_local() {
                 cp -R "/tmp/mod/${DOCKER_MOD}"/* /
                 shopt -u dotglob
                 rm -rf "/tmp/mod/${DOCKER_MOD}"
-                echo "${SHALAYER}" >"/${FILENAME}.local"
+                echo "${SHALAYER}" >"/${FILENAME}"
+                write_mod_info "${DOCKER_MOD} applied to container"
+            fi
+        elif [[ -d "/mods/${DOCKER_MOD}" ]]; then
+            # Calculate mod bits
+            FILENAME="${DOCKER_MOD}.local"
+            SHALAYER=$(tar c "/mods/${DOCKER_MOD}"  2>/dev/null | sha256sum | cut -d " " -f 1)
+            write_mod_debug "Mod checksum is ${SHALAYER}"
+            # Check if we have allready applied this layer
+            if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
+                write_mod_info "${DOCKER_MOD} at ${SHALAYER} has been previously applied, skipping"
+            else
+                write_mod_info "Installing ${DOCKER_MOD} from /mods/${DOCKER_MOD}/"
+                mkdir -p "/tmp/mod/${DOCKER_MOD}"
+                cp -R "/mods/${DOCKER_MOD}" "/tmp/mod/"
+                # Remove any v2 mod elements as they're no longer supported
+                if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d" ]]; then
+                    rm -rf "/tmp/mod/${DOCKER_MOD}/etc/cont-init.d"
+                fi
+                if [[ -d "/tmp/mod/${DOCKER_MOD}/etc/services.d" ]]; then
+                    rm -rf "/tmp/mod/${DOCKER_MOD}/etc/services.d"
+                fi
+                shopt -s dotglob
+                cp -R "/tmp/mod/${DOCKER_MOD}"/* /
+                shopt -u dotglob
+                rm -rf "/tmp/mod/${DOCKER_MOD}"
+                echo "${SHALAYER}" >"/${FILENAME}"
                 write_mod_info "${DOCKER_MOD} applied to container"
             fi
         else
-            write_mod_error "${DOCKER_MOD}.tar not found in /mods, skipping"
+            write_mod_error "${DOCKER_MOD} not found in /mods, skipping"
         fi
     done
 }
