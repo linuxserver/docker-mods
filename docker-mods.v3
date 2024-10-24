@@ -1,11 +1,11 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
 
-# Use /command/with-contenv shebang because /usr/bin/with-contenv is created in this script
+# Use /command/with-contenv shebang because /usr/bin/with-contenv is created in this script for older bases
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20240928"
+MOD_SCRIPT_VER="3.20241018"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -490,7 +490,9 @@ fi
 
 if [[ -z ${LSIO_READ_ONLY_FS} ]] && [[ -z ${LSIO_NON_ROOT_USER} ]]; then
     # Run alias creation functions
-    create_with_contenv_alias
+    if [[ ! -f "/usr/bin/with-contenv" ]]; then
+        create_with_contenv_alias
+    fi
 
     if [[ -d "${SCRIPTS_DIR}" ]] || [[ -d "${SERVICES_DIR}" ]]; then
         tamper_check
