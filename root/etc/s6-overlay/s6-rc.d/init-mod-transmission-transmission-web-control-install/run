@@ -3,4 +3,8 @@
 
 printf "/themes/transmission-web-control" > /var/run/s6/container_environment/TRANSMISSION_WEB_HOME
 
+mv /usr/share/transmission/public_html/index.html /usr/share/transmission/public_html/index.original.html
+cp -R /usr/share/transmission/public_html/* /themes/transmission-web-control/
+mv /usr/share/transmission/public_html/index.original.html /usr/share/transmission/public_html/index.html
+
 lsiown -R abc:abc /themes
