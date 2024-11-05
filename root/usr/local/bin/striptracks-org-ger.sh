@@ -1,3 +1,3 @@
 #!/bin/bash
 
-. /usr/local/bin/striptracks.sh --audio :org:ger:deu --subs :org:ger:deu
+. /usr/local/bin/striptracks.sh --audio :org:ger:deu:und --subs :org:ger:deu

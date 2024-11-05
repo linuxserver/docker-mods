@@ -12,19 +12,22 @@
 
 # NOTE: ShellCheck linter directives appear as comments
 
-# Dependencies:
-#  mkvmerge
-#  mkvpropedit
-#  sed
-#  awk
-#  curl
-#  jq
-#  numfmt
-#  stat
-#  nice
-#  basename
-#  dirname
-#  mktemp
+# Dependencies:      # sudo apt install mkvtoolnix jq
+#  From mkvtoolnix:
+#   mkvmerge
+#   mkvpropedit
+#  From jq:
+#   jq
+#  Generally always available:
+#   sed
+#   awk
+#   curl
+#   numfmt
+#   stat
+#   nice
+#   basename
+#   dirname
+#   mktemp
 
 # Exit codes:
 #  0 - success; or test
@@ -88,6 +91,8 @@ Options and Arguments:
                                    from Radarr or Sonarr!
   -l, --log <log_file>             Log filename
                                    [default: /config/log/striptracks.txt]
+  -c, --config <config_file>       Radarr/Sonarr XML configuration file
+                                   [default: ./config/config.xml]
   -d, --debug [<level>]            Enable debug logging
                                    level is optional, between 1-3
                                    1 is lowest, 3 is highest
@@ -128,6 +133,11 @@ Examples:
 "
   echo "$usage" >&2
 }
+
+# Log command-line arguments
+if [ $# -ne 0 ]; then
+  striptracks_prelogmessagedebug="Debug|Command line arguments are '$*'"
+fi
 
 # Check for environment variable arguments
 if [ -n "$STRIPTRACKS_ARGS" ]; then
@@ -203,6 +213,17 @@ while (( "$#" )); do
         echo "Error|Invalid option: $1 requires an argument." >&2
         usage
         exit 3
+      fi
+    ;;
+    -c|--config ) # *arr XML configuration file
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        # Overrides default /config/config.xml
+        export striptracks_arr_config="$2"
+        shift 2
+      else
+        echo "Error|Invalid option: $1 requires an argument." >&2
+        usage
+        exit 1
       fi
     ;;
     -*) # Unknown option
@@ -897,24 +918,26 @@ if [ ! -w "$striptracks_log" ]; then
 fi
 
 # Check for required binaries
-if [ ! -f "/usr/bin/mkvmerge" ]; then
-  striptracks_message="Error|/usr/bin/mkvmerge is required by this script"
-  echo "$striptracks_message" | log
-  echo "$striptracks_message" >&2
-  end_script 4
-fi
-if [ ! -f "/usr/bin/mkvpropedit" ]; then
-  striptracks_message="Error|/usr/bin/mkvpropedit is required by this script"
-  echo "$striptracks_message" | log
-  echo "$striptracks_message" >&2
-  end_script 4
-fi
+for striptracks_file in "/usr/bin/mkvmerge" "/usr/bin/mkvpropedit" "/usr/bin/jq"; do
+  if [ ! -f "$striptracks_file" ]; then
+    striptracks_message="Error|$striptracks_file is required by this script"
+    echo "$striptracks_message" | log
+    echo "$striptracks_message" >&2
+    end_script 4
+  fi
+done
 
 # Log Debug state
 if [ $striptracks_debug -ge 1 ]; then
   striptracks_message="Debug|Enabling debug logging level ${striptracks_debug}. Starting run for: $striptracks_title"
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
+fi
+
+# Log command line parameters
+if [ -n "$striptracks_prelogmessagedebug" ]; then
+  # striptracks_prelogmessagedebug is set above, before argument processing
+  [ $striptracks_debug -ge 1 ] && echo "$striptracks_prelogmessagedebug" | log
 fi
 
 # Log STRIPTRACKS_ARGS usage
@@ -933,6 +956,16 @@ if [[ "${!striptracks_eventtype}" =~ Grab|Rename|MovieAdded|MovieDelete|MovieFil
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
   end_script 20
+fi
+
+# Check for WSL environment
+if [ -n "$WSL_DISTRO_NAME" ]; then
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Running in virtual WSL $WSL_DISTRO_NAME distribution." | log
+  # Adjust config file location to WSL default
+  if [ ! -f "$striptracks_arr_config" ]; then
+    striptracks_arr_config="/mnt/c/ProgramData/${striptracks_type^}/config.xml"
+    [ $striptracks_debug -ge 1 ] && echo "Debug|Will try to use the default WSL configuration file '$striptracks_arr_config'" | log
+  fi
 fi
 
 # Handle Test event
@@ -978,6 +1011,11 @@ elif [ -f "$striptracks_arr_config" ]; then
   striptracks_apikey_var="${striptracks_type^^}__AUTH__APIKEY"
   [ -n "${!striptracks_apikey_var}" ] && striptracks_apikey="${!striptracks_apikey_var}"
 
+  # Check for WSL environment and adjust bindaddress if not otherwise specified
+  if [ -n "$WSL_DISTRO_NAME" -a "$striptracks_bindaddress" = "*" ]; then
+    striptracks_bindaddress=$(ip route show | grep -i default | awk '{ print $3}')
+  fi
+
   # Check for localhost
   [[ $striptracks_bindaddress = "*" ]] && striptracks_bindaddress=localhost
 
@@ -991,7 +1029,7 @@ elif [ -f "$striptracks_arr_config" ]; then
   get_version
   striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
     # curl errored out. API calls are really broken at this point.
-    striptracks_message="Error|Unable to get ${striptracks_type^} version information. It is not safe to continue."
+    striptracks_message="Error|[$striptracks_return] Unable to get ${striptracks_type^} version information. It is not safe to continue."
     echo "$striptracks_message" | log
     echo "$striptracks_message" >&2
     end_script 17
