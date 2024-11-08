@@ -3,21 +3,19 @@ A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.i
 Advanced options act as a light wrapper to ffmpeg, allowing conversion to any supported audio format, including AAC, AC3, Opus, and many others.
 A [Batch Mode](./README.md#batch-mode) is also supported that allows usage outside of Lidarr.
 
->**NOTE:** This mod supports Linux OSes only.
-
-Production Container info: ![Docker Image Size](https://img.shields.io/docker/image-size/linuxserver/mods/lidarr-flac2mp3 "Container Size")
-[![linuxserver/docker-mods/mods/lidarr-flac2mp3](https://img.shields.io/badge/dynamic/json?logo=github&url=https%3A%2F%2Fthecaptain989.github.io%2Fghcr-pulls%2Flidarr-flac2mp3.json&query=%24.pulls&label=ghcr%20pulls&color=1572A4)](https://github.com/linuxserver/docker-mods/pkgs/container/mods)  
+>![notes] This mod supports Linux OSes only.
+<!-- markdownlint-disable -->
+Production Container info: [![Docker Image Size](https://img.shields.io/docker/image-size/linuxserver/mods/lidarr-flac2mp3)](https://hub.docker.com/r/linuxserver/mods/tags?name=lidarr-flac2mp3 "Docker image size")
+[![linuxserver/docker-mods/mods/lidarr-flac2mp3](https://img.shields.io/badge/dynamic/json?logo=github&url=https%3A%2F%2Fthecaptain989.github.io%2Fghcr-pulls%2Flidarr-flac2mp3.json&query=%24.pulls&label=ghcr%20pulls&color=1572A4)](https://github.com/linuxserver/docker-mods/pkgs/container/mods "GitHub package pulls")  
 Development Container info:
-![Docker Image Size](https://img.shields.io/docker/image-size/thecaptain989/lidarr-flac2mp3 "Container Size")
-![Docker Pulls](https://img.shields.io/docker/pulls/thecaptain989/lidarr-flac2mp3?logo=docker "Container Pulls")
-[![GitHub Super-Linter](https://github.com/TheCaptain989/lidarr-flac2mp3/actions/workflows/linter.yml/badge.svg)](https://github.com/TheCaptain989/lidarr-flac2mp3/actions/workflows/linter.yml "Linter Job")  
+[![Docker Image Size](https://img.shields.io/docker/image-size/thecaptain989/lidarr-flac2mp3)](https://hub.docker.com/r/thecaptain989/lidarr-flac2mp3 "Docker image size")
+[![Docker Pulls](https://img.shields.io/docker/pulls/thecaptain989/lidarr-flac2mp3?logo=docker)](https://hub.docker.com/r/thecaptain989/lidarr-flac2mp3 "Docker container pulls")
+[![GitHub Super-Linter](https://github.com/TheCaptain989/lidarr-flac2mp3/actions/workflows/BuildImage.yml/badge.svg)](https://github.com/TheCaptain989/lidarr-flac2mp3/actions/workflows/BuildImage.yml "BuildImage Job")  
+<!-- markdownlint-restore -->  
 
 # Installation
-1. Pull the [linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "LinuxServer.io's Lidarr container") docker image from GitHub Container Registry or Docker Hub:  
-  `docker pull lscr.io/linuxserver/lidarr:latest`
-
-2. Configure the Docker container with all the port, volume, and environment settings from the *original container documentation* here:  
-  **[linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "Docker container")**
+1. Configure the Docker container with all the port, volume, and environment settings from the *original container documentation* here:  
+  **[linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr "Lidarr Docker container")**
    1. Add a **DOCKER_MODS** environment variable to your `compose.yml` file or `docker run` command, as follows:  
       - Stable release: `DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3`
       - Dev/test release: `DOCKER_MODS=thecaptain989/lidarr-flac2mp3:latest`
@@ -44,7 +42,8 @@ Development Container info:
           restart: unless-stopped
       ```  
 
-      *Example Docker Run Command*  
+      <details>
+      <summary>Example Docker Run Command</summary>
 
        ```shell
        docker run -d \
@@ -61,29 +60,40 @@ Development Container info:
          lscr.io/linuxserver/lidarr
        ```  
 
+      </details>
+      <details>
+      <summary>Synology Screenshot</summary>
+
       *Example Synology Configuration*  
       ![flac2mp3](.assets/lidarr-synology.png "Synology container settings")  
 
+      </details>
+
    2. Start the container.
 
-3. Configure a custom script from Lidarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
+2. Configure a custom script from Lidarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
    `/usr/local/bin/flac2mp3.sh`
 
-   *Example*  
+   <details>
+   <summary>Screenshot</summary>
+
+   *Example Custom Script*  
    ![lidarr-flac2mp3](.assets/lidarr-custom-script.png "Lidarr Custom Script dialog")
+
+   </details>
 
    This will use the defaults to create a 320Kbps MP3 file.
 
-   *For any other setting, you **must** use one of the supported methods to pass arguments to the script.  See the [Command-Line Syntax](./README.md#command-line-syntax) section below.*
+   >![notes] *For any other setting, you **must** use one of the supported methods to pass arguments to the script.  See the [Command-Line Syntax](./README.md#command-line-syntax) section below.*
 
 # Usage
 New file(s) will be placed in the same directory as the original FLAC file(s) (unless redirected with the `--output` option below) with permissions preserved. Existing files with the same track name will be overwritten. Owner is preserved if the script is executed as root.
 
 By default, if you've configured Lidarr's **Recycle Bin** path correctly, the original audio file will be moved there.  
-![danger] **NOTE:** If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.  This behavior may be modified with the `--keep-file` option.
+>![warning] **WARNING:** If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.  This behavior may be modified with the `--keep-file` option.
 
 ## Command-Line Syntax
->**Note:** The *Arguments* field for Custom Scripts was removed in Lidarr release [v0.7.0.1347](https://github.com/lidarr/Lidarr/commit/b9d240924f8965ebb2c5e307e36b810ae076101e "Lidarr commit notes") due to security concerns.
+>![notes] The *Arguments* field for Custom Scripts was removed in Lidarr release [v0.7.0.1347](https://github.com/lidarr/Lidarr/commit/b9d240924f8965ebb2c5e307e36b810ae076101e "Lidarr commit notes") due to security concerns.
 
 ### Options and Arguments
 The script may be called with optional command-line arguments.
@@ -91,7 +101,8 @@ The script may be called with optional command-line arguments.
 The syntax for the command-line is:  
 `flac2mp3 [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} "<options>" {-e|--extension} <extension>] [{-f|--file} <audio_file>] [{-k|--keep-file}] [{-o|--output} <directory>] [{-r|--regex} '<regex>'] [{-t|--tags} <taglist>] [{-l|--log} <log_file>] [{-d|--debug} [<level>]]`  
 
-Where:
+<details>
+<summary>Table of Command-Line Arguments</summary>
 
 Option|Argument|Description
 ---|---|---
@@ -108,6 +119,8 @@ Option|Argument|Description
 -d, --debug|\[\<level\>\]|Enables debug logging. Level is optional.<br/>Default of 1 (low).<br/>2 includes JSON and FFmpeg output.<br/>3 contains even more JSON output.
 --help| |Display help and exit.
 --version| |Display version and exit.
+
+</details>
 
 If neither `-b`, `-v`, `-a`, or `-e` options are specified, the script will default to a constant 320Kbps MP3.
 
@@ -129,7 +142,7 @@ By default, the script only matches and interacts with FLAC files (specifically,
 
 Files are passed to the script with the full Linux path intact. (Ex: `/path/to/audio/a-ha/Hunting High and Low/01 Take on Me.mp3`).  Craft your regular expression with this in mind.
 
-![warning] **NOTE:** Escaping special regular expression characters (like a dot `.`) requires a double backslash or a character class. A character class (i.e. `[.]`) is recommended because backslashes can be stripped by the bash shell and getting this right can be confusing.
+>![notes] Escaping special regular expression characters (like a dot `.`) requires a double backslash or a character class. A character class (i.e. `[.]`) is recommended because backslashes can be stripped by the bash shell and getting this right can be confusing.
 
 For example, to convert all audio files to AAC audio files, use the following options:  
 
@@ -140,6 +153,9 @@ For example, to convert all audio files to AAC audio files, use the following op
 Regular expression syntax is beyond the scope of this document.  See this [tutorial](https://www.regular-expressions.info/tutorial.html "Regular Expressions Tutorial") for more information. Regular expression patterns may be tested [here](http://regexstorm.net/tester "regex tester").
 
 ## Examples
+
+<details>
+<summary>Command-line Examples</summary>
 
 ```shell
 -b 320k        # Output 320 kbit/s MP3 (non-VBR; same as default behavior)
@@ -159,12 +175,17 @@ Regular expression syntax is beyond the scope of this document.  See this [tutor
                # Place the converted file(s) in the specified directory and do not delete the original audio file(s)
 ```
 
+</details>
+
 ## Wrapper Scripts
 To supply arguments to the script, you must either use one of the included wrapper scripts, create a custom wrapper script, or set the `FLAC2MP3_ARGS` [environment variable](./README.md#environment-variable).
 
 ### Included Wrapper Scripts
 For your convenience, several wrapper scripts are included in the `/usr/local/bin/` directory.  
 You may use any of these scripts in place of the `flac2mp3.sh` mentioned in the [Installation](./README.md#installation) section above.
+
+<details>
+<summary>List of scripts</summary>
 
 ```shell
 flac2mp3-debug.sh        # Enable debugging, level 1
@@ -173,6 +194,8 @@ flac2mp3-vbr.sh          # Use variable bit rate MP3, quality 0
 flac2opus.sh             # Convert to Opus format using .opus extension, 192 kbit/s, no covert art
 flac2alac.sh             # Convert to Apple Lossless using an .m4a extension
 ```
+
+</details>
 
 ### Example Wrapper Script
 To configure an entry from the [Examples](./README.md#examples) section above, create and save a file called `flac2mp3-custom.sh` to `/config` containing the following text:
@@ -191,7 +214,7 @@ chmod +x /config/flac2mp3-custom.sh
 
 Then put `/config/flac2mp3-custom.sh` in the **Path** field in place of `/usr/local/bin/flac2mp3.sh` mentioned in the [Installation](./README.md#installation) section above.
 
->**Note:** If you followed the Linuxserver.io recommendations when configuring your container, the `/config` directory will be mapped to an external storage location.  It is therefore recommended to place custom scripts in the `/config` directory so they will survive container updates, but they may be placed anywhere that is accessible by Lidarr.
+>![notes] If you followed the Linuxserver.io recommendations when configuring your container, the `/config` directory will be mapped to an external storage location.  It is therefore recommended to place custom scripts in the `/config` directory so they will survive container updates, but they may be placed anywhere that is accessible by Lidarr.
 
 ## Environment Variable
 The `flac2mp3.sh` script also allows the use of arguments provided by the `FLAC2MP3_ARGS` environment variable. This allows advanced use cases without having to provide a custom script.
@@ -210,10 +233,15 @@ environment:
   - FLAC2MP3_ARGS=-a "-vn -c:a libopus -b:a 192k" -e .opus -r '[.]mp3$$'
 ```
 
+<details>
+<summary>Synology Screenshot</summary>
+
 *Example Synology Configuration*  
 ![flac2mp3](.assets/lidarr-synology-2.png "Synology container settings")
 
->**NOTE:** The environment variable settings are *only* used when **no** command-line arguments are present. **Any** command-line argument will disable the use of the environment variable.
+</details>
+
+>![notes] The environment variable settings are *only* used when **no** command-line arguments are present. **Any** command-line argument will disable the use of the environment variable.
 
 ## Triggers
 The only events/notification triggers that are supported are **On Release Import** and **On Upgrade**
@@ -239,18 +267,23 @@ find /music/ -type f -name "*.flac" | while read file; do /usr/local/bin/flac2mp
 ## Metadata Corrections
 **This feature is not meant for general purpose use.** It is only documented here for completeness.
 
+<details>
+<summary>Metadata Tag Details</summary>
+
 List of supported tags and metadata corrections that are applied:
 
-|Tag|Original|Correction
-|---|---|---
-|title|Parenthesis for live\|remix, etc. "()"|Square brackets "\[]"
-|disc|1|1/1
-|genre|/Pop/|"Pop"
-| |/Indie/|"Alternative & Indie"
-| |/Industrial/|"Industrial Rock"
-| |/Electronic/|"Electronica & Dance"
-| |/Punk\|Alternative/|"Alternative & Punk"
-| |/Rock/|"Rock"
+Tag|Original|Correction
+---|---|---
+title|Parenthesis for live\|remix, etc. "()"|Square brackets "\[]"
+disc|1|1/1
+genre|/Pop/|"Pop"
+&nbsp;|/Indie/|"Alternative & Indie"
+&nbsp;|/Industrial/|"Industrial Rock"
+&nbsp;|/Electronic/|"Electronica & Dance"
+&nbsp;|/Punk\|Alternative/|"Alternative & Punk"
+&nbsp;|/Rock/|"Rock"
+
+</details>
 
 ## Logs
 By default, a log file is created for the script activity called:
@@ -260,7 +293,8 @@ By default, a log file is created for the script activity called:
 This log can be downloaded from Lidarr under *System* > *Log Files*.  The log filename can be modified with the `--log` command-line option.
 
 Log rotation is performed, with 5 log files of 1MB each kept, matching Lidarr's log retention.
->![danger] **NOTE:** If debug logging is enabled with a level above 1, the log file can grow very large very quickly and is much more likely to be rotated.  *Do not leave high-level debug logging enabled permanently.*
+
+>![warning] If debug logging is enabled with a level above 1, the log file can grow very large very quickly and is much more likely to be rotated.  *Do not leave high-level debug logging enabled permanently.*
 
 # Uninstall
 To completely remove the mod:
@@ -281,4 +315,4 @@ This would not be possible without the following:
 Icons made by [Freepik](https://www.freepik.com) from [Flaticon](https://www.flaticon.com/)
 
 [warning]: .assets/warning.png "Warning"
-[danger]: .assets/danger.png "Danger"
+[notes]: .assets/notes.png "Note"

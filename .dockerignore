@@ -3,8 +3,8 @@
 .gitignore
 .github
 .gitattributes
+.vscode
 .assets
-hooks
 READMETEMPLATE.md
 README.md
 SECURITY.md
