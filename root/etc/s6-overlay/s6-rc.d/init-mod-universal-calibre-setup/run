@@ -25,4 +25,5 @@ if [[ -e /calibre.txz ]]; then
     echo "Installing Calibre version $(cat /CALIBRE_RELEASE)"
     /app/calibre/calibre_postinstall
     rm /calibre.txz
+    echo "**** The 2 warnings above about setting up completion and desktop integration are expected and harmless. You can safely ignore them. ****"
 fi
