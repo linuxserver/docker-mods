@@ -1,8 +1,15 @@
 #!/usr/bin/with-contenv bash
 
+# set config path
+if [[ -f /config/sshd/sshd_config ]]; then
+  CONFIG_FILE_PATH="/config/sshd/sshd_config"
+else
+  CONFIG_FILE_PATH="/etc/ssh/sshd_config"
+fi
+
 # allow tcp forwarding within openssh settings
-sed -i '/^AllowTcpForwarding/c\AllowTcpForwarding yes' /etc/ssh/sshd_config
-sed -i '/^GatewayPorts/c\GatewayPorts clientspecified' /etc/ssh/sshd_config
+sed -i '/^AllowTcpForwarding/c\AllowTcpForwarding yes' "${CONFIG_FILE_PATH}"
+sed -i '/^GatewayPorts/c\GatewayPorts clientspecified' "${CONFIG_FILE_PATH}"
 echo "TcpForwarding is enabled"
 
 if [ "$SHELL_NOLOGIN" == 'true' ]; then

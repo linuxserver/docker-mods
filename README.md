@@ -19,10 +19,9 @@ Example:
 
 When creating the container with the following setup:
 ```
-version: '2'
 services:
   openssh-server:
-    image: linuxserver/openssh-server
+    image: lscr.io/linuxserver/openssh-server
     environment:
       - DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel
       - SHELL_NOLOGIN=false
