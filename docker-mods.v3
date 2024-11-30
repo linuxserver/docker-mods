@@ -368,14 +368,14 @@ run_mods() {
                 --header "Authorization: Bearer ${TOKEN}" \
                 --user-agent "${MOD_UA}" \
                 "${BLOB_URL}${SHALAYER}" -o \
-                /modtarball.tar.xz
+                "/${FILENAME}.tar.xz"
             mkdir -p /tmp/mod
-            if ! tar -tzf /modtarball.tar.xz >/dev/null 2>&1; then
+            if ! tar -tzf "/${FILENAME}.tar.xz" >/dev/null 2>&1; then
                 write_mod_error "Invalid tarball, could not download ${DOCKER_MOD} from ${REGISTRY}"
                 continue
             fi
             write_mod_info "Installing ${DOCKER_MOD}"
-            tar xzf /modtarball.tar.xz -C /tmp/mod
+            tar xzf "/${FILENAME}.tar.xz" -C /tmp/mod
             # Remove any v2 mod elements as they're no longer supported
             if [[ -d /tmp/mod/etc/cont-init.d ]]; then
                 rm -rf /tmp/mod/etc/cont-init.d
@@ -387,7 +387,7 @@ run_mods() {
             cp -R /tmp/mod/* /
             shopt -u dotglob
             rm -rf /tmp/mod
-            rm -rf /modtarball.tar.xz
+            rm -rf "/${FILENAME}.tar.xz"
             echo "${SHALAYER}" >"/${FILENAME}"
             write_mod_info "${DOCKER_MOD} applied to container"
         fi
