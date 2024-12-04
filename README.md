@@ -39,6 +39,8 @@ Then the env var in SWAG can be set as `DOCKER_HOST=dockerproxy`. This will allo
 
 ## Multiple Hosts:
 
+In the `DOCKER_MODS` env mentioned above replace `linuxserver/mods:swag-auto-proxy` with `foxxmd/auto-proxy-multi`.
+
 If both `DOCKER_HOST` and `docker.sock` volumes are provided this mod will detect containers using both connections. As noted in the [requirements](#requirements), containers detected via `docker.sock` must be in the same user defined network or have `swag_address` label set.
 
 Multiple remote hosts can be used via `DOCKER_HOST` by separating hosts with a comma. Additional per-host settings can be assigned by separating with a pipe `|`. The syntax for per-host configuration:
