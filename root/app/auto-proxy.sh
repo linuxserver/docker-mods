@@ -62,6 +62,9 @@ for CONTAINER in ${AUTO_GEN}; do
         if [ -n "${swag_address}" ]; then
             sed -i "s|set \$upstream_app .*|set \$upstream_app ${swag_address};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Overriding address as ${swag_address} for ${CONTAINER} ****"
+        elif [ -n "${swag_preset_conf}" ] && [ -f "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" ]; then
+            sed -i "s|set \$upstream_app .*|set \$upstream_app ${CONTAINER};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Overriding address as ${CONTAINER} for ${CONTAINER} ****"
         fi
         if [ -n "${swag_port}" ]; then
             sed -i "s|set \$upstream_port .*|set \$upstream_port ${swag_port};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
@@ -75,6 +78,9 @@ for CONTAINER in ${AUTO_GEN}; do
             SED_swag_url=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_url}")
             sed -i "s|server_name .*|server_name ${SED_swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Overriding url as ${swag_url} for ${CONTAINER} ****"
+        elif [ -n "${swag_preset_conf}" ] && [ -f "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" ]; then
+            sed -i "s|server_name .*|server_name ${CONTAINER}.*;|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Overriding url as ${CONTAINER}.* for ${CONTAINER} ****"
         fi
         if [ -n "${swag_server_custom_directive}" ]; then
             SED_swag_server_custom_directive=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_server_custom_directive}")
