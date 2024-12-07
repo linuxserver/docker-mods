@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20241018"
+MOD_SCRIPT_VER="3.20241207"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -490,7 +490,7 @@ fi
 
 if [[ -z ${LSIO_READ_ONLY_FS} ]] && [[ -z ${LSIO_NON_ROOT_USER} ]]; then
     # Run alias creation functions
-    if [[ ! -f "/usr/bin/with-contenv" ]]; then
+    if [[ ! -f "/usr/bin/with-contenv" ]] || [[ -L "/usr/bin/with-contenv" ]]; then
         create_with_contenv_alias
     fi
 
