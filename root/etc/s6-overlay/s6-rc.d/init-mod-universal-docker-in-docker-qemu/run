@@ -5,7 +5,6 @@ if [[ $(uname -m) = "armv7l" ]]; then
   exit 0
 fi
 
-if [[ $(uname -m) = "x86_64" ]]; then
-    echo "**** Enabling QEMU ****"
-    exec docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-fi
+echo "**** Enabling QEMU ****"
+docker pull lscr.io/linuxserver/qemu-static
+exec docker run --rm --privileged lscr.io/linuxserver/qemu-static --reset -p yes
