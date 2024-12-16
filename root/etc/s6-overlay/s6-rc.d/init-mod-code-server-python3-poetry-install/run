@@ -7,8 +7,8 @@ curl -sSL https://install.python-poetry.org | python3 -
 
 # Add poetry to the path
 echo "**** ensuring poetry is in PATH ****"
-if ! grep -q "$HOME/.local/bin" /var/run/s6/container_environment/PATH; then
-    printf ':$HOME/.local/bin' >> /var/run/s6/container_environment/PATH
+if ! grep -q "/config/.local/bin" /var/run/s6/container_environment/PATH; then
+    printf ':/config/.local/bin' >> /var/run/s6/container_environment/PATH
 fi
 
 echo "**** poetry setup complete ****"
