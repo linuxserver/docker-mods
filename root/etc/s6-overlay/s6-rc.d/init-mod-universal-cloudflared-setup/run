@@ -4,13 +4,10 @@ echo "**** Cloudflared setup script init... ****"
 
 echo "**** Checking cloudflared setup script requirements... ****"
 ARCH="$(command arch)"
-if [ "${ARCH}" = "x86_64" ]; then 
+if [ "${ARCH}" = "x86_64" ]; then
   ARCH="amd64"
-elif [ "${ARCH}" = "aarch64" ]; then 
-  ARCH="arm64" 
-elif [ "${ARCH}" = "armv7l" ]; then 
-  echo "**** The universal cloudflared mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
-  exit 0
+elif [ "${ARCH}" = "aarch64" ]; then
+  ARCH="arm64"
 else
   echo "**** Unsupported Linux architecture ${ARCH} found, exiting... ****"
   exit 1
