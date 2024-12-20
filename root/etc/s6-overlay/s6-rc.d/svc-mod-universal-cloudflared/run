@@ -1,11 +1,13 @@
 #!/usr/bin/with-contenv bash
 
 if [[ $(uname -m) = "armv7l" ]]; then
-  echo "**** The universal cloudflared mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
-  sleep infinity
+    echo "**** The universal cloudflared mod no longer supports arm32v7/armhf per https://info.linuxserver.io/issues/2023-07-01-armhf/ ****"
+    sleep infinity
 fi
 
-if [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUNNEL_NAME} -gt 0 ]] && [[ ${#CF_TUNNEL_CONFIG} -gt 0 ]] && [[ ${#CF_TUNNEL_PASSWORD} -gt 31 ]]; then
+if [[ -n "${CF_REMOTE_MANAGE_TOKEN}" ]]; then
+    exec s6-setuidgid abc cloudflared tunnel --no-autoupdate run --token ${CF_REMOTE_MANAGE_TOKEN}
+elif [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUNNEL_NAME} -gt 0 ]] && [[ ${#CF_TUNNEL_CONFIG} -gt 0 ]] && [[ ${#CF_TUNNEL_PASSWORD} -gt 31 ]]; then
     exec s6-setuidgid abc cloudflared tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
 else
     echo "**** Issues with cloudflared settings, sleeping ****"

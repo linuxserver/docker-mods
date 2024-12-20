@@ -6,7 +6,48 @@ If no additional parameters are supplied this mod adds [`cloudflared`](https://g
 
 If all additional parameters are supplied this docker mod will also create/configure/route/enable a cloudflare tunnel via `cloudflared` and the cloudflare v4 API.
 
-## Usage
+This mod supports both locally managed and remotely managed tunnels.
+
+## Remotely Managed Tunnel Usage
+
+First create a tunnel on Cloudflare's [Zero Trust Dashboard](https://one.dash.cloudflare.com/) and note the tunnel's token.
+
+Here an example snippet to help you get started using this docker mod.
+
+### docker-compose ([recommended](https://docs.linuxserver.io/general/docker-compose))
+
+```yaml
+  swag:
+    image: lscr.io/linuxserver/nginx
+    container_name: nginx
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/London
+      DOCKER_MODS: linuxserver/mods:universal-cloudflared
+      CF_REMOTE_MANAGE_TOKEN: cbvcnbvcjyrtd5erxjhgvkjhbvmhnfchgfchgjv
+    volumes:
+      - /path/to/appdata/config:/config
+    restart: unless-stopped
+```
+
+# Parameters
+
+Container images/mods are configured using parameters passed at runtime (such as those above).
+
+| Parameter | Function | Notes |
+| :----: | --- | --- |
+| `DOCKER_MODS` | Enable this docker mod with `linuxserver/mods:universal-cloudflared` | If adding multiple mods, enter them in an array separated by `\|`, such as `DOCKER_MODS: linuxserver/mods:universal-cloudflared\|linuxserver/mods:universal-mod2` |
+
+### Cloudflare tunnel parameters
+
+| Parameter | Function | Notes |
+| :----: | --- | --- |
+| `CF_REMOTE_MANAGE_TOKEN` | Existing Cloudflare tunnel's token |   |
+
+Once set up, all tunnel config will be handled through the [Zero Trust Dashboard](https://one.dash.cloudflare.com/)
+
+## Locally Managed Tunnel Usage
 
 Here an example snippet to help you get started using this docker mod.
 
