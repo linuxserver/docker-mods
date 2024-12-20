@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build container
-FROM ghcr.io/linuxserver/baseimage-alpine:3.19 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.21 AS buildstage
 
 ARG MOD_VERSION
 
