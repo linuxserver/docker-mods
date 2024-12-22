@@ -12,9 +12,9 @@ SCRIPTS_DIR="/custom-cont-init.d"
 SERVICES_DIR="/custom-services.d"
 
 if [[ ${DOCKER_MODS_DEBUG_CURL,,} = "true" ]]; then
-  CURL_NOISE_LEVEL="-v"
+    CURL_NOISE_LEVEL="-v"
 else
-  CURL_NOISE_LEVEL="--silent"
+    CURL_NOISE_LEVEL="--silent"
 fi
 
 tamper_check() {
@@ -353,9 +353,9 @@ run_mods() {
             MOD_OFFLINE="true"
         else
             # Determine first and only layer of image
-            SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}" "${ARCH:=-amd64}")
+            SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}" "${ARCH:--amd64}")
             if [[ $? -eq 1 ]]; then
-                write_mod_error "No manifest available for arch ${ARCH:=-amd64}, cannot fetch mod"
+                write_mod_error "No manifest available for arch ${ARCH:--amd64}, cannot fetch mod"
                 continue
             elif [[ -z "${SHALAYER}" ]]; then
                 write_mod_info "${DOCKER_MOD} digest could not be fetched from ${REGISTRY}, checking local cache"
@@ -379,14 +379,14 @@ run_mods() {
             if [[ -f "/modcache/${FILENAME}.lock" ]]; then
                 write_mod_info "${DOCKER_MOD} is already being downloaded by another container, waiting..."
                 for ((i = 5 ; i < 21 ; i=i*2 )); do
-                  sleep $i
-                  if [[ ! -f "/modcache/${FILENAME}.lock" ]]; then
-                    SKIP_MOD_DOWNLOAD=true
-                    break
-                  elif [[ $i == 20 ]]; then
-                    write_mod_error "${DOCKER_MOD} timed out waiting for lock, skipping\n\tIf no other containers are using this mod you may need to delete /modcache/${FILENAME}.lock"
-                    SKIP_MOD=true
-                  fi
+                    sleep $i
+                    if [[ ! -f "/modcache/${FILENAME}.lock" ]]; then
+                        SKIP_MOD_DOWNLOAD=true
+                        break
+                    elif [[ $i == 20 ]]; then
+                        write_mod_error "${DOCKER_MOD} timed out waiting for lock, skipping\n\tIf no other containers are using this mod you may need to delete /modcache/${FILENAME}.lock"
+                        SKIP_MOD=true
+                    fi
                 done
             fi
             if [[ "${SKIP_MOD}" == "true" ]]; then
@@ -410,21 +410,25 @@ run_mods() {
             fi
             continue
         fi
-        write_mod_info "Installing ${DOCKER_MOD}"
-        mkdir -p /tmp/mod
-        tar xzf "/modcache/${FILENAME}.tar.xz" -C /tmp/mod
-        # Remove any v2 mod elements as they're no longer supported
-        if [[ -d /tmp/mod/etc/cont-init.d ]]; then
-            rm -rf /tmp/mod/etc/cont-init.d
+        if [[ -z "${MODMANAGER_MODONLY}" ]]; then
+            write_mod_info "Installing ${DOCKER_MOD}"
+            mkdir -p /tmp/mod
+            tar xzf "/modcache/${FILENAME}.tar.xz" -C /tmp/mod
+            # Remove any v2 mod elements as they're no longer supported
+            if [[ -d /tmp/mod/etc/cont-init.d ]]; then
+                rm -rf /tmp/mod/etc/cont-init.d
+            fi
+            if [[ -d /tmp/mod/etc/services.d ]]; then
+                rm -rf /tmp/mod/etc/services.d
+            fi
+            shopt -s dotglob
+            cp -R /tmp/mod/* /
+            shopt -u dotglob
+            rm -rf /tmp/mod
+            echo "${SHALAYER}" >"/${FILENAME}"
+        else
+            write_mod_debug "Modmanager skipping mod application"
         fi
-        if [[ -d /tmp/mod/etc/services.d ]]; then
-            rm -rf /tmp/mod/etc/services.d
-        fi
-        shopt -s dotglob
-        cp -R /tmp/mod/* /
-        shopt -u dotglob
-        rm -rf /tmp/mod
-        echo "${SHALAYER}" >"/${FILENAME}"
         if [[ -f "/modcache/${FILENAME}.lock" ]]; then
             rm "/modcache/${FILENAME}.lock" || write_mod_error "Failed to delete lock file /modcache/${FILENAME}.lock"
         fi
@@ -512,6 +516,11 @@ run_branding() {
 }
 
 # Main script loop
+if [[ -n "${MODMANAGER_MODONLY}" ]]; then
+    run_mods
+    exit 0
+fi
+
 if grep -qEe ' / \w+ ro' /proc/mounts; then
     printf '1' > /run/s6/container_environment/LSIO_READ_ONLY_FS
     LSIO_READ_ONLY_FS=1
