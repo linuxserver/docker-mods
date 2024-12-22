@@ -421,7 +421,7 @@ run_mods() {
         shopt -u dotglob
         rm -rf /tmp/mod
         echo "${SHALAYER}" >"/${FILENAME}"
-        #rm "/modcache/${FILENAME}.lock"
+        rm "/modcache/${FILENAME}.lock"
         write_mod_info "${DOCKER_MOD} applied to container"
     done
 }
