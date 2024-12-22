@@ -2,6 +2,7 @@
 
 These files are used by Linuxserver build processes to handle mods in our images. Not for end-user consumption.
 
+* **22.12.24:** - Add modcache support.
 * **26.06.24:** - Add RO and User handlers.
 * **10.06.24:** - Move lsiown to its own file. Remove support for legacy v2 and hybrid mods.
 * **13.04.24:** - Let lsiown ignore broken symlinks (requires gnu find).

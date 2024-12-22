@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20241207"
+MOD_SCRIPT_VER="3.20241222"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -120,7 +120,7 @@ create_with_contenv_alias() {
 # Check for curl
 curl_check() {
     if [[ ! -f /usr/bin/curl ]] || [[ ! -f /usr/bin/jq ]]; then
-        write_mod_info "Curl/JQ was not found on this system for Docker mods installing"
+        write_mod_info "Curl/JQ was not found on this system and is required for Docker mods, installing..."
         if [[ -f /usr/bin/apt ]]; then
             # Ubuntu
             export DEBIAN_FRONTEND="noninteractive"
@@ -154,7 +154,7 @@ write_mod_info() {
 
 write_mod_error() {
     local MSG=$*
-    echo "[mod-init] (ERROR) $MSG"
+    echo -e "[mod-init] (ERROR) $MSG"
 }
 
 write_mod_debug() {
@@ -164,7 +164,7 @@ write_mod_debug() {
 
 # Use different filtering depending on URL
 get_blob_sha() {
-    MULTIDIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+    MULTIDIGEST=$(curl  -f --retry 5 --retry-max-time 30 --retry-connrefused \
         ${CURL_NOISE_LEVEL} \
         --location \
         --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
@@ -194,7 +194,7 @@ get_blob_sha() {
             write_mod_debug "Mod only has a single arch manifest" >&2
             MULTIDIGEST=$(jq -r ".manifests[].digest?" <<< "${MULTIDIGEST}")
         fi
-        if DIGEST=$(curl  -f --retry 10 --retry-max-time 60 --retry-connrefused \
+        if DIGEST=$(curl  -f --retry 5 --retry-max-time 30 --retry-connrefused \
             ${CURL_NOISE_LEVEL} \
             --location \
             --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
@@ -254,6 +254,7 @@ run_mods() {
     write_mod_info "Running Docker Modification Logic"
     write_mod_debug "Running in debug mode"
     write_mod_debug "Mod script version ${MOD_SCRIPT_VER}"
+    mkdir -p /modcache
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
         # Support alternative endpoints
         case "${DOCKER_MOD}" in
@@ -320,7 +321,7 @@ run_mods() {
         if [[ -n "${AUTH_URL}" ]]; then
             # Get registry token for api operations
             TOKEN="$(
-                curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                curl -f --retry 5 --retry-max-time 30 --retry-connrefused \
                     ${CURL_NOISE_LEVEL} \
                     "${AUTH_URL}" |
                     jq -r '.token'
@@ -335,7 +336,7 @@ run_mods() {
                 write_mod_debug "Couldn't fetch manifest from ghcr.io, trying docker.io"
                 AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
                 TOKEN="$(
-                    curl -f --retry 10 --retry-max-time 60 --retry-connrefused \
+                    curl -f --retry 5 --retry-max-time 30 --retry-connrefused \
                         ${CURL_NOISE_LEVEL} \
                         "${AUTH_URL}" |
                         jq -r '.token'
@@ -347,50 +348,81 @@ run_mods() {
         fi
         ARCH=$(get_arch)
         write_mod_debug "Arch detected as ${ARCH}"
-        # Determine first and only layer of image
-        SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}" "${ARCH:=-amd64}")
-        if [[ $? -eq 1 ]]; then
-            write_mod_error "No manifest available for arch ${ARCH:=-amd64}, cannot fetch mod"
-            continue
-        elif [[ -z "${SHALAYER}" ]]; then
-            write_mod_error "${DOCKER_MOD} digest could not be fetched from ${REGISTRY}"
-            continue
+        if [[ -z "${TOKEN}" ]]; then
+            write_mod_error "Couldn't fetch auth token from ${REGISTRY}, switching to offline mode for ${DOCKER_MOD}"
+            MOD_OFFLINE="true"
+        else
+            # Determine first and only layer of image
+            SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}" "${ARCH:=-amd64}")
+            if [[ $? -eq 1 ]]; then
+                write_mod_error "No manifest available for arch ${ARCH:=-amd64}, cannot fetch mod"
+                continue
+            elif [[ -z "${SHALAYER}" ]]; then
+                write_mod_info "${DOCKER_MOD} digest could not be fetched from ${REGISTRY}, checking local cache"
+                MOD_OFFLINE="true"
+            fi
+            write_mod_debug "Mod SHA is ${SHALAYER:-unknown, mod may not exist}"
         fi
         # Check if we have allready applied this layer
         if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
             write_mod_info "${DOCKER_MOD} at ${SHALAYER} has been previously applied skipping"
+            continue
+        elif [[ -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${SHALAYER}" =~ $(sha256sum "/modcache/${FILENAME}.tar.xz" | cut -f1 -d" ") ]]; then
+            write_mod_info "${DOCKER_MOD} at ${SHALAYER} found in modcache, applying"
+        elif [[ -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${MOD_OFFLINE}" = "true" ]]; then
+            write_mod_info "OFFLINE: ${DOCKER_MOD} found in modcache, applying"
+        elif [[ ! -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${MOD_OFFLINE}" = "true" ]]; then
+            write_mod_error "OFFLINE: ${DOCKER_MOD} not found in modcache, skipping"
+            continue
         else
             write_mod_info "Downloading ${DOCKER_MOD} from ${REGISTRY}"
+            if [[ -f "/modcache/${FILENAME}.lock" ]]; then
+                write_mod_info "${DOCKER_MOD} is already being downloaded by another container, waiting..."
+                for ((i = 5 ; i < 21 ; i=i*2 )); do
+                  sleep $i
+                  if [[ ! -f "/modcache/${FILENAME}.lock" ]]; then
+                    break
+                  elif [[ $i == 20 ]]; then
+                    write_mod_error "${DOCKER_MOD} timed out waiting for lock, skipping\n\tIf no other containers are using this mod you may need to delete /modcache/${FILENAME}.lock"
+                    SKIP_MOD_DOWNLOAD=true
+                  fi
+                done
+            fi
+            if [[ "${SKIP_MOD_DOWNLOAD}" == "true" ]]; then
+                continue
+            fi
             # Download and extract layer to /
-            curl -f --retry 10 --retry-max-time 60 --retry-all-errors \
+            touch "/modcache/${FILENAME}.lock"
+            curl -f --retry 5 --retry-max-time 30 --retry-all-errors \
                 ${CURL_NOISE_LEVEL} \
                 --location \
                 --header "Authorization: Bearer ${TOKEN}" \
                 --user-agent "${MOD_UA}" \
                 "${BLOB_URL}${SHALAYER}" -o \
-                "/${FILENAME}.tar.xz"
-            mkdir -p /tmp/mod
-            if ! tar -tzf "/${FILENAME}.tar.xz" >/dev/null 2>&1; then
+                "/modcache/${FILENAME}.tar.xz"
+            if ! tar -tzf "/modcache/${FILENAME}.tar.xz" >/dev/null 2>&1; then
                 write_mod_error "Invalid tarball, could not download ${DOCKER_MOD} from ${REGISTRY}"
+                rm "/modcache/${FILENAME}.lock"
                 continue
             fi
-            write_mod_info "Installing ${DOCKER_MOD}"
-            tar xzf "/${FILENAME}.tar.xz" -C /tmp/mod
-            # Remove any v2 mod elements as they're no longer supported
-            if [[ -d /tmp/mod/etc/cont-init.d ]]; then
-                rm -rf /tmp/mod/etc/cont-init.d
-            fi
-            if [[ -d /tmp/mod/etc/services.d ]]; then
-                rm -rf /tmp/mod/etc/services.d
-            fi
-            shopt -s dotglob
-            cp -R /tmp/mod/* /
-            shopt -u dotglob
-            rm -rf /tmp/mod
-            rm -rf "/${FILENAME}.tar.xz"
-            echo "${SHALAYER}" >"/${FILENAME}"
-            write_mod_info "${DOCKER_MOD} applied to container"
         fi
+        write_mod_info "Installing ${DOCKER_MOD}"
+        mkdir -p /tmp/mod
+        tar xzf "/modcache/${FILENAME}.tar.xz" -C /tmp/mod
+        # Remove any v2 mod elements as they're no longer supported
+        if [[ -d /tmp/mod/etc/cont-init.d ]]; then
+            rm -rf /tmp/mod/etc/cont-init.d
+        fi
+        if [[ -d /tmp/mod/etc/services.d ]]; then
+            rm -rf /tmp/mod/etc/services.d
+        fi
+        shopt -s dotglob
+        cp -R /tmp/mod/* /
+        shopt -u dotglob
+        rm -rf /tmp/mod
+        echo "${SHALAYER}" >"/${FILENAME}"
+        #rm "/modcache/${FILENAME}.lock"
+        write_mod_info "${DOCKER_MOD} applied to container"
     done
 }
 
