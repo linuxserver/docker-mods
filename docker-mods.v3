@@ -402,7 +402,7 @@ run_mods() {
                 "/modcache/${FILENAME}.tar.xz"
             if ! tar -tzf "/modcache/${FILENAME}.tar.xz" >/dev/null 2>&1; then
                 write_mod_error "Invalid tarball, could not download ${DOCKER_MOD} from ${REGISTRY}"
-                rm "/modcache/${FILENAME}.lock"
+                rm "/modcache/${FILENAME}.lock" || write_mod_error "Failed to delete lock file /modcache/${FILENAME}.lock"
                 continue
             fi
         fi
@@ -421,7 +421,9 @@ run_mods() {
         shopt -u dotglob
         rm -rf /tmp/mod
         echo "${SHALAYER}" >"/${FILENAME}"
-        rm "/modcache/${FILENAME}.lock"
+        if [[ -f "/modcache/${FILENAME}.lock" ]]; then
+            rm "/modcache/${FILENAME}.lock"
+        fi
         write_mod_info "${DOCKER_MOD} applied to container"
     done
 }
