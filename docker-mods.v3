@@ -149,7 +149,7 @@ curl_check() {
 
 write_mod_info() {
     local MSG=$*
-    echo "[mod-init] $MSG"
+    echo -e "[mod-init] $MSG"
 }
 
 write_mod_error() {
@@ -159,7 +159,7 @@ write_mod_error() {
 
 write_mod_debug() {
     local MSG=$*
-    if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo "[mod-init] (DEBUG) $MSG"; fi
+    if [[ ${DOCKER_MODS_DEBUG,,} = "true" ]]; then echo -e "[mod-init] (DEBUG) $MSG"; fi
 }
 
 # Use different filtering depending on URL
