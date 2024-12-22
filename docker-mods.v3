@@ -381,30 +381,34 @@ run_mods() {
                 for ((i = 5 ; i < 21 ; i=i*2 )); do
                   sleep $i
                   if [[ ! -f "/modcache/${FILENAME}.lock" ]]; then
+                    SKIP_MOD_DOWNLOAD=true
                     break
                   elif [[ $i == 20 ]]; then
                     write_mod_error "${DOCKER_MOD} timed out waiting for lock, skipping\n\tIf no other containers are using this mod you may need to delete /modcache/${FILENAME}.lock"
-                    SKIP_MOD_DOWNLOAD=true
+                    SKIP_MOD=true
                   fi
                 done
             fi
-            if [[ "${SKIP_MOD_DOWNLOAD}" == "true" ]]; then
+            if [[ "${SKIP_MOD}" == "true" ]]; then
                 continue
+            elif [[ "${SKIP_MOD_DOWNLOAD}" != "true" ]]; then
+                # Download and extract layer to /
+                touch "/modcache/${FILENAME}.lock"
+                curl -f --retry 5 --retry-max-time 30 --retry-all-errors \
+                    ${CURL_NOISE_LEVEL} \
+                    --location \
+                    --header "Authorization: Bearer ${TOKEN}" \
+                    --user-agent "${MOD_UA}" \
+                    "${BLOB_URL}${SHALAYER}" -o \
+                    "/modcache/${FILENAME}.tar.xz"
             fi
-            # Download and extract layer to /
-            touch "/modcache/${FILENAME}.lock"
-            curl -f --retry 5 --retry-max-time 30 --retry-all-errors \
-                ${CURL_NOISE_LEVEL} \
-                --location \
-                --header "Authorization: Bearer ${TOKEN}" \
-                --user-agent "${MOD_UA}" \
-                "${BLOB_URL}${SHALAYER}" -o \
-                "/modcache/${FILENAME}.tar.xz"
-            if ! tar -tzf "/modcache/${FILENAME}.tar.xz" >/dev/null 2>&1; then
-                write_mod_error "Invalid tarball, could not download ${DOCKER_MOD} from ${REGISTRY}"
+        fi
+        if ! tar -tzf "/modcache/${FILENAME}.tar.xz" >/dev/null 2>&1; then
+            write_mod_error "Invalid tarball for ${DOCKER_MOD}, skipping"
+            if [[ -f "/modcache/${FILENAME}.lock" ]]; then
                 rm "/modcache/${FILENAME}.lock" || write_mod_error "Failed to delete lock file /modcache/${FILENAME}.lock"
-                continue
             fi
+            continue
         fi
         write_mod_info "Installing ${DOCKER_MOD}"
         mkdir -p /tmp/mod
