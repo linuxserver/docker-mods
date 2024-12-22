@@ -422,7 +422,7 @@ run_mods() {
         rm -rf /tmp/mod
         echo "${SHALAYER}" >"/${FILENAME}"
         if [[ -f "/modcache/${FILENAME}.lock" ]]; then
-            rm "/modcache/${FILENAME}.lock"
+            rm "/modcache/${FILENAME}.lock" || write_mod_error "Failed to delete lock file /modcache/${FILENAME}.lock"
         fi
         write_mod_info "${DOCKER_MOD} applied to container"
     done
