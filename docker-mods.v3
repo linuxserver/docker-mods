@@ -256,7 +256,7 @@ run_mods() {
     write_mod_debug "Mod script version ${MOD_SCRIPT_VER}"
     mkdir -p /modcache
     # Fetch internal fds
-    FD_MAX=0
+    FD_MAX=3
     while IFS= read -r -d '' FD; do
         if [[ $(cat "${FD}") -gt "${FD_MAX}" ]]; then
             FD_MAX=$(cat "${FD}")
