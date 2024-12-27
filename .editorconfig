@@ -15,6 +15,6 @@ trim_trailing_whitespace = false
 indent_style = space
 indent_size = 2
 
-[{**.sh,root/etc/cont-init.d/**,root/etc/services.d/**}]
+[{docker-mods.*}]
 indent_style = space
 indent_size = 4
