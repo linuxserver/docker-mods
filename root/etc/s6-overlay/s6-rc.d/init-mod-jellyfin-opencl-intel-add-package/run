@@ -11,6 +11,15 @@ if [ $(uname -m) != "x86_64" ]; then
     exit 0
 fi
 
+if [ -d /opencl-intel-legacy ]; then
+    echo "**** Installing/updating opencl-intel legacy1 debs and adding clinfo to package install list ****"
+    dpkg -i /opencl-intel-legacy/*.deb
+    rm -rf /opencl-intel-legacy
+    echo "clinfo" >> /mod-repo-packages-to-install.list
+else
+    echo "**** Opencl-intel already installed ****"
+fi
+
 if [ -d /opencl-intel ]; then
     echo "**** Installing/updating opencl-intel debs and adding clinfo to package install list ****"
     dpkg -i /opencl-intel/*.deb
