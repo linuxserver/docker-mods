@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20241222"
+MOD_SCRIPT_VER="3.20241223"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -255,6 +255,13 @@ run_mods() {
     write_mod_debug "Running in debug mode"
     write_mod_debug "Mod script version ${MOD_SCRIPT_VER}"
     mkdir -p /modcache
+    # Fetch internal fds
+    FD_MAX=3
+    while IFS= read -r -d '' FD; do
+        if [[ $(cat "${FD}") -gt "${FD_MAX}" ]]; then
+            FD_MAX=$(cat "${FD}")
+        fi
+    done <   <(find /etc/s6-overlay/s6-rc.d -type f -name 'notification-fd' -print0)
     for DOCKER_MOD in $(echo "${DOCKER_MODS}" | tr '|' '\n'); do
         # Support alternative endpoints
         case "${DOCKER_MOD}" in
@@ -420,6 +427,13 @@ run_mods() {
             fi
             if [[ -d /tmp/mod/etc/services.d ]]; then
                 rm -rf /tmp/mod/etc/services.d
+            fi
+            # Rationalise fds
+            if [[ ! -f "/tmp/mod/fd-static" ]]; then
+                while IFS= read -r -d '' FD; do
+                    (( FD_MAX++ ))
+                    echo $FD_MAX > "${FD}"
+                done <   <(find /tmp/mod/etc/s6-overlay/s6-rc.d -type f -name 'notification-fd' -print0)
             fi
             shopt -s dotglob
             cp -R /tmp/mod/* /
