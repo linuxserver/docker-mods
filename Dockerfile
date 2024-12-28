@@ -10,8 +10,17 @@ RUN \
   if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/latest" | jq -r '.tag_name'); \
   fi && \
+  COMP_RT_URLS_LEGACY1=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/24.35.30872.22" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
+  echo "**** grab legacy1 debs ****" && \
+  mkdir -p /root-layer/opencl-intel-legacy1 && \
+  for i in $COMP_RT_URLS_LEGACY1; do \
+    echo "**** downloading ${i%$'\r'} ****" && \
+    curl -fS --retry 3 --retry-connrefused -o \
+      /root-layer/opencl-intel-legacy1/$(basename "${i%$'\r'}") -L \
+      "${i%$'\r'}" || exit 1; \
+  done && \
   COMP_RT_URLS=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/${MOD_VERSION}" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
-  echo "**** grab debs ****" && \
+  echo "**** grab latest debs ****" && \
   mkdir -p /root-layer/opencl-intel && \
   for i in $COMP_RT_URLS; do \
     echo "**** downloading ${i%$'\r'} ****" && \
