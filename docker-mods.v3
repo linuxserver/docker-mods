@@ -301,7 +301,7 @@ run_mods() {
         FULLTAG="${DOCKER_MOD#*:}"
         TAG="${FULLTAG%@*}"
         TAGSHA="${DOCKER_MOD#*@}"
-        if [[ ! "${TAGSHA}" =~ sha256 ]]; then
+        if [[ ! "${TAGSHA}" =~ sha256: ]]; then
             unset TAGSHA
         fi
         if [[ "${TAG}" == "${DOCKER_MOD}" ]]; then
