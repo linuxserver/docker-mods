@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20241223"
+MOD_SCRIPT_VER="3.20241230"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
