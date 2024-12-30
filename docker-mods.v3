@@ -390,12 +390,12 @@ run_mods() {
             write_mod_info "Downloading ${DOCKER_MOD} from ${REGISTRY}"
             if [[ -f "/modcache/${FILENAME}.lock" ]]; then
                 write_mod_info "${DOCKER_MOD} is already being downloaded by another container, waiting..."
-                for ((i = 5 ; i < 21 ; i=i*2 )); do
+                for ((i = 5 ; i < 41 ; i=i*2 )); do
                     sleep $i
                     if [[ ! -f "/modcache/${FILENAME}.lock" ]]; then
                         SKIP_MOD_DOWNLOAD=true
                         break
-                    elif [[ $i == 20 ]]; then
+                    elif [[ $i == 40 ]]; then
                         write_mod_error "${DOCKER_MOD} timed out waiting for lock, skipping\n\tIf no other containers are using this mod you may need to delete /modcache/${FILENAME}.lock"
                         SKIP_MOD=true
                     fi
