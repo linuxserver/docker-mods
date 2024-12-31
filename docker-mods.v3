@@ -12,7 +12,7 @@ SCRIPTS_DIR="/custom-cont-init.d"
 SERVICES_DIR="/custom-services.d"
 
 if [[ ${DOCKER_MODS_DEBUG_CURL,,} = "true" ]]; then
-    CURL_NOISE_LEVEL="-v"
+    CURL_NOISE_LEVEL="-vs"
 else
     CURL_NOISE_LEVEL="--silent"
 fi
