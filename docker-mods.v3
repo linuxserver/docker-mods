@@ -5,14 +5,14 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20241230"
+MOD_SCRIPT_VER="3.20241231"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
 SERVICES_DIR="/custom-services.d"
 
 if [[ ${DOCKER_MODS_DEBUG_CURL,,} = "true" ]]; then
-    CURL_NOISE_LEVEL="-v"
+    CURL_NOISE_LEVEL="-vs"
 else
     CURL_NOISE_LEVEL="--silent"
 fi
@@ -295,24 +295,43 @@ run_mods() {
             fi
             ;;
         esac
-        ENDPOINT="${DOCKER_MOD%%:*}"
-        USERNAME="${DOCKER_MOD%%/*}"
-        REPO="${ENDPOINT#*/}"
-        TAG="${DOCKER_MOD#*:}"
+        # Identify what kind of image name format we're working with
+        if [[ ${DOCKER_MOD} == *:*@* ]]; then
+            ENDPOINT="${DOCKER_MOD%%:*}"
+            USERNAME="${DOCKER_MOD%%/*}"
+            REPO="${ENDPOINT#*/}"
+            FULLTAG="${DOCKER_MOD#*:}"
+            TAG="${FULLTAG%@*}"
+            TAGSHA="${DOCKER_MOD#*@}"
+        elif [[ ${DOCKER_MOD} == *@* ]]; then
+            ENDPOINT="${DOCKER_MOD%%@*}"
+            USERNAME="${DOCKER_MOD%%/*}"
+            REPO="${ENDPOINT#*/}"
+            unset FULLTAG
+            unset TAG
+            TAGSHA="${DOCKER_MOD#*@}"
+        elif [[ ${DOCKER_MOD} == *:* ]]; then
+            ENDPOINT="${DOCKER_MOD%%:*}"
+            USERNAME="${DOCKER_MOD%%/*}"
+            REPO="${ENDPOINT#*/}"
+            unset FULLTAG
+            TAG="${DOCKER_MOD#*:}"
+            unset TAGSHA
+        fi
         if [[ "${TAG}" == "${DOCKER_MOD}" ]]; then
             TAG="latest"
         fi
-        FILENAME="${USERNAME}.${REPO}.${TAG}"
+        FILENAME="${USERNAME}.${REPO}${TAG:+.${TAG}}${TAGSHA:+.${TAGSHA#*:}}"
         MANIFEST_URL="https://${REGISTRY}/v2/${ENDPOINT}/manifests"
         BLOB_URL="https://${REGISTRY}/v2/${ENDPOINT}/blobs/"
-        MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${REGISTRY}/${ENDPOINT}:${TAG}"
-        write_mod_debug "Registry='${REGISTRY}', Repository='${USERNAME}', Image='${ENDPOINT}', Tag='${TAG}'"
+        MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${REGISTRY}/${ENDPOINT}${TAG:+:${TAG}}${TAGSHA:+@${TAGSHA}}"
+        write_mod_debug "Registry='${REGISTRY}', Repository='${USERNAME}', Image='${ENDPOINT}', Tag='${TAG:-N/A}', TagSHA='${TAGSHA:-N/A}'"
         case "${REGISTRY}" in
             "lscr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "ghcr.io") AUTH_URL="https://ghcr.io/token?scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "quay.io") AUTH_URL="https://quay.io/v2/auth?service=quay.io&scope=repository%3A${USERNAME}%2F${REPO}%3Apull";;
             "registry-1.docker.io") AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull";;
-            *) AUTH_URL=$(get_auth_url "${MANIFEST_URL}" "${TAG}")
+            *) AUTH_URL=$(get_auth_url "${MANIFEST_URL}" "${TAG:-${TAGSHA}}")
         esac
         # Kill off modification logic if any of the usernames are banned
         for BANNED in $(curl -s https://raw.githubusercontent.com/linuxserver/docker-mods/master/blacklist.txt); do
@@ -339,7 +358,7 @@ run_mods() {
         write_mod_info "Adding ${DOCKER_MOD} to container"
         # If we're using lscr try and get the manifest from ghcr, if it fails re-request a token from Docker Hub
         if [[ "${REGISTRY}" == "lscr.io" ]]; then
-            if [[ -n $(curl --user-agent "${MOD_UA}" -sLH "Authorization: Bearer ${TOKEN}" "${MANIFEST_URL}/${TAG}" | jq -r '.errors' >/dev/null 2>&1) ]]; then
+            if [[ -n $(curl --user-agent "${MOD_UA}" -sLH "Authorization: Bearer ${TOKEN}" "${MANIFEST_URL}/${TAG:-${TAGSHA}}" | jq -r '.errors' >/dev/null 2>&1) ]]; then
                 write_mod_debug "Couldn't fetch manifest from ghcr.io, trying docker.io"
                 AUTH_URL="https://auth.docker.io/token?service=registry.docker.io&scope=repository:${ENDPOINT}:pull"
                 TOKEN="$(
@@ -360,7 +379,7 @@ run_mods() {
             MOD_OFFLINE="true"
         else
             # Determine first and only layer of image
-            SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAG}" "${ARCH:--amd64}")
+            SHALAYER=$(get_blob_sha "${TOKEN}" "${MANIFEST_URL}" "${TAGSHA:-$TAG}" "${ARCH:--amd64}")
             if [[ $? -eq 1 ]]; then
                 write_mod_error "No manifest available for arch ${ARCH:--amd64}, cannot fetch mod"
                 continue
