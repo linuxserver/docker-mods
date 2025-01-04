@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20241231"
+MOD_SCRIPT_VER="3.20250104"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -291,7 +291,7 @@ run_mods() {
             # If "repo" name has . in it, then assume it's actually a registry with no repo
             elif [[ ${DOCKER_MOD%%/*} =~ \. ]]; then
                 REGISTRY="${DOCKER_MOD%%/*}"
-                MOD="${DOCKER_MOD##*/}"
+                DOCKER_MOD="${DOCKER_MOD##*/}"
             fi
             ;;
         esac
@@ -317,9 +317,14 @@ run_mods() {
             unset FULLTAG
             TAG="${DOCKER_MOD#*:}"
             unset TAGSHA
-        fi
-        if [[ "${TAG}" == "${DOCKER_MOD}" ]]; then
+        else
+            # Mod has no tag
+            ENDPOINT="${DOCKER_MOD}"
+            USERNAME="${DOCKER_MOD%%/*}"
+            REPO="${ENDPOINT#*/}"
+            unset FULLTAG
             TAG="latest"
+            unset TAGSHA
         fi
         FILENAME="${USERNAME}.${REPO}${TAG:+.${TAG}}${TAGSHA:+.${TAGSHA#*:}}"
         MANIFEST_URL="https://${REGISTRY}/v2/${ENDPOINT}/manifests"
