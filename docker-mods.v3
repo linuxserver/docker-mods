@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20250104"
+MOD_SCRIPT_VER="3.20250105"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -397,6 +397,7 @@ run_mods() {
         # Check if we have allready applied this layer
         if [[ -f "/${FILENAME}" ]] && [[ "${SHALAYER}" == "$(cat /"${FILENAME}")" ]]; then
             write_mod_info "${DOCKER_MOD} at ${SHALAYER} has been previously applied skipping"
+            unset MOD_OFFLINE
             continue
         elif [[ -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${SHALAYER}" =~ $(sha256sum "/modcache/${FILENAME}.tar.xz" | cut -f1 -d" ") ]]; then
             write_mod_info "${DOCKER_MOD} at ${SHALAYER} found in modcache, applying"
@@ -404,6 +405,7 @@ run_mods() {
             write_mod_info "OFFLINE: ${DOCKER_MOD} found in modcache, applying"
         elif [[ ! -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${MOD_OFFLINE}" = "true" ]]; then
             write_mod_error "OFFLINE: ${DOCKER_MOD} not found in modcache, skipping"
+            unset MOD_OFFLINE
             continue
         else
             write_mod_info "Downloading ${DOCKER_MOD} from ${REGISTRY}"
@@ -421,6 +423,7 @@ run_mods() {
                 done
             fi
             if [[ "${SKIP_MOD}" == "true" ]]; then
+                unset MOD_OFFLINE SKIP_MOD_DOWNLOAD SKIP_MOD
                 continue
             elif [[ "${SKIP_MOD_DOWNLOAD}" != "true" ]]; then
                 # Download and extract layer to /
@@ -439,6 +442,7 @@ run_mods() {
             if [[ -f "/modcache/${FILENAME}.lock" ]]; then
                 rm "/modcache/${FILENAME}.lock" || write_mod_error "Failed to delete lock file /modcache/${FILENAME}.lock"
             fi
+            unset MOD_OFFLINE SKIP_MOD_DOWNLOAD SKIP_MOD
             continue
         fi
         if [[ -z "${MODMANAGER_MODONLY}" ]]; then
@@ -471,6 +475,7 @@ run_mods() {
             rm "/modcache/${FILENAME}.lock" || write_mod_error "Failed to delete lock file /modcache/${FILENAME}.lock"
         fi
         write_mod_info "${DOCKER_MOD} applied to container"
+        unset MOD_OFFLINE SKIP_MOD_DOWNLOAD SKIP_MOD
     done
 }
 
