@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20250105"
+MOD_SCRIPT_VER="3.20250106"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -402,7 +402,7 @@ run_mods() {
         elif [[ -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${SHALAYER}" =~ $(sha256sum "/modcache/${FILENAME}.tar.xz" | cut -f1 -d" ") ]]; then
             write_mod_info "${DOCKER_MOD} at ${SHALAYER} found in modcache, applying"
         elif [[ -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${MOD_OFFLINE}" = "true" ]]; then
-            write_mod_info "OFFLINE: ${DOCKER_MOD} found in modcache, applying"
+            write_mod_info "OFFLINE: ${DOCKER_MOD} found in modcache"
         elif [[ ! -f "/modcache/${FILENAME}.tar.xz" ]] && [[ "${MOD_OFFLINE}" = "true" ]]; then
             write_mod_error "OFFLINE: ${DOCKER_MOD} not found in modcache, skipping"
             unset MOD_OFFLINE
@@ -474,7 +474,9 @@ run_mods() {
         if [[ -f "/modcache/${FILENAME}.lock" ]]; then
             rm "/modcache/${FILENAME}.lock" || write_mod_error "Failed to delete lock file /modcache/${FILENAME}.lock"
         fi
-        write_mod_info "${DOCKER_MOD} applied to container"
+        if [[ -z "${MODMANAGER_MODONLY}" ]]; then
+            write_mod_info "${DOCKER_MOD} applied to container"
+        fi
         unset MOD_OFFLINE SKIP_MOD_DOWNLOAD SKIP_MOD
     done
 }
