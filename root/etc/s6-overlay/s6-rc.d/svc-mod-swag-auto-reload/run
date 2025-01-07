@@ -14,7 +14,7 @@ done
 function wait_for_changes {
   inotifywait -rq \
     --event modify,move,create,delete \
-    --excludei '\.(sample|md)' \
+    --excludei '\.(sample|md|swp)' \
     "${ACTIVE_WATCH[@]}"
 }
 
