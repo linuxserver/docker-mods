@@ -2,6 +2,10 @@
 
 echo "**** Setting up poetry ****"
 
+if [[ ! -f /lsiopy/bin/pip ]]; then
+    python3 -m venv /lsiopy
+fi
+
 # Install poetry
 curl -sSL https://install.python-poetry.org | python3 -
 
