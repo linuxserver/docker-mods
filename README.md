@@ -269,6 +269,7 @@ GitHub Actions will trigger a build off of your repo when you commit. The image 
 
 * Fork this repo, checkout the `template` branch.
 * Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
+* Ensure you set the maintainer line to your GitHub username, this allows us to @ you if there are breaking changes that affect or will affect your mod in the future.
 * Inspect the `root` folder contents. Edit, add and remove as necessary.
 * After all init scripts and services are created, run `find ./ -path "./.git" -prune -o ( -name "run" -o -name "finish" -o -name "check" ) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
 * Edit the readme with pertinent info.
