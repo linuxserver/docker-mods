@@ -1,5 +1,9 @@
 # Auto-reload - Docker mod for Nginx based images
 
+## DEPRECATION NOTICE
+
+### This mod is deprecated. We will not offer support for this mod and it will not be updated. This mod's functionality is now included in the SWAG image
+
 This mod allows Nginx to be reloaded automatically whenever there are new files, or valid changes to the files in `/config/nginx`.
 
 In the container's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-auto-reload`
