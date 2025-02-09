@@ -1,3 +1,3 @@
 #!/bin/bash
 
-. /usr/local/bin/striptracks.sh :fre:fra:und :fre:fra
+. /usr/local/bin/striptracks.sh --audio :fre:fra:und --subs :fre:fra
