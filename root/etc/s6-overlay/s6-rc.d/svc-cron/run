@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+if builtin command -v crontab >/dev/null 2>&1 && [[ -n "$(crontab -l -u abc 2>/dev/null || true)" || -n "$(crontab -l -u root 2>/dev/null || true)" ]]; then
+    if builtin command -v busybox >/dev/null 2>&1 && [[ $(busybox || true) =~ [[:space:]](crond)([,]|$) ]]; then
+        # busybox crond logs every wakeup at level 5 which is noisy, use 7
+        exec busybox crond -f -S -l ${CRON_LOG_LEVEL:-7}
+    elif [[ -f /usr/bin/apt ]] && [[ -f /usr/sbin/cron ]]; then
+        # Berkeley cron logs the start of all jobs at level 1.  Levels are additive, see `man 8 cron`.
+        exec /usr/sbin/cron -f -L ${CRON_LOG_LEVEL:-1}
+    else
+        echo "**** cron not found ****"
+        sleep infinity
+    fi
+else
+    sleep infinity
+fi

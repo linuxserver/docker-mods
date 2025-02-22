@@ -12,8 +12,8 @@ on:
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "universal" #replace
+  MODNAME: "alpine-quieter-cron" #replace
   MOD_VERSION: ${{ inputs.mod_version }} #don't modify
   MULTI_ARCH: "true" #set to false if not needed
 
