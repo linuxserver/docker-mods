@@ -1,6 +1,7 @@
 <?php
     function GetHeader() {
         return <<<HTML
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
             <style type="text/css">
             @import url("https://use.fontawesome.com/releases/v5.15.0/css/all.css");
                 .status-div {
@@ -52,7 +53,7 @@
     }
 
     function GetProxies() {
-        $output = shell_exec("if test -f /lsiopy/bin/python3; then /lsiopy/bin/python3 /dashboard/swag-proxies.py; else python3 /dashboard/swag-proxies.py; fi");
+        $output = shell_exec("if test -f /lsiopy/bin/python3; then /lsiopy/bin/python3 /dashboard/swag-proxies.py fast; else python3 /dashboard/swag-proxies.py fast; fi");
         $results = json_decode($output);
         $status = "";
         $index = 0;
@@ -89,8 +90,18 @@
         }
         return <<<HTML
             <div class="wrap-panel status-div">
-                <div>
+                <div id="proxiesTable">
+                    <script>
+                        $.ajax({
+                            url : 'proxies.php',
+                            type: 'GET',
+                            success: function(data){
+                                $('#proxiesTable').html(data);
+                            }
+                        });
+                    </script>
                     <h2>Proxies</h2>
+                    <h4>Scanning for unproxied containers ...</h4>
                     <table class="table-hover">
                         <thead>
                             <tr>
@@ -342,7 +353,7 @@
         return array("proxied" => "$proxied", "auth" => "$auth", "outdated" => "$outdated", "banned" => "$banned");
     }
 
-    $stats = $_GET['stats'] == 'true' ? true : false;
+    $stats = (isset($_GET['stats']) && $_GET['stats'] == 'true') ? true : false;
     if($stats) {
         $page = GetStats();
         header("Content-Type: application/json");
