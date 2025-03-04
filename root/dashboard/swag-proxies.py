@@ -71,7 +71,7 @@ urllib3.disable_warnings()
 fast = (len(sys.argv) > 1)
 apps, auths = find_apps(fast)
 discovered_apps = collections.defaultdict(dict)
-with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
+with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
     futures = {executor.submit(is_available, app): app for app in apps.keys()}
     for future in concurrent.futures.as_completed(futures):
         app = futures[future]
