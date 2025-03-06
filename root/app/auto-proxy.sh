@@ -13,7 +13,7 @@ else
             AUTO_GEN="${CONTAINER} ${AUTO_GEN}"
         else
             INSPECTION=$(docker inspect ${CONTAINER})
-            for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass swag_server_custom_directive; do
+            for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass swag_server_custom_directive swag_preset_conf; do
                 VAR_VALUE=$(echo ${INSPECTION} | jq -r ".[0].Config.Labels[\"${VAR}\"]")
                 if [ "${VAR_VALUE}" == "null" ]; then
                     VAR_VALUE=""
@@ -40,7 +40,7 @@ fi
 for CONTAINER in ${AUTO_GEN}; do
     INSPECTION=$(docker inspect ${CONTAINER})
     rm -rf "/auto-proxy/${CONTAINER}.conf"
-    for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass swag_server_custom_directive; do
+    for VAR in swag_address swag_port swag_proto swag_url swag_auth swag_auth_bypass swag_server_custom_directive swag_preset_conf; do
         VAR_VALUE=$(echo ${INSPECTION} | jq -r ".[0].Config.Labels[\"${VAR}\"]")
         if [ "${VAR_VALUE}" == "null" ]; then
             VAR_VALUE=""
@@ -48,15 +48,23 @@ for CONTAINER in ${AUTO_GEN}; do
         echo "${VAR}=\"${VAR_VALUE}\"" >> "/auto-proxy/${CONTAINER}.conf"
     done
     . /auto-proxy/${CONTAINER}.conf
-    if [ -f "/config/nginx/proxy-confs/${CONTAINER}.subdomain.conf.sample" ]; then
-        cp "/config/nginx/proxy-confs/${CONTAINER}.subdomain.conf.sample" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
-        echo "**** Using preset proxy conf for ${CONTAINER} ****"
+    if [ -f "/config/nginx/proxy-confs/${CONTAINER}.subdomain.conf.sample" ] || [ -f "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" ]; then
+        if [ -f "/config/nginx/proxy-confs/${CONTAINER}.subdomain.conf.sample" ]; then
+            echo "**** Container name matches a preset proxy conf, using ${CONTAINER}.subdomain.conf for container ${CONTAINER} ****"
+            cp "/config/nginx/proxy-confs/${CONTAINER}.subdomain.conf.sample" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+        elif [ -f "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" ]; then
+            echo "**** Label swag_preset_conf matches a preset proxy conf, using ${swag_preset_conf}.subdomain.conf for container ${CONTAINER} ****"
+            cp "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+        fi
         if [ -n "${swag_auth_bypass}" ]; then
             echo "**** Swag auth bypass is auto managed via preset confs and cannot be overridden via env vars ****"
         fi
         if [ -n "${swag_address}" ]; then
             sed -i "s|set \$upstream_app .*|set \$upstream_app ${swag_address};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Overriding address as ${swag_address} for ${CONTAINER} ****"
+        elif [ ! -f "/config/nginx/proxy-confs/${CONTAINER}.subdomain.conf.sample" ] && [ -n "${swag_preset_conf}" ] && [ -f "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" ]; then
+            sed -i "s|set \$upstream_app .*|set \$upstream_app ${CONTAINER};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Overriding address as ${CONTAINER} for ${CONTAINER} ****"
         fi
         if [ -n "${swag_port}" ]; then
             sed -i "s|set \$upstream_port .*|set \$upstream_port ${swag_port};|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
@@ -70,6 +78,9 @@ for CONTAINER in ${AUTO_GEN}; do
             SED_swag_url=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_url}")
             sed -i "s|server_name .*|server_name ${SED_swag_url};|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Overriding url as ${swag_url} for ${CONTAINER} ****"
+        elif [ ! -f "/config/nginx/proxy-confs/${CONTAINER}.subdomain.conf.sample" ] && [ -n "${swag_preset_conf}" ] && [ -f "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" ]; then
+            sed -i "s|server_name .*|server_name ${CONTAINER}.*;|" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Overriding url as ${CONTAINER}.* for ${CONTAINER} ****"
         fi
         if [ -n "${swag_server_custom_directive}" ]; then
             SED_swag_server_custom_directive=$(sed -e 's/[&\\|]/\\&/g; s|$|\\|; $s|\\$||' <<<"${swag_server_custom_directive}")
@@ -96,6 +107,9 @@ for CONTAINER in ${AUTO_GEN}; do
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
         fi
     else
+        if [ -n "${swag_preset_conf}" ] && [ ! "/config/nginx/proxy-confs/${swag_preset_conf}.subdomain.conf.sample" ]; then
+            echo "**** Label swag_preset_conf is set, but no preset proxy conf found with the name ${swag_preset_conf}.subdomain.conf.sample ****"
+        fi
         echo "**** No preset proxy conf found for ${CONTAINER}, generating from scratch ****"
         cp "/config/nginx/proxy-confs/_template.subdomain.conf.sample" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
         if [ -n "${swag_auth_bypass}" ]; then
