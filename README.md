@@ -1,5 +1,5 @@
 # About
-A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Radarr/Sonarr v3 or higher Docker containers that adds a script to automatically strip out unwanted audio and subtitle tracks, keeping only the desired languages.
+A [Docker Mod](https://github.com/linuxserver/docker-mods) for the LinuxServer.io Radarr/Sonarr v3 or higher Docker containers that adds a script to automatically strip out unwanted audio and subtitle tracks, keeping only the desired languages. A [Batch Mode](#batch-mode) is also supported that allows usage outside of Radarr/Sonarr.
 
 **This unified script works in both Radarr and Sonarr.  Use this mod in either container!**
 
@@ -85,7 +85,7 @@ Development Container info:
    </details>
 
    The script will detect the language(s) defined in Radarr/Sonarr for the movie or TV show and only keep the audio and subtitles selected.  
-   Alternatively, a wrapper script or an environment variable may be used to more granularly define which tracks to keep.  See [Wrapper Scripts](./README.md#wrapper-scripts) or [Environment Variable](./README.md#environment-variable) for more details.
+   Alternatively, a wrapper script or an environment variable may be used to more granularly define which tracks to keep.  See [Wrapper Scripts](#wrapper-scripts) or [Environment Variable](#environment-variable) for more details.
 
 > [!IMPORTANT]
 > You **must** configure language(s) in Radarr/Sonarr *or* pass command-line arguments for the script to do anything!  See the next section for an example.
@@ -127,7 +127,7 @@ The following is a simplified example and steps to configure Radarr so the scrip
    </details>
 
 Now, when Radarr imports a movie with the 'Any' Quality Profile, the script will keep only Original and English languages.  This is equivalent to calling the script with `--audio :org:eng --subs :org:eng` command-line arguments.
-See [Automatic Language Detection](./README.md#automatic-language-detection) for more details.
+See [Automatic Language Detection](#automatic-language-detection) for more details.
 
 # Usage Details
 The source video can be any mkvtoolnix supported video format. The output is an MKV file with the same name and the same permissions. Owner is preserved if the script is executed as root.  
@@ -157,15 +157,15 @@ Both audio **and** subtitle tracks that match the configured language(s) are kep
 
 ### Special Language Selections
 The language selection **'Original'** will use the language Radarr pulled from [The Movie Database](https://www.themoviedb.org/ "TMDB") or that Sonarr pulled from [The TVDB](https://www.thetvdb.com/ "TVDB") during its last refresh.
-Selecting this language is functionally equivalent to calling the script with `--audio :org --subs :org` command-line arguments.  See [Original language code](./README.md#original-language-code) below for more details.
+Selecting this language is functionally equivalent to calling the script with `--audio :org --subs :org` command-line arguments.  See [Original language code](#original-language-code) below for more details.
 
 The language selection **'Unknown'** will match tracks with **no configured language** in the video file. Selecting this language is functionally equivalent to calling the script with `--audio :und --subs :und` command-line arguments.
-See [Unknown language code](./README.md#unknown-language-code) below for more details.
+See [Unknown language code](#unknown-language-code) below for more details.
 
 The language selection **'Any'** has two purposes:
    1) In Radarr only, when set on a Quality Profile, it will trigger a search of languages in ***Custom Formats***
    2) If languages are not configured in a Custom Format, or if you're using Sonarr, it will preserve **all languages** in the video file. This is functionally equivalent to calling the script with `--audio :any --subs :any` command-line arguments.
-   See [Any language code](./README.md#any-language-code) below for more details.
+   See [Any language code](#any-language-code) below for more details.
 
 > [!IMPORTANT]
 > When using *Custom Formats* language conditions and scoring you may not get the results you expect.
@@ -210,16 +210,17 @@ All language conditions with positive scores *and* Negated conditions with negat
 The script also supports command-line arguments that will override the automatic language detection.  More granular control can therefore be exerted or extended using tagging and defining multiple *Connect* scripts (this is native Radarr/Sonarr functionality outside the scope of this documentation).
 
 The syntax for the command-line is:  
-`striptracks.sh [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]`  
+`striptracks.sh [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [--reorder] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]`  
 
 <details>
 <summary>Table of Command-Line Arguments</summary>
 
 Option|Argument|Description
 ---|---|---
-`-a`, `--audio`|`<audio_languages>`|Audio languages to keep<br/>ISO 639-2 code(s) prefixed with a colon (`:`)<br/>Each code may optionally be followed by a plus (`+`) and one or more [modifiers](./README.md#language-code-modifiers).
+`-a`, `--audio`|`<audio_languages>`|Audio languages to keep<br/>ISO 639-2 code(s) prefixed with a colon (`:`)<br/>Each code may optionally be followed by a plus (`+`) and one or more [modifiers](#language-code-modifiers).
 `-s`, `--subs`|`<subtitle_languages>`|Subtitle languages to keep<br/>ISO 639-2 code(s) prefixed with a colon (`:`)<br/>Each code may optionally be followed by a plus (`+`) and one or more modifiers.
-`-f`, `--file`|`<video_file>`|If included, the script enters **[Batch Mode](./README.md#batch-mode)** and converts the specified video file.<br/>Requires the `-a` option.<br/>![notes] **Do not** use this argument when called from Radarr or Sonarr!
+`--reorder`| |Reorder audio and subtitles tracks to match the language code order specified in the `<audio_languages>` and `<subtitle_languages>` arguments.<br/>This is skipped if no tracks are removed.
+`-f`, `--file`|`<video_file>`|If included, the script enters **[Batch Mode](#batch-mode)** and converts the specified video file.<br/>Requires the `--audio` option.<br/>![notes] **Do not** use this argument when called from Radarr or Sonarr!
 `-l`, `--log`|`<log_file>`|The log filename<br/>Default is `/config/log/striptracks.txt`
 `-c`, `--config`|`<config_file>`|Radarr/Sonarr XML configuration file<br/>Default is `/config/config.xml`
 `-d`, `--debug`|`[<level>]`|Enables debug logging. Level is optional.<br/>Default is `1` (low)<br/>`2` includes JSON output<br/>`3` contains even more JSON output
@@ -228,7 +229,7 @@ Option|Argument|Description
 
 </details>
 
-The `<audio_languages>` and `<subtitle_languages>` are optional arguments that are colon (`:`) prepended language codes in [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes "List of ISO 639-2 codes") format.  
+The `<audio_languages>` and `<subtitle_languages>` arguments are colon (`:`) prepended language codes in [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes "List of ISO 639-2 codes") format.  
 For example:
 
 * `:eng`
@@ -237,7 +238,7 @@ For example:
 
 ...etc.
 
-Multiple codes may be concatenated, such as `:eng:spa` for both English and Spanish.  Order is unimportant.
+Multiple codes may be concatenated, such as `:eng:spa` for both English and Spanish.  Order is unimportant, unless the `--reorder` option is also specified.
 
 > [!WARNING]
 > If no subtitle language is detected via Radarr/Sonarr configuration or specified on the command-line, all subtitles are removed.
@@ -268,7 +269,7 @@ The `:any` language code is a special code. When used, the script will preserve 
 ### Original language code
 The `:org` language code is a special code. When used, instead of retaining a specific language, the script substitutes the original movie or TV show language as specified in its [The Movie Database](https://www.themoviedb.org/ "TMDB") or [The TVDB](https://www.thetvdb.com/ "TVDB") entry.  
 As an example, when importing "*Amores Perros (2000)*" with options `--audio :org:eng`, the Spanish and English audio tracks are preserved.  
-Several [Included Wrapper Scripts](./README.md#included-wrapper-scripts) use this special code.
+Several [Included Wrapper Scripts](#included-wrapper-scripts) use this special code.
 
 > [!NOTE]
 > This feature relies on the 'originalLanguage' field in the Radarr/Sonarr database. The `:org` code is therefore invalid when used in Batch Mode.  
@@ -314,7 +315,7 @@ There is no way to force the script to remove audio tracks with these codes.
 </details>
 
 ## Wrapper Scripts
-To supply arguments to the script, you must either use one of the included wrapper scripts, create a custom wrapper script, or set the `STRIPTRACKS_ARGS` [environment variable](./README.md#environment-variable).
+To supply arguments to the script, you must either use one of the included wrapper scripts, create a custom wrapper script, or set the `STRIPTRACKS_ARGS` [environment variable](#environment-variable).
 
 > [!TIP]
 > If you followed the Linuxserver.io recommendations when configuring your container, the `/config` directory will be mapped to an external storage location.
@@ -322,7 +323,7 @@ To supply arguments to the script, you must either use one of the included wrapp
 
 ### Included Wrapper Scripts
 For your convenience, several wrapper scripts are included in the `/usr/local/bin/` directory.  
-You may use any of these in place of `striptracks.sh` mentioned in the [Installation](./README.md#installation) section above.
+You may use any of these in place of `striptracks.sh` mentioned in the [Installation](#installation) section above.
 
 <details>
 <summary>List of scripts</summary>
@@ -350,7 +351,7 @@ striptracks-org-spa.sh     # Keep Original, Spanish, and Unknown audio, and Orig
 <details>
 <summary>Example Script</summary>
 
-To configure an entry from the [Examples](./README.md#examples) section above, create and save a file called `striptracks-custom.sh` to `/config` containing the following text:
+To configure an entry from the [Examples](#examples) section above, create and save a file called `striptracks-custom.sh` to `/config` containing the following text:
 
 ```shell
 #!/bin/bash
@@ -364,7 +365,7 @@ Make it executable:
 chmod +x /config/striptracks-custom.sh
 ```
 
-Then put `/config/striptracks-custom.sh` in the **Path** field in place of `/usr/local/bin/striptracks.sh` mentioned in the [Installation](./README.md#installation) section above.
+Then put `/config/striptracks-custom.sh` in the **Path** field in place of `/usr/local/bin/striptracks.sh` mentioned in the [Installation](#installation) section above.
 
 </details>
 
@@ -410,7 +411,7 @@ The only events/notification triggers that are supported are **On Import** and *
 ## Batch Mode
 Batch mode allows the script to be executed independently of Radarr or Sonarr.  It converts the file specified on the command-line and ignores any environment variables that are normally expected to be set by the video management program.
 
-Using this function, you can easily process all of your video files in any subdirectory at once.  See the [Batch Example](./README.md#batch-example) below.
+Using this function, you can easily process all of your video files in any subdirectory at once.  See the [Batch Example](#batch-example) below.
 
 ### Script Execution Differences in Batch Mode
 Because the script is not called from within Radarr or Sonarr, their database is unavailable to the script.  Therefore, expect the following behavior while in Batch Mode:
@@ -460,7 +461,7 @@ However, configuring hardlinks is still recommended.
 <summary>Hardlink Limitations</summary>
 
 *Radarr Hardlinks Configuration Screenshot*
-![radarr-enable-hardlinks](./.assets/radarr-enable-hardlinks.png "Radarr hardlinks screenshot")
+![radarr-enable-hardlinks](.assets/radarr-enable-hardlinks.png "Radarr hardlinks screenshot")
 
 Hardlinks are essentially multiple references to the *same file*.
 The purpose of a hardlink is to:
@@ -481,7 +482,7 @@ It is therefore still recommended to enable and use hardlinks in Radarr and Sona
 
 # Uninstall
 To completely remove the mod:
-1. Delete the custom script from Radarr's or Sonarr's *Settings* > *Connect* screen that you created in the [Installation](./README.md#installation) section above.
+1. Delete the custom script from Radarr's or Sonarr's *Settings* > *Connect* screen that you created in the [Installation](#installation) section above.
 2. Stop and delete the Radarr/Sonarr container.
 3. Remove the **DOCKER_MODS** environment variable from your `compose.yaml` file or exclude it from the `docker run` command when re-creating the Radarr/Sonarr container.
 

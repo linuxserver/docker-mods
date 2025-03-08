@@ -62,10 +62,13 @@ export striptracks_debug=0
 # Presence of '*_eventtype' variable sets script mode
 export striptracks_type=$(printenv | sed -n 's/_eventtype *=.*$//p')
 
-# Usage function
+# Usage functions
 function usage {
-  usage="
-$striptracks_script   Version: $striptracks_ver
+  usage="Try '$striptracks_script --help' for more information."
+  echo "$usage" >&2
+}
+function long_usage {
+  usage="$striptracks_script   Version: $striptracks_ver
 Video remuxing script that only keeps tracks with the specified languages.
 Designed for use with Radarr and Sonarr, but may be used standalone in batch
 mode.
@@ -73,7 +76,7 @@ mode.
 Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
-  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-d|--debug} [<level>]]
+  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [--reorder] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]
 
   Options can also be set via the STRIPTRACKS_ARGS environment variable.
   Command-line arguments override the environment variable.
@@ -89,6 +92,12 @@ Options and Arguments:
                                    multiple codes may be concatenated.
                                    Each code may optionally be followed by a
                                    plus \`+\` and one or more modifiers.
+      --reorder                    Reorder audio and subtitles tracks to match
+                                   the language code order specified in the
+                                   <audio_languages> and <subtitle_languages>
+                                   arguments.
+                                   Track reorder is skipped if no tracks are
+                                   removed.
   -f, --file <video_file>          If included, the script enters batch mode
                                    and converts the specified video file.
                                    WARNING: Do not use this argument when called
@@ -122,11 +131,11 @@ Examples:
   $striptracks_script -d 2                      # Enable debugging level 2, audio and
                                            # subtitles languages detected from
                                            # Radarr/Sonarr
-  $striptracks_script -a :eng:und -s :eng       # keep English and Unknown audio and
+  $striptracks_script -a :eng:und -s :eng       # Keep English and Unknown audio and
                                            # English subtitles
-  $striptracks_script -a :eng:org -s :any+f:eng # keep English and Original audio,
+  $striptracks_script -a :eng:org -s :any+f:eng # Keep English and Original audio,
                                            # and forced or English subtitles
-  $striptracks_script -a :eng -s \"\"             # keep English audio and no subtitles
+  $striptracks_script -a :eng -s \"\"             # Keep English audio and no subtitles
   $striptracks_script -d :eng:kor:jpn :eng:spa  # Enable debugging level 1, keeping
                                            # English, Korean, and Japanese
                                            # audio, and English and Spanish
@@ -137,8 +146,13 @@ Examples:
                                            # English subtitles, converting video
                                            # specified
   $striptracks_script -a :any -s \"\"             # Keep all audio and no subtitles
+  $striptracks_script -a :org:any+d1 -s :eng+1:any+f2
+                                           # Keep all Original and one default
+                                           # audio in any language, and one
+                                           # English and two forced subtitles
+                                           # in any language
 "
-  echo "$usage" >&2
+  echo "$usage"
 }
 
 # Log command-line arguments
@@ -182,11 +196,11 @@ while (( "$#" )); do
         exit 1
       fi
     ;;
-    -h|--help ) # Display usage
-      usage
+    --help ) # Display full usage
+      long_usage
       exit 0
     ;;
-    -v|--version ) # Display version
+    --version ) # Display version
       echo "$striptracks_script $striptracks_ver"
       exit 0
     ;;
@@ -238,6 +252,10 @@ while (( "$#" )); do
         usage
         exit 1
       fi
+    ;;
+    --reorder ) # Reorder audio and subtitles tracks
+      export striptracks_reorder="true"
+      shift
     ;;
     -*) # Unknown option
       echo "Error|Unknown option: $1" >&2
@@ -319,7 +337,8 @@ elif [[ "${striptracks_type,,}" = "sonarr" ]]; then
   # export striptracks_sonarr_json=" \"episodeIds\":[.episodes[].id],"
 else
   # Called in an unexpected way
-  echo -e "Error|Unknown or missing '*_eventtype' environment variable: ${striptracks_type}\nNot called from Radarr/Sonarr.\nTry using Batch Mode option: -f <file>" >&2
+  echo -e "Error|Unknown or missing '*_eventtype' environment variable: ${striptracks_type}\nNot calling from Radarr/Sonarr? Try using Batch Mode option: -f <file>" >&2
+  usage
   exit 7
 fi
 export striptracks_rescan_api="Rescan${striptracks_video_type^}"
@@ -1397,19 +1416,22 @@ reduce .tracks[] as $track (
   {"tracks": [], "counters": {"audio": {"normal": {}, "forced": {}, "default": {}}, "subtitles": {"normal": {}, "forced": {}, "default": {}}}};
 
   # Set track language to "und" if null or empty
+  # NOTE: The // operator cannot be used here because it checks for null or empty values, not blank strings
   (if ($track.properties.language == "" or $track.properties.language == null) then "und" else $track.properties.language end) as $track_lang |
 
   # Initialize counters for each track type and language
-  .counters[$track.type].normal[$track_lang] = (.counters[$track.type].normal[$track_lang] // 0) |
-  if $track.properties.forced_track then .counters[$track.type].forced[$track_lang] = (.counters[$track.type].forced[$track_lang] // 0) else . end |
-  if $track.properties.default_track then .counters[$track.type].default[$track_lang] = (.counters[$track.type].default[$track_lang] // 0) else . end |
+  (.counters[$track.type].normal[$track_lang] //= 0) |
+  if $track.properties.forced_track then (.counters[$track.type].forced[$track_lang] //= 0) else . end |
+  if $track.properties.default_track then (.counters[$track.type].default[$track_lang] //= 0) else . end |
   .counters[$track.type] as $track_counters |
   
   # Add tracks one at a time to output object above
   .tracks += [
     $track |
     .striptracks_debug_log = "Debug|Parsing track ID:\(.id) Type:\(.type) Name:\(.properties.track_name) Lang:\($track_lang) Codec:\(.codec) Default:\(.properties.default_track) Forced:\(.properties.forced_track)" |
-    
+    # Use track language evaluation above
+    .properties.language = $track_lang |
+
     # Determine keep logic based on type and rules
     if .type == "video" then
       .striptracks_keep = true
@@ -1476,7 +1498,7 @@ elif (.tracks | map(select(.type == "audio" and .striptracks_keep)) | length == 
 else . end |
 
 # Output simplified dataset
-{ striptracks_log, tracks: [ .tracks[] | { id, type, forced: .properties.forced_track, default: .properties.default_track, striptracks_debug_log, striptracks_log, striptracks_keep } ] }
+{ striptracks_log, tracks: .tracks | map({ id, type, language: .properties.language, forced: .properties.forced_track, default: .properties.default_track, striptracks_debug_log, striptracks_log, striptracks_keep }) }
 ')
 [ $striptracks_debug -ge 1 ] && echo "Debug|Track processing returned ${#striptracks_json_processed} bytes." | log
 [ $striptracks_debug -ge 2 ] && echo "Track processing returned: $(echo "$striptracks_json_processed" | jq)" | awk '{print "Debug|"$0}' | log
@@ -1541,6 +1563,47 @@ if [ "$(echo "$striptracks_json" | jq -crM '.tracks|map(select(.type=="audio" or
   fi
 fi
 
+# Prepare to reorder tracks if option is enabled
+if [ "$striptracks_reorder" = "true" ]; then
+  striptracks_neworder=$(echo "$striptracks_json_processed" | jq -jcM --arg AudioKeep "$striptracks_audiokeep" \
+--arg SubsKeep "$striptracks_subskeep" '
+# Reorder tracks
+def order_tracks(tracks; rules; tracktype):
+  rules | split(":")[1:] | map(split("+") | {lang: .[0], mods: .[1]}) | 
+  reduce .[] as $rule (
+    [];
+    . as $orderedTracks |
+    . += [tracks |
+    map(. as $track | 
+      select(.type == tracktype and .striptracks_keep and
+        ($rule.lang | in({"any":0,($track.language):0})) and
+        ($rule.mods == null or
+          ($rule.mods | test("[fd]") | not) or
+          ($rule.mods | contains("f") and $track.forced) or
+          ($rule.mods | contains("d") and $track.default)
+        )
+      ) |
+      .id as $id |
+      # Remove track id from orderedTracks if it already exists
+      if ([$id] | flatten | inside($orderedTracks | flatten)) then empty else $id end
+    )]
+  ) | flatten;
+
+# Reorder audio and subtitles according to language rules
+.tracks as $tracks |
+order_tracks($tracks; $AudioKeep; "audio") as $audioOrder |
+order_tracks($tracks; $SubsKeep; "subtitles") as $subsOrder |
+
+# Output ordered track string compatible with the mkvmerge --track-order option
+# Video tracks are always first, followed by audio tracks, then subtitles
+$tracks | map(select(.type == "video") | .id) + $audioOrder + $subsOrder | map("0:" + tostring) | join(",")
+')
+  striptracks_neworder="--track-order $striptracks_neworder"
+  striptracks_message="Info|Reordering tracks using language rules."
+  echo "$striptracks_message" | log
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Using track reorder string: $striptracks_neworder" | log
+fi
+
 # Test for hardlinked file (see issue #85)
 striptracks_refcount=$(stat -c %h "$striptracks_video")
 [ $striptracks_debug -ge 1 ] && echo "Debug|Input file has a hard link count of $striptracks_refcount" | log
@@ -1563,7 +1626,7 @@ else
 fi
 
 # Execute MKVmerge (remux then rename, see issue #46)
-striptracks_mkvcommand="nice /usr/bin/mkvmerge --title \"$striptracks_title\" -q -o \"$striptracks_tempvideo\" $striptracks_audioarg $striptracks_subsarg \"$striptracks_video\""
+striptracks_mkvcommand="nice /usr/bin/mkvmerge --title \"$striptracks_title\" -q -o \"$striptracks_tempvideo\" $striptracks_audioarg $striptracks_subsarg $striptracks_neworder \"$striptracks_video\""
 [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $striptracks_mkvcommand" | log
 striptracks_result=$(eval $striptracks_mkvcommand)
 striptracks_return=$?
