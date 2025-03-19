@@ -6,24 +6,27 @@
 # Resultant MP3s are fully tagged and retain same permissions as original file
 
 # Dependencies:
-#  ffmpeg
-#  ffprobe
-#  awk
-#  curl
-#  jq
-#  stat
-#  nice
-#  basename
-#  dirname
-#  printenv
-#  chmod
-#  tr
-#  sed
+#  From ffmpeg package:
+#   ffmpeg
+#   ffprobe
+#  From jq package:
+#   jq
+#  Generally always available:
+#   awk
+#   curl
+#   stat
+#   nice
+#   basename
+#   dirname
+#   printenv
+#   chmod
+#   tr
+#   sed
 
 # Exit codes:
 #  0 - success; or test
 #  1 - no audio tracks detected
-#  2 - ffmpeg not found
+#  2 - ffmpeg, ffprobe, or jq not found
 #  3 - invalid command line arguments
 #  4 - log file is not writable
 #  5 - specified audio file not found
@@ -52,8 +55,12 @@ export flac2mp3_debug=0
 export flac2mp3_keep=0
 export flac2mp3_type=$(printenv | sed -n 's/_eventtype *=.*$//p')
 
-# Usage function
+# Usage functions
 function usage {
+  usage="Try '$flac2mp3_script --help' for more information."
+  echo "$usage" >&2
+}
+function long_usage {
   usage="
 $flac2mp3_script   Version: $flac2mp3_ver
 Audio conversion script designed for use with Lidarr
@@ -103,7 +110,7 @@ Options:
                                 [default: \.flac$]
   -t, --tags <taglist>          Comma separated list of metadata tags to apply
                                 automated corrections to.
-                                Supports: disc, genre
+                                Supports: title, disc, genre
   -l, --log <log_file>          log filename
                                 [default: /config/log/flac2mp3.txt]
   -d, --debug [<level>]         Enable debug logging
@@ -137,7 +144,7 @@ Examples:
                                   directory and do not delete the original
                                   audio file(s)
 "
-  echo "$usage" >&2
+  echo "$usage"
 }
 
 # Check for environment variable arguments
@@ -164,7 +171,7 @@ while (( "$#" )); do
       fi
     ;;
     --help ) # Display usage
-      usage
+      long_usage
       exit 0
     ;;
     --version ) # Display version
@@ -331,7 +338,8 @@ elif [[ "${flac2mp3_type,,}" = "lidarr" ]]; then
   [ -z "$flac2mp3_tracks" ] && flac2mp3_tracks="$lidarr_trackfile_path"
 else
   # Called in an unexpected way
-  echo -e "Error|Unknown or missing '*_eventtype' environment variable: ${flac2mp3_type}\nNot called from Lidarr.\nTry using Batch Mode option: -f <file>"
+  echo -e "Error|Unknown or missing '*_eventtype' environment variable: ${flac2mp3_type}\nNot called from Lidarr. Try using Batch Mode option: -f <file>" >&2
+  usage
   exit 7
 fi
 
@@ -531,11 +539,12 @@ function import_tracks {
 }
 # Get track media info from ffprobe
 function ffprobe {
-  [ $flac2mp3_debug -ge 2 ] && echo "Debug|Executing: /usr/bin/ffprobe -hide_banner -loglevel $flac2mp3_ffmpeg_log -print_format json=compact=1 -show_format -show_entries \"format=tags : format_tags=title,disc,genre\" -i \"$1\"" | log
+  local flac2mp3_ffcommand="/usr/bin/ffprobe -hide_banner -loglevel $flac2mp3_ffmpeg_log -print_format json=compact=1 -show_format -show_entries \"format=tags : format_tags=title,disc,genre\" -i \"$1\""
+  [ $flac2mp3_debug -ge 1 ] && echo "Debug|Executing: $flac2mp3_ffcommand" | log
   unset flac2mp3_ffprobe_json
-  flac2mp3_ffprobe_json=$(/usr/bin/ffprobe -hide_banner -loglevel $flac2mp3_ffmpeg_log -print_format json=compact=1 -show_format -show_entries "format=tags : format_tags=title,disc,genre" -i "$1")
+  flac2mp3_ffprobe_json=$(eval $flac2mp3_ffcommand 2>&1)
   flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
-    flac2mp3_message="Error|[$flac2mp3_return] ffprobe error when inspecting track: \"$1\""
+    flac2mp3_message=$(echo -e "[$flac2mp3_return] ffprobe error when inspecting file: \"$1\"\nffprobe returned: $flac2mp3_ffprobe_json" | awk '{print "Error|"$0}')
     echo "$flac2mp3_message" | log
     echo "$flac2mp3_message" >&2
   }
@@ -567,7 +576,7 @@ fi
 # Check that the log file exists
 if [ ! -f "$flac2mp3_log" ]; then
   echo "Info|Creating a new log file: $flac2mp3_log"
-  touch "$flac2mp3_log" 2>&1
+  touch "$flac2mp3_log"
 fi
 
 # Check that the log file is writable
@@ -578,24 +587,20 @@ if [ ! -w "$flac2mp3_log" ]; then
 fi
 
 # Check for required binaries
-if [ ! -f "/usr/bin/ffmpeg" ]; then
-  flac2mp3_message="Error|/usr/bin/ffmpeg is required by this script"
-  echo "$flac2mp3_message" | log
-  echo "$flac2mp3_message" >&2
-  end_script 2
-fi
-if [ ! -f "/usr/bin/ffprobe" ]; then
-  flac2mp3_message="Error|/usr/bin/ffprobe is required by this script"
-  echo "$flac2mp3_message" | log
-  echo "$flac2mp3_message" >&2
-  end_script 2
-fi
+for flac2mp3_file in "/usr/bin/ffmpeg" "/usr/bin/ffprobe" "/usr/bin/jq"; do
+  if [ ! -f "$flac2mp3_file" ]; then
+    flac2mp3_message="Error|$flac2mp3_file is required by this script"
+    echo "$flac2mp3_message" | log
+    echo "$flac2mp3_message" >&2
+    end_script 2
+  fi
+done
 
 # Log Debug state
 if [ $flac2mp3_debug -ge 1 ]; then
   flac2mp3_message="Debug|Enabling debug logging level ${flac2mp3_debug}. Starting ${lidarr_eventtype^} run."
   echo "$flac2mp3_message" | log
-  echo "$flac2mp3_message"
+  echo "$flac2mp3_message" >&2
 fi
 
 # Log FLAC2MP3_ARGS usage
@@ -653,7 +658,7 @@ elif [ -f "$flac2mp3_config" ]; then
   # Check for localhost
   [[ $flac2mp3_bindaddress = "*" ]] && flac2mp3_bindaddress=localhost
 
-  # Strip leading and trailing forward slashes from URL base
+  # Strip leading and trailing forward slashes from URL base (see issue #44)
   flac2mp3_urlbase="$(echo "$flac2mp3_urlbase" | sed -re 's/^\/+//; s/\/+$//')"
 
   # Build URL to Lidarr API
@@ -699,7 +704,7 @@ fi
 # If specified, check if destination folder exists and create if necessary
 if [ "$flac2mp3_output" -a ! -d "$flac2mp3_output" ]; then
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Destination directory does not exist. Creating: $flac2mp3_output" | log
-  mkdir -p "$flac2mp3_output" >&2
+  mkdir -p "$flac2mp3_output"
   flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
     flac2mp3_message="Error|[$flac2mp3_return] mkdir returned an error. Unable to create output directory."
     echo "$flac2mp3_message" | log
@@ -829,7 +834,7 @@ for flac2mp3_track in $flac2mp3_tracks; do
         esac
       done
       # shellcheck disable=SC2090
-      [ $flac2mp3_debug -ge 1 ] && echo "Debug|New metadata: echo ${flac2mp3_ffmpeg_metadata//-metadata /}" | log
+      [ $flac2mp3_debug -ge 1 ] && echo "Debug|New metadata: ${flac2mp3_ffmpeg_metadata//-metadata /}" | log
     else
       echo "Warn|ffprobe did not return any data when querying track: \"$flac2mp3_track\"" | log
       flac2mp3_exitstatus=12
@@ -838,10 +843,11 @@ for flac2mp3_track in $flac2mp3_tracks; do
   
   # Convert the track
   echo "Info|Writing: $flac2mp3_newTrack" | log
-  [ $flac2mp3_debug -ge 1 ] && echo "Debug|Executing: nice /usr/bin/ffmpeg -loglevel $flac2mp3_ffmpeg_log -nostdin -i \"$flac2mp3_track\" $flac2mp3_ffmpeg_opts $flac2mp3_ffmpeg_metadata\"$flac2mp3_newTrack\"" | log
-  eval nice /usr/bin/ffmpeg -loglevel $flac2mp3_ffmpeg_log -nostdin -i \"$flac2mp3_track\" $flac2mp3_ffmpeg_opts $flac2mp3_ffmpeg_metadata\"$flac2mp3_newTrack\" 2>&1 | log
+  flac2mp3_ffcommand="nice /usr/bin/ffmpeg -loglevel $flac2mp3_ffmpeg_log -nostdin -i \"$flac2mp3_track\" $flac2mp3_ffmpeg_opts $flac2mp3_ffmpeg_metadata\"$flac2mp3_newTrack\""
+  [ $flac2mp3_debug -ge 1 ] && echo "Debug|Executing: $flac2mp3_ffcommand" | log
+  flac2mp3_result=$(eval $flac2mp3_ffcommand 2>&1)
   flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
-    flac2mp3_message="Error|[$flac2mp3_return] ffmpeg error when converting track: \"$flac2mp3_track\" to \"$flac2mp3_newTrack\""
+    flac2mp3_message=$(echo -e "[$flac2mp3_return] ffmpeg error when converting track: \"$flac2mp3_track\" to \"$flac2mp3_newTrack\"\nffmpeg returned: $flac2mp3_result" | awk '{print "Error|"$0}')
     echo "$flac2mp3_message" | log
     echo "$flac2mp3_message" >&2
     flac2mp3_exitstatus=13
@@ -861,9 +867,9 @@ for flac2mp3_track in $flac2mp3_tracks; do
   if [ "$(id -u)" -eq 0 ]; then
     # Set owner
     [ $flac2mp3_debug -ge 1 ] && echo "Debug|Changing owner of file \"$flac2mp3_newTrack\"" | log
-    chown --reference="$flac2mp3_track" "$flac2mp3_newTrack" >&2
+    flac2mp3_result=$(chown --reference="$flac2mp3_track" "$flac2mp3_newTrack")
     flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
-      flac2mp3_message="Error|[$flac2mp3_return] Error when changing owner of track: \"$flac2mp3_newTrack\""
+      flac2mp3_message=$(echo -e "[$flac2mp3_return] Error when changing owner of file: \"$flac2mp3_newTrack\"\nchown returned: $flac2mp3_result" | awk '{print "Error|"$0}')
       echo "$flac2mp3_message" | log
       echo "$flac2mp3_message" >&2
       flac2mp3_exitstatus=15
@@ -873,9 +879,9 @@ for flac2mp3_track in $flac2mp3_tracks; do
     [ $flac2mp3_debug -ge 1 ] && echo "Debug|Unable to change owner of track when running as user '$(id -un)'" | log
   fi
   # Set permissions
-  chmod --reference="$flac2mp3_track" "$flac2mp3_newTrack" >&2
+  flac2mp3_result=$(chmod --reference="$flac2mp3_track" "$flac2mp3_newTrack")
   flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
-    flac2mp3_message="Error|[$flac2mp3_return] Error when changing permissions of track: \"$flac2mp3_newTrack\""
+    flac2mp3_message=$(echo -e "[$flac2mp3_return] Error when changing permissions of file: \"$flac2mp3_newTrack\"\nchmod returned: $flac2mp3_result" | awk '{print "Error|"$0}')
     echo "$flac2mp3_message" | log
     echo "$flac2mp3_message" >&2
     flac2mp3_exitstatus=15
@@ -887,12 +893,12 @@ for flac2mp3_track in $flac2mp3_tracks; do
     continue
   fi
 
-  # Skip the rest of the loop if in batch mode, just delete the track
+  # Skip the rest of the loop if in batch mode, just delete the file
   if [ "$flac2mp3_type" = "batch" ]; then
     [ $flac2mp3_debug -ge 1 ] && echo "Debug|Deleting: \"$flac2mp3_track\"" | log
-    rm "$flac2mp3_track" >&2
+    flac2mp3_result=$(rm "$flac2mp3_track")
     flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
-      flac2mp3_message="Error|[$flac2mp3_return] Error when deleting track: \"$flac2mp3_track\""
+      flac2mp3_message=$(echo -e "[$flac2mp3_return] Error when deleting file: \"$flac2mp3_track\"\nrm returned: $flac2mp3_result" | awk '{print "Error|"$0}')
       echo "$flac2mp3_message" | log
       echo "$flac2mp3_message" >&2
       flac2mp3_exitstatus=16
@@ -937,14 +943,14 @@ elif [ -n "$flac2mp3_api_url" ]; then
         # Build JSON data for all tracks
         # NOTE: Tracks with empty track IDs will not appear in the resulting JSON and will therefore not be imported into Lidarr
         [ $flac2mp3_debug -ge 1 ] && echo "Debug|Building JSON data to import" | log
-        export flac2mp3_json=$(echo $flac2mp3_result | jq -jcrM "
+        export flac2mp3_json=$(echo $flac2mp3_result | jq -jcM "
           map(
             select(.path | inside(\"$flac2mp3_import_list\")) |
             {path, \"artistId\":$lidarr_artist_id, \"albumId\":$lidarr_album_id, albumReleaseId,\"trackIds\":[.tracks[].id], quality, \"disableReleaseSwitching\":false}
           )
         ")
 
-        # Import new files into Lidarr
+        # Import new files into Lidarr (see issue #39)
         import_tracks
         flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
           flac2mp3_message="Error|[$flac2mp3_return] Lidarr error when importing the new tracks!"
@@ -954,7 +960,7 @@ elif [ -n "$flac2mp3_api_url" ]; then
         }
         flac2mp3_jobid="$(echo $flac2mp3_result | jq -crM .id)"
 
-        # Check status of job
+        # Check status of job (see issue #39)
         check_job
         flac2mp3_return=$?; [ $flac2mp3_return -ne 0 ] && {
           case $flac2mp3_return in
