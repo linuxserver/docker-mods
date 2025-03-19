@@ -1,3 +1,3 @@
 #!/bin/bash
 
-. /usr/local/bin/striptracks.sh :spa:und :spa
+. /usr/local/bin/striptracks.sh --audio :spa:und --subs :spa

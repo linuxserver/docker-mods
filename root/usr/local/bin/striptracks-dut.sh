@@ -1,3 +1,3 @@
 #!/bin/bash
 
-. /usr/local/bin/striptracks.sh :nld:dut:und :nld:dut
+. /usr/local/bin/striptracks.sh --audio :nld:dut:und --subs :nld:dut
