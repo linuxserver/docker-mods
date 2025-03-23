@@ -10,7 +10,7 @@ RUN \
   if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/latest" | jq -r '.tag_name'); \
   fi && \
-  COMP_RT_URLS_LEGACY1=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/24.35.30872.22" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
+  COMP_RT_URLS_LEGACY1=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/24.35.30872.32" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
   echo "**** grab legacy1 debs ****" && \
   mkdir -p /root-layer/opencl-intel-legacy1 && \
   for i in $COMP_RT_URLS_LEGACY1; do \
