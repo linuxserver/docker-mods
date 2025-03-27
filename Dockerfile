@@ -1,16 +1,16 @@
 # syntax=docker/dockerfile:1
 
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.21 as buildstage
 
 ARG MOD_VERSION
 
 RUN \
   echo "**** install packages ****" && \
   if [ -z "${MOD_VERSION}" ]; then \
-    MOD_VERSION=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/latest" | jq -r '.tag_name'); \
+    MOD_VERSION=$(curl -sfX GET "https://api.github.com/repos/intel/compute-runtime/releases/latest" | jq -r '.tag_name'); \
   fi && \
-  COMP_RT_URLS_LEGACY1=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/24.35.30872.32" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
+  COMP_RT_URLS_LEGACY1=$(curl -sfX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/24.35.30872.22" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
   echo "**** grab legacy1 debs ****" && \
   mkdir -p /root-layer/opencl-intel-legacy1 && \
   for i in $COMP_RT_URLS_LEGACY1; do \
@@ -19,7 +19,13 @@ RUN \
       /root-layer/opencl-intel-legacy1/$(basename "${i%$'\r'}") -L \
       "${i%$'\r'}" || exit 1; \
   done && \
-  COMP_RT_URLS=$(curl -sX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/${MOD_VERSION}" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
+  COMP_RT_URLS=$(curl -sfX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/${MOD_VERSION}" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
+  if [ -z "${COMP_RT_URLS}" ]; then \
+    echo "**** No download URLs found in release, checking artifacts ****"; \
+    COMP_RT_URLS=$(curl -sfX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/${MOD_VERSION}" | jq -r '.assets[].browser_download_url' | grep -v .sum | grep -v .ddeb); \
+    IGC_VERSION=$(curl -sfX GET "https://api.github.com/repos/intel/intel-graphics-compiler/releases/latest" | jq -r '.tag_name'); \
+    COMP_RT_URLS="${COMP_RT_URLS} $(curl -sfX GET https://api.github.com/repos/intel/intel-graphics-compiler/releases/tags/${IGC_VERSION} | jq -r '.assets[].browser_download_url' | grep -v devel)"; \
+  fi && \
   echo "**** grab latest debs ****" && \
   mkdir -p /root-layer/opencl-intel && \
   for i in $COMP_RT_URLS; do \
