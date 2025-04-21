@@ -199,7 +199,7 @@ while (( "$#" )); do
       exit 0
     ;;
     --version ) # Display version
-      echo "$striptracks_script $striptracks_ver"
+      echo "${striptracks_script} ${striptracks_ver/{{VERSION\}\}/unknown}"
       exit 0
     ;;
     -f|--file ) # Batch Mode
@@ -1000,7 +1000,7 @@ done
 
 # Log Debug state
 if [ $striptracks_debug -ge 1 ]; then
-  striptracks_message="Debug|Enabling debug logging level ${striptracks_debug}. Starting run for: $striptracks_title"
+  striptracks_message="Debug|Running ${striptracks_script} version ${striptracks_ver/{{VERSION\}\}/unknown} with debug logging level ${striptracks_debug}. Video: $striptracks_title"
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
 fi
