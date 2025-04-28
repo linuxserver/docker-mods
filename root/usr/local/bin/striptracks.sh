@@ -76,7 +76,7 @@ mode.
 Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
-  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [--reorder] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]
+  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [--reorder] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]
 
   Options can also be set via the STRIPTRACKS_ARGS environment variable.
   Command-line arguments override the environment variable.
@@ -92,16 +92,14 @@ Options and Arguments:
                                    multiple codes may be concatenated.
                                    Each code may optionally be followed by a
                                    plus \`+\` and one or more modifiers.
-      --reorder                    Reorder audio and subtitles tracks to match
-                                   the language code order specified in the
-                                   <audio_languages> and <subtitle_languages>
-                                   arguments.
-                                   Track reorder is skipped if no tracks are
-                                   removed.
   -f, --file <video_file>          If included, the script enters batch mode
                                    and converts the specified video file.
                                    WARNING: Do not use this argument when called
                                    from Radarr or Sonarr!
+      --reorder                    Reorder audio and subtitles tracks to match
+                                   the language code order specified in the
+                                   <audio_languages> and <subtitle_languages>
+                                   arguments.
   -l, --log <log_file>             Log filename
                                    [default: /config/log/striptracks.txt]
   -c, --config <config_file>       Radarr/Sonarr XML configuration file
@@ -201,7 +199,7 @@ while (( "$#" )); do
       exit 0
     ;;
     --version ) # Display version
-      echo "$striptracks_script $striptracks_ver"
+      echo "${striptracks_script} ${striptracks_ver/{{VERSION\}\}/unknown}"
       exit 0
     ;;
     -f|--file ) # Batch Mode
@@ -346,7 +344,7 @@ export striptracks_eventtype="${striptracks_type,,}_eventtype"
 export striptracks_newvideo="${striptracks_video%.*}.mkv"
 # If this were defined directly in Radarr or Sonarr this would not be needed here
 # shellcheck disable=SC2089
-striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["any"]}},{"language":{"name":"Afrikaans","iso639-2":["afr"]}},{"language":{"name":"Albanian","iso639-2":["sqi","alb"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bengali","iso639-2":["ben"]}},{"language":{"name":"Bosnian","iso639-2":["bos"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Catalan","iso639-2":["cat"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Croatian","iso639-2":["hrv"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Estonian","iso639-2":["est"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Indonesian","iso639-2":["ind"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Kannada","iso639-2":["kan"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Latvian","iso639-2":["lav"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Macedonian","iso639-2":["mac","mkd"]}},{"language":{"name":"Malayalam","iso639-2":["mal"]}},{"language":{"name":"Marathi","iso639-2":["mar"]}},{"language":{"name":"Norwegian","iso639-2":["nno","nob","nor"]}},{"language":{"name":"Persian","iso639-2":["fas","per"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Portuguese (Brazil)","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Serbian","iso639-2":["srp"]}},{"language":{"name":"Slovak","iso639-2":["slk","slo"]}},{"language":{"name":"Slovenian","iso639-2":["slv"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Spanish (Latino)","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Tagalog","iso639-2":["tgl"]}},{"language":{"name":"Tamil","iso639-2":["tam"]}},{"language":{"name":"Telugu","iso639-2":["tel"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Ukrainian","iso639-2":["ukr"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
+striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["any"]}},{"language":{"name":"Afrikaans","iso639-2":["afr"]}},{"language":{"name":"Albanian","iso639-2":["sqi","alb"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bengali","iso639-2":["ben"]}},{"language":{"name":"Bosnian","iso639-2":["bos"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Catalan","iso639-2":["cat"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Croatian","iso639-2":["hrv"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Estonian","iso639-2":["est"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Indonesian","iso639-2":["ind"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Kannada","iso639-2":["kan"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Latvian","iso639-2":["lav"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Macedonian","iso639-2":["mac","mkd"]}},{"language":{"name":"Malayalam","iso639-2":["mal"]}},{"language":{"name":"Marathi","iso639-2":["mar"]}},{"language":{"name":"Norwegian","iso639-2":["nno","nob","nor"]}},{"language":{"name":"Persian","iso639-2":["fas","per"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Portuguese (Brazil)","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Serbian","iso639-2":["srp"]}},{"language":{"name":"Slovak","iso639-2":["slk","slo"]}},{"language":{"name":"Slovenian","iso639-2":["slv"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Spanish (Latino)","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Tagalog","iso639-2":["tgl"]}},{"language":{"name":"Tamil","iso639-2":["tam"]}},{"language":{"name":"Telugu","iso639-2":["tel"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Ukrainian","iso639-2":["ukr"]}},{"language":{"name":"Urdu","iso639-2":["urd"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
 
 ### Functions
 
@@ -1002,7 +1000,7 @@ done
 
 # Log Debug state
 if [ $striptracks_debug -ge 1 ]; then
-  striptracks_message="Debug|Enabling debug logging level ${striptracks_debug}. Starting run for: $striptracks_title"
+  striptracks_message="Debug|Running ${striptracks_script} version ${striptracks_ver/{{VERSION\}\}/unknown} with debug logging level ${striptracks_debug}. Video: $striptracks_title"
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
 fi
@@ -1379,7 +1377,7 @@ get_mediainfo "$striptracks_video"
 # Process JSON data from MKVmerge; track selection logic
 striptracks_json_processed=$(echo "$striptracks_json" | jq -jcM --arg AudioKeep "$striptracks_audiokeep" \
 --arg SubsKeep "$striptracks_subskeep" '
-# Parse input string into JSON language rules
+# Parse input string into JSON language rules function
 def parse_language_codes(codes):
   # Supports f, d, and number modifiers (see issues #82 and #86)
   # -1 default value in language key means to keep unlimited tracks
@@ -1505,7 +1503,7 @@ else . end |
 
 # Write messages to log
 echo "$striptracks_json_processed" | jq -crM --argjson Debug $striptracks_debug '
-# Join log messages into one line
+# Join log messages into one line function
 def log_removed_tracks($type):
   if (.tracks | map(select(.type == $type and .striptracks_keep == false)) | length > 0) then
     "Info|Removing \($type) tracks: " +
@@ -1532,42 +1530,23 @@ log_removed_tracks("subtitles"),
 "subtitles: \(.tracks | map(select(.type == "subtitles" and .striptracks_keep)) | length))"
 ' | log
 
-# Check for no audio or subtitle tracks
-if [ "$(echo "$striptracks_json_processed" | jq -crM '.tracks|map(select(.type=="audio" and .striptracks_keep))')" = "" ]; then
-  striptracks_message="Warn|Script encountered an error when determining audio tracks to keep and must close."
+# Check for no audio tracks
+if [ "$(echo "$striptracks_json_processed" | jq -crM '.tracks|map(select(.type=="audio" and .striptracks_keep))')" = "[]" ]; then
+  striptracks_message="Error|Unable to determine any audio tracks to keep. Exiting."
   echo "$striptracks_message" | log
   echo "$striptracks_message" >&2
   end_script 11
 fi
 
-# All tracks matched/no tracks removed (see issues #49 and #89)
-if [ "$(echo "$striptracks_json" | jq -crM '.tracks|map(select(.type=="audio" or .type=="subtitles"))|length')" = "$(echo "$striptracks_json_processed" | jq -crM '.tracks|map(select((.type=="audio" or .type=="subtitles") and .striptracks_keep))|length')" ]; then
-  [ $striptracks_debug -ge 1 ] && echo "Debug|No tracks will be removed from video \"$striptracks_video\"" | log
-  # Check if already MKV
-  if [[ $striptracks_video == *.mkv ]]; then
-    # Remuxing not performed
-    striptracks_message="Info|No tracks would be removed from video. Setting Title only and exiting."
-    echo "$striptracks_message" | log
-    striptracks_mkvcommand="/usr/bin/mkvpropedit -q --edit info --set \"title=$striptracks_title\" \"$striptracks_video\""
-    [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $striptracks_mkvcommand" | log
-    striptracks_result=$(eval $striptracks_mkvcommand)
-    striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
-      striptracks_message=$(echo -e "[$striptracks_return] Error when setting video title: \"$striptracks_tempvideo\"\nmkvpropedit returned: $striptracks_result" | awk '{print "Error|"$0}')
-      echo "$striptracks_message" | log
-      echo "$striptracks_message" >&2
-      striptracks_exitstatus=13
-    }
-    end_script
-  else
-    [ $striptracks_debug -ge 1 ] && echo "Debug|Source video is not MKV. Remuxing anyway." | log
-  fi
-fi
+# Map current track order
+striptracks_order=$(echo "$striptracks_json_processed" | jq -jcM '.tracks | map(.id | "0:" + tostring) | join(",")')
+[ $striptracks_debug -ge 1 ] && echo "Debug|Current mkvmerge track order: $striptracks_order" | log
 
-# Prepare to reorder tracks if option is enabled
+# Prepare to reorder tracks if option is enabled (see issue #92)
 if [ "$striptracks_reorder" = "true" ]; then
   striptracks_neworder=$(echo "$striptracks_json_processed" | jq -jcM --arg AudioKeep "$striptracks_audiokeep" \
 --arg SubsKeep "$striptracks_subskeep" '
-# Reorder tracks
+# Reorder tracks function
 def order_tracks(tracks; rules; tracktype):
   rules | split(":")[1:] | map(split("+") | {lang: .[0], mods: .[1]}) | 
   reduce .[] as $rule (
@@ -1589,19 +1568,50 @@ def order_tracks(tracks; rules; tracktype):
     )]
   ) | flatten;
 
-# Reorder audio and subtitles according to language rules
+# Reorder audio and subtitles according to language code order
 .tracks as $tracks |
 order_tracks($tracks; $AudioKeep; "audio") as $audioOrder |
 order_tracks($tracks; $SubsKeep; "subtitles") as $subsOrder |
 
 # Output ordered track string compatible with the mkvmerge --track-order option
 # Video tracks are always first, followed by audio tracks, then subtitles
+# NOTE: Other track types are still preserved as mkvmerge will automatically place any missing tracks after those listed per https://mkvtoolnix.download/doc/mkvmerge.html#d4e544
 $tracks | map(select(.type == "video") | .id) + $audioOrder + $subsOrder | map("0:" + tostring) | join(",")
 ')
-  striptracks_neworder="--track-order $striptracks_neworder"
-  striptracks_message="Info|Reordering tracks using language rules."
+  [ $striptracks_debug -ge 1 ] && echo "Debug|New mkvmerge track order: $striptracks_neworder" | log
+  striptracks_message="Info|Reordering tracks using language code order."
   echo "$striptracks_message" | log
-  [ $striptracks_debug -ge 1 ] && echo "Debug|Using track reorder string: $striptracks_neworder" | log
+fi
+
+# All tracks matched/no tracks removed (see issues #49 and #89)
+if [ "$(echo "$striptracks_json" | jq -crM '.tracks|map(select(.type=="audio" or .type=="subtitles"))|length')" = "$(echo "$striptracks_json_processed" | jq -crM '.tracks|map(select((.type=="audio" or .type=="subtitles") and .striptracks_keep))|length')" ]; then
+  [ $striptracks_debug -ge 1 ] && echo "Debug|No tracks will be removed from video \"$striptracks_video\"" | log
+  # Check if already MKV
+  if [[ $striptracks_video == *.mkv ]]; then
+    # Check if reorder option is unset or if the order wouldn't change (see issue #92)
+    if [ "$striptracks_reorder" != "true" -o "$striptracks_order" = "$striptracks_neworder" ]; then
+      # Remuxing not performed
+      striptracks_message="Info|No tracks would be removed from video$( [ "$striptracks_reorder" = "true" ] && echo " or reordered"). Setting Title only and exiting."
+      echo "$striptracks_message" | log
+      striptracks_mkvcommand="/usr/bin/mkvpropedit -q --edit info --set \"title=$striptracks_title\" \"$striptracks_video\""
+      [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $striptracks_mkvcommand" | log
+      striptracks_result=$(eval $striptracks_mkvcommand)
+      striptracks_return=$?; [ $striptracks_return -ne 0 ] && {
+        striptracks_message=$(echo -e "[$striptracks_return] Error when setting video title: \"$striptracks_tempvideo\"\nmkvpropedit returned: $striptracks_result" | awk '{print "Error|"$0}')
+        echo "$striptracks_message" | log
+        echo "$striptracks_message" >&2
+        striptracks_exitstatus=13
+      }
+      end_script
+    else
+      # Reorder tracks anyway
+      striptracks_message="Info|No tracks will be removed from video, but they can be reordered. Remuxing anyway."
+      echo "$striptracks_message" | log
+    fi
+  else
+    # Not MKV
+    [ $striptracks_debug -ge 1 ] && echo "Debug|Source video is not MKV. Remuxing anyway." | log
+  fi
 fi
 
 # Test for hardlinked file (see issue #85)
@@ -1623,6 +1633,11 @@ if [ ${#striptracks_subsarg} -ne 0 ]; then
   striptracks_subsarg="-s $striptracks_subsarg"
 else
   striptracks_subsarg="-S"
+fi
+
+# Build argument for track reorder option for MKVmerge
+if [ ${#striptracks_neworder} -ne 0 ]; then
+  striptracks_neworder="--track-order $striptracks_neworder"
 fi
 
 # Execute MKVmerge (remux then rename, see issue #46)
@@ -1722,7 +1737,7 @@ echo "$striptracks_message" | log
 #### Call Radarr/Sonarr API to RescanMovie/RescanSeries
 # Check for URL
 if [ "$striptracks_type" = "batch" ]; then
-  [ $striptracks_debug -ge 1 ] && echo "Debug|Cannot use API in batch mode." | log
+  [ $striptracks_debug -ge 1 ] && echo "Debug|Not calling API while in batch mode." | log
 elif [ -n "$striptracks_api_url" ]; then
   # Check for video IDs
   if [ "$striptracks_video_id" -a "$striptracks_videofile_id" ]; then
