@@ -280,6 +280,7 @@
     }
 
     function GetGoaccess() {
+        $geodb = '';
         $dbip = '/config/geoip2db/dbip-country-lite.mmdb';
         $maxmind = '/config/geoip2db/GeoLite2-City.mmdb';
         if (file_exists($dbip) and file_exists($maxmind)):
@@ -288,12 +289,16 @@
             $geodb = '--geoip-database='.$dbip;
         elseif (file_exists($maxmind)):
             $geodb = '--geoip-database='.$maxmind;
-        else:
-            $geodb = '';
+        endif;
+
+        $asndb = '';
+        $asn = '/config/geoip2db/asn.mmdb';
+        if (file_exists($asn)):
+            $asndb = '--geoip-database='.$asn;
         endif;
 
         $access_log = file_exists("/dashboard/logs") ? "/dashboard/logs/*.log" : "/config/log/nginx/access.log";
-        $goaccess = shell_exec("cat $access_log | /usr/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf $geodb -");
+        $goaccess = shell_exec("cat $access_log | /usr/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf $geodb $asndb -");
         $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
         $goaccess = str_replace("<h1 class='h-dashboard'>", "<h1>", $goaccess);
         $goaccess = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);

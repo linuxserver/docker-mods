@@ -32,6 +32,7 @@ Remove the allow/deny lines in `/config/nginx/proxy-confs/dashboard.subdomain.co
     proxy_pass $upstream_proto://$upstream_app:$upstream_port;
     ```
 - Either [Swag Maxmind mod](https://github.com/linuxserver/docker-mods/tree/swag-maxmind) or [Swag DBIP mod](https://github.com/linuxserver/docker-mods/tree/swag-dbip) are required to enable the geo location graph.
+- Either Maxmind's or DB-IP's ASN mmdb are required under `/config/geoip2db/asn.mmdb` to enable the ASN graph.
 - To clear the dashboard stats, you must remove the logs (/config/log/nginx) and **recreate** the container.
 
 ## Dashboard Support 
