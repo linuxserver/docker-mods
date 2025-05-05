@@ -185,6 +185,8 @@ Regular expression syntax is beyond the scope of this document.  See this [tutor
                # Convert .mp3 files to Opus format, 192 kbit/s, no cover art
 -a "-y -map 0 -c:a aac -b:a 240k -c:v copy" -e m4a
                # Convert to M4A format, using AAC 240 kbit/s audio, cover art, overwrite file
+-a "-c:a flac -sample_fmt s16 -ar 44100" -e flac
+               # Resample to 16-bit FLAC
 --file "/path/to/audio/a-ha/Hunting High and Low/01 Take on Me.flac"
                # Batch Mode
                # Output 320kbit/s MP3
