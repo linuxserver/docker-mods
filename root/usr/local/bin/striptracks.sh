@@ -76,7 +76,7 @@ mode.
 Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
-  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [--reorder] [{-f|--file} <video_file>]] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]
+  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [--reorder] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]
 
   Options can also be set via the STRIPTRACKS_ARGS environment variable.
   Command-line arguments override the environment variable.
@@ -92,14 +92,14 @@ Options and Arguments:
                                    multiple codes may be concatenated.
                                    Each code may optionally be followed by a
                                    plus \`+\` and one or more modifiers.
-      --reorder                    Reorder audio and subtitles tracks to match
-                                   the language code order specified in the
-                                   <audio_languages> and <subtitle_languages>
-                                   arguments.
   -f, --file <video_file>          If included, the script enters batch mode
                                    and converts the specified video file.
                                    WARNING: Do not use this argument when called
                                    from Radarr or Sonarr!
+      --reorder                    Reorder audio and subtitles tracks to match
+                                   the language code order specified in the
+                                   <audio_languages> and <subtitle_languages>
+                                   arguments.
   -l, --log <log_file>             Log filename
                                    [default: /config/log/striptracks.txt]
   -c, --config <config_file>       Radarr/Sonarr XML configuration file
@@ -659,8 +659,8 @@ function delete_video {
 # }
 # Update file metadata in Radarr/Sonarr
 function set_metadata {
-  local url="$striptracks_api_url/$striptracks_videofile_api/editor"
-  local data="$(echo $striptracks_original_metadata | jq -crM "{${striptracks_videofile_api}Ids: [${striptracks_videofile_id}], quality, releaseGroup}")"
+  local url="$striptracks_api_url/$striptracks_videofile_api/bulk"
+  local data="$(echo $striptracks_original_metadata | jq -crM "[{id:${striptracks_videofile_id}, quality, releaseGroup}]")"
   local i=0
   for ((i=1; i <= 5; i++)); do
     [ $striptracks_debug -ge 1 ] && echo "Debug|Updating from quality '$(echo $striptracks_videofile_info | jq -crM .quality.quality.name)' to '$(echo $striptracks_original_metadata | jq -crM .quality.quality.name)' and release group '$(echo $striptracks_videofile_info | jq -crM '.releaseGroup | select(. != null)')' to '$(echo $striptracks_original_metadata | jq -crM '.releaseGroup | select(. != null)')'. Calling ${striptracks_type^} API using PUT and URL '$url' with data $data" | log
@@ -794,10 +794,10 @@ function rename_video {
   fi
   return $striptracks_return
 }
-# Set video language in Radarr
-function set_radarr_language {
-  local url="$striptracks_api_url/$striptracks_videofile_api/editor"
-  local data="{\"${striptracks_videofile_api}Ids\":[${striptracks_videofile_id}],\"languages\":${striptracks_json_languages}}"
+# Set video language
+function set_language {
+  local url="$striptracks_api_url/$striptracks_videofile_api/bulk"
+  local data="[{\"id\":${striptracks_videofile_id},\"languages\":${striptracks_json_languages}}]"
   [ $striptracks_debug -ge 1 ] && echo "Debug|Updating from language(s) '$(echo $striptracks_videofile_info | jq -crM "[.languages[].name] | join(\",\")")' to '$(echo $striptracks_json_languages | jq -crM "[.[].name] | join(\",\")")'. Calling ${striptracks_type^} API using PUT and URL '$url' with data $data" | log
   unset striptracks_result
   striptracks_result=$(curl -s --fail-with-body -H "X-Api-Key: $striptracks_apikey" \
@@ -818,8 +818,8 @@ function set_radarr_language {
   fi
   return $striptracks_return
 }
-# Set video language in Sonarr
-function set_sonarr_language {
+# Set video language in Sonarr v3
+function set_legacy_sonarr_language {
   local url="$striptracks_api_url/$striptracks_videofile_api/editor"
   local data="{\"${striptracks_videofile_api}Ids\":[${striptracks_videofile_id}],\"language\":$(echo $striptracks_json_languages | jq -crM ".[0]")}"
   [ $striptracks_debug -ge 1 ] && echo "Debug|Updating from language '$(echo $striptracks_videofile_info | jq -crM ".language.name")' to '$(echo $striptracks_json_languages | jq -crM ".[0].name")'. Calling ${striptracks_type^} API using PUT and URL '$url' with data $data" | log
@@ -1539,7 +1539,7 @@ if [ "$(echo "$striptracks_json_processed" | jq -crM '.tracks|map(select(.type==
 fi
 
 # Map current track order
-striptracks_order=$(echo "$striptracks_json_processed" | jq -jcM '.tracks | map(.id | "0:" + tostring) | join(",")')
+striptracks_order=$(echo "$striptracks_json_processed" | jq -jcM '.tracks | map(select(.striptracks_keep) | .id | "0:" + tostring) | join(",")')
 [ $striptracks_debug -ge 1 ] && echo "Debug|Current mkvmerge track order: $striptracks_order" | log
 
 # Prepare to reorder tracks if option is enabled (see issue #92)
@@ -1848,7 +1848,7 @@ elif [ -n "$striptracks_api_url" ]; then
             # Sooooo glad I did it this way
             if [ "$(echo $striptracks_videofile_info | jq -crM .languages)" != "null" ]; then
               if [ "$(echo $striptracks_videofile_info | jq -crM .languages)" != "$striptracks_json_languages" ]; then
-                if set_radarr_language; then
+                if set_language; then
                   striptracks_exitstatus=0
                 else
                   striptracks_message="Error|${striptracks_type^} error when updating video language(s)."
@@ -1863,7 +1863,7 @@ elif [ -n "$striptracks_api_url" ]; then
             # Check languages for Sonarr v3 and earlier
             elif [ "$(echo $striptracks_videofile_info | jq -crM .language)" != "null" ]; then
               if [ "$(echo $striptracks_videofile_info | jq -crM .language)" != "$(echo $striptracks_json_languages | jq -crM '.[0]')" ]; then
-                if set_sonarr_language; then
+                if set_legacy_sonarr_language; then
                   striptracks_exitstatus=0
                 else
                   striptracks_message="Error|${striptracks_type^} error when updating video language(s)."
