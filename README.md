@@ -18,6 +18,11 @@ Follow these steps to enable the dbip mod:
 4. Edit `/config/nginx/dbip.conf` and add countries to the blocklist / whitelist according to the comments, for example:
    
     ```nginx
+    geoip2 /config/geoip2db/dbip-country-lite.mmdb {
+        auto_reload 1w;
+           $geoip2_data_country_iso_code country iso_code;
+    }
+    
     map $geoip2_data_country_iso_code $geo-whitelist {
         default no;
         UK yes;
@@ -26,6 +31,12 @@ Follow these steps to enable the dbip mod:
     map $geoip2_data_country_iso_code $geo-blacklist {
         default yes;
         US no;
+    }
+    
+    geo $lan-ip {
+        default no;
+        192.168.0.0/24 yes;
+        172.20.0.0/16 yes;
     }
     ```
 5. Use the definitions in the following way:
