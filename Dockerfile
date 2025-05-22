@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.21 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.21 AS buildstage
 
 ARG MOD_VERSION
 
@@ -10,7 +10,7 @@ RUN \
   if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -sfX GET "https://api.github.com/repos/intel/compute-runtime/releases/latest" | jq -r '.tag_name'); \
   fi && \
-  COMP_RT_URLS_LEGACY1=$(curl -sfX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/24.35.30872.22" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | sed 's|wget ||g') && \
+  COMP_RT_URLS_LEGACY1=$(curl -sfX GET "https://api.github.com/repos/intel/compute-runtime/releases/tags/24.35.30872.22" | jq -r '.body' | grep wget | grep -v .sum | grep -v .ddeb | grep -v zero-gpu_ | grep -v opencl-icd_ | sed 's|wget ||g') && \
   echo "**** grab legacy1 debs ****" && \
   mkdir -p /root-layer/opencl-intel-legacy1 && \
   for i in $COMP_RT_URLS_LEGACY1; do \
