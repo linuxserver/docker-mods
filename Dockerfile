@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.21 AS buildstage
 
 ARG MOD_VERSION
 
@@ -11,14 +11,14 @@ RUN \
     | jq -r '.tag_name'); \
   fi && \
   if [ -z ${MOD_VERSION+x} ]; then \
-    echo "**** Could not fetch current bouncer version from Github ****" \
+    echo "**** Could not fetch current bouncer version from Github ****"; \
     exit 1; \
   fi && \
   curl -sLo \
     /root-layer/crowdsec-nginx-bouncer.tgz -L \
     "https://github.com/crowdsecurity/cs-nginx-bouncer/releases/download/${MOD_VERSION}/crowdsec-nginx-bouncer.tgz" && \
   if ! tar -tzf /root-layer/crowdsec-nginx-bouncer.tgz >/dev/null 2>&1; then \
-    echo "**** Invalid tarball, could not download crowdsec bouncer ****" \
+    echo "**** Invalid tarball, could not download crowdsec bouncer ****"; \
     exit 1; \
   fi
 
