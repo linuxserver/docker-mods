@@ -6,8 +6,8 @@ Only the latest major and minor version are supported.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 2.13.x  | :heavy_check_mark: |
-| < 2.13  | :x:                |
+| 2.15.x  | :heavy_check_mark: |
+| < 2.15  | :x:                |
 
 ## Reporting a Vulnerability
 
