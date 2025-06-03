@@ -210,7 +210,7 @@ All language conditions with positive scores *and* Negated conditions with negat
 The script also supports command-line arguments that will override the automatic language detection.  More granular control can therefore be exerted or extended using tagging and defining multiple *Connect* scripts (this is native Radarr/Sonarr functionality outside the scope of this documentation).
 
 The syntax for the command-line is:  
-`striptracks.sh [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [--reorder] [--disable-recycle] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]`  
+`striptracks.sh [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [--reorder] [--disable-recycle] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-p|--priority} {idle|low|medium|high}] [{-d|--debug} [<level>]]`  
 
 <details>
 <summary>Table of Command-Line Arguments</summary>
@@ -224,6 +224,7 @@ Option|Argument|Description
 `--disable-recycle`| |Disable recycle bin use, even if configured in Radarr/Sonarr
 `-l`, `--log`|`<log_file>`|The log filename<br/>Default is `/config/log/striptracks.txt`
 `-c`, `--config`|`<config_file>`|Radarr/Sonarr XML configuration file<br/>Default is `/config/config.xml`
+`-p`, `--priority`|`idle`, `low`, `medium`, `high`|CPU and I/O process priority for mkvmerge<br/>Default is `medium`<br/>![notes] High priority can consume all system resources. When processing a large video file your system may become unresponsive!
 `-d`, `--debug`|`[<level>]`|Enables debug logging. Level is optional.<br/>Default is `1` (low)<br/>`2` includes JSON output<br/>`3` contains even more JSON output
 `--help`| |Display help and exit.
 `--version`| |Display version and exit.
