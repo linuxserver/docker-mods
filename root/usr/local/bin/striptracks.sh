@@ -633,13 +633,12 @@ function get_mediainfo {
 
   local videofile="$1"
 
-  # shellcheck disable=SC2016
-  local mkvcommand='/usr/bin/mkvmerge -J "$videofile"'
+  local mkvcommand="/usr/bin/mkvmerge -J \"$videofile\""
   [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $mkvcommand" | log
   unset striptracks_json
   # This must be a declare statement to avoid the 'Argument list too long' error with some large returned JSON (see issue #104)
   declare -g striptracks_json
-  striptracks_json=$(eval $mkvcommand)
+  striptracks_json=$(eval "$mkvcommand")
   local return=$?
   [ $striptracks_debug -ge 1 ] && echo "Debug|mkvmerge returned ${#striptracks_json} bytes" | log
   [ $striptracks_debug -ge 2 ] && [ ${#striptracks_json} -ne 0 ] && echo "mkvmerge returned: $striptracks_json" | awk '{print "Debug|"$0}' | log
@@ -1514,11 +1513,10 @@ function set_title_and_exit_if_nothing_removed {
         # Remuxing not performed
         local message="Info|No tracks would be removed from video$( [ "$striptracks_reorder" = "true" ] && echo " or reordered"). Setting Title only and exiting."
         echo "$message" | log
-        # shellcheck disable=SC2016
-        local mkvcommand='/usr/bin/mkvpropedit -q --edit info --set "title=$striptracks_title" "$striptracks_video"'
+        local mkvcommand="/usr/bin/mkvpropedit -q --edit info --set \"title=$striptracks_title\" \"$striptracks_video\""
         [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $mkvcommand" | log
         local result
-        result=$(eval $mkvcommand)
+        result=$(eval "$mkvcommand")
         local return=$?
         [ $striptracks_debug -ge 1 ] && echo "Debug|mkvpropedit returned ${#result} bytes" | log
         [ $striptracks_debug -ge 2 ] && [ ${#result} -ne 0 ] && echo "mkvpropedit returned: $result" | awk '{print "Debug|"$0}' | log
@@ -1569,11 +1567,10 @@ function remux_video {
   fi
 
   # Execute MKVmerge (remux then rename, see issue #46)
-  # shellcheck disable=SC2016
-  local mkvcommand='$striptracks_nice /usr/bin/mkvmerge --title "$striptracks_title" -q -o "$striptracks_tempvideo" $audioarg $subsarg $striptracks_neworder "$striptracks_video"'
+  local mkvcommand="$striptracks_nice /usr/bin/mkvmerge --title \"$striptracks_title\" -q -o \"$striptracks_tempvideo\" $audioarg $subsarg $striptracks_neworder \"$striptracks_video\""
   [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $mkvcommand" | log
   local result
-  result=$(eval $mkvcommand)
+  result=$(eval "$mkvcommand")
   local return=$?
   [ $striptracks_debug -ge 1 ] && echo "Debug|mkvmerge returned ${#result} bytes" | log
   [ $striptracks_debug -ge 2 ] && [ ${#result} -ne 0 ] && echo "mkvmerge returned: $result" | awk '{print "Debug|"$0}' | log
