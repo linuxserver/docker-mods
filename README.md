@@ -362,20 +362,21 @@ You may use any of these in place of `striptracks.sh` mentioned in the [Installa
 <summary>List of scripts</summary>
 
 ```shell
-striptracks-debug.sh       # Use detected languages, but enable debug logging
-striptracks-debug-2.sh     # Use detected languages, enable debug logging level 2
-striptracks-debug-max.sh   # Use detected languages, enable highest debug logging
-striptracks-dut.sh         # Keep Dutch and Unknown audio, and Dutch subtitles
-striptracks-eng.sh         # Keep English and Unknown audio, and English subtitles
-striptracks-eng-debug.sh   # Keep English and Unknown audio, and English subtitles, and enable debug logging
-striptracks-eng-fre.sh     # Keep English, French, and Unknown audio, and English and French subtitles
-striptracks-eng-jpn.sh     # Keep English, Japanese, and Unknown audio and English subtitles
-striptracks-fre.sh         # Keep French and Unknown audio, and French subtitles
-striptracks-ger.sh         # Keep German and Unknown audio, and German subtitles
-striptracks-spa.sh         # Keep Spanish and Unknown audio, and Spanish subtitles
-striptracks-org-eng.sh     # Keep Original, English, Unknown, and forced audio, and Original, English, and forced subtitles
-striptracks-org-ger.sh     # Keep Original, German, and Unknown audio, and Original and German subtitles
-striptracks-org-spa.sh     # Keep Original, Spanish, and Unknown audio, and Original and Spanish subtitles
+striptracks-debug.sh        # Use detected languages, but enable debug logging
+striptracks-debug-2.sh      # Use detected languages, enable debug logging level 2
+striptracks-debug-max.sh    # Use detected languages, enable highest debug logging
+striptracks-dut.sh          # Keep Dutch and Unknown audio, and Dutch subtitles
+striptracks-eng.sh          # Keep English and Unknown audio, and English subtitles
+striptracks-eng-debug.sh    # Keep English and Unknown audio, and English subtitles, and enable debug logging
+striptracks-eng-fre.sh      # Keep English, French, and Unknown audio, and English and French subtitles
+striptracks-eng-jpn.sh      # Keep English, Japanese, and Unknown audio and English subtitles
+striptracks-fre.sh          # Keep French and Unknown audio, and French subtitles
+striptracks-ger.sh          # Keep German and Unknown audio, and German subtitles
+striptracks-spa.sh          # Keep Spanish and Unknown audio, and Spanish subtitles
+striptracks-low-priority.sh # Use detected languages, but execute mkvmerge with low CPU and I/O priority
+striptracks-org-eng.sh      # Keep Original, English, and Unknown audio, and Original and English subtitles
+striptracks-org-ger.sh      # Keep Original, German, and Unknown audio, and Original and German subtitles
+striptracks-org-spa.sh      # Keep Original, Spanish, and Unknown audio, and Original and Spanish subtitles
 ```
 
 </details>
