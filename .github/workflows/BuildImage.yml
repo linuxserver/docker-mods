@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "TrezOne/swag-auto-uptime-kuma"
+  ENDPOINT: "trezone/swag-auto-uptime-kuma"
   BRANCH: "swag-auto-uptime-kuma-timeout-fix_2025-06-20T09-38-36"
 
 jobs:
