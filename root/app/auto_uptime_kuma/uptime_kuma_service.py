@@ -33,7 +33,7 @@ class UptimeKumaService:
             )
             return False
 
-        self.api = UptimeKumaApi(url)
+        self.api = UptimeKumaApi(url, ENV[TIMEOUT])
         self.api.login(username, password)
 
         return True
