@@ -34,18 +34,17 @@ fi
 # Install pacakges and fonts
 if [[ "${LSIO_BASE}" == "alpine" ]] && [[ ! -f /usr/share/fonts/noto/NotoSansCJK-Regular.ttc ]]; then
   # Add fonts and lang
-  apk add --no-cache \
+  echo "\
     font-noto-all \
     font-noto-cjk \
     font-noto-emoji \
-    lang
+    lang" >> /mod-repo-packages-to-install.list
 elif [[ "${LSIO_BASE}" == "ubuntu" ]] && [[ ! -f /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc ]]; then
   # Install fonts and locales
   sed -i \
     '/locale/d' \
     /etc/dpkg/dpkg.cfg.d/excludes
-  apt-get update
-  apt-get install -y \
+  echo "\
     fonts-noto \
     language-pack-af \
     language-pack-am \
@@ -130,25 +129,24 @@ elif [[ "${LSIO_BASE}" == "ubuntu" ]] && [[ ! -f /usr/share/fonts/opentype/noto/
     language-pack-vi \
     language-pack-xh \
     language-pack-zh-hans \
-    language-pack-zh-hant
+    language-pack-zh-hant" >> /mod-repo-packages-to-install.list
 elif [[ "${LSIO_BASE}" == "debian" ]] && [[ ! -f /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc ]]; then
   # Install fonts and locales
   sed -i \
     '/locale/d' \
     /etc/dpkg/dpkg.cfg.d/docker
-  apt-get update
-  apt-get install -y \
+    echo "\
     fonts-noto \
-    locales-all
+    locales-all" >> /mod-repo-packages-to-install.list
   # Generate locales
   for LOCALE in ${LOCALES}; do
     echo "Generating Locale for ${LOCALE}"
-    localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
+    localedef -i "${LOCALE}" -f UTF-8 "${LOCALE}.UTF-8"
   done
 elif [[ "${LSIO_BASE}" == "fedora" ]] && [[ ! -d /usr/share/licenses/google-noto-cjk-fonts-common ]]; then
   # Install fonts and locales
   rm -f /etc/rpm/macros.image-language-conf
-  dnf install -y \
+    echo "\
     glibc-langpack-aa \
     glibc-langpack-af \
     glibc-langpack-agr \
@@ -715,26 +713,26 @@ elif [[ "${LSIO_BASE}" == "fedora" ]] && [[ ! -d /usr/share/licenses/google-noto
     google-noto-serif-vithkuqi-vf-fonts \
     google-noto-serif-yezidi-fonts \
     google-noto-serif-yezidi-vf-fonts \
-    google-noto-traditional-nushu-fonts
+    google-noto-traditional-nushu-fonts" >> /mod-repo-packages-to-install.list
   # Generate locales
   for LOCALE in ${LOCALES}; do
     echo "Generating Locale for ${LOCALE}"
-    localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
+    localedef -i "${LOCALE}" -f UTF-8 "${LOCALE}.UTF-8"
   done
 elif [[ "${LSIO_BASE}" == "arch" ]] && [[ ! -f /usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc ]]; then
   # Install fonts
   sed -i \
     '/locale/d' \
     /etc/pacman.conf
-  pacman -Sy --noconfirm \
+    echo "\
     glibc \
     noto-fonts-cjk \
     noto-fonts-emoji \
-    noto-fonts-extra 
+    noto-fonts-extra" >> /mod-repo-packages-to-install.list
   # Generate locales
   for LOCALE in ${LOCALES}; do
     echo "Generating Locale for ${LOCALE}"
-    localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
+    localedef -i "${LOCALE}" -f UTF-8 "${LOCALE}.UTF-8"
   done
 else
   echo "**** International Fonts/Locales installed skipping ****"
@@ -745,10 +743,10 @@ if which firefox && [ ! -f /langlock ]; then
   echo "Installing firefox langpacks"
   FIREFOX_VERSION=$(curl -sI https://download.mozilla.org/?product=firefox-latest | awk -F '(releases/|/win32)' '/Location/ {print $2}')
   RELEASE_URL="https://releases.mozilla.org/pub/firefox/releases/${FIREFOX_VERSION}/win64/xpi/"
-  LANGS=$(curl -Ls ${RELEASE_URL} | awk -F '(xpi">|</a>)' '/href.*xpi/ {print $2}' | tr '\n' ' ')
+  LANGS=$(curl -Ls "${RELEASE_URL}" | awk -F '(xpi">|</a>)' '/href.*xpi/ {print $2}' | tr '\n' ' ')
   if [[ "${LSIO_BASE}" == "alpine" ]]; then
     EXTENSION_DIR=/usr/lib/firefox/distribution/extensions/
-  else 
+  else
     EXTENSION_DIR=/usr/lib/firefox-addons/distribution/extensions/
   fi
   mkdir -p ${EXTENSION_DIR}
@@ -756,8 +754,8 @@ if which firefox && [ ! -f /langlock ]; then
     LANGCODE=$(echo ${LANG} | sed 's/\.xpi//g')
     echo "Downloading ${LANG} Firefox Language pack"
     curl -o \
-      ${EXTENSION_DIR}langpack-${LANGCODE}@firefox.mozilla.org.xpi -Ls \
-      ${RELEASE_URL}${LANG}
+      "${EXTENSION_DIR}langpack-${LANGCODE}@firefox.mozilla.org.xpi" -Ls \
+      "${RELEASE_URL}${LANG}"
   done
 fi
 
