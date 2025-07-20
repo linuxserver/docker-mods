@@ -1,11 +1,13 @@
-## Version 2023/05/18 - Changelog: https://github.com/linuxserver/docker-mods/commits/nginx-proxy-confs/root/defaults/nginx/site-confs/default.conf.sample
+## Version 2025/07/18 - Changelog: https://github.com/linuxserver/docker-mods/commits/nginx-proxy-confs/root/defaults/nginx/site-confs/default.conf.sample
 
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    listen 443 ssl http2 default_server;
-    listen [::]:443 ssl http2 default_server;
+    listen 443 ssl default_server;
+    #listen 443 quic reuseport default_server;
+    listen [::]:443 ssl default_server;
+    #listen [::]:443 quic reuseport default_server;
 
     server_name _;
 

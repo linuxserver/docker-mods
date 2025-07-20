@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as grab-stage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.22 AS grab-stage
 
 RUN \
   apk add --no-cache --upgrade \
