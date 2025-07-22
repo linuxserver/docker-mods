@@ -13,6 +13,7 @@ AUTHELIA_REGEX = r"\n\s+include \/config\/nginx\/authelia-location\.conf;.*"
 AUTHENTIK_REGEX = r"\n\s+include \/config\/nginx\/authentik-location\.conf;.*"
 BASIC_AUTH_REGEX = r"\n\s+auth_basic.*"
 LDAP_REGEX = r"\n\s+include \/config\/nginx\/ldap-location\.conf;.*"
+TINYAUTH_REGEX = r"\n\s+include \/config\/nginx\/tinyauth-location\.conf;.*"
 
 
 def find_apps(fast=False):
@@ -50,6 +51,8 @@ def match_auth(auths, app, file_path, content):
         auths[app][file_path] = "Basic Auth"
     elif re.findall(LDAP_REGEX, content):
         auths[app][file_path] = "LDAP"
+    elif re.findall(TINYAUTH_REGEX, content):
+        auths[app][file_path] = "Tinyauth"
     else:
         auths[app][file_path] = "No Auth"
 
