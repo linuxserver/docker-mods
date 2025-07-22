@@ -1,0 +1,12 @@
+#!/bin/with-contenv bash
+
+# Installing dependencies and Infisical CLI
+apk add --no-cache bash curl
+curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash
+apk update && apk add infisical=0.41.94
+
+# Ensure Infisical CLI is executable
+chmod +x /usr/bin/infisical
+
+# Clean up to minimize image size
+rm -rf /var/cache/apk/* /tmp/*

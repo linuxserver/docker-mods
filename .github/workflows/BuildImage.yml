@@ -10,10 +10,10 @@ on:
         required: false
 
 env:
-  GITHUB_REPO: "linuxserver/docker-mods" #don't modify
-  ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  GITHUB_REPO: "mildman1848/docker-mods" #don't modify
+  ENDPOINT: "mildman1848/mods" #don't modify
+  BASEIMAGE: "universal" #replace
+  MODNAME: "infisical-cli" #replace
   MOD_VERSION: ${{ inputs.mod_version }} #don't modify
   MULTI_ARCH: "true" #set to false if not needed
 
@@ -47,11 +47,9 @@ jobs:
       MOD_VERSION_OVERRIDE: ${{ steps.outputs.outputs.MOD_VERSION_OVERRIDE }}
 
   build:
-    uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
+    uses: mildman1848/github-workflows/.github/workflows/docker-mod-builder.yml@v1
     needs: set-vars
     secrets:
-      CR_USER: ${{ secrets.CR_USER }}
-      CR_PAT: ${{ secrets.CR_PAT }}
       DOCKERUSER: ${{ secrets.DOCKERUSER }}
       DOCKERPASS: ${{ secrets.DOCKERPASS }}
     with:
