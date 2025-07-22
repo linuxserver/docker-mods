@@ -22,6 +22,9 @@
                 td {
                     padding-right: 20px;
                 }
+                h1 {
+                    text-transform: none;
+                }
                 .far, .fas {
                     font-family: "Font Awesome 5 Free" !important;
                 }
@@ -89,7 +92,7 @@
             $index++;
         }
         return <<<HTML
-            <div class="wrap-panel status-div">
+            <article class="wrap-panel status-div">
                 <div id="proxiesTable">
                     <script>
                         $.ajax({
@@ -116,10 +119,8 @@
                             {$status}
                         </tbody>
                     </table>
-                    <br/>
                 </div>
-                <br/>
-            </div>
+            </article>
         HTML;
     }
 
@@ -137,7 +138,7 @@
             $index++;
         }
         return <<<HTML
-            <div class="wrap-panel status-div">
+            <article class="wrap-panel status-div">
                 <div>
                     <h2>Fail2Ban</h2>
                     <table class="table-hover">
@@ -152,10 +153,8 @@
                             {$status}
                         </tbody>
                     </table>
-                    <br/>
                 </div>
-                <br/>
-            </div>
+            </article>
         HTML;
     }
 
@@ -202,7 +201,7 @@
             return "";
         }
         return <<<HTML
-            <div class="wrap-panel status-div">
+            <article class="wrap-panel status-div">
                 <div>
                     <h2>Version Updates <i class="fas fa-info-circle" title="{$tooltip}"></i></h2>
                     <table class="table-hover">
@@ -218,10 +217,8 @@
                             {$files}
                         </tbody>
                     </table>
-                    <br/>
                 </div>
-                <br/>
-            </div>
+            </article>
         HTML;
     }
 
@@ -243,7 +240,7 @@
             $counter++;
         }
         return <<<HTML
-            <div class="wrap-panel status-div">
+            <article class="wrap-panel status-div">
                 <div>
                     <h2>Announcements</h2>
                     <table class="table-hover">
@@ -251,16 +248,14 @@
                             {$output}
                         </tbody>
                     </table>
-                    <br/>
                 </div>
-                <br/>
-            </div>
+            </article>
         HTML;
     }
 
     function GetLinks() {
         return <<<HTML
-            <div class="wrap-panel status-div">
+            <article class="wrap-panel status-div">
                 <div>
                     <h2>Useful Links</h2>
                     <table class="table-hover">
@@ -272,10 +267,8 @@
                             <tr><td class="link-text left-text"><span class="status-text"><a href="https://opencollective.com/linuxserver/donate">Donate</a></span></td></tr>
                         </tbody>
                     </table>
-                    <br/>
                 </div>
-                <br/>
-            </div>
+            </article>
         HTML;
     }
 
@@ -299,9 +292,9 @@
 
         $access_log = file_exists("/dashboard/logs") ? "/dashboard/logs/*.log" : "/config/log/nginx/access.log";
         $goaccess = shell_exec("cat $access_log | /usr/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf $geodb $asndb -");
+        $goaccess = str_replace("<div class='loading-container'>", "<div hidden>", $goaccess);
         $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
-        $goaccess = str_replace("<h1 class='h-dashboard'>", "<h1>", $goaccess);
-        $goaccess = str_replace("<i class='fa fa-tachometer'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);
+        $goaccess = str_replace("<i class='fa fa-tachometer' aria-hidden='true'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);
         $goaccess = preg_replace("/(<link rel='icon' )(.*?)(>)/", "<link rel='icon' type='image/svg+xml' href='/icon.svg'>", $goaccess);
         return $goaccess;
     }
@@ -318,7 +311,7 @@
         return <<<HTML
             <div class="pull-right status-div">
                 <h4>
-                    <span class="label label-info" style="display:block">
+                    <span class="label label-info" style="display:block" id="last-updated">
                         {$ssl}
                     </span>
                 </h4>
@@ -365,10 +358,10 @@
         echo json_encode($page);
     } else {
         $goaccess = GetGoaccess();
-        $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . "<div class='wrap-general'>";
-        $page = str_replace("<div class='wrap-general'>", $status, $goaccess);
-        $ssl = GetCertificate() . "<div class='pull-right hide'>";
-        $page = str_replace("<div class='pull-right'>", $ssl, $page);
+        $status = GetHeader() . GetProxies() . GetF2B() . GetTemplates() . GetAnnouncements() . GetLinks() . "<br/><br/><aside id='overall' aria-labelledby='overall-heading'>";
+        $page = str_replace("<aside id='overall' aria-labelledby='overall-heading'>", $status, $goaccess);
+        $ssl = GetCertificate() . "<div hidden style='margin-left: auto;'>";
+        $page = str_replace("<div style='margin-left: auto;'>", $ssl, $page);
         echo $page;
     }
 ?>
