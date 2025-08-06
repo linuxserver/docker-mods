@@ -193,7 +193,7 @@ class UptimeKumaService:
             Log.info(f"Deleting Monitor {monitor_data['id']}:{monitor_data['name']}")
             try:
                 self.api.delete_monitor(monitor_data["id"])
-            except socketio.exceptions.TimeoutError:
+            except TimeoutError:
                 Log.error(f"Timeout while deleting monitor ID {monitor_data['id']}")
                 return
             except Exception as e:
