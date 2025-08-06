@@ -188,27 +188,22 @@ class UptimeKumaService:
             )
 
     def delete_monitor(self, container_name: str):
-        monitor_data = self.get_monitor(container_name)
-        if monitor_data is not None:
-            Log.info(f"Deleting Monitor {monitor_data['id']}:{monitor_data['name']}")
-            try:
-                self.api.delete_monitor(monitor_data["id"])
-            except socketio.exceptions.TimeoutError:
-                Log.info(f"Timeout while deleting monitor ID {monitor_data['id']}")
-                return
-            except Exception as e:
-                Log.info(f"Error while deleting monitor ID {monitor_data['id']}: {e}")
-                return
+    monitor_data = self.get_monitor(container_name)
+    if monitor_data is not None:
+        Log.info(f"Deleting Monitor {monitor_data['id']}:{monitor_data['name']}")
+        try:
+            self.api.delete_monitor(monitor_data["id"])
+        except socketio.exceptions.TimeoutError:
+            Log.error(f"Timeout while deleting monitor ID {monitor_data['id']}")
+            return
+        except Exception as e:
+            Log.error(f"Error while deleting monitor ID {monitor_data['id']}: {e}")
+            return
 
-            for i, monitor in enumerate(self.monitors):
-                if monitor["id"] == monitor_data["id"]:
-                    del self.monitors[i]
-                    break
-
-            for i, monitor in enumerate(self.monitors):
-                if monitor["id"] == monitor_data["id"]:
-                    del self.monitors[i]
-                    break
+        for i, monitor in enumerate(self.monitors):
+            if monitor["id"] == monitor_data["id"]:
+                del self.monitors[i]
+                break
 
     def delete_monitors(self, container_names: list[str]):
         if container_names:
