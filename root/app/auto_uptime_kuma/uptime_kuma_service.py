@@ -145,10 +145,10 @@ class UptimeKumaService:
         try:
             monitor = self.api.add_monitor(**monitor_data)
         except TimeoutError:
-            Log.error("Timeout while trying to add monitor to Uptime Kuma. Is the server responsive?")
+            Log.info("Timeout while trying to add monitor to Uptime Kuma. Is the server responsive?")
             return None
         except Exception as e:
-            Log.error(f"Failed to create monitor due to unexpected error: {e}")
+            Log.info(f"Failed to create monitor due to unexpected error: {e}")
             return None
 
         self.api.add_monitor_tag(
