@@ -116,6 +116,15 @@ class UptimeKumaService:
                 return monitor
         return None
 
+    def validate_monitor_data(self, monitor_data):
+        required_keys = ["type", "name", "url"]
+        for key in required_keys:
+            if key not in monitor_data:
+                raise ValueError(f"Missing required monitor field: {key}")
+
+        if not isinstance(monitor_data.get("notificationIDList", []), list):
+            raise ValueError("notificationIDList must be a list")
+
     def monitor_exists(self, container_name):
         return self.get_monitor(container_name) is not None
 
