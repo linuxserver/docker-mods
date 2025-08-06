@@ -140,7 +140,7 @@ class UptimeKumaService:
             return None
 
         Log.info(f"Adding Monitor '{monitor_data['name']}' for container '{container_name}'")
-        Log.debug(f"Sending monitor data: {monitor_data}")
+        Log.info(f"Sending monitor data: {monitor_data}")
 
         try:
             monitor = self.api.add_monitor(**monitor_data)
