@@ -2,7 +2,7 @@ import requests
 from uptime_kuma_api.api import UptimeKumaApi, MonitorType
 from auto_uptime_kuma.log import Log
 from auto_uptime_kuma.config_service import ConfigService
-
+from socketio.exceptions import TimeoutError
 
 class UptimeKumaService:
 
@@ -144,7 +144,7 @@ class UptimeKumaService:
 
         try:
             monitor = self.api.add_monitor(**monitor_data)
-        except socketio.exceptions.TimeoutError:
+        except TimeoutError:
             Log.error("Timeout while trying to add monitor to Uptime Kuma. Is the server responsive?")
             return None
         except Exception as e:
