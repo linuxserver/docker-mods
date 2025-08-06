@@ -194,10 +194,10 @@ class UptimeKumaService:
             try:
                 self.api.delete_monitor(monitor_data["id"])
             except TimeoutError:
-                Log.error(f"Timeout while deleting monitor ID {monitor_data['id']}")
+                Log.info(f"Timeout while deleting monitor ID {monitor_data['id']}")
                 return
             except Exception as e:
-                Log.error(f"Error while deleting monitor ID {monitor_data['id']}: {e}")
+                Log.info(f"Error while deleting monitor ID {monitor_data['id']}: {e}")
                 return
 
             for i, monitor in enumerate(self.monitors):
