@@ -24,19 +24,50 @@ class UptimeKumaService:
     def __init__(self, config_service):
         self.config_service = config_service
 
-    def connect(self, url, username, password):
-        response = requests.get(url, allow_redirects=True, timeout=5)
-        if response.status_code != 200:
+    def _retry_api_call(self, func, *args, retries=5, delay=5, **kwargs):
+        """
+        Generic retry wrapper for Uptime Kuma API calls that may timeout.
+        """
+        for attempt in range(1, retries + 1):
+            try:
+                return func(*args, **kwargs)
+            except socketio.exceptions.TimeoutError:
+                if attempt == retries:
+                    Log.info(f"[auto-uptime-kuma] Final attempt {attempt} failed. Giving up.")
+                    raise
+                Log.info(
+                    f"[auto-uptime-kuma] Attempt {attempt} failed with TimeoutError. Retrying in {delay} seconds..."
+                )
+                time.sleep(delay)
+
+    def create_monitor(self, container_name, monitor_data):
+        monitor_data = self.build_monitor_data(container_name, monitor_data)
+        if self.monitor_exists(container_name):
             Log.info(
-                f"Unable to connect to UptimeKuma at '{url}' (Status code: {response.status_code})."
-                " Please check if the host is running."
+                f"Uptime Kuma already contains Monitor '{monitor_data['name']}'"
+                f" for container '{container_name}', skipping..."
             )
-            return False
+            return None
 
-        self.api = UptimeKumaApi(url, ENV[TIMEOUT])
-        self.api.login(username, password)
+        Log.info(
+            f"Adding Monitor '{monitor_data['name']}' for container '{container_name}'"
+        )
 
-        return True
+        monitor = self._retry_api_call(self.api.add_monitor, **monitor_data)
+
+        self._retry_api_call(
+            self.api.add_monitor_tag,
+            tag_id=self.get_swag_tag()["id"],
+            monitor_id=monitor["monitorID"],
+            value=container_name.lower(),
+        )
+
+        self.config_service.create_config(container_name, monitor_data)
+
+        monitor = self._retry_api_call(self.api.get_monitor, monitor["monitorID"])
+        self.monitors.append(monitor)
+
+        return monitor
 
     def disconnect(self):
         """
