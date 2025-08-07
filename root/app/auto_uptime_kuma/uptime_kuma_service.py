@@ -2,7 +2,7 @@ import requests
 from uptime_kuma_api.api import UptimeKumaApi, MonitorType
 from auto_uptime_kuma.log import Log
 from auto_uptime_kuma.config_service import ConfigService
-
+from socketio.exceptions import TimeoutError
 
 class UptimeKumaService:
 
@@ -116,11 +116,22 @@ class UptimeKumaService:
                 return monitor
         return None
 
+    def validate_monitor_data(self, monitor_data):
+        required_keys = ["type", "name", "url"]
+        for key in required_keys:
+            if key not in monitor_data:
+                raise ValueError(f"Missing required monitor field: {key}")
+
+        if not isinstance(monitor_data.get("notificationIDList", []), list):
+            raise ValueError("notificationIDList must be a list")
+
     def monitor_exists(self, container_name):
         return self.get_monitor(container_name) is not None
 
     def create_monitor(self, container_name, monitor_data):
         monitor_data = self.build_monitor_data(container_name, monitor_data)
+        self.validate_monitor_data(monitor_data)
+
         if self.monitor_exists(container_name):
             Log.info(
                 f"Uptime Kuma already contains Monitor '{monitor_data['name']}'"
@@ -128,11 +139,17 @@ class UptimeKumaService:
             )
             return None
 
-        Log.info(
-            f"Adding Monitor '{monitor_data['name']}' for container '{container_name}'"
-        )
+        Log.info(f"Adding Monitor '{monitor_data['name']}' for container '{container_name}'")
+        Log.info(f"Sending monitor data: {monitor_data}")
 
-        monitor = self.api.add_monitor(**monitor_data)
+        try:
+            monitor = self.api.add_monitor(**monitor_data)
+        except TimeoutError:
+            Log.info("Timeout while trying to add monitor to Uptime Kuma. Is the server responsive?")
+            return None
+        except Exception as e:
+            Log.info(f"Failed to create monitor due to unexpected error: {e}")
+            return None
 
         self.api.add_monitor_tag(
             tag_id=self.get_swag_tag()["id"],
@@ -141,7 +158,6 @@ class UptimeKumaService:
         )
 
         self.config_service.create_config(container_name, monitor_data)
-
         monitor = self.api.get_monitor(monitor["monitorID"])
         self.monitors.append(monitor)
 
@@ -153,7 +169,13 @@ class UptimeKumaService:
         is actually "delete" followed by "add"
         so that in the end the monitors are actually recreated
         """
-        new_monitor_data = self.build_monitor_data(container_name, monitor_data)
+        try:
+            new_monitor_data = self.build_monitor_data(container_name, monitor_data)
+            self.validate_monitor_data(new_monitor_data)
+        except Exception as e:
+            Log.info(f"Invalid monitor data for '{container_name}'. Skipping edit. Reason: {e}")
+            return
+
         existing_monitor_data = self.get_monitor(container_name)
         old_content = self.config_service.read_config_content(container_name)
         new_content = self.config_service.build_config_content(new_monitor_data)
@@ -175,7 +197,14 @@ class UptimeKumaService:
         monitor_data = self.get_monitor(container_name)
         if monitor_data is not None:
             Log.info(f"Deleting Monitor {monitor_data['id']}:{monitor_data['name']}")
-            self.api.delete_monitor(monitor_data["id"])
+            try:
+                self.api.delete_monitor(monitor_data["id"])
+            except TimeoutError:
+                Log.info(f"Timeout while deleting monitor ID {monitor_data['id']}")
+                return
+            except Exception as e:
+                Log.info(f"Error while deleting monitor ID {monitor_data['id']}: {e}")
+                return
 
             for i, monitor in enumerate(self.monitors):
                 if monitor["id"] == monitor_data["id"]:
