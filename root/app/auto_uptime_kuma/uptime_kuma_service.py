@@ -169,7 +169,13 @@ class UptimeKumaService:
         is actually "delete" followed by "add"
         so that in the end the monitors are actually recreated
         """
-        new_monitor_data = self.build_monitor_data(container_name, monitor_data)
+        try:
+            new_monitor_data = self.build_monitor_data(container_name, monitor_data)
+            self.validate_monitor_data(new_monitor_data)
+        except Exception as e:
+            Log.info(f"Invalid monitor data for '{container_name}'. Skipping edit. Reason: {e}")
+            return
+
         existing_monitor_data = self.get_monitor(container_name)
         old_content = self.config_service.read_config_content(container_name)
         new_content = self.config_service.build_config_content(new_monitor_data)
