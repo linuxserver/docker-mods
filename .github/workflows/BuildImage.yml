@@ -10,8 +10,8 @@ on:
         required: false
 
 env:
-  GITHUB_REPO: "linuxserver/docker-mods" #don't modify
-  ENDPOINT: "linuxserver/mods" #don't modify
+  GITHUB_REPO: "hctancredi/docker-mods" #don't modify
+  ENDPOINT: "hctancredi/mods" #don't modify
   BASEIMAGE: "nzbget" #replace
   MODNAME: "essentials" #replace
   MOD_VERSION: ${{ inputs.mod_version }} #don't modify
