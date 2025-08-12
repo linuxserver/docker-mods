@@ -1,8 +1,8 @@
 #!/usr/bin/with-contenv bash
 
-PAR2_VERSION="0.8.1"
+PAR2_VERSION="1.0.0"
 PAR2_URL="https://github.com/Parchive/par2cmdline/releases/download/v$PAR2_VERSION/par2cmdline-$PAR2_VERSION.tar.gz"
-echo "UPDATED 12/22/22"
+echo "UPDATED 8/12/25"
 echo "NZBGet Essentials FIXED - Installation Started"
 apk --update upgrade
 echo "Phase 1 - Dependencies are being installed...."
@@ -26,7 +26,7 @@ apk add --no-cache \
 	unzip
 apk add --no-cache --repository https://dl-cdn.alpinelinux.org/alpine/v3.12/main/ \
 	unrar \
-	python2 \
+	python3 \
 	ffmpeg
 echo "Phase 2 - DONE"
 if [ -f /usr/local/bin/par2 ]; then
