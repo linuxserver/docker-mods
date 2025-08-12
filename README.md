@@ -7,7 +7,7 @@ openssl
 p7zip
 unzip
 unrar
-python2
+python3
 par2
 
 In NZBGet docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:nzbget-essentials`
