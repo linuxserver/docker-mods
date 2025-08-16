@@ -43,4 +43,20 @@ Follow these steps to enable the dbip mod:
 
         location / {
     ```
+   Or for blacklist with both some countries and continents: 
+    ```nginx
+    server {
+        listen 443 ssl;
+        listen [::]:443 ssl;
+
+        server_name some-app.*;
+        include /config/nginx/ssl.conf;
+        client_max_body_size 0;
+
+        if ($lan-ip = yes) { set $geo-blacklist yes; }
+        if ($geo-blacklist = no) { return 404; }
+        if ($continent-blacklist = no) { return 404; }
+
+        location / {
+    ```
 6. Restart the container to apply the changes.
