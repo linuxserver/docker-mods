@@ -5,7 +5,7 @@
 
 # Version 3
 # 2022-09-25 - Initial Release
-MOD_SCRIPT_VER="3.20250106"
+MOD_SCRIPT_VER="3.20250825"
 
 # Define custom folder paths
 SCRIPTS_DIR="/custom-cont-init.d"
@@ -328,6 +328,7 @@ run_mods() {
         fi
         FILENAME="${USERNAME}.${REPO}${TAG:+.${TAG}}${TAGSHA:+.${TAGSHA#*:}}"
         MANIFEST_URL="https://${REGISTRY}/v2/${ENDPOINT}/manifests"
+        write_mod_debug "Manifest URL: ${MANIFEST_URL}"
         BLOB_URL="https://${REGISTRY}/v2/${ENDPOINT}/blobs/"
         MOD_UA="Mozilla/5.0 (Linux $(uname -m)) linuxserver.io ${REGISTRY}/${ENDPOINT}${TAG:+:${TAG}}${TAGSHA:+@${TAGSHA}}"
         write_mod_debug "Registry='${REGISTRY}', Repository='${USERNAME}', Image='${ENDPOINT}', Tag='${TAG:-N/A}', TagSHA='${TAGSHA:-N/A}'"
@@ -379,8 +380,8 @@ run_mods() {
         fi
         ARCH=$(get_arch)
         write_mod_debug "Arch detected as ${ARCH}"
-        if [[ -z "${TOKEN}" ]]; then
-            write_mod_error "Couldn't fetch auth token from ${REGISTRY}, switching to offline mode for ${DOCKER_MOD}"
+        if [[ -z "${TOKEN}" ]] && [[ -z $(curl -sIk "${MANIFEST_URL}" | grep -E 'HTTP/\S+' | awk {'print $2'}) ]]; then
+            write_mod_error "No response from ${REGISTRY}, switching to offline mode for ${DOCKER_MOD}"
             MOD_OFFLINE="true"
         else
             # Determine first and only layer of image
