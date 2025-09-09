@@ -8,6 +8,6 @@ if [ ! -d "$plugindir/Audnexus.bundle" ]; then
     s6-setuidgid abc git clone --depth 1 https://github.com/djdembeck/Audnexus.bundle "$plugindir/Audnexus.bundle"
 else
     echo "**** pulling latest update ****"
-    s6-setuidgid abc git -C "$plugindir/Hama.bundle" pull
+    s6-setuidgid abc git -C "$plugindir/Audnexus.bundle" pull
 fi
 lsiown -R abc:abc "$plugindir/Audnexus.bundle"
