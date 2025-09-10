@@ -65,7 +65,7 @@ function initialize_variables {
   export striptracks_nice="nice"
   # If this were defined directly in Radarr or Sonarr this would not be needed here
   # shellcheck disable=SC2089
-  export striptracks_isocodemap='{"languages":[{"language":{"name":"Any","iso639-2":["any"]}},{"language":{"name":"Afrikaans","iso639-2":["afr"]}},{"language":{"name":"Albanian","iso639-2":["sqi","alb"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bengali","iso639-2":["ben"]}},{"language":{"name":"Bosnian","iso639-2":["bos"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Catalan","iso639-2":["cat"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Croatian","iso639-2":["hrv"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Estonian","iso639-2":["est"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Indonesian","iso639-2":["ind"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Kannada","iso639-2":["kan"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Latvian","iso639-2":["lav"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Macedonian","iso639-2":["mac","mkd"]}},{"language":{"name":"Malayalam","iso639-2":["mal"]}},{"language":{"name":"Marathi","iso639-2":["mar"]}},{"language":{"name":"Mongolian","iso639-2":["mon"]}},{"language":{"name":"Norwegian","iso639-2":["nno","nob","nor"]}},{"language":{"name":"Persian","iso639-2":["fas","per"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Portuguese (Brazil)","iso639-2":["por"]}},{"language":{"name":"Romansh","iso639-2":["roh"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Serbian","iso639-2":["srp"]}},{"language":{"name":"Slovak","iso639-2":["slk","slo"]}},{"language":{"name":"Slovenian","iso639-2":["slv"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Spanish (Latino)","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Tagalog","iso639-2":["tgl"]}},{"language":{"name":"Tamil","iso639-2":["tam"]}},{"language":{"name":"Telugu","iso639-2":["tel"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Ukrainian","iso639-2":["ukr"]}},{"language":{"name":"Urdu","iso639-2":["urd"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}},{"language":{"name":"Unknown","iso639-2":["und"]}}]}'
+  export striptracks_isocodemap='{"languages":[{"language":{"name":"Afrikaans","iso639-2":["afr"]}},{"language":{"name":"Albanian","iso639-2":["sqi","alb"]}},{"language":{"name":"Any","iso639-2":["any"]}},{"language":{"name":"Arabic","iso639-2":["ara"]}},{"language":{"name":"Bengali","iso639-2":["ben"]}},{"language":{"name":"Bosnian","iso639-2":["bos"]}},{"language":{"name":"Bulgarian","iso639-2":["bul"]}},{"language":{"name":"Catalan","iso639-2":["cat"]}},{"language":{"name":"Chinese","iso639-2":["zho","chi"]}},{"language":{"name":"Croatian","iso639-2":["hrv"]}},{"language":{"name":"Czech","iso639-2":["ces","cze"]}},{"language":{"name":"Danish","iso639-2":["dan"]}},{"language":{"name":"Dutch","iso639-2":["nld","dut"]}},{"language":{"name":"English","iso639-2":["eng"]}},{"language":{"name":"Estonian","iso639-2":["est"]}},{"language":{"name":"Finnish","iso639-2":["fin"]}},{"language":{"name":"Flemish","iso639-2":["nld","dut"]}},{"language":{"name":"French","iso639-2":["fra","fre"]}},{"language":{"name":"Georgian","iso639-2":["kat","geo"]}},{"language":{"name":"German","iso639-2":["deu","ger"]}},{"language":{"name":"Greek","iso639-2":["ell","gre"]}},{"language":{"name":"Hebrew","iso639-2":["heb"]}},{"language":{"name":"Hindi","iso639-2":["hin"]}},{"language":{"name":"Hungarian","iso639-2":["hun"]}},{"language":{"name":"Icelandic","iso639-2":["isl","ice"]}},{"language":{"name":"Indonesian","iso639-2":["ind"]}},{"language":{"name":"Italian","iso639-2":["ita"]}},{"language":{"name":"Japanese","iso639-2":["jpn"]}},{"language":{"name":"Kannada","iso639-2":["kan"]}},{"language":{"name":"Korean","iso639-2":["kor"]}},{"language":{"name":"Latvian","iso639-2":["lav"]}},{"language":{"name":"Lithuanian","iso639-2":["lit"]}},{"language":{"name":"Macedonian","iso639-2":["mac","mkd"]}},{"language":{"name":"Malayalam","iso639-2":["mal"]}},{"language":{"name":"Marathi","iso639-2":["mar"]}},{"language":{"name":"Mongolian","iso639-2":["mon"]}},{"language":{"name":"Norwegian","iso639-2":["nno","nob","nor"]}},{"language":{"name":"Persian","iso639-2":["fas","per"]}},{"language":{"name":"Polish","iso639-2":["pol"]}},{"language":{"name":"Portuguese","iso639-2":["por"]}},{"language":{"name":"Portuguese (Brazil)","iso639-2":["por"]}},{"language":{"name":"Romanian","iso639-2":["rum","ron"]}},{"language":{"name":"Romansh","iso639-2":["roh"]}},{"language":{"name":"Russian","iso639-2":["rus"]}},{"language":{"name":"Serbian","iso639-2":["srp"]}},{"language":{"name":"Slovak","iso639-2":["slk","slo"]}},{"language":{"name":"Slovenian","iso639-2":["slv"]}},{"language":{"name":"Spanish","iso639-2":["spa"]}},{"language":{"name":"Spanish (Latino)","iso639-2":["spa"]}},{"language":{"name":"Swedish","iso639-2":["swe"]}},{"language":{"name":"Tagalog","iso639-2":["tgl"]}},{"language":{"name":"Tamil","iso639-2":["tam"]}},{"language":{"name":"Telugu","iso639-2":["tel"]}},{"language":{"name":"Thai","iso639-2":["tha"]}},{"language":{"name":"Turkish","iso639-2":["tur"]}},{"language":{"name":"Ukrainian","iso639-2":["ukr"]}},{"language":{"name":"Unknown","iso639-2":["und"]}},{"language":{"name":"Urdu","iso639-2":["urd"]}},{"language":{"name":"Vietnamese","iso639-2":["vie"]}}]}'
   # Presence of '*_eventtype' variable sets script mode
   export striptracks_type=$(printenv | sed -n 's/_eventtype *=.*$//p')
 }
@@ -633,13 +633,12 @@ function get_mediainfo {
 
   local videofile="$1"
 
-  # shellcheck disable=SC2016
-  local mkvcommand='/usr/bin/mkvmerge -J "$videofile"'
+  local mkvcommand="/usr/bin/mkvmerge -J \"$videofile\""
   [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $mkvcommand" | log
   unset striptracks_json
   # This must be a declare statement to avoid the 'Argument list too long' error with some large returned JSON (see issue #104)
   declare -g striptracks_json
-  striptracks_json=$(eval $mkvcommand)
+  striptracks_json=$(eval "$mkvcommand")
   local return=$?
   [ $striptracks_debug -ge 1 ] && echo "Debug|mkvmerge returned ${#striptracks_json} bytes" | log
   [ $striptracks_debug -ge 2 ] && [ ${#striptracks_json} -ne 0 ] && echo "mkvmerge returned: $striptracks_json" | awk '{print "Debug|"$0}' | log
@@ -1514,11 +1513,10 @@ function set_title_and_exit_if_nothing_removed {
         # Remuxing not performed
         local message="Info|No tracks would be removed from video$( [ "$striptracks_reorder" = "true" ] && echo " or reordered"). Setting Title only and exiting."
         echo "$message" | log
-        # shellcheck disable=SC2016
-        local mkvcommand='/usr/bin/mkvpropedit -q --edit info --set "title=$striptracks_title" "$striptracks_video"'
+        local mkvcommand="/usr/bin/mkvpropedit -q --edit info --set \"title=$striptracks_title\" \"$striptracks_video\""
         [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $mkvcommand" | log
         local result
-        result=$(eval $mkvcommand)
+        result=$(eval "$mkvcommand")
         local return=$?
         [ $striptracks_debug -ge 1 ] && echo "Debug|mkvpropedit returned ${#result} bytes" | log
         [ $striptracks_debug -ge 2 ] && [ ${#result} -ne 0 ] && echo "mkvpropedit returned: $result" | awk '{print "Debug|"$0}' | log
@@ -1569,11 +1567,10 @@ function remux_video {
   fi
 
   # Execute MKVmerge (remux then rename, see issue #46)
-  # shellcheck disable=SC2016
-  local mkvcommand='$striptracks_nice /usr/bin/mkvmerge --title "$striptracks_title" -q -o "$striptracks_tempvideo" $audioarg $subsarg $striptracks_neworder "$striptracks_video"'
+  local mkvcommand="$striptracks_nice /usr/bin/mkvmerge --title \"$striptracks_title\" -q -o \"$striptracks_tempvideo\" $audioarg $subsarg $striptracks_neworder \"$striptracks_video\""
   [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $mkvcommand" | log
   local result
-  result=$(eval $mkvcommand)
+  result=$(eval "$mkvcommand")
   local return=$?
   [ $striptracks_debug -ge 1 ] && echo "Debug|mkvmerge returned ${#result} bytes" | log
   [ $striptracks_debug -ge 2 ] && [ ${#result} -ne 0 ] && echo "mkvmerge returned: $result" | awk '{print "Debug|"$0}' | log
