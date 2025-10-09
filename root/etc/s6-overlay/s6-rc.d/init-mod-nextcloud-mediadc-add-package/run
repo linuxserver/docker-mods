@@ -4,7 +4,9 @@ if ! pip list 2> /dev/null | grep -q "pillow-heif" || ! pip list 2> /dev/null | 
     echo "**** Adding pillow-heif, hexhamming, pywavelets and their deps to package install lists ****"
     echo "\
         ffmpeg \
+        g++ \
         imagemagick \
+        python3-dev \
         supervisor" >> /mod-repo-packages-to-install.list
     if [ $(arch) = "x86_64" ]; then
         echo "scipy" >> /mod-pip-packages-to-install.list
