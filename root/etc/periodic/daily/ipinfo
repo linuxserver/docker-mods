@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+
+if [[ ! -n "${IPINFO_TOKEN}" ]]; then
+    echo "IPINFO_TOKEN env var is missing."
+    exit 1
+fi
+
+FILE="https://ipinfo.io/data/ipinfo_lite.mmdb?token=${IPINFO_TOKEN}"
+
+wget -O /tmp/ipinfo_lite.mmdb $FILE
+mv -f /tmp/ipinfo_lite.mmdb /config/geoip2db/ipinfo_lite.mmdb
+exit 0

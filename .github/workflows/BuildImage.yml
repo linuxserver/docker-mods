@@ -1,6 +1,8 @@
 name: Build Image
 
 on:
+  push:
+  pull_request_target:
   workflow_dispatch:
     inputs:
       mod_version:
@@ -8,22 +10,56 @@ on:
         required: false
 
 env:
-  MOD_VERSION: ${{ inputs.mod_version }}
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "master"
-  MODNAME: "dummy"
+  BASEIMAGE: "swag" #replace
+  MODNAME: "ipinfo" #replace
+  MOD_VERSION: ${{ inputs.mod_version }} #don't modify
   MULTI_ARCH: "false" #set to false if not needed
+
 
 jobs:
   set-vars:
     runs-on: ubuntu-latest
     steps:
       - name: Set Vars
+        id: outputs
         run: |
-          echo "GITHUB_REPO=${{ env.GITHUB_REPO }}" >> $GITHUB_STEP_SUMMARY
-          echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_STEP_SUMMARY
-          echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_STEP_SUMMARY
-          echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_STEP_SUMMARY
-          echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_STEP_SUMMARY
-          echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "GITHUB_REPO=${{ env.GITHUB_REPO }}" >> $GITHUB_OUTPUT
+          echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_OUTPUT
+          echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_OUTPUT
+          echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_OUTPUT
+          echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_OUTPUT
+          if [[ -z "${{ env.MOD_VERSION }}" ]]; then
+            # **** If the mod needs to be versioned, set the versioning logic below. Otherwise leave as is. ****
+            MOD_VERSION=""
+          else
+            MOD_VERSION=${{ env.MOD_VERSION }}
+            echo "MOD_VERSION_OVERRIDE=true" >> $GITHUB_OUTPUT
+          fi
+          echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_OUTPUT
+    outputs:
+      GITHUB_REPO: ${{ steps.outputs.outputs.GITHUB_REPO }}
+      ENDPOINT: ${{ steps.outputs.outputs.ENDPOINT }}
+      BASEIMAGE: ${{ steps.outputs.outputs.BASEIMAGE }}
+      MODNAME: ${{ steps.outputs.outputs.MODNAME }}
+      MULTI_ARCH: ${{ steps.outputs.outputs.MULTI_ARCH }}
+      MOD_VERSION: ${{ steps.outputs.outputs.MOD_VERSION }}
+      MOD_VERSION_OVERRIDE: ${{ steps.outputs.outputs.MOD_VERSION_OVERRIDE }}
+
+  build:
+    uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
+    needs: set-vars
+    secrets:
+      CR_USER: ${{ secrets.CR_USER }}
+      CR_PAT: ${{ secrets.CR_PAT }}
+      DOCKERUSER: ${{ secrets.DOCKERUSER }}
+      DOCKERPASS: ${{ secrets.DOCKERPASS }}
+    with:
+      GITHUB_REPO: ${{ needs.set-vars.outputs.GITHUB_REPO }}
+      ENDPOINT: ${{ needs.set-vars.outputs.ENDPOINT }}
+      BASEIMAGE: ${{ needs.set-vars.outputs.BASEIMAGE }}
+      MODNAME: ${{ needs.set-vars.outputs.MODNAME }}
+      MULTI_ARCH: ${{ needs.set-vars.outputs.MULTI_ARCH }}
+      MOD_VERSION: ${{ needs.set-vars.outputs.MOD_VERSION }}
+      MOD_VERSION_OVERRIDE: ${{ needs.set-vars.outputs.MOD_VERSION_OVERRIDE }}
