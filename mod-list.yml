@@ -151,6 +151,7 @@ mods:
       - geoip2influx: https://github.com/linuxserver/docker-mods/tree/swag-geoip2influx
       - imagemagick: https://github.com/linuxserver/docker-mods/tree/swag-imagemagick
       - ioncube: https://github.com/linuxserver/docker-mods/tree/swag-ioncube
+      - ipinfo: https://github.com/linuxserver/docker-mods/tree/swag-ipinfo
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
   transmission:
     mod_count: 5
