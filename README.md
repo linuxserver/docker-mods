@@ -1,25 +1,65 @@
-# Rsync - Docker mod for openssh-server
+# IPINFO Docker mod for Nginx based images
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod downloads the `ipinfo_lite.mmdb` database under `/config/geoip2db`, the database is updated daily.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+**This mod should not be enabled together with swag-maxmind or swag-dbip mods.**
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+Follow these steps to enable the ipinfo mod:
 
-# Mod creation instructions
+1. Sign up and aquire an ipinfo token here: https://ipinfo.io/signup
+2. In the container's docker arguments, set the following environment variables:
+    - `IPINFO_TOKEN=<token>` with your token.
+3. In the container's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-ipinfo`
+   
+   If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:swag-ipinfo|linuxserver/mods:swag-mod2`
+4. Recreate the container to apply the changes.
+5. Add the following line to `/config/nginx/nginx.conf` under the `http` section:
+   
+   ```nginx
+   include /config/nginx/ipinfo.conf;
+   ```
+6. Edit `/config/nginx/ipinfo.conf` and add countries to the blocklist / whitelist according to the comments, for example:
+   
+    ```nginx
+    map $geoip2_data_country_iso_code $geo-whitelist {
+        default no;
+        UK yes;
+    }
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic and `MULTI_ARCH` if needed.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+    map $geoip2_data_country_iso_code $geo-blacklist {
+        default yes;
+        US no;
+    }
+    ```
+7. Use the definitions in the following way:
+   ```nginx
+    server {
+        listen 443 ssl;
+        listen [::]:443 ssl;
 
+        server_name some-app.*;
+        include /config/nginx/ssl.conf;
+        client_max_body_size 0;
 
-## Tips and tricks
+        if ($lan-ip = yes) { set $geo-whitelist yes; }
+        if ($geo-whitelist = no) { return 404; }
 
-* Some images have helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+        location / {
+    ```
+   Or for blacklist with both some countries and continents: 
+    ```nginx
+    server {
+        listen 443 ssl;
+        listen [::]:443 ssl;
+
+        server_name some-app.*;
+        include /config/nginx/ssl.conf;
+        client_max_body_size 0;
+
+        if ($lan-ip = yes) { set $geo-blacklist yes; }
+        if ($geo-blacklist = no) { return 404; }
+        if ($continent-blacklist = no) { return 404; }
+
+        location / {
+    ```
+8. Restart the container to apply the changes.

@@ -1,0 +1,19 @@
+#!/usr/bin/with-contenv bash
+
+echo "Applying the ipinfo mod..."
+
+chmod +x /etc/periodic/daily/ipinfo
+
+# check GeoIP2 database
+if [ ! -f /config/geoip2db/ipinfo_lite.mmdb ]; then
+    echo "Downloading GeoIP2 City database."
+    mkdir -p "/config/geoip2db"
+    /etc/periodic/daily/ipinfo
+fi
+
+if [ ! -f /config/nginx/ipinfo.conf ]; then
+    cp /defaults/ipinfo.conf /config/nginx/ipinfo.conf
+    lsiown -R abc:abc /config/nginx/ipinfo.conf
+fi
+
+echo "Applied the ipinfo mod"
