@@ -4,7 +4,7 @@ This mod adds the maxmind database to nginx using the license key defined in the
 
 This mod downloads the `GeoLite2-City.mmdb` database under `/config/geoip2db`, the database is updated weekly.
 
-**This mod should not be enabled together with the swag-dbip mod.**
+**This mod should not be enabled together with swag-dbip or swag-ipinfo mods.**
 
 Follow these steps to enable the maxmind mod:
 
@@ -21,7 +21,7 @@ Follow these steps to enable the maxmind mod:
    ```nginx
    include /config/nginx/maxmind.conf;
    ```
-5. Edit `/config/nginx/maxmind.conf` and add countries to the blocklist / whitelist according to the comments, for example:
+6. Edit `/config/nginx/maxmind.conf` and add countries to the blocklist / whitelist according to the comments, for example:
    
     ```nginx
     map $geoip2_data_country_iso_code $geo-whitelist {
@@ -34,7 +34,7 @@ Follow these steps to enable the maxmind mod:
         US no;
     }
     ```
-6. Use the definitions in the following way:
+7. Use the definitions in the following way:
    ```nginx
     server {
         listen 443 ssl;
@@ -49,4 +49,4 @@ Follow these steps to enable the maxmind mod:
 
         location / {
     ```
-7. Restart the container to apply the changes.
+8. Restart the container to apply the changes.
