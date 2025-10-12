@@ -2,7 +2,7 @@
 
 This mod downloads the `dbip-country-lite.mmdb` database under `/config/geoip2db`, the database is updated weekly.
 
-**This mod should not be enabled together with the swag-maxmind mod.**
+**This mod should not be enabled together with swag-maxmind or swag-ipinfo mods.**
 
 Follow these steps to enable the dbip mod:
 
