@@ -7,6 +7,7 @@ echo "**** Setting notify_push server URL to ${NOTIFY_PUSH_URL} ****"
 while ! occ notify_push:setup "${NOTIFY_PUSH_URL}"; do
     RETRY=$((${RETRY} + 1))
     if [[ "${RETRY}" -lt 6 ]]; then
+        echo "**** Retrying notify_push setup ****"
         sleep 3
     else
         echo "**** There was an error setting the notify_push server URL. Please double check your reverse proxy settings as well as the overwrite.cli.url entry in Nextcloud's config.php ****"
