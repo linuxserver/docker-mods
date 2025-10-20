@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ## Buildstage ##
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.22 AS buildstage
 
 ARG MOD_VERSION
 
@@ -13,13 +13,17 @@ RUN \
       | jq -r '.tag_name'); \
   fi && \
   if [ "$(uname -m)" == "x86_64" ]; then \
-    curl -o \
+    if ! curl -fo /root-layer/calibre.txz -L "https://github.com/kovidgoyal/calibre/releases/download/${MOD_VERSION}/calibre-${MOD_VERSION:1}-x86_64.txz"; then \
+      curl -fo \
         /root-layer/calibre.txz -L \
         "https://download.calibre-ebook.com/${MOD_VERSION:1}/calibre-${MOD_VERSION:1}-x86_64.txz"; \
+    fi; \
   elif [ "$(uname -m)" == "aarch64" ]; then \
-    curl -o \
+    if ! curl -fo /root-layer/calibre.txz -L "https://github.com/kovidgoyal/calibre/releases/download/${MOD_VERSION}/calibre-${MOD_VERSION:1}-arm64.txz"; then \
+      curl -fo \
         /root-layer/calibre.txz -L \
         "https://download.calibre-ebook.com/${MOD_VERSION:1}/calibre-${MOD_VERSION:1}-arm64.txz"; \
+    fi; \
   fi && \
   echo $MOD_VERSION > /root-layer/CALIBRE_RELEASE
 
