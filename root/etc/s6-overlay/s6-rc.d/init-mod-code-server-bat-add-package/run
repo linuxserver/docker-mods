@@ -1,0 +1,27 @@
+#!/usr/bin/with-contenv bash
+
+# This is the init file used for adding os or pip packages to install lists.
+# It takes advantage of the built-in init-mods-package-install init script that comes with the baseimages.
+# If using this, we need to make sure we set this init as a dependency of init-mods-package-install so this one runs first
+#!/usr/bin/with-contenv bash
+
+if ! dpkg -s ripgrep >/dev/null 2>&1; then
+    echo "**** Adding ripgrep to package install list ****"
+    echo "ripgrep" >> /mod-repo-packages-to-install.list
+else
+    echo "**** ripgrep already installed, skipping ****"
+fi
+
+if ! dpkg -s bat >/dev/null 2>&1; then
+    echo "**** Adding bat to package install list ****"
+    echo "bat" >> /mod-repo-packages-to-install.list
+else
+    echo "**** bat already installed, skipping ****"
+fi
+
+if ! dpkg -s git >/dev/null 2>&1; then
+    echo "**** Adding git to package install list ****"
+    echo "git" >> /mod-repo-packages-to-install.list
+else
+    echo "**** git already installed, skipping ****"
+fi
