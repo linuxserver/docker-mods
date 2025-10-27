@@ -4,9 +4,9 @@ This mod adds [bat](https://github.com/sharkdp/bat) to code-server, to be instal
 
 Bat is a cat(1) clone with syntax highlighting and Git integration.
 
-In code-server docker arguments, set an environment variable `DOCKER_MODS=somewatson/mods:code-server-bat`
+In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-bat`
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=somewatson/mods:code-server-bat|linuxserver/mods:openssh-server-mod2`
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-bat|linuxserver/mods:openssh-server-mod2`
 
 ### Bat-extras and Ripgrep
 
