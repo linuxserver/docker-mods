@@ -44,14 +44,17 @@ else
 fi
 
 if [ -d ~/.bat-extras ]; then
-    echo 'Bat-extras already installed, skipping'
+    echo 'Bat-extras already cloned, skipping'
 else
-    echo 'Installing bat-extras'
+    echo 'Cloning bat-extras repo'
     git clone https://github.com/eth-p/bat-extras.git ~/.bat-extras
-    cd ~/.bat-extras/src
-    chmod +x ~/.bat-extras/src/*.sh
-    ln -s ~/.bat-extras/src/*.sh /usr/local/bin
 fi
 
+echo 'Installing bat-extras'
+cd ~/.bat-extras/src
+chmod +x ~/.bat-extras/src/*.sh
+ln -s ~/.bat-extras/src/*.sh /usr/local/bin
+
+echo 'Setting permissions for bat-extras'
 lsiown -R abc:abc \
     /config/.bat-extras
