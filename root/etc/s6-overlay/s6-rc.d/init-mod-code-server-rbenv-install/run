@@ -14,6 +14,11 @@ fi
 if [ -d /config/.rbenv/plugins/ruby-build ]; then
     echo 'ruby-build plugin already cloned, skipping'
 
+    # On a docker start, even if this folder exists, we need to own it first for git to be able to pull
+    echo 'Setting permissions for ~/.rbenv'
+    lsiown -R abc:abc \
+        /config/.rbenv
+
     echo 'Upgrading ruby-build plugin'
     git -C /config/.rbenv/plugins/ruby-build pull
 else
