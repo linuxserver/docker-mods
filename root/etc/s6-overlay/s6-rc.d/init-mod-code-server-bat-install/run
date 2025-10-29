@@ -7,54 +7,54 @@
 if ! command -v zsh >/dev/null 2>&1; then
     echo "**** zsh not installed, skipping alias setup ****"
 else
-    if [ -f ~/.zshrc ]; then
-        if ! grep -q 'alias bat="batcat"' ~/.zshrc; then
+    if [ -f /config/.zshrc ]; then
+        if ! grep -q 'alias bat="batcat"' /config/.zshrc; then
             echo 'Adding alias to zsh for bat'
-            echo 'alias bat="batcat"' >> ~/.zshrc
+            echo 'alias bat="batcat"' >> /config/.zshrc
         else
             echo 'Alias already exists in zsh, skipping'
         fi
     else
-        echo '~/.zshrc not found, creating one with the alias'
-        echo 'alias bat="batcat"' > ~/.zshrc
+        echo '/config/.zshrc not found, creating one with the alias'
+        echo 'alias bat="batcat"' > /config/.zshrc
     fi
 fi
 
 if ! command -v bash >/dev/null 2>&1; then
     echo "**** bash not installed, skipping alias setup ****"
 else
-    if [ -f ~/.bash_profile ]; then
-        if ! grep -q 'alias bat="batcat"' ~/.bash_profile; then
-            echo 'Adding alias to ~/.bash_profile for bat'
-            echo 'alias bat="batcat"' >> ~/.bash_profile
+    if [ -f /config/.bash_profile ]; then
+        if ! grep -q 'alias bat="batcat"' /config/.bash_profile; then
+            echo 'Adding alias to /config/.bash_profile for bat'
+            echo 'alias bat="batcat"' >> /config/.bash_profile
         else
-            echo 'Alias already exists in ~/.bash_profile, skipping'
+            echo 'Alias already exists in /config/.bash_profile, skipping'
         fi
-    elif [ -f ~/.bashrc ]; then
-        if ! grep -q 'alias bat="batcat"' ~/.bashrc; then
-            echo 'Adding alias to ~/.bashrc for bat'
-            echo 'alias bat="batcat"' >> ~/.bashrc
+    elif [ -f /config/.bashrc ]; then
+        if ! grep -q 'alias bat="batcat"' /config/.bashrc; then
+            echo 'Adding alias to /config/.bashrc for bat'
+            echo 'alias bat="batcat"' >> /config/.bashrc
         else
-            echo 'Alias already exists in ~/.bashrc, skipping'
+            echo 'Alias already exists in /config/.bashrc, skipping'
         fi
     else
-        echo '~/.bash_profile or ~/.bashrc not found, creating one with the alias'
-        echo 'alias bat="batcat"' > ~/.bash_profile
+        echo '/config/.bash_profile or /config/.bashrc not found, creating one with the alias'
+        echo 'alias bat="batcat"' > /config/.bash_profile
     fi
 fi
 
-if [ -d ~/.bat-extras ]; then
-    echo 'Bat-extras already cloned, skipping'
+if [ -d /config/.bat-extras ]; then
+    echo 'Bat-extras already cloned, updating'
+    git -C /config/.bat-extras pull
 else
     echo 'Cloning bat-extras repo'
-    git clone https://github.com/eth-p/bat-extras.git ~/.bat-extras
+    git clone https://github.com/eth-p/bat-extras.git /config/.bat-extras
 fi
 
 echo 'Installing bat-extras'
-cd ~/.bat-extras/src
-chmod +x ~/.bat-extras/src/*.sh
-ln -s ~/.bat-extras/src/*.sh /usr/local/bin
+ln -sf /config/.bat-extras/src/*.sh /usr/local/bin
 
 echo 'Setting permissions for bat-extras'
+chmod +x /config/.bat-extras/src/*.sh
 lsiown -R abc:abc \
     /config/.bat-extras
