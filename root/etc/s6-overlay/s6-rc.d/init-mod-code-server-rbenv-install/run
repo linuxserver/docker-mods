@@ -4,54 +4,54 @@
 # so it can take advantage of packages installed
 # init-mods-end depends on this script so that later init and services wait until this script exits
 
-if [ -d ~/.rbenv ]; then
+if [ -d /config/.rbenv ]; then
     echo 'rbenv already cloned, skipping'
 else
     echo 'Cloning rbenv repo'
-    git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+    git clone https://github.com/rbenv/rbenv.git /config/.rbenv
 fi
 
-if [ -d ~/.rbenv/plugins/ruby-build ]; then
+if [ -d /config/.rbenv/plugins/ruby-build ]; then
     echo 'ruby-build plugin already cloned, skipping'
 
     echo 'Upgrading ruby-build plugin'
-    git -C ~/.rbenv/plugins/ruby-build pull
+    git -C /config/.rbenv/plugins/ruby-build pull
 else
     echo 'Cloning ruby-build plugin repo'
-    git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+    git clone https://github.com/rbenv/ruby-build.git /config/.rbenv/plugins/ruby-build
 fi
 
 # This will add `eval "$(~/.rbenv/bin/rbenv init - --no-rehash bash)"` to the ~/.bashrc or ~/.bash_profile file
 echo 'Initializing rbenv for bash'
-~/.rbenv/bin/rbenv init
+/config/.rbenv/bin/rbenv init
 
 if ! command -v zsh >/dev/null 2>&1; then
     echo "**** zsh not installed, skipping shell completions setup ****"
 else
     # This will add `eval "$(~/.rbenv/bin/rbenv init - --no-rehash zsh)"` to the ~/.zshrc file
     echo 'Initializing rbenv for zsh'
-    ~/.rbenv/bin/rbenv init zsh
+    /config/.rbenv/bin/rbenv init zsh
 
-    if [ -f ~/.zshrc ]; then
-        if ! grep -q 'FPATH=~/.rbenv/completions:"$FPATH"' ~/.zshrc; then
+    if [ -f /config/.zshrc ]; then
+        if ! grep -q 'FPATH=~/.rbenv/completions:"$FPATH"' /config/.zshrc; then
             echo 'Adding shell completions to zsh for rbenv'
 
-            echo '' >> ~/.zshrc
-            echo '# For rbenv shell completions' >> ~/.zshrc
-            echo 'FPATH=~/.rbenv/completions:"$FPATH"' >> ~/.zshrc
-            echo 'autoload -U compinit' >> ~/.zshrc
-            echo 'compinit' >> ~/.zshrc
+            echo '' >> /config/.zshrc
+            echo '# For rbenv shell completions' >> /config/.zshrc
+            echo 'FPATH=~/.rbenv/completions:"$FPATH"' >> /config/.zshrc
+            echo 'autoload -U compinit' >> /config/.zshrc
+            echo 'compinit' >> /config/.zshrc
         else
             echo 'rbenv shell completions already exist in zsh, skipping'
         fi
     else
-        echo '~/.zshrc not found, creating one with the shell completions'
+        echo '/config/.zshrc not found, creating one with the shell completions'
 
-        echo '' >> ~/.zshrc
-        echo '# For rbenv shell completions' >> ~/.zshrc
-        echo 'FPATH=~/.rbenv/completions:"$FPATH"' >> ~/.zshrc
-        echo 'autoload -U compinit' >> ~/.zshrc
-        echo 'compinit' >> ~/.zshrc
+        echo '' >> /config/.zshrc
+        echo '# For rbenv shell completions' >> /config/.zshrc
+        echo 'FPATH=~/.rbenv/completions:"$FPATH"' >> /config/.zshrc
+        echo 'autoload -U compinit' >> /config/.zshrc
+        echo 'compinit' >> /config/.zshrc
     fi
 fi
 
