@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.22 AS buildstage
 
 ARG MOD_VERSION
 
@@ -9,6 +9,7 @@ RUN \
   if [ -z "${MOD_VERSION+x}" ]; then \
     DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" \
       | awk '/tag_name/{print $4;exit}' FS='[""]' \
+      | sed 's|^docker-||' \
       | sed 's|^v||'); \
     COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" \
       | awk '/tag_name/{print $4;exit}' FS='[""]' \
