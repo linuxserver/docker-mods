@@ -9,12 +9,12 @@ def _get_f2b_data(db_path):
     con = sqlite3.connect(db_path)
     cur = con.cursor()
     results = cur.execute("""
-        SELECT jails.name, 
-        COUNT(bans.ip) AS bans,
-        (SELECT DISTINCT bans.ip from bans where jails.name = bans.jail ORDER BY timeofban DESC) as last_ban,
-        (SELECT DISTINCT bans.data from bans where jails.name = bans.jail ORDER BY timeofban DESC) as data
-        FROM jails 
-        LEFT JOIN bans ON jails.name=bans.jail 
+        SELECT jails.name,
+        COUNT(bips.ip) AS bans,
+        (SELECT DISTINCT bips.ip from bips where jails.name = bips.jail ORDER BY timeofban DESC) as last_ban,
+        (SELECT DISTINCT bips.data from bips where jails.name = bips.jail ORDER BY timeofban DESC) as data
+        FROM jails
+        LEFT JOIN bips ON jails.name=bips.jail
         GROUP BY jails.name
         """).fetchall()
     con.close()
