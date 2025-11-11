@@ -23,7 +23,7 @@ jobs:
           echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_OUTPUT
           # **** If the mod needs to be versioned, set the versioning logic below. Otherwise leave as is. ****
           COMPOSE_RELEASE=$(curl -sX GET "https://api.github.com/repos/docker/compose/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||')
-          DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^v||')
+          DOCKER_RELEASE=$(curl -sX GET "https://api.github.com/repos/moby/moby/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's|^docker-||' | sed 's|^v||')
           MOD_VERSION="${DOCKER_RELEASE}-${COMPOSE_RELEASE}"
           echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_OUTPUT
     outputs:
