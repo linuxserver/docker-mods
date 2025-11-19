@@ -1,0 +1,20 @@
+#!/usr/bin/with-contenv bash
+
+# This is an install script that is designed to run after init-mods-package-install
+# so it can take advantage of packages installed
+# init-mods-end depends on this script so that later init and services wait until this script exits
+
+echo "**** Setting up heyu ****"
+
+mkdir -p /config/heyu
+
+
+if [[ ! -f /config/heyu/x10config ]]; then
+    cp /defaults/x10config.sample /config/heyu/x10config
+fi
+
+if [[ ! -f /config/heyu/x10config ]]; then
+    cp /defaults/x10.sched.sample /config/heyu/x10.sched
+fi
+
+echo "**** heyu setup complete ****"
