@@ -7,10 +7,11 @@
 echo "**** Setting up heyu ****"
 
 mkdir -p /config/heyu
+mkdir -p /usr/local/var/tmp/heyu
+mkdir -p /usr/local/var/lock
 
-
-if [[ ! -f /config/heyu/x10config ]]; then
-    cp /defaults/x10config.sample /config/heyu/x10config
+if [[ ! -f /config/heyu/x10.conf ]]; then
+    cp /defaults/x10config.sample /config/heyu/x10.conf
 fi
 
 if [[ ! -f /config/heyu/x10.sched ]]; then
