@@ -13,7 +13,7 @@ if [[ ! -f /config/heyu/x10config ]]; then
     cp /defaults/x10config.sample /config/heyu/x10config
 fi
 
-if [[ ! -f /config/heyu/x10config ]]; then
+if [[ ! -f /config/heyu/x10.sched ]]; then
     cp /defaults/x10.sched.sample /config/heyu/x10.sched
 fi
 
