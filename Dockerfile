@@ -9,7 +9,7 @@ ARG GIT_HASH=902a4ef
 COPY root/ /root-layer/
 
 RUN \
-  echo "**** install build packages ****" && \h
+  echo "**** install build packages ****" && \
   apk add --no-cache \
     curl build-base && \
   echo "**** get heyu source ****" && \
