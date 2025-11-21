@@ -181,15 +181,17 @@ graph LR
   A[Command-Line]
   B["Environment
   Variable"]
-  C["Quality
-  Profile"] 
+  C{"Quality
+  Profile"}
   D["Custom
   Formats"]
   E["Language Profile
   (Sonarr only)"]
+  F(["Exit"])
   A-->B
   B-->C
   C-- 'Any' -->D
+  C-- "--skip-profile" -->F
   D-->E
 ```
 
@@ -197,6 +199,7 @@ Descriptively, these steps are:
 1. Command-line arguments override all automatic language selection.
 2. Environment variable is checked for arguments.
 3. If there are no command-line or environment variable arguments, the video's *Quality Profile* is examined for a language configuration (only supported in Radarr).
+    1. If the *Quality Profile* name matches one of the names specified with the `--skip-profile` option, stop processing and exit.
 4. If there is no *Quality Profile* language **or** it is set to 'Any', then examine the *Custom Formats* and scores associated with the quality profile.  
 All language conditions with positive scores *and* Negated conditions with negative scores *and* non-Negated Except Language conditions with negative scores are selected.
 5. If the *Custom Format* scores are zero (0) or there are none with configured language conditions, use the *Language Profile* (only supported in Sonarr v3)
@@ -210,18 +213,22 @@ All language conditions with positive scores *and* Negated conditions with negat
 The script also supports command-line arguments that will override the automatic language detection.  More granular control can therefore be exerted or extended using tagging and defining multiple *Connect* scripts (this is native Radarr/Sonarr functionality outside the scope of this documentation).
 
 The syntax for the command-line is:  
-`striptracks.sh [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [--reorder] [--disable-recycle] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-p|--priority} {idle|low|medium|high}] [{-d|--debug} [<level>]]`  
+`striptracks.sh [{-a|--audio} <audio_languages[+modifier]> [{-s|--subs} <subtitle_languages[+modifier]>] [{-f|--file} <video_file>]] [--reorder] [--disable-recycle] [--skip-profile <profile_name>]... [--set-default-audio <language_code[=name]>] [--set-default-subs <language_code[=name]>]
+[{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-p|--priority} {idle|low|medium|high}] [{-d|--debug} [<level>]]`  
 
 <details>
 <summary>Table of Command-Line Arguments</summary>
 
 Option|Argument|Description
 ---|---|---
-`-a`, `--audio`|`<audio_languages>`|Audio languages to keep<br/>ISO 639-2 code(s) prefixed with a colon (`:`)<br/>Each code may optionally be followed by a plus (`+`) and one or more [modifiers](#language-code-modifiers).
-`-s`, `--subs`|`<subtitle_languages>`|Subtitle languages to keep<br/>ISO 639-2 code(s) prefixed with a colon (`:`)<br/>Each code may optionally be followed by a plus (`+`) and one or more modifiers.
+`-a`, `--audio`|`<audio_languages[+modifier]>`|Audio languages to keep<br/>ISO 639-2 code(s) prefixed with a colon (`:`)<br/>Each code may optionally be followed by a plus (`+`) and one or more [modifiers](#language-code-modifiers).
+`-s`, `--subs`|`<subtitle_languages[+modifier]>`|Subtitle languages to keep<br/>ISO 639-2 code(s) prefixed with a colon (`:`)<br/>Each code may optionally be followed by a plus (`+`) and one or more modifiers.
 `-f`, `--file`|`<video_file>`|If included, the script enters **[Batch Mode](#batch-mode)** and converts the specified video file.<br/>Requires the `--audio` option.<br/>![notes] **Do not** use this argument when called from Radarr or Sonarr!
 `--reorder`| |Reorder audio and subtitles tracks to match the language code order specified in the `<audio_languages>` and `<subtitle_languages>` arguments.
 `--disable-recycle`| |Disable recycle bin use, even if configured in Radarr/Sonarr
+`--skip-profile`|`<profile_name>`|Skip processing if the video was downloaded using the specified Quality Profile name. May be specified multiple times to skip multiple profiles.
+`--set-default-audio`|`<language_code[=name]>`|Set the default audio track to the first track of the specified language. Only one language code is allowed. If specified, all other tracks are marked as not default.<br/>The code may optionally be followed by an equals (`=`) and a [track name](#setting-default-track) matching string.
+`--set-default-subs`|`<language_code[=name]>`|Set the default subtitles track to the first track of the specified language. Only one language code is allowed. If specified, all other tracks are marked as not default.<br/>The code may optionally be followed by an equals (`=`) and a track name string.
 `-l`, `--log`|`<log_file>`|The log filename<br/>Default is `/config/log/striptracks.txt`
 `-c`, `--config`|`<config_file>`|Radarr/Sonarr XML configuration file<br/>Default is `/config/config.xml`
 `-p`, `--priority`|`idle`, `low`, `medium`, `high`|CPU and I/O process priority for mkvmerge<br/>Default is `medium`<br/>![notes] High priority can consume all system resources. When processing a large video file your system may become unresponsive!
@@ -246,13 +253,18 @@ Multiple codes may be concatenated, such as `:eng:spa` for both English and Span
 > If no subtitle language is detected via Radarr/Sonarr configuration or specified on the command-line, all subtitles are removed.
 
 ### Language Code Modifiers
-Each language code can optionally be followed by a plus (`+`) and one or more modifier characters.  Supported modifiers are:
+Each language code can optionally be followed by a plus (`+`) and one or more modifier characters. Supported modifiers are in the table below.
+
+<details>
+<summary>Table of Language Code Modifiers</summary>
 
 Modifier|Function
 ---|---
 `f`|Selects only tracks with the forced flag set
 `d`|Selects only tracks with the default flag set
 `[0-9]`|Specifies the maximum number of tracks to select.<br/>Based on the order of the tracks in the original source video.
+
+</details>
 
 These modifiers must be applied to each language code you want to modify.  They may be used with either audio or subtitles codes.  
 For example, the following options, `--audio :org:any+d --subs :eng+1:any+f` would keep:  
@@ -264,6 +276,30 @@ Modifiers may be combined, such as `:any+fd` to keep all forced and all default 
 > [!NOTE]
 > Note the exact phrasing of the previous sentence.  There is nuance here that is not obvious.  
 > `:any+fd` is equivalent to `:any+f:any+d`, but `:eng+1d` is **not** the same as `:eng+1:eng+d`.
+
+### Setting Default Track
+Use the `--set-default` options to choose tracks that appear first when the video is played. Only one audio and one subtitles track may be set as default. The language code is the same colon (`:`) prepended ISO 639-2 language code used with the `--audio` and `--subs` options.
+The first track of the specified language will have its default flag set and all other tracks (of any language) will have their default flag disabled.
+
+The language code can optionally be follow by an equals (`=`) and a string which is used to match against the track name. The first track that matches the specified language and with a name that matches the string will be set to default.
+The string matching uses a substring and is case insensitive. You can use this to set the default subtitles track to hearing impared (SDH), or the audio track to your preferred language.
+
+The setting of default track flags occurs after the track selection logic.
+
+> [!NOTE]
+> This is not a robust feature. It relies heavily on the track order and names from the source video file.
+> You may therefore not obtain consistent results.
+
+<details>
+<summary>Track Name Examples</summary>
+
+If you want to set the default subtitles track to the first hearing impared English track, you would use:  
+`--set-default-subs :eng=SDH`
+
+To set the default audio track to Dutch:  
+`--set-default-audio :dut`
+
+</details>
 
 ### Any language code
 The `:any` language code is a special code. When used, the script will preserve all language tracks, regardless of how they are tagged in the source video.
@@ -452,6 +488,7 @@ Because the script is not called from within Radarr or Sonarr, their database is
 * *The filename must be specified on the command-line.*<br/>The `-f` option places the script in Batch Mode
 * *No audio or subtitles language detection occurs.*<br/>Both the audio and subtitles languages must be specified on the command-line.
 * *The `:org` language code is meaningless.*<br/>The original video language cannot be determined.
+* *Profile skipping is not available.*
 * *The resultant MKV embedded title attribute is set to the basename of the file minus the extension.*<br/>The canonical name of the movie/TV show cannot otherwise be determined.
 * *Radarr or Sonarr APIs are not called and their database is not updated.*<br/>This may require a manual rescan of converted videos.
 * *Original video files are deleted.*<br/>The Recycle Bin function is not available.
