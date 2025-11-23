@@ -55,6 +55,9 @@ server {
 - `swag_ondemand_urls` don't need to be valid, it will work as long as it reaches swag and gets logged by nginx under `/config/log/nginx/access.log`.
 - The same URL can be set on multiple containers and all of them will be started when accessing that URL.
 
+### Logging:
+The log file can be found under `/config/log/ondemand/ondemand.log`.
+
 ## Security Consideration:
 Mapping the `docker.sock`, especially in a publicly accessible container is a security liability. Since this mod only needs read-only access to the docker api, the recommended method is to proxy the `docker.sock` via a solution like [our docker socket proxy](https://github.com/linuxserver/docker-socket-proxy), limit the access, and set `DOCKER_HOST=` to point to the proxy address.
 
