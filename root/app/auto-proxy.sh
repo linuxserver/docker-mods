@@ -1,12 +1,12 @@
 #!/usr/bin/with-contenv bash
 
 AUTO_GEN=""
+ENABLED_CONTAINERS=$(docker ps -f "label=swag=enable" --format "{{.Names}}" && docker ps -a  -f "status=exited" -f "label=swag=enable" -f "label=swag_ondemand=enable" --format "{{.Names}}")
 # figure out which containers to generate confs for or which confs to remove
 if [ ! -f /auto-proxy/enabled_containers ]; then
-    docker ps --filter "label=swag=enable" --format "{{.Names}}" > /auto-proxy/enabled_containers
+    echo "${ENABLED_CONTAINERS}" > /auto-proxy/enabled_containers
     AUTO_GEN=$(cat /auto-proxy/enabled_containers)
 else
-    ENABLED_CONTAINERS=$(docker ps --filter "label=swag=enable" --format "{{.Names}}")
     for CONTAINER in ${ENABLED_CONTAINERS}; do
         if [ ! -f "/auto-proxy/${CONTAINER}.conf" ]; then
             echo "**** New container ${CONTAINER} detected, will generate new conf. ****"
