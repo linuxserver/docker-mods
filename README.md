@@ -45,6 +45,14 @@ server {
     include /config/nginx/ondemand.conf;
     ...
 ```
+Or set the following label if using `swag-auto-proxy`:
+```yaml
+    somecontainer:
+        container_name: somecontainer
+        ...
+        labels:
+            - swag_server_custom_directive=include /config/nginx/ondemand.conf;
+```
 ### Labels:
 - `swag_ondemand=enable` - required for on-demand.
 - `swag_ondemand_urls=https://wake.domain.com,https://app.domain.com/up` - *optional* - overrides the monitored URLs for starting the container on-demand. Defaults to `https://somecontainer.,http://somecontainer.`.
