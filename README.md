@@ -1,6 +1,6 @@
 # On-demand - Docker mod for SWAG
 
-This mod gives SWAG the ability to start containers on-demand when accessed through SWAG and stop them after a period of inactivity. It takes a few seconds for containers to start on-demand, you'll need to refresh the tab.
+This mod gives SWAG the ability to start containers on-demand when accessed through SWAG and stop them after a period of inactivity. It takes a few seconds for containers to start on-demand, you'll need to refresh the tab or add a loading page as detailed below.
 
 ## Setup:
 - In SWAG's docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-ondemand` and either add a volume mapping for `/var/run/docker.sock:/var/run/docker.sock:ro`, or set an environment var `DOCKER_HOST=remoteaddress` (read the security considerations below).
