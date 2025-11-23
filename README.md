@@ -24,14 +24,11 @@ This mod gives SWAG the ability to start containers on-demand when accessed thro
                     '"$http_referer" "$http_user_agent"';
     access_log /config/log/nginx/access.log main;
     ```
-- *Optional* - In SWAG's docker arguments, set an environment variable `SWAG_ONDEMAND_STOP_THRESHOLD` to override the period of inactivity in seconds before stopping the container. Defaults to `600` which is 10 minutes.
-    ```yaml
-    swag:
-        container_name: swag
-        ...
-        environment:
-            - SWAG_ONDEMAND_STOP_THRESHOLD=600
-    ```
+- *Optional* - Additional environment variables
+  - `SWAG_ONDEMAND_STOP_THRESHOLD` - duration of inactivity in seconds before stopping on-demand containers, defaults to `600` (10 minutes).
+  - `SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP` - sleep time in seconds between querying containers, defaults to `5.0`.
+  - `SWAG_ONDEMAND_LOG_READER_SLEEP` - sleep time in seconds between log reads, defaults to `1.0`.
+
 ### Loading Page:
 
 ![loading-page](.assets/loading-page.png)

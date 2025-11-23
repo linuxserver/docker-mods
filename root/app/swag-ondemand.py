@@ -7,6 +7,8 @@ import time
 
 ACCESS_LOG_FILE = "/config/log/nginx/access.log"
 LOG_FILE = "/config/log/ondemand/ondemand.log"
+CONTAINER_QUERY_SLEEP = float(os.environ.get("SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP", "5.0"))
+LOG_READER_SLEEP = float(os.environ.get("SWAG_ONDEMAND_LOG_READER_SLEEP", "1.0"))
 STOP_THRESHOLD = int(os.environ.get("SWAG_ONDEMAND_STOP_THRESHOLD", "600"))
 
 last_accessed_urls = set()
@@ -75,7 +77,7 @@ class ContainerThread(threading.Thread):
                 self.process_containers()
                 self.start_containers()
                 self.stop_containers()
-                time.sleep(5)
+                time.sleep(CONTAINER_QUERY_SLEEP)
             except Exception as e:
                 logging.exception(e)
 
@@ -91,7 +93,7 @@ class LogReaderThread(threading.Thread):
         while True:
             line = f.readline()
             if not line:
-                time.sleep(1)
+                time.sleep(LOG_READER_SLEEP)
                 if os.stat(ACCESS_LOG_FILE).st_ino != inode:
                     f.close()
                     f = open(ACCESS_LOG_FILE, 'r')
