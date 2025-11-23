@@ -93,6 +93,9 @@ for CONTAINER in ${AUTO_GEN}; do
         elif [ "${swag_auth}" == "authentik" ]; then
             sed -i "s|#include /config/nginx/authentik|include /config/nginx/authentik|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling Authentik for ${CONTAINER} ****"
+        elif [ "${swag_auth}" == "tinyauth" ]; then
+            sed -i "s|#include /config/nginx/tinyauth|include /config/nginx/tinyauth|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Enabling Tinyauth for ${CONTAINER} ****"
         elif [ "${swag_auth}" == "http" ]; then
             sed -i "s|#auth_basic|auth_basic|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
@@ -167,6 +170,9 @@ DUDE
         elif [ "${swag_auth}" == "authentik" ]; then
             sed -i "s|#include /config/nginx/authentik|include /config/nginx/authentik|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling Authentik for ${CONTAINER} ****"
+        elif [ "${swag_auth}" == "tinyauth" ]; then
+            sed -i "s|#include /config/nginx/tinyauth|include /config/nginx/tinyauth|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
+            echo "**** Enabling Tinyauth for ${CONTAINER} ****"
         elif [ "${swag_auth}" == "http" ]; then
             sed -i "s|#auth_basic|auth_basic|g" "/etc/nginx/http.d/auto-proxy-${CONTAINER}.subdomain.conf"
             echo "**** Enabling basic http auth for ${CONTAINER} ****"
