@@ -1,0 +1,24 @@
+#!/usr/bin/with-contenv bash
+
+echo "Applying the swag-ondemand mod..."
+
+if [ ! -S /var/run/docker.sock ] && [ -z "$DOCKER_HOST" ]; then
+    echo "**** Docker not set up properly, skipping swag-ondemand ****"
+    exit 0
+fi
+
+echo '**** Checking if docker-py is already installed ****'
+if ! pip list 2>&1 | grep -q "docker"; then
+    echo "**** Adding docker-py to package install lists ****"
+    echo "\
+        docker" >> /mod-pip-packages-to-install.list
+else
+    echo "**** docker-py already installed, skipping ****"
+fi
+
+if [ ! -f /config/nginx/ondemand.conf ]; then
+    cp /defaults/ondemand.conf /config/nginx/ondemand.conf
+    lsiown -R abc:abc /config/nginx/ondemand.conf
+fi
+
+echo "Applied the swag-ondemand mod"
