@@ -646,14 +646,15 @@ function get_mediainfo {
 
   local videofile="$1"  # Video file to inspect
 
-  local mkvcommand="/usr/bin/mkvmerge -J \"$videofile\""
+  local mkvcommand="/usr/bin/mkvmerge -J \"$(escape_string "$videofile")\""
   execute_mkv_command "$mkvcommand" "inspecting video"
+  local return=$?
 
   unset striptracks_json
   # This must be a declare statement to avoid the 'Argument list too long' error with some large returned JSON (see issue #104)
   declare -g striptracks_json
   striptracks_json="$striptracks_mkvresult"
-  return
+  return $return
 }
 # function import_video {
   # # Import new video into Radarr/Sonarr
@@ -1047,6 +1048,16 @@ function wait_if_locked {
   fi
   return $return
 }
+function escape_string {
+  # Escape special characters in string for use in mkvmerge/mkvpropedit commands
+
+  local input="$1" # Input string to escape
+
+  # Escape backslashes, double quotes, and dollar signs
+  # shellcheck disable=SC2001
+  local output="$(echo "$input" | sed -e 's/[`"\\$]/\\&/g')"
+  echo "$output"
+}
 function execute_mkv_command {
   # Execute mkvmerge or mkvpropedit command
 
@@ -1054,7 +1065,7 @@ function execute_mkv_command {
   local action="$2" # Action being performed (for logging purposes)
 
   [ $striptracks_debug -ge 1 ] && echo "Debug|Executing: $command" | log
-  local shortcommand="$(echo $command | sed -E 's/(nice )?([^ ]+).*$/\2/')"
+  local shortcommand="$(echo $command | sed -E 's/(.+ )?(\/[^ ]+) .*$/\2/')"
   shortcommand=$(basename "$shortcommand")
   unset striptracks_mkvresult
   # This must be a declare statement to avoid the 'Argument list too long' error with some large returned JSON (see issue #104)
@@ -1620,7 +1631,7 @@ function set_default_tracks {
 
   if [ -n "$striptracks_default_flags" ]; then
     # Execute mkvpropedit to set default flags on tracks
-    local mkvcommand="/usr/bin/mkvpropedit -q $striptracks_default_flags \"$striptracks_video\""
+    local mkvcommand="/usr/bin/mkvpropedit -q $striptracks_default_flags \"$(escape_string "$striptracks_video")\""
     execute_mkv_command "$mkvcommand" "setting default track flags"
   fi
 }
@@ -1637,7 +1648,7 @@ function set_title_and_exit_if_nothing_removed {
         # Remuxing not performed
         local message="Info|No tracks would be removed from video$( [ "$striptracks_reorder" = "true" ] && echo " or reordered"). Setting Title only and exiting."
         echo "$message" | log
-        local mkvcommand="/usr/bin/mkvpropedit -q --edit info --set \"title=$striptracks_title\" \"$striptracks_video\""
+        local mkvcommand="/usr/bin/mkvpropedit -q --edit info --set \"title=$(escape_string "$striptracks_title")\" \"$(escape_string "$striptracks_video")\""
         execute_mkv_command "$mkvcommand" "setting video title"
         end_script
       else
@@ -1672,7 +1683,7 @@ function remux_video {
   fi
 
   # Execute MKVmerge (remux then rename, see issue #46)
-  local mkvcommand="$striptracks_nice /usr/bin/mkvmerge --title \"$striptracks_title\" -q -o \"$striptracks_tempvideo\" $audioarg $subsarg $striptracks_neworder \"$striptracks_video\""
+  local mkvcommand="$striptracks_nice /usr/bin/mkvmerge --title \"$(escape_string "$striptracks_title")\" -q -o \"$(escape_string "$striptracks_tempvideo")\" $audioarg $subsarg $striptracks_neworder \"$(escape_string "$striptracks_video")\""
   execute_mkv_command "$mkvcommand" "remuxing video"
 
   # Check for non-empty file

@@ -281,7 +281,7 @@ Modifiers may be combined, such as `:any+fd` to keep all forced and all default 
 Use the `--set-default` options to choose tracks that appear first when the video is played. Only one audio and one subtitles track may be set as default. The language code is the same colon (`:`) prepended ISO 639-2 language code used with the `--audio` and `--subs` options.
 The first track of the specified language will have its default flag set and all other tracks (of any language) will have their default flag disabled.
 
-The language code can optionally be follow by an equals (`=`) and a string which is used to match against the track name. The first track that matches the specified language and with a name that matches the string will be set to default.
+The language code can optionally be followed by an equals (`=`) and a string which is used to match against the track name. The first track that matches the specified language and with a name that matches the string will be set to default.
 The string matching uses a substring and is case insensitive. You can use this to set the default subtitles track to hearing impared (SDH), or the audio track to your preferred language.
 
 The setting of default track flags occurs after the track selection logic.
