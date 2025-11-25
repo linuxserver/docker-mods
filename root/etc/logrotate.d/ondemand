@@ -1,0 +1,11 @@
+/config/log/ondemand/*.log {
+        weekly
+        rotate 14
+        compress
+        delaycompress
+        nodateext
+        notifempty
+        missingok
+        sharedscripts
+        su abc abc
+}
