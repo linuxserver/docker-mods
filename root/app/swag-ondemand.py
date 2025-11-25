@@ -20,9 +20,16 @@ class ContainerThread(threading.Thread):
         self.daemon = True
         self.ondemand_containers = {}
         try:
-            self.docker_client = docker.from_env()
+            docker_host = os.environ.get("DOCKER_HOST", None)
+            if docker_host:
+                if not docker_host.startswith("tcp://"):
+                    docker_host = f"tcp://{docker_host}:2375"
+                self.docker_client = docker.DockerClient(base_url=docker_host)
+            else:
+                self.docker_client = docker.from_env()
         except Exception as e:
             logging.exception(e)
+            os._exit(1)
 
     def process_containers(self):
         containers = self.docker_client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })

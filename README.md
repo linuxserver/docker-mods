@@ -83,4 +83,4 @@ Here's a sample compose yaml snippet for `linuxserver/docker-socket-proxy`:
     tmpfs:
       - /run
 ```
-Then the env var in SWAG can be set as `DOCKER_HOST=tcp://socket-proxy:2375`. This will allow docker in SWAG to be able to start/stop existing containers, but it won't be allowed to spin up new containers.
+Then the env var in SWAG can be set as `DOCKER_HOST=socket-proxy`. This will allow SWAG to be able to start/stop existing containers, but it won't be allowed to spin up new containers.
