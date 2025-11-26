@@ -19,6 +19,9 @@ class ContainerThread(threading.Thread):
         super().__init__()
         self.daemon = True
         self.ondemand_containers = {}
+        self.init_docker()
+            
+    def init_docker(self):
         try:
             docker_host = os.environ.get("DOCKER_HOST", None)
             if docker_host:
@@ -117,6 +120,8 @@ class LogReaderThread(threading.Thread):
 
                 logfile = open(ACCESS_LOG_FILE, "r")
                 for line in self.tail(logfile):
+                    if '" 302 ' in line:
+                        continue
                     for part in line.split():
                         if not part.startswith("http"):
                             continue
