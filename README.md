@@ -17,6 +17,7 @@ This mod gives SWAG the ability to auto-detect running containers via labels and
 - `swag_auth=authelia` - *optional* - enables auth methods (options are `authelia`, `authentik`, `ldap`, `tinyauth` and `http` for basic http auth)
 - `swag_auth_bypass=/api,/othersubfolder` - *optional* - bypasses auth for selected subfolders. Comma separated, no spaces.
 - `swag_server_custom_directive=custom_directive;` - *optional* - injects the label value as is into the server block of the generated conf. Must be a valid nginx directive, ending with a semi colon.
+- `swag_location_custom_directive=custom_directive;` - *optional* - injects the label value as is into each location block of the generated conf. Must be a valid nginx directive, ending with a semi colon.
 - `swag_preset_conf=confname` - *optional* - allows defining a preset conf to use if the container name does not match one (if the conf name is `radarr.subdomain.conf.sample`, set this value to `radarr`). If the container name matches an existing conf, this var will be ignored.
 
 
