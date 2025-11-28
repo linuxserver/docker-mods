@@ -48,7 +48,23 @@ Or set the following label if using `swag-auto-proxy`:
         container_name: somecontainer
         ...
         labels:
-            - swag_server_custom_directive=include /config/nginx/ondemand.conf;
+            - 'swag_server_custom_directive=include /config/nginx/ondemand.conf;'
+```
+#### Authelia
+Add the following line to each proxy-conf where you wish to show the loading page inside the `location` section:
+```nginx
+    location / {
+        ...
+        error_page 502 = @waking_up;
+        ...
+```
+Or set the following label if using `swag-auto-proxy`:
+```yaml
+    somecontainer:
+        container_name: somecontainer
+        ...
+        labels:
+            - 'swag_location_custom_directive=error_page 502 = @waking_up;'
 ```
 ### Labels:
 - `swag_ondemand=enable` - required for on-demand.
