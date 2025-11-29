@@ -49,7 +49,7 @@ class ContainerThread(threading.Thread):
             container_urls = container.labels.get("swag_ondemand_urls", f"https://{default_url},http://{default_url}")
             if container.name not in self.ondemand_containers.keys():
                 last_accessed = datetime.now()
-                logging.info(f"Started monitoring {container.name}")
+                logging.info(f"Started monitoring {container.name} for urls: {container_urls}")
             else:
                 last_accessed = self.ondemand_containers[container.name]["last_accessed"]
             self.ondemand_containers[container.name] = { "status": container.status, "urls": container_urls, "last_accessed": last_accessed }
