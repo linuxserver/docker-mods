@@ -20,7 +20,7 @@ class ContainerThread(threading.Thread):
         self.daemon = True
         self.ondemand_containers = {}
         self.init_docker()
-            
+
     def init_docker(self):
         try:
             docker_host = os.environ.get("DOCKER_HOST", None)
@@ -52,6 +52,8 @@ class ContainerThread(threading.Thread):
                 logging.info(f"Started monitoring {container.name} for urls: {container_urls}")
             else:
                 last_accessed = self.ondemand_containers[container.name]["last_accessed"]
+                if container_urls != self.ondemand_containers["urls"]:
+                    logging.info(f"Updated urls for {container.name} to: {container_urls}")
             self.ondemand_containers[container.name] = { "status": container.status, "urls": container_urls, "last_accessed": last_accessed }
 
     def stop_containers(self):
