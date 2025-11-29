@@ -52,7 +52,7 @@ class ContainerThread(threading.Thread):
                 logging.info(f"Started monitoring {container.name} for urls: {container_urls}")
             else:
                 last_accessed = self.ondemand_containers[container.name]["last_accessed"]
-                if container_urls != self.ondemand_containers["urls"]:
+                if container_urls != self.ondemand_containers[container.name]["urls"]:
                     logging.info(f"Updated urls for {container.name} to: {container_urls}")
             self.ondemand_containers[container.name] = { "status": container.status, "urls": container_urls, "last_accessed": last_accessed }
 
