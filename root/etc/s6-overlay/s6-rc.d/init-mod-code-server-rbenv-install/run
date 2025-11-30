@@ -20,6 +20,7 @@ if [ -d /config/.rbenv/plugins/ruby-build ]; then
         /config/.rbenv
 
     echo 'Upgrading ruby-build plugin'
+    git config --global --add safe.directory /config/.rbenv/plugins/ruby-build
     git -C /config/.rbenv/plugins/ruby-build pull
 else
     echo 'Cloning ruby-build plugin repo'
