@@ -45,6 +45,7 @@ fi
 
 if [ -d /config/.bat-extras ]; then
     echo 'Bat-extras already cloned, updating'
+    git config --global --add safe.directory /config/.bat-extras
     git -C /config/.bat-extras pull
 else
     echo 'Cloning bat-extras repo'
