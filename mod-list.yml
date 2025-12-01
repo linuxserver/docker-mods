@@ -6,9 +6,10 @@ mods:
       - dtrpg-metadata: https://github.com/linuxserver/docker-mods/tree/calibre-web-dtrpg-metadata
       - kcc: https://github.com/linuxserver/docker-mods/tree/calibre-web-kcc
   code-server:
-    mod_count: 29
+    mod_count: 30
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
+      - bat: https://github.com/linuxserver/docker-mods/tree/code-server-bat
       - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
       - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
       - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet
