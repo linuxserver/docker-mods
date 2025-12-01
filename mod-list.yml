@@ -6,7 +6,7 @@ mods:
       - dtrpg-metadata: https://github.com/linuxserver/docker-mods/tree/calibre-web-dtrpg-metadata
       - kcc: https://github.com/linuxserver/docker-mods/tree/calibre-web-kcc
   code-server:
-    mod_count: 30
+    mod_count: 31
     container_mods:
       - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
       - bat: https://github.com/linuxserver/docker-mods/tree/code-server-bat
@@ -30,6 +30,7 @@ mods:
       - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
       - python3-poetry: https://github.com/linuxserver/docker-mods/tree/code-server-python3-poetry
       - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
+      - rbenv: https://github.com/linuxserver/docker-mods/tree/code-server-rbenv
       - ros2: https://github.com/linuxserver/docker-mods/tree/code-server-ros2
       - rust: https://github.com/linuxserver/docker-mods/tree/code-server-rust
       - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
