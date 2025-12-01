@@ -1,25 +1,54 @@
-# Rsync - Docker mod for openssh-server
+# Rbenv - Docker mod for code-server
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds [rbenv](https://github.com/rbenv/rbenv) to code-server, to be installed/updated during container start.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+rbenv is a version manager tool for the Ruby programming language on Unix-like systems. It is useful for switching between multiple Ruby versions on the same machine and for ensuring that each project you are working on always runs on the correct Ruby version.
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-rbenv`
 
-# Mod creation instructions
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-rbenv|linuxserver/mods:openssh-server-mod2`
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic and `MULTI_ARCH` if needed.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+### Shell completions
 
+This mod includes adding [shell completions](https://github.com/rbenv/rbenv?tab=readme-ov-file#shell-completions) for `rbenv` in `bash` and `zsh`.
 
-## Tips and tricks
+The zsh completion script ships with the project, but needs to be added to FPATH in zsh before it can be discovered by the shell. So, the mod will automatically detect and update the `~/.zshrc` file:
 
-* Some images have helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+```
+FPATH=~/.rbenv/completions:"$FPATH"
+autoload -U compinit
+compinit
+```
+
+### Ruby-build
+
+This mod includes [ruby-build](https://github.com/rbenv/ruby-build), which allows you to run the `rbenv install` command.
+
+It will automatically check for an existing `ruby-build` installation upon `docker build`. If it detects `ruby-build`, it will upgrade it.
+
+You can also manually upgrade `ruby-build`, as described in the [documentation](https://github.com/rbenv/ruby-build?tab=readme-ov-file#clone-as-rbenv-plugin-using-git), without bringing down the docker instance by running:
+
+```
+git -C "$(rbenv root)"/plugins/ruby-build pull
+```
+
+### Build environment
+
+In order to compile Ruby, you need the proper toolchain and build environment. The required system packages can be found in the [documentation](https://github.com/rbenv/ruby-build/wiki#ubuntudebianmint).
+
+This mod will install these requirements for you:
+
+* autoconf
+* build-essential
+* libffi-dev
+* libgmp-dev
+* libssl-dev
+* libyaml-dev
+* rustc
+* zlib1g-dev
+
+With these installed, you should be able to compile any of the latest stable Ruby versions, which you can find by running the command `rbenv install --list`.
+
+### Installed Ruby versions
+
+By default, `rbenv` is installed in `~/.rbenv`. This mod will update the permissions of that folder to ensure that your user can install new versions of Ruby into it.
