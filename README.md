@@ -1,25 +1,17 @@
-# Rsync - Docker mod for openssh-server
+# Bat - Docker mod for code-server
 
-This mod adds rsync to openssh-server, to be installed/updated during container start.
+This mod adds [bat](https://github.com/sharkdp/bat) to code-server, to be installed/updated during container start.
 
-In openssh-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:openssh-server-rsync`
+Bat is a cat(1) clone with syntax highlighting and Git integration.
 
-If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:openssh-server-rsync|linuxserver/mods:openssh-server-mod2`
+In code-server docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:code-server-bat`
 
-# Mod creation instructions
+If adding multiple mods, enter them in an array separated by `|`, such as `DOCKER_MODS=linuxserver/mods:code-server-bat|linuxserver/mods:openssh-server-mod2`
 
-* Fork the repo, create a new branch based on the branch `template`.
-* Edit the `Dockerfile` for the mod. `Dockerfile.complex` is only an example and included for reference; it should be deleted when done.
-* Inspect the `root` folder contents. Edit, add and remove as necessary.
-* After all init scripts and services are created, run `find ./  -path "./.git" -prune -o \( -name "run" -o -name "finish" -o -name "check" \) -not -perm -u=x,g=x,o=x -print -exec chmod +x {} +` to fix permissions.
-* Edit this readme with pertinent info, delete these instructions.
-* Finally edit the `.github/workflows/BuildImage.yml`. Customize the vars for `BASEIMAGE` and `MODNAME`. Set the versioning logic and `MULTI_ARCH` if needed.
-* Ask the team to create a new branch named `<baseimagename>-<modname>`. Baseimage should be the name of the image the mod will be applied to. The new branch will be based on the `template` branch.
-* Submit PR against the branch created by the team.
+### Bat-extras and Ripgrep
 
+This mod also includes [bat-extras](https://github.com/eth-p/bat-extras) which has a dependency of [ripgrep](https://github.com/BurntSushi/ripgrep). Ripgrep has also been included because it is a requirment of bat-extras.
 
-## Tips and tricks
+### Aliases
 
-* Some images have helpers built in, these images are currently:
-    * [Openvscode-server](https://github.com/linuxserver/docker-openvscode-server/pull/10/files)
-    * [Code-server](https://github.com/linuxserver/docker-code-server/pull/95)
+This mod includes aliases for `bat` in `bash` and `zsh`. Under Ubuntu `bat` gets installed as `batcat` to avoid a name collision. So, for convenience, an alias to set `bat="batcat"` is included for both `bash` and `zsh`. 

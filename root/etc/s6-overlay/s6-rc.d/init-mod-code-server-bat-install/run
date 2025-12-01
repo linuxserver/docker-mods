@@ -1,0 +1,61 @@
+#!/usr/bin/with-contenv bash
+
+# This is an install script that is designed to run after init-mods-package-install
+# so it can take advantage of packages installed
+# init-mods-end depends on this script so that later init and services wait until this script exits
+
+if ! command -v zsh >/dev/null 2>&1; then
+    echo "**** zsh not installed, skipping alias setup ****"
+else
+    if [ -f /config/.zshrc ]; then
+        if ! grep -q 'alias bat="batcat"' /config/.zshrc; then
+            echo 'Adding alias to zsh for bat'
+            echo 'alias bat="batcat"' >> /config/.zshrc
+        else
+            echo 'Alias already exists in zsh, skipping'
+        fi
+    else
+        echo '/config/.zshrc not found, creating one with the alias'
+        echo 'alias bat="batcat"' > /config/.zshrc
+    fi
+fi
+
+if ! command -v bash >/dev/null 2>&1; then
+    echo "**** bash not installed, skipping alias setup ****"
+else
+    if [ -f /config/.bash_profile ]; then
+        if ! grep -q 'alias bat="batcat"' /config/.bash_profile; then
+            echo 'Adding alias to /config/.bash_profile for bat'
+            echo 'alias bat="batcat"' >> /config/.bash_profile
+        else
+            echo 'Alias already exists in /config/.bash_profile, skipping'
+        fi
+    elif [ -f /config/.bashrc ]; then
+        if ! grep -q 'alias bat="batcat"' /config/.bashrc; then
+            echo 'Adding alias to /config/.bashrc for bat'
+            echo 'alias bat="batcat"' >> /config/.bashrc
+        else
+            echo 'Alias already exists in /config/.bashrc, skipping'
+        fi
+    else
+        echo '/config/.bash_profile or /config/.bashrc not found, creating one with the alias'
+        echo 'alias bat="batcat"' > /config/.bash_profile
+    fi
+fi
+
+if [ -d /config/.bat-extras ]; then
+    echo 'Bat-extras already cloned, updating'
+    git config --global --add safe.directory /config/.bat-extras
+    git -C /config/.bat-extras pull
+else
+    echo 'Cloning bat-extras repo'
+    git clone https://github.com/eth-p/bat-extras.git /config/.bat-extras
+fi
+
+echo 'Installing bat-extras'
+ln -sf /config/.bat-extras/src/*.sh /usr/local/bin
+
+echo 'Setting permissions for bat-extras'
+chmod +x /config/.bat-extras/src/*.sh
+lsiown -R abc:abc \
+    /config/.bat-extras
