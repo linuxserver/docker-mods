@@ -106,7 +106,7 @@ New file(s) will be placed in the same directory as the original FLAC file(s) (u
 The script may be called with optional command-line arguments.
 
 The syntax for the command-line is:  
-`flac2mp3 [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} "<options>" {-e|--extension} <extension>] [{-f|--file} <audio_file>] [{-k|--keep-file}] [{-o|--output} <directory>] [{-r|--regex} '<regex>'] [{-t|--tags} <taglist>] [{-l|--log} <log_file>] [{-d|--debug} [<level>]]`  
+`flac2mp3 [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} "<options>" {-e|--extension} <extension>] [{-f|--file} <audio_file>] [{-k|--keep-file}] [{-o|--output} <directory>] [{-r|--regex} '<regex>'] [{-t|--tags} <taglist>] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]`  
 
 <details>
 <summary>Table of Command-Line Arguments</summary>
@@ -122,6 +122,7 @@ Option|Argument|Description
 `-k`, `--keep-file`| |Do not delete the source file or move it to the Lidarr Recycle bin.<br/>**Note:** This also disables importing the new files into Lidarr after conversion.
 `-r`, `--regex`|`'<regex>'`|Sets the regular expression used to select input files.<br/>The `regex` value should be enclosed in single quotes and escaped properly.<br/>Defaults to `[.]flac$`.
 `-l`, `--log`|`<log_file>`|The log filename<br/>Default of /config/log/flac2mp3.txt
+`-c`, `--config`|`<config_file>`|Lidar XML configuration file<br/>Default is `/config/config.xml`
 `-t`, `--tags`|`<taglist>`|Comma separated list of metadata tags to apply automated corrections to.<br/>See [Metadata Corrections](#metadata-corrections) section.
 `-d`, `--debug`|`[<level>]`|Enables debug logging. Level is optional.<br/>Default of 1 (low).<br/>2 includes JSON and FFmpeg output.<br/>3 contains even more JSON output.
 `--help`| |Display help and exit.
@@ -153,8 +154,6 @@ ffmpeg -loglevel error -nostdin -i "input.flac" ${options} "output.${extension}"
 
 By default, the script only matches and interacts with FLAC files (specifically, files ending in ".flac"). The `--regex` option allows the script to match on a user specified regular expression (i.e. "regex") pattern.
 
-<!-- textlint-enable -->
-
 Files are passed to the script with the full Linux path intact. (Ex: `/path/to/audio/a-ha/Hunting High and Low/01 Take on Me.mp3`).  Craft your regular expression with this in mind.
 
 For example, to convert all audio files to AAC audio files, use the following options:  
@@ -163,7 +162,9 @@ For example, to convert all audio files to AAC audio files, use the following op
 -a "-y -map 0 -c:a aac -b:a 240k -c:v copy" -e m4a --regex '[.][^.]*$'
 ```
 
-Regular expression syntax is beyond the scope of this document.  See this [tutorial](https://www.regular-expressions.info/tutorial.html "Regular Expressions Tutorial") for more information. Regular expression patterns may be tested [here](http://regexstorm.net/tester "regex tester").
+Regular expression syntax is beyond the scope of this document.  See this [tutorial](https://www.regular-expressions.info/tutorial.html "Regular Expressions Tutorial") for more information. Regular expression patterns may be tested at [Regex Storm](http://regexstorm.net/tester "regex tester").
+
+<!-- textlint-enable -->
 
 </details>
 
