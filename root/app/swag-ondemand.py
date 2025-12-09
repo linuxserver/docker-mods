@@ -20,7 +20,7 @@ class ContainerThread(threading.Thread):
         self.daemon = True
         self.ondemand_containers = {}
         self.init_docker()
-            
+
     def init_docker(self):
         try:
             docker_host = os.environ.get("DOCKER_HOST", None)
@@ -37,20 +37,23 @@ class ContainerThread(threading.Thread):
     def process_containers(self):
         containers = self.docker_client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
         container_names = {container.name for container in containers}
-        
+
         for container_name in list(self.ondemand_containers.keys()):
             if container_name in container_names:
                 continue
             self.ondemand_containers.pop(container_name)
             logging.info(f"Stopped monitoring {container_name}")
-        
+
         for container in containers:
-            container_urls = container.labels.get("swag_ondemand_urls", f"https://{container.name}.,http://{container.name}.")
+            default_url = container.labels.get("swag_url", f"{container.name}.").rstrip("*")
+            container_urls = container.labels.get("swag_ondemand_urls", f"https://{default_url},http://{default_url}")
             if container.name not in self.ondemand_containers.keys():
                 last_accessed = datetime.now()
-                logging.info(f"Started monitoring {container.name}")
+                logging.info(f"Started monitoring {container.name} for urls: {container_urls}")
             else:
                 last_accessed = self.ondemand_containers[container.name]["last_accessed"]
+                if container_urls != self.ondemand_containers[container.name]["urls"]:
+                    logging.info(f"Updated urls for {container.name} to: {container_urls}")
             self.ondemand_containers[container.name] = { "status": container.status, "urls": container_urls, "last_accessed": last_accessed }
 
     def stop_containers(self):
@@ -62,12 +65,12 @@ class ContainerThread(threading.Thread):
                 continue
             self.docker_client.containers.get(container_name).stop()
             logging.info(f"Stopped {container_name} after {STOP_THRESHOLD}s of inactivity")
-    
+
     def start_containers(self):
         with last_accessed_urls_lock:
             last_accessed_urls_combined = ",".join(last_accessed_urls)
             last_accessed_urls.clear()
-        
+
         for container_name in self.ondemand_containers.keys():
             accessed = False
             for ondemand_url in self.ondemand_containers[container_name]["urls"].split(","):
@@ -95,7 +98,7 @@ class LogReaderThread(threading.Thread):
     def __init__(self):
         super().__init__()
         self.daemon = True
-    
+
     def tail(self, f):
         f.seek(0,2)
         inode = os.fstat(f.fileno()).st_ino
@@ -143,6 +146,6 @@ if __name__ == "__main__":
 
     ContainerThread().start()
     LogReaderThread().start()
-    
+
     while True:
         time.sleep(1)
