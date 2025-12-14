@@ -32,7 +32,7 @@ jobs:
           echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_OUTPUT
           if [[ -z "${{ env.MOD_VERSION }}" ]]; then
             # **** If the mod needs to be versioned, set the versioning logic below. Otherwise leave as is. ****
-            MOD_VERSION="2.18.0"
+            MOD_VERSION="2.19.0"
           else
             MOD_VERSION=${{ env.MOD_VERSION }}
             echo "MOD_VERSION_OVERRIDE=true" >> $GITHUB_OUTPUT

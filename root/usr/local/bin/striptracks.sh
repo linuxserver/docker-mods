@@ -122,7 +122,7 @@ mode.
 Source: https://github.com/TheCaptain989/radarr-striptracks
 
 Usage:
-  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [--reorder] [--disable-recycle] [--skip-profile <profile_name>]... [--set-default-audio <language_code[=name]>] [--set-default-subs <language_code[=name]>] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-p|--priority} {idle|low|medium|high}] [{-d|--debug} [<level>]]
+  $0 [{-a|--audio} <audio_languages> [{-s|--subs} <subtitle_languages>] [{-f|--file} <video_file>]] [--reorder] [--disable-recycle] [--skip-profile <profile_name>]... [--set-default-audio <language_code[=name][-f]>] [--set-default-subs <language_code[=name][-f]>] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-p|--priority} {idle|low|medium|high}] [{-d|--debug} [<level>]]
 
   Options can also be set via the STRIPTRACKS_ARGS environment variable.
   Command-line arguments override the environment variable.
@@ -155,16 +155,22 @@ Options and Arguments:
                                    using the specified quality profile name.
                                    May be specified multiple times to skip
                                    multiple profiles.
-      --set-default-audio <language_code[=name]>
+      --set-default-audio <language_code[=name][-f]>
                                    Set the default audio track to the first
                                    track of the specified language.
                                    The code may optionally be followed by an
                                    equals \`=\` and a track name.
-      --set-default-subs <language_code[=name]>
+                                   The code may optionally be followed by a
+                                   minus \`-f\` to indicate skipping Forced
+                                   tracks.
+      --set-default-subs <language_code[=name][-f]>
                                    Set the default subtitles track to the first
                                    track of the specified language.
                                    The code may optionally be followed by an
-                                   equals \`+\` and a track name.
+                                   equals \`=\` and a track name.
+                                   The code may optionally be followed by a
+                                   minus \`-f\` to indicate skipping Forced
+                                   tracks.
   -l, --log <log_file>             Log filename
                                    [default: /config/log/striptracks.txt]
   -c, --config <config_file>       Radarr/Sonarr XML configuration file
@@ -1582,7 +1588,7 @@ function determine_track_order {
   fi
 }
 function set_default_tracks {
-  # Build mkvpropedit paramaters to set default flags on audio and subtitle tracks.
+  # Build mkvpropedit parameters to set default flags on audio and subtitle tracks.
 
   # Process audio and subtitle --set-default track settings
   for tracktype in audio subtitles; do
@@ -1597,15 +1603,32 @@ function set_default_tracks {
     # Use jq to find the track ID using case-insensitive substring match on track name
     local track_id=$(echo "$striptracks_json_processed" | jq -crM --arg type "$tracktype" --arg currentcfg "$currentcfg" '
       def parse_cfg(cfg):
-        cfg | ltrimstr(":") | split("=") | {lang: .[0], name: .[1]};
+        # Remove leading ":" then split on "=" (if present)
+        # Supports f as a modifier (see issue #113)
+        (cfg | ltrimstr(":") | split("=")) as $eq |
+        ($eq[0]) as $left |
+        (if ($eq | length > 1) then $eq[1] else "" end) as $right |
 
-      (parse_cfg($currentcfg)).lang as $lang |
-      (parse_cfg($currentcfg)).name as $name |
+        # Detect trailing "-f" on left or right and strip it; only "f" is a valid modifier
+        (if ($left | test("-f$")) then {lang: ($left | sub("-f$"; "")), skip: true} else {lang: $left, skip: false} end) as $leftinfo |
+
+        (if $right == "" then
+           $leftinfo + {name: ""}
+         else
+           (if ($right | test("-f$")) then
+             $leftinfo + {name: ($right | sub("-f$"; "")), skip: true}
+           else
+             $leftinfo + {name: $right}
+           end)
+         end);
+
+      parse_cfg($currentcfg) as $rule |
       .tracks |
       map(. as $track |
-        (($lang == "any" or $lang == $track.language) as $lang_match |
-          ($name == "" or (($track.name // "") | ascii_downcase | contains(($name // "") | ascii_downcase))) as $name_match |
-          select($track.type == $type and $lang_match and $name_match and .striptracks_keep)
+        (($rule.lang == "any" or $rule.lang == $track.language) as $lang_match |
+          ($rule.name == "" or (($track.name // "") | ascii_downcase | contains(($rule.name // "") | ascii_downcase))) as $name_match |
+          ($rule.skip and $track.forced) as $skipped |
+          select($track.type == $type and $lang_match and $name_match and ($skipped | not) and .striptracks_keep)
         )
       ) |
       .[0].id // ""
