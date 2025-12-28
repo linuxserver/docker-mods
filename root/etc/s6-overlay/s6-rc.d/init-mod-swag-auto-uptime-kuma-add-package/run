@@ -2,11 +2,28 @@
 
 echo "[mod-auto-uptime-kuma] Installing SWAG auto-uptime-kuma packages"
 
-if ! pip list 2>&1 | grep -q "uptime-kuma-api\|docker"; then
+# Default to v1 for backwards compatibility
+UPTIME_KUMA_API_VERSION="${UPTIME_KUMA_API_VERSION:-1}"
+
+# Validate version and warn on invalid values
+if [[ "$UPTIME_KUMA_API_VERSION" != "1" && "$UPTIME_KUMA_API_VERSION" != "2" ]]; then
+    echo "[mod-auto-uptime-kuma] Warning: Invalid UPTIME_KUMA_API_VERSION '$UPTIME_KUMA_API_VERSION', defaulting to v1"
+    UPTIME_KUMA_API_VERSION="1"
+fi
+
+if [[ "$UPTIME_KUMA_API_VERSION" == "2" ]]; then
+    KUMA_PACKAGE="uptime-kuma-api-v2"
+    echo "[mod-auto-uptime-kuma] Using Uptime Kuma API v2 (for Uptime Kuma 2.x)"
+else
+    KUMA_PACKAGE="uptime-kuma-api"
+    echo "[mod-auto-uptime-kuma] Using Uptime Kuma API v1 (for Uptime Kuma 1.x)"
+fi
+
+if ! pip list 2>&1 | grep -q "^${KUMA_PACKAGE} " || ! pip list 2>&1 | grep -q "^docker "; then
     echo "\
     docker \
-    uptime-kuma-api" >> /mod-pip-packages-to-install.list
-    echo "[mod-auto-uptime-kuma] Successfuly installed packages"
+    ${KUMA_PACKAGE}" >> /mod-pip-packages-to-install.list
+    echo "[mod-auto-uptime-kuma] Packages added to install list"
 else
     echo "[mod-auto-uptime-kuma] Packages already installed, skipping..."
 fi
