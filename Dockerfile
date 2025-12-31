@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.23 AS buildstage
 
 ARG MOD_VERSION
 
 RUN \
   DOTNET_JSON=$(curl -sX GET "https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases-index.json") && \
-  if [ -z ${MOD_VERSION+x} ]; then \
+  if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(echo "$DOTNET_JSON" | jq -r '."releases-index"[] | select(."support-phase"=="active" or ."support-phase"=="maintenance") | ."latest-sdk"' | tr '\n' '_' | head -c -1); \
   fi && \
   DOTNET_VERSIONS="${MOD_VERSION//_/ }" && \
