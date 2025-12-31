@@ -15,10 +15,8 @@ RUN \
   echo "**** get heyu source ****" && \
   mkdir -p /build && \
   cd /build && \
-  curl -LsSo heyu.zip https://github.com/HeyuX10Automation/heyu/archive/${GIT_HASH}.zip && \
-  unzip heyu.zip && \
-  mv heyu-* heyu && \
-  cd heyu && \
+  curl -LsSo heyu.tar.gz https://github.com/HeyuX10Automation/heyu/archive/${GIT_HASH}.tar.gz && \
+  tar --strip-components=1 -xf heyu.tar.gz && \
   echo "**** building heyu ****" && \
   ./configure --sysconfdir=/config/heyu/ && \
   make && \
