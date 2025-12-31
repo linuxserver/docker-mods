@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.23 AS buildstage
 
 ARG MOD_VERSION
 
 RUN \
-  if [ -z ${MOD_VERSION+x} ]; then \
+  if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/powershell-release?tag=stable \
       | sed 's|.*tag/v||g'); \
   fi && \
