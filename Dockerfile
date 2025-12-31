@@ -1,16 +1,16 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.23 AS buildstage
 
 ARG MOD_VERSION
 
 RUN \
   echo "**** grab flood-for-transmission ****" && \
-  if [ -z ${MOD_VERSION+x} ]; then \
+  if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -s "https://api.github.com/repos/johman10/flood-for-transmission/releases/latest" \
     | jq -rc ".tag_name"); \
   fi && \
-  curl -o \
+  curl -fo \
     /tmp/flood.tar.gz -L \
     "https://github.com/johman10/flood-for-transmission/releases/download/${MOD_VERSION}/flood-for-transmission.tar.gz" && \
   mkdir -p /root-layer/themes/flood-for-transmission && \
