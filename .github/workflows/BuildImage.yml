@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set Vars
+        id: outputs
         run: |
           echo "GITHUB_REPO=${{ env.GITHUB_REPO }}" >> $GITHUB_STEP_SUMMARY
           echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_STEP_SUMMARY
