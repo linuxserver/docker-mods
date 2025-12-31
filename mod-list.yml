@@ -157,12 +157,11 @@ mods:
       - maxmind: https://github.com/linuxserver/docker-mods/tree/swag-maxmind
       - ondemand: https://github.com/linuxserver/docker-mods/tree/swag-ondemand
   transmission:
-    mod_count: 5
+    mod_count: 4
     container_mods:
       - env-var-settings: https://github.com/linuxserver/docker-mods/tree/transmission-env-var-settings
       - floodui: https://github.com/linuxserver/docker-mods/tree/transmission-floodui
       - transmissionic: https://github.com/linuxserver/docker-mods/tree/transmission-transmissionic
-      - transmission-web-control: https://github.com/linuxserver/docker-mods/tree/transmission-transmission-web-control
       - trguing: https://github.com/linuxserver/docker-mods/tree/transmission-trguing
   universal:
     mod_count: 12
@@ -179,3 +178,34 @@ mods:
       - stdout-logs: https://github.com/linuxserver/docker-mods/tree/universal-stdout-logs
       - tshoot: https://github.com/linuxserver/docker-mods/tree/universal-tshoot
       - unrar6: https://github.com/linuxserver/docker-mods/tree/universal-unrar6
+  vscodium-web:
+    mod_count: 28
+    container_mods:
+      - awscli: https://github.com/linuxserver/docker-mods/tree/code-server-awscli
+      - docker: https://github.com/linuxserver/docker-mods/tree/universal-docker
+      - docker-in-docker: https://github.com/linuxserver/docker-mods/tree/universal-docker-in-docker
+      - dotnet: https://github.com/linuxserver/docker-mods/tree/code-server-dotnet
+      - extension-arguments: https://github.com/linuxserver/docker-mods/tree/code-server-extension-arguments
+      - flutter: https://github.com/linuxserver/docker-mods/tree/code-server-flutter
+      - golang: https://github.com/linuxserver/docker-mods/tree/code-server-golang
+      - java11: https://github.com/linuxserver/docker-mods/tree/code-server-java11
+      - julia: https://github.com/linuxserver/docker-mods/tree/code-server-julia
+      - nodejs: https://github.com/linuxserver/docker-mods/tree/code-server-nodejs
+      - npmglobal: https://github.com/linuxserver/docker-mods/tree/code-server-npmglobal
+      - nvm: https://github.com/linuxserver/docker-mods/tree/code-server-nvm
+      - php: https://github.com/linuxserver/docker-mods/tree/code-server-php
+      - php8: https://github.com/linuxserver/docker-mods/tree/code-server-php8
+      - php-cli: https://github.com/linuxserver/docker-mods/tree/code-server-php-cli
+      - pnpm: https://github.com/linuxserver/docker-mods/tree/code-server-pnpm
+      - powershell: https://github.com/linuxserver/docker-mods/tree/code-server-powershell
+      - prolog: https://github.com/linuxserver/docker-mods/tree/code-server-prolog
+      - python3: https://github.com/linuxserver/docker-mods/tree/code-server-python3
+      - python3-poetry: https://github.com/linuxserver/docker-mods/tree/code-server-python3-poetry
+      - r: https://github.com/linuxserver/docker-mods/tree/code-server-r
+      - ros2: https://github.com/linuxserver/docker-mods/tree/code-server-ros2
+      - rust: https://github.com/linuxserver/docker-mods/tree/code-server-rust
+      - scikit-learn: https://github.com/linuxserver/docker-mods/tree/code-server-scikit-learn
+      - shellcheck: https://github.com/linuxserver/docker-mods/tree/code-server-shellcheck
+      - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
+      - terraform: https://github.com/linuxserver/docker-mods/tree/code-server-terraform
+      - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
