@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.23 AS buildstage
 
 ARG MOD_VERSION
 
 RUN \
   echo "**** Retrieving rust version ****" && \
-  if [ -z "$MOD_VERSION" ]; then \
+  if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -s https://api.github.com/repos/rust-lang/rust/releases/latest | jq -r .tag_name); \
   fi && \
   mkdir -p /root-layer/rust-bins && \
