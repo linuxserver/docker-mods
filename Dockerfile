@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/linuxserver/baseimage-alpine:3.19 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.23 AS buildstage
 
 ARG MOD_VERSION
 
 RUN \
   echo "**** grab transmission-web-control ****" && \
   mkdir -p /root-layer/themes && \
-  if [ -z ${MOD_VERSION} ]; then \
+  if [ -z "${MOD_VERSION}" ]; then \
     MOD_VERSION=$(curl -s "https://api.github.com/repos/transmission-web-control/transmission-web-control/releases/latest" \
     | jq -rc ".tag_name"); \
   fi && \
