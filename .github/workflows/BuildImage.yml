@@ -32,7 +32,7 @@ jobs:
       MOD_VERSION: ${{ steps.outputs.outputs.MOD_VERSION }}
 
   build:
-    if: github.base_ref != 'refs/heads/master'
+    if: ${{ github.base_ref != 'master' }}
     uses: linuxserver/github-workflows/.github/workflows/docker-mod-builder.yml@v1
     needs: set-vars
     secrets:
