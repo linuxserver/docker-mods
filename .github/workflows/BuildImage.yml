@@ -18,17 +18,18 @@ jobs:
       - name: Set Vars
         id: outputs
         run: |
-          echo "GITHUB_REPO=${{ env.GITHUB_REPO }}" >> $GITHUB_STEP_SUMMARY
-          echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_STEP_SUMMARY
-          echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_STEP_SUMMARY
-          echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_STEP_SUMMARY
-          echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_STEP_SUMMARY
-          echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "GITHUB_REPO=${{ env.GITHUB_REPO }}" >> $GITHUB_OUTPUT
+          echo "ENDPOINT=${{ env.ENDPOINT }}" >> $GITHUB_OUTPUT
+          echo "BASEIMAGE=${{ env.BASEIMAGE }}" >> $GITHUB_OUTPUT
+          echo "MODNAME=${{ env.MODNAME }}" >> $GITHUB_OUTPUT
+          echo "MULTI_ARCH=${{ env.MULTI_ARCH }}" >> $GITHUB_OUTPUT
+          echo "MOD_VERSION=${MOD_VERSION}" >> $GITHUB_OUTPUT
     outputs:
       GITHUB_REPO: ${{ steps.outputs.outputs.GITHUB_REPO }}
       ENDPOINT: ${{ steps.outputs.outputs.ENDPOINT }}
       BASEIMAGE: ${{ steps.outputs.outputs.BASEIMAGE }}
       MODNAME: ${{ steps.outputs.outputs.MODNAME }}
+      MULTI_ARCH: ${{ steps.outputs.outputs.MULTI_ARCH }}
       MOD_VERSION: ${{ steps.outputs.outputs.MOD_VERSION }}
 
   build:
@@ -45,4 +46,5 @@ jobs:
       ENDPOINT: ${{ needs.set-vars.outputs.ENDPOINT }}
       BASEIMAGE: ${{ needs.set-vars.outputs.BASEIMAGE }}
       MODNAME: ${{ needs.set-vars.outputs.MODNAME }}
+      MULTI_ARCH: ${{ needs.set-vars.outputs.MULTI_ARCH }}
       MOD_VERSION: ${{ needs.set-vars.outputs.MOD_VERSION }}
