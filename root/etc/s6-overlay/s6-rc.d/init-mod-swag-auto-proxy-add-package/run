@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+
+if grep -q "linuxserver/mods:universal-docker" /run/s6/container_environment/DOCKER_MODS; then
+    until [ -f /usr/local/bin/docker ]; do
+        sleep 3
+    done
+    echo "**** Using docker binary from the universal-docker mod ****"
+else
+    echo "**** Adding docker-cli to package install list ****"
+    echo "\
+        docker-cli" >> /mod-repo-packages-to-install.list
+fi

@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bash
 
 if [ ! -S /var/run/docker.sock ] && [ -z "$DOCKER_HOST" ]; then
-    echo "**** Docker mod not set up properly, skipping SWAG auto-proxy ****"
+    echo "**** Docker service access not set up properly, skipping SWAG auto-proxy, please map either the docker socket or set the DOCKER_HOST var. ****"
     exit 0
 fi
 
