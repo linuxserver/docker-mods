@@ -2,7 +2,7 @@
 
 FROM scratch
 
-LABEL maintainer="username"
+LABEL maintainer="dtrunk90"
 
 # copy local files
 COPY root/ /
