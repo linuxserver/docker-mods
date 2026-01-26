@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+if ! beet help dropbox >/dev/null 2>&1; then
+    echo "**** Adding drop2beets and its deps to package install lists ****"
+    echo "drop2beets" >> /mod-pip-packages-to-install.list
+else
+    echo "**** drop2beets already installed, skipping ****"
+fi
