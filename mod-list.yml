@@ -1,4 +1,8 @@
 mods:
+  beets:
+    mod_count: 1
+    container_mods:
+      - drop2beets: https://github.com/linuxserver/docker-mods/tree/beets-drop2beets
   calibre-web:
     mod_count: 3
     container_mods:
