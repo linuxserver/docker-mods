@@ -34,7 +34,7 @@ This mod gives SWAG the ability to start containers on-demand when accessed thro
 ![loading-page](.assets/loading-page.png)
 
 Instead of showing a 502 error page, it can display a loading page and auto-refresh once the container is up.
-  
+
 Add the following `include` to each proxy-conf where you wish to show the loading page inside the `server` section:
 ```nginx
 server {
@@ -68,7 +68,7 @@ Or set the following label if using `swag-auto-proxy`:
 ```
 ### Labels:
 - `swag_ondemand=enable` - required for on-demand.
-- `swag_ondemand_urls=https://wake.domain.com,https://app.domain.com/up` - *optional* - overrides the monitored URLs for starting the container on-demand. Defaults to `https://somecontainer.,http://somecontainer.`.
+- `swag_ondemand_urls=https://wake.domain.com,https://app.domain.com/up` - *optional* - overrides the monitored URLs for starting the container on-demand. Defaults to using the value of the `swag_url` label, if you've already set it for `swag-auto-proxy`, or `https://somecontainer.,http://somecontainer.` otherwise.
 
 ### URLs:
 - Accessed URLs need to start with one of `swag_ondemand_urls` to be matched, for example, setting `swag_ondemand_urls=https://plex.` will apply to `https://plex.domain.com` and `https://plex.domain.com/something`.
