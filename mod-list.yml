@@ -214,3 +214,7 @@ mods:
       - svn: https://github.com/linuxserver/docker-mods/tree/code-server-svn
       - terraform: https://github.com/linuxserver/docker-mods/tree/code-server-terraform
       - zsh: https://github.com/linuxserver/docker-mods/tree/code-server-zsh
+  wireguard:
+    mod_count: 1
+    container_mods:
+      - mullvad: https://github.com/linuxserver/docker-mods/tree/wireguard-mullvad
