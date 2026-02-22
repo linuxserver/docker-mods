@@ -1,0 +1,154 @@
+#!/usr/bin/with-contenv bash
+
+fail() {
+    
+    echo "[mullvad_setup] Error: $1" >&2
+    exit 1
+}
+
+skip() {
+    
+    echo "[mullvad_setup] $1"
+    exit 0
+}
+
+config_file_base="/opt/mullvad"
+target_link="/config/wg_confs/wg0.conf"
+
+# Verify required environment variables are present. This script cannot run without them.
+[[ -z "${MULLVAD_ACCOUNT}" ]]     && fail "MULLVAD_ACCOUNT environment variable is not set"
+[[ -z "${MULLVAD_PRIVATE_KEY}" ]] && fail "MULLVAD_PRIVATE_KEY environment variable is not set"
+[[ -z "${MULLVAD_LOCATION}" ]]    && fail "MULLVAD_LOCATION environment variable is not set"
+
+# Set up the configuration output directory. Create it if it doesn't exist.
+[[ -d "${config_file_base}" ]] || mkdir -p "${config_file_base}"
+
+echo "[mullvad_setup] Cleaning config base..."
+rm -f "${config_file_base}/"*
+
+echo "[mullvad_setup] Removing old symlink if it exists..."
+rm -f "$target_link"
+
+# MULLVAD_LOCATION is a dynamic-value variable. 
+# It may may contain a value fo either:
+#  - a region (e.g. 'gb') 
+#  - a city (e.g. 'gb-lon')
+#  - or specific nodes (e.g. 'gb-lon-wg-001,gb-lon-wg-002').
+if [[ "$MULLVAD_LOCATION" =~ ^[a-z]{2}$ ]]; then
+    
+    echo "[mullvad_setup] Location filter set to region '$MULLVAD_LOCATION'."
+    jq_filter=".countries[] | select(.code == \"$MULLVAD_LOCATION\") | .cities[] | .relays[]"
+
+elif [[ "$MULLVAD_LOCATION" =~ ^[a-z]{2}-[a-z]{3}$ ]]; then
+    
+    echo "[mullvad_setup] Location filter set to city '$MULLVAD_LOCATION'."
+    country="${MULLVAD_LOCATION%%-*}"
+    city="${MULLVAD_LOCATION##*-}"
+
+    jq_filter=".countries[] | select(.code == \"$country\") | .cities[] | select(.code == \"$city\") | .relays[]"
+
+elif [[ "$MULLVAD_LOCATION" =~ ^([a-z]{2}-[a-z]{3}-wg-[0-9]{3},?)+$ ]]; then
+
+    echo "[mullvad_setup] Location filter set to nodes '$MULLVAD_LOCATION'."
+    jq_list=$(echo "$MULLVAD_LOCATION" | sed 's/,/", "/g' | sed 's/^/"/; s/$/"/')
+    jq_filter=".countries[] | .cities[] | .relays[] | select(.hostname | IN($jq_list))"
+
+else
+    fail "Invalid MULLVAD_LOCATION format. Expected formats: 'gb', 'gb-lon', or 'gb-lon-wg-001,nl-ams-wg-001'."
+fi
+
+# The client's tunnel address needs to be obtained.
+# A call to the Mullvad API is made using the account number and the public key derived from the private key.
+# The API returns a comma-delimited string with the (ipv4) assigned tunnel address as the first value.
+echo "[mullvad_setup] Fetching tunnel address from Mullvad API..."
+wg_pubkey="$(wg pubkey <<<"$MULLVAD_PRIVATE_KEY")"
+tunnel_address_response="$(curl -sSL https://api.mullvad.net/wg -d account="$MULLVAD_ACCOUNT" --data-urlencode pubkey="$wg_pubkey")" || fail "Could not talk to Mullvad API."
+tunnel_address="${tunnel_address_response%%,*}"
+
+# Now the specified node needs to be selected. 
+# The API is called again to get the list of all available nodes, which is then filtered down to matching nodes.
+# A random node is selected from the filtered list. If only one node matches, that one is selected.
+echo "[mullvad_setup] Fetching relay information from Mullvad API..."
+relay_response="$(curl -LsS https://api.mullvad.net/public/relays/wireguard/v1/)" || fail "Unable to connect to Mullvad API."
+relay_fields=$(echo "$relay_response" | jq -r "$jq_filter | [.hostname, .public_key, .ipv4_addr_in] | @tsv" | sort -R | head) || fail "Failed to parse Mullvad API response. Check your MULLVAD_LOCATION value."
+
+[[ -z "$relay_fields" ]] && fail "No relays found matching the specified location filter '$MULLVAD_LOCATION'."
+
+# Optionally, if the user defines a network which needs routing access to services running through wireguared,
+# a PostUp and PreDown hook is created to add and remove the necessary routing rules when the tunnel is brought up and down.
+if [[ -n "$LAN_NETWORKS" || -n "${ALLOW_ATTACHED_NETWORKS}" ]]; then
+
+    ip_route_add=""
+    ip_route_delete=""
+    chain_route_add=""
+    chain_route_delete=""
+
+    if [[ -n "$LAN_NETWORKS" ]]; then
+
+        IFS=',' read -ra lan_network_array <<< "${LAN_NETWORKS}"
+        DROUTE=$(ip route | grep default | awk '{print $3}');
+
+        for lan_network_item in $(echo "$LAN_NETWORKS" | tr "," " "); do
+            
+            echo "[mullvad_setup] Adding iptables rule for LAN network $lan_network_item"
+
+            lan_network_item=$(echo "${lan_network_item}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+
+            ip_route_add+="ip route add ${lan_network_item} via ${DROUTE}; "
+            ip_route_delete+="ip route delete ${lan_network_item}; "
+            chain_route_delete+="iptables -D OUTPUT -d ${lan_network_item} -j ACCEPT; "
+
+            if [[ "${lan_network_item}" = "${lan_network_array[0]}" ]]; then
+                chain_route_add+="iptables -I OUTPUT -d ${lan_network_item} -j ACCEPT; "
+            else
+                chain_route_add+="iptables -A OUTPUT -d ${lan_network_item} -j ACCEPT; "
+            fi
+        done
+
+    fi
+
+    # If set, the iptables rules will be amended to allow inbound traffic from services on the same attached network(s).
+    # This allows other containers on the same stack or global network to access services running through the WireGuard tunnel.
+    if [[ "${ALLOW_ATTACHED_NETWORKS:-}" == "true" ]]; then
+
+        attached_networks=$(ip route | grep -e "link" | awk '{print $1}');
+        for attached_network in $attached_networks; do
+        
+            echo "[mullvad_setup] Adding iptables rule for attached docker network $attached_network"    
+            chain_route_add+="iptables -A OUTPUT -d $attached_network -j ACCEPT; "
+            chain_route_delete+="iptables -D OUTPUT -d $attached_network -j ACCEPT; "
+
+        done
+    fi
+
+    post_up_hook="${ip_route_add}${chain_route_add}iptables -A OUTPUT ! -o %i -m mark ! --mark \$(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT;"
+    pre_down_hook="${ip_route_delete}iptables -D OUTPUT ! -o %i -m mark ! --mark \$(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT; $chain_route_delete"
+fi
+
+IFS=$'\t' read -r WG_HOST WG_PUBKEY WG_IPADDR <<< "$relay_fields"
+echo "[mullvad_setup] Generating config for chosen node $WG_HOST..."
+
+# The selected node is used to generate the WireGuard configuration file.
+configuration_file="$config_file_base/$WG_HOST.conf"
+umask 077
+rm -f "$configuration_file.tmp"
+cat > "$configuration_file.tmp" <<-_EOF
+[Interface]
+PrivateKey = $MULLVAD_PRIVATE_KEY
+Address = $tunnel_address
+DNS = ${MULLVAD_DNS:-"10.64.0.1"}
+PostUp = $post_up_hook
+PreDown = $pre_down_hook
+
+[Peer]
+PublicKey = $WG_PUBKEY
+Endpoint = $WG_IPADDR:51820
+AllowedIPs = 0.0.0.0/0
+_EOF
+
+mv "$configuration_file.tmp" "$configuration_file"
+
+# Finally, a symlink is created to the generated configuration file.
+# Use of a link allows the container owner to check which node was selected.
+echo "[mullvad_setup] Symlink created $target_link -> $configuration_file"
+ln -sf "$configuration_file" "$target_link"
