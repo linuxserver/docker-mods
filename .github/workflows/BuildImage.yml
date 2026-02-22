@@ -12,10 +12,10 @@ on:
 env:
   GITHUB_REPO: "linuxserver/docker-mods" #don't modify
   ENDPOINT: "linuxserver/mods" #don't modify
-  BASEIMAGE: "replace_baseimage" #replace
-  MODNAME: "replace_modname" #replace
+  BASEIMAGE: "wireguard" #replace
+  MODNAME: "mullvad" #replace
   MOD_VERSION: ${{ inputs.mod_version }} #don't modify
-  MULTI_ARCH: "true" #set to false if not needed
+  MULTI_ARCH: "false" #set to false if not needed
 
 jobs:
   set-vars:
