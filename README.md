@@ -90,13 +90,11 @@ services:
       PGID: '1004'
       TZ: Europe/London
     volumes:
-      - /dev/rtc:/dev/rtc:ro
       - /opt/appdata/sonarr:/config
 
   seerr:
     image: ghcr.io/seerr-team/seerr:latest
     restart: unless-stopped
-    init: true
     user: "1000"
     depends_on:
       - wireguard_client
