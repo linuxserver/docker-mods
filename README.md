@@ -55,6 +55,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
+      - DOCKER_MODS=linuxserver/mods:wireguard-mullvad
       - MULLVAD_PRIVATE_KEY=$MULLVAD_PRIVATE_KEY
       - MULLVAD_ACCOUNT=$MULLVAD_ACCOUNT
       - MULLVAD_LOCATION=gb-lon
