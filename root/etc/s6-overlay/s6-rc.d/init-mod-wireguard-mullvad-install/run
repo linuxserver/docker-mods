@@ -15,6 +15,9 @@ skip() {
 config_file_base="/opt/mullvad"
 target_link="/config/wg_confs/wg0.conf"
 
+# Ensure the service is not running in SERVER mode.
+[[ -n "${PEERS}" ]] && skip "PEERS environment variable is set. This setup is intended for CLIENT mode only. Skipping Mullvad configuration."
+
 # Verify required environment variables are present. This script cannot run without them.
 [[ -z "${MULLVAD_ACCOUNT}" ]]     && fail "MULLVAD_ACCOUNT environment variable is not set"
 [[ -z "${MULLVAD_PRIVATE_KEY}" ]] && fail "MULLVAD_PRIVATE_KEY environment variable is not set"
