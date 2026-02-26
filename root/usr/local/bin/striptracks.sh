@@ -980,38 +980,48 @@ function call_api {
   local message="$2" # Message to log
   local method="$3" # HTTP method to use (GET, POST, PUT, DELETE)
   local endpoint="$4" # API endpoint to call
-  local data # Data to send with the request. All subsequent arguments are treated as data.
+  local -a curl_data_args=() # Use array instead of string for safer argument passing (see issue #118)
 
   # Process remaining data values
   shift 4
   while (( "$#" )); do
-    # Escape double quotes in data parameter
-    local param="${1//\"/\\\"}"
-    case "$param" in
+    case "$1" in
       "{"*|"["*)
-        data+=" --json \"$param\""
+        curl_data_args+=(--json "$1")
         shift
       ;;
       *=*)
-        data+=" --data-urlencode \"$param\""
+        curl_data_args+=(--data-urlencode "$1")
         shift
       ;;
       *)
-        data+=" --data-raw \"$param\""
+        curl_data_args+=(--data-raw "$1")
         shift
       ;;
     esac
   done
 
+  local -a curl_args=(
+    -s
+    --fail-with-body
+    -H "X-Api-Key: $striptracks_apikey"
+    -H "Content-Type: application/json"
+    -H "Accept: application/json"
+  )
+
   local url="$striptracks_api_url/$endpoint"
-  [ $striptracks_debug -ge 1 ] && echo "Debug|$message Calling ${striptracks_type^} API using $method and URL '$url'${data:+ with$data}" | log
+  local data_info=""
+  [ ${#curl_data_args[@]} -gt 0 ] && data_info=" with data: ${curl_data_args[*]}"
+  [ $striptracks_debug -ge 1 ] && echo "Debug|$message Calling ${striptracks_type^} API using $method and URL '$url'$data_info" | log
   if [ "$method" = "GET" ]; then
-    method="-G"
+    curl_args+=(-G)
   else
-    method="-X $method"
+    curl_args+=(-X "$method")
   fi
-  local curl_cmd="curl -s --fail-with-body -H \"X-Api-Key: $striptracks_apikey\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" ${data:+$data} $method \"$url\""
-  [ $striptracks_debug -ge 2 ] && echo "Debug|Executing: $curl_cmd" | sed -E 's/(X-Api-Key: )[^"]+/\1[REDACTED]/' | log
+  # Add data arguments and url to curl arguments array
+  curl_args+=("${curl_data_args[@]}")
+  curl_args+=(--url "$url")
+  [ $striptracks_debug -ge 2 ] && echo "Debug|Executing: curl ${curl_args[*]}" | sed -E 's/(X-Api-Key: )[^ ]+/\1[REDACTED]/' | log
   unset striptracks_result
   # (See issue #104)
   declare -g striptracks_result
@@ -1019,10 +1029,11 @@ function call_api {
   # Retry up to five times if database is locked
   local i=0
   for ((i=1; i <= 5; i++)); do
-    striptracks_result=$(eval "$curl_cmd")
+    striptracks_result=$(curl "${curl_args[@]}")
     local curl_return=$?
     if [ $curl_return -ne 0 ]; then
-      local message=$(echo -e "[$curl_return] curl error when calling: \"$url\"${data:+ with$data}\nWeb server returned: $(echo $striptracks_result | jq -jcM 'if type=="array" then map(.errorMessage) | join(", ") else (if has("title") then "[HTTP \(.status?)] \(.title?) \(.errors?)" elif has("message") then .message else "Unknown JSON format." end) end')" | awk '{print "Error|"$0}')
+      local error_message="$(echo $striptracks_result | jq -jcM 'if type=="array" then map(.errorMessage) | join(", ") else (if has("title") then "[HTTP \(.status?)] \(.title) \(.errors?)" elif has("message") then .message else "Unknown JSON format." end) end')"
+      local message=$(echo -e "[$curl_return] curl error when calling: \"$url\"$data_info\nWeb server returned: $error_message" | awk '{print "Error|"$0}')
       echo "$message" | log
       echo "$message" >&2
       break
@@ -1133,7 +1144,8 @@ function check_video {
   # Create temporary filename
   local basename="$(basename -- "${striptracks_video}")"
   local fileroot="${basename%.*}"
-  export striptracks_tempvideo="$(dirname -- "${striptracks_video}")/$(mktemp -u -- "${fileroot:0:5}.tmp.XXXXXX")"
+  # ._ prefixed files are ignored by Radarr/Sonarr (see issues #65 and #115)
+  export striptracks_tempvideo="$(dirname -- "${striptracks_video}")/$(mktemp -u -- "._${fileroot:0:5}.tmp.XXXXXX")"
   [ $striptracks_debug -ge 1 ] && echo "Debug|Using temporary file \"$striptracks_tempvideo\"" | log
 }
 function detect_languages {
@@ -1260,7 +1272,6 @@ function detect_languages {
               local message="Warn|No languages found in any profile or custom format. Unable to use automatic language detection."
               echo "$message" | log
               echo "$message" >&2
-              change_exit_status 20
             else
               # Final determination of configured languages in profiles or custom formats
               local profileLangNames="$(echo $profileLanguages | jq -crM '[.[].name]')"

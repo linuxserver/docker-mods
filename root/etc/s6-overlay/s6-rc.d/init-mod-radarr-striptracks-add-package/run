@@ -1,4 +1,5 @@
 #!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
 cat <<EOF
 ----------------
@@ -23,14 +24,14 @@ fi
 for file in /usr/local/bin/striptracks*.sh
 do
   # Change ownership
-  if [ $(stat -c '%G' $file) != "abc" ]; then
+  if [ "$(stat -c '%G' "$file")" != "abc" ]; then
     echo "Changing ownership on $file script."
-    lsiown abc:abc $file
+    lsiown abc:abc "$file"
   fi
 
   # Make executable
-  if [ ! -x $file ]; then
+  if [ ! -x "$file" ]; then
     echo "Making $file script executable."
-    chmod +x $file
+    chmod +x "$file"
   fi
 done
