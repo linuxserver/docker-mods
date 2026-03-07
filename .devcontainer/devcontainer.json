@@ -1,0 +1,17 @@
+{
+  "name": "beets-httpshell",
+  "image": "mcr.microsoft.com/devcontainers/python:3",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.typeCheckingMode": "basic"
+      }
+    }
+  },
+  "forwardPorts": [5555]
+}
