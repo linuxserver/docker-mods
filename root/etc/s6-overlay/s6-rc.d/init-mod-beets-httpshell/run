@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing beets-httpshell mod ****"
+echo "**** httpshell port: ${HTTPSHELL_PORT:-5555} ****"
+echo "**** beets-httpshell mod installed ****"

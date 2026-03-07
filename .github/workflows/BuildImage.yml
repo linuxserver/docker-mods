@@ -5,7 +5,8 @@ on:
 
 env:
   GITHUB_REPO: "linuxserver/docker-mods"
-  ENDPOINT: "linuxserver/mods"
+  ENDPOINT: "dyptan-io/docker-mods"
+  BRANCH: "master"
   BASEIMAGE: "pr"
   MODNAME: "build"
   MULTI_ARCH: "true"
