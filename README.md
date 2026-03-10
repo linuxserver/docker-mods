@@ -8,51 +8,62 @@ The mod runs a Python 3 HTTP server (no extra dependencies) that maps URL paths 
 
 ## Installation
 
-Add the mod to your beets container using the `DOCKER_MODS` environment variable.
+1. Configure your selected Docker container with the port, volume, and environment settings from the *original container documentation* here **[linuxserver/beets](https://hub.docker.com/r/linuxserver/beets "Beets Docker container")**
+2. Add the **DOCKER_MODS** environment variable to your `compose.yml` file or `docker run` command, as follows:  
+   - `DOCKER_MODS=linuxserver/mods:beets-httpshell`
+3. Map the HTTP API port so it is accessible from outside the container. The default port is `5555` (configurable via `HTTPSHELL_PORT`). Add `5555:5555` to your port mappings:  
 
-### docker run
+    <details>
+    <summary>Example Docker Compose YAML Configuration</summary>
 
-```bash
-docker run \
-  --name=beets \
-  -e DOCKER_MODS=ghcr.io/linuxserver/mods:beets-httpshell \
-  -e PUID=1000 \
-  -e PGID=1000 \
-  -e TZ=Europe/London \
-  -p 8337:8337 \
-  -p 5555:5555 \
-  -v /path/to/config:/config \
-  -v /path/to/music:/music \
-  -v /path/to/downloads:/downloads \
-  --restart unless-stopped \
-  lscr.io/linuxserver/beets:latest
-```
+    ```yaml
+    ---
+    services:
+      beets:
+        image: lscr.io/linuxserver/beets:latest
+        container_name: beets
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - TZ=Europe/London
+          - DOCKER_MODS=linuxserver/mods:beets-httpshell
+          - HTTPSHELL_PORT=5555
+        volumes:
+          - /path/to/config:/config
+          - /path/to/music:/music
+          - /path/to/downloads:/downloads
+        ports:
+          - 8337:8337
+          - 5555:5555
+        restart: unless-stopped
+    ```
+    </details>
 
-### docker compose
+    <details>
+    <summary>Example Docker Run Command</summary>
 
-```yaml
----
-services:
-  beets:
-    image: lscr.io/linuxserver/beets:latest
-    container_name: beets
-    environment:
-      DOCKER_MODS: ghcr.io/linuxserver/mods:beets-httpshell
-      PUID: 1000
-      PGID: 1000
-      TZ: Europe/London
-      HTTPSHELL_PORT: 5555
-    volumes:
-      - /path/to/config:/config
-      - /path/to/music:/music
-      - /path/to/downloads:/downloads
-    ports:
-      - 8337:8337
-      - 5555:5555
-    restart: unless-stopped
-```
+    ```bash
+    docker run -d \
+      --name=beets \
+      -e PUID=1000 \
+      -e PGID=1000 \
+      -e TZ=Europe/London \
+      -e DOCKER_MODS=linuxserver/mods:beets-httpshell \
+      -e HTTPSHELL_PORT=5555 \
+      -p 8337:8337 \
+      -p 5555:5555 \
+      -v /path/to/config:/config \
+      -v /path/to/music:/music \
+      -v /path/to/downloads:/downloads \
+      --restart unless-stopped \
+      lscr.io/linuxserver/beets:latest
+    ```
 
-## Environment Variables
+    </details>
+
+4. Start the container.
+
+### Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
@@ -86,22 +97,6 @@ The URL path is the beet subcommand. The optional `?mode=` query parameter contr
 }
 ```
 
-### Health check
-
-```
-GET /health
-```
-
-Returns `200 OK` with server status:
-
-```json
-{
-  "status": "ok",
-  "default_mode": "parallel",
-  "queue_size": 0
-}
-```
-
 ### Examples
 
 ```bash
@@ -116,12 +111,12 @@ curl -X POST http://localhost:5555/list \
 # Import music in parallel (returns result when done, runs in parallel with other requests)
 curl -X POST http://localhost:5555/import \
   -H "Content-Type: application/json" \
-  -d '["/downloads/music", "--quiet", "--incremental"]'
+  -d '["--quiet", "--incremental", "/downloads/music"]'
 
 # Queue an import (returns 202 immediately, runs in background)
 curl -X POST 'http://localhost:5555/import?mode=queue' \
   -H "Content-Type: application/json" \
-  -d '["/downloads/music"]'
+  -d '["--quiet", "/downloads/music"]'
 
 # Update the library
 curl -X POST http://localhost:5555/update
@@ -138,9 +133,6 @@ curl -X POST http://localhost:5555/remove \
 curl -X POST http://localhost:5555/move \
   -H "Content-Type: application/json" \
   -d '["artist:Radiohead", "-d", "/music/favorites"]'
-
-# Health check
-curl http://localhost:5555/health
 ```
 
 ## Execution Modes
@@ -187,9 +179,9 @@ Request 2 ──▶ 202 (queued, position 2)
 }
 ```
 
-## Lidarr Integration
+## Lidarr Integration Example
 
-Use beets-httpshell as a Lidarr custom script to automatically import downloads. In Lidarr, go to **Settings → Connect → +** and add a **Custom Script** with the path to the script below.
+Use remote beets HTTP server in Lidarr's external content management script to automatically import downloads. In Lidarr, go to **Settings → Media Management → Importing → +** and add a **Import Script Path** with the path to the script below.
 
 Create the script at a path accessible to Lidarr (e.g., `/config/scripts/beets-import.sh`):
 
@@ -203,7 +195,7 @@ fi
 
 curl -X POST --fail-with-body \
     -H "Content-Type: application/json" \
-    -d "[\"$lidarr_sourcepath\"]" \
+    -d "[\"-q\",\"$lidarr_sourcepath\"]" \
     'http://beets:5555/import?mode=block'
 
 if [ $? -ne 0 ]; then
@@ -212,7 +204,7 @@ if [ $? -ne 0 ]; then
 fi
 ```
 
-> **Note:** The script uses `?mode=block` so Lidarr waits for the import to complete before proceeding. Without it, the default `parallel` mode would also work but allows concurrent imports. Adjust the hostname (`beets`) and port (`5555`) to match your setup.
+> **Note:** The script uses `?mode=block` so Lidarr waits for the import to complete before proceeding. Without it, the default `parallel` mode would also work but allows concurrent imports and import changes may not be detected by Lidarr sync. Adjust the hostname (`beets`) and port (`5555`) to match your setup.
 
 ## Mod Structure
 
@@ -221,11 +213,7 @@ root/
 ├── usr/local/bin/
 │   └── beets-httpshell.py              # HTTP server script
 └── etc/s6-overlay/s6-rc.d/
-    ├── init-mod-beets-httpshell/       # oneshot init (startup banner, env validation)
     ├── svc-mod-beets-httpshell/        # longrun service (HTTP server)
-    ├── init-mods-end/dependencies.d/
-    │   └── init-mod-beets-httpshell
     └── user/contents.d/
-        ├── init-mod-beets-httpshell
         └── svc-mod-beets-httpshell
 ```
