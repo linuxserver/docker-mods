@@ -630,6 +630,8 @@ function move_track {
   local source="$1" # Source audio file
   local dest="$2"   # Destination audio file
 
+  local IFS=$' \t\n' # Set IFS to default
+
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Moving/renaming track '$source' to '$dest'" | log
   local result
   result=$(mv -f "$source" "$dest")
@@ -926,6 +928,8 @@ function call_api {
   local endpoint="$4" # API endpoint to call
   local -a curl_data_args=() # Use array instead of string for safer argument passing
 
+  local IFS=$' \t\n' # Set IFS to default
+
   # Process remaining data values
   shift 4
   while (( "$#" )); do
@@ -1017,6 +1021,8 @@ function execute_ff_command {
   local action="$1" # Action being performed (for logging purposes)
   local command="$2" # Full ffmpeg or ffprobe command to execute
   local -a ff_args=() # Use array instead of string for safer argument passing
+
+  local IFS=$' \t\n' # Set IFS to default
 
   # Process remaining data values
   shift 2
@@ -1111,7 +1117,7 @@ function process_tracks {
   
   # Changing the input field separator to split track string
   declare -g flac2mp3_import_list=""
-  IFS=\|
+  local IFS=\|
   for track in $flac2mp3_tracks; do
     # Check that track exists
     if [ ! -f  "$track" ]; then
@@ -1221,7 +1227,7 @@ function process_tracks {
     # Convert the track
     echo "Info|Writing: $newTrack" | log
     local ffcommand="nice /usr/bin/ffmpeg"
-    IFS=$' \t\n'  # Temporarily restore IFS
+    local IFS=$' \t\n'  # Temporarily restore IFS
     # shellcheck disable=SC2090
     execute_ff_command "converting track: '$track' to '$tempTrack'" "$ffcommand" -loglevel $flac2mp3_ffmpeg_log -nostdin -i "$track" $flac2mp3_ffmpeg_opts $metadata "$tempTrack"
     local return=$?; [ $return -ne 0 ] && {
@@ -1230,7 +1236,7 @@ function process_tracks {
       [ -f "$tempTrack" ] && rm -f "$tempTrack"
       continue
     }
-    IFS=\|  # Go back to pipe IFS
+    local IFS=\|  # Go back to pipe IFS
 
     # Check for non-zero size file
     if [ ! -s "$tempTrack" ]; then
@@ -1309,8 +1315,7 @@ function process_tracks {
     # Add new track to list of tracks to import
     flac2mp3_import_list+="${newTrack}|"
   done
-  # Restore IFS
-  IFS=$' \t\n'
+
   # Remove trailing pipe
   flac2mp3_import_list="${flac2mp3_import_list%|}"
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|Track import list: $flac2mp3_import_list" | log
