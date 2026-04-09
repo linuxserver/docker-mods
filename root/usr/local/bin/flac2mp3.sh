@@ -1037,7 +1037,7 @@ function execute_ff_command {
   unset flac2mp3_ffresult
   # This must be a declare statement to avoid the 'Argument list too long' error with some large returned JSON
   declare -g flac2mp3_ffresult
-  flac2mp3_ffresult=$($command "${ff_args[@]}")
+  flac2mp3_ffresult=$($command "${ff_args[@]}" 2>&1)
   local return=$?
   [ $flac2mp3_debug -ge 1 ] && echo "Debug|$shortcommand returned ${#flac2mp3_ffresult} bytes" | log
   [ $flac2mp3_debug -ge 2 ] && [ ${#flac2mp3_ffresult} -ne 0 ] && echo "$shortcommand returned: $flac2mp3_ffresult" | awk '{print "Debug|"$0}' | log
@@ -1172,7 +1172,7 @@ function process_tracks {
     
     # Set metadata options to fix tags if asked
     if [ -n "$flac2mp3_tags" ]; then
-      local metadata=""
+      local -a metadata=()
       [ $flac2mp3_debug -ge 1 ] && echo "Debug|Detecting and fixing common problems with the following metadata tags: $flac2mp3_tags" | log
 
       # Get track metadata
@@ -1186,7 +1186,7 @@ function process_tracks {
               [ $flac2mp3_debug -ge 1 ] && echo "Debug|Original metadata: title=$tag_title" | log
               local pattern='\([^)]+\)$'      # Rough way to limit editing metadata for every track
               if [[ "$tag_title" =~ $pattern ]]; then
-                metadata+="-metadata title=\"$(echo "$tag_title" | sed -r 's/\((live|acoustic|demo|[^)]*((re)?mix(es)?|dub|edit|version))\)$/[\1]/i')\" "
+                metadata+=(-metadata "title=$(echo "$tag_title" | sed -r 's/\((live|acoustic|demo|[^)]*((re)?mix(es)?|dub|edit|version))\)$/[\1]/i')")
               fi
             ;;
             disc )
@@ -1194,7 +1194,7 @@ function process_tracks {
               local tag_disc=$(echo "$flac2mp3_ffprobe_json" | jq -crM '.format.tags | to_entries[] | select(.key | match("disc"; "i")).value')
               [ $flac2mp3_debug -ge 1 ] && echo "Debug|Original metadata: disc=$tag_disc" | log
               if [ "$tag_disc" = "1" ]; then
-                metadata+='-metadata disc="1/1" '
+                metadata+=(-metadata 'disc=1/1')
               fi
             ;;
             genre )
@@ -1204,20 +1204,20 @@ function process_tracks {
               # Only trigger on multiple genres
               if [[ $tag_genre =~ \; ]]; then
                 case "$tag_genre" in
-                  *Synth-Pop*) metadata+='-metadata genre="Electronica & Dance" ' ;;
-                  *Pop*) metadata+='-metadata genre="Pop" ' ;;
-                  *Indie*) metadata+='-metadata genre="Alternative & Indie" ' ;;
-                  *Industrial*) metadata+='-metadata genre="Industrial Rock" ' ;;
-                  *Electronic*) metadata+='-metadata genre="Electronica & Dance" ' ;;
-                  *Punk*|*Alternative*) metadata+='-metadata genre="Alternative & Punk" ' ;;
-                  *Rock*) metadata+='-metadata genre="Rock" ' ;;
+                  *Synth-Pop*) metadata+=(-metadata 'genre=Electronica & Dance') ;;
+                  *Pop*) metadata+=(-metadata 'genre=Pop') ;;
+                  *Indie*) metadata+=(-metadata 'genre=Alternative & Indie') ;;
+                  *Industrial*) metadata+=(-metadata 'genre=Industrial Rock') ;;
+                  *Electronic*) metadata+=(-metadata 'genre=Electronica & Dance') ;;
+                  *Punk*|*Alternative*) metadata+=(-metadata 'genre=Alternative & Punk') ;;
+                  *Rock*) metadata+=(-metadata 'genre=Rock') ;;
                 esac
               fi
             ;;
           esac
         done
         # shellcheck disable=SC2090
-        [ $flac2mp3_debug -ge 1 ] && echo "Debug|New metadata: ${metadata//-metadata /}" | log
+        [ $flac2mp3_debug -ge 1 ] && echo "Debug|New metadata: $(echo "${metadata[@]}" | sed -E 's/-metadata //g')" | log
       else
         echo "Warn|ffprobe did not return any data when querying track: '$track'" | log
         change_exit_status 12
@@ -1229,7 +1229,7 @@ function process_tracks {
     local ffcommand="nice /usr/bin/ffmpeg"
     local IFS=$' \t\n'  # Temporarily restore IFS
     # shellcheck disable=SC2090
-    execute_ff_command "converting track: '$track' to '$tempTrack'" "$ffcommand" -loglevel $flac2mp3_ffmpeg_log -nostdin -i "$track" $flac2mp3_ffmpeg_opts $metadata "$tempTrack"
+    execute_ff_command "converting track: '$track' to '$tempTrack'" "$ffcommand" -loglevel $flac2mp3_ffmpeg_log -nostdin -i "$track" $flac2mp3_ffmpeg_opts "${metadata[@]}" "$tempTrack"
     local return=$?; [ $return -ne 0 ] && {
       change_exit_status 13
       # Delete the temporary file if it exists
