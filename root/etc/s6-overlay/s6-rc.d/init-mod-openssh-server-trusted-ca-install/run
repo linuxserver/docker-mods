@@ -1,0 +1,54 @@
+#!/usr/bin/with-contenv bash
+
+# set trusted certificate authority in file
+
+# Reset the content of the file
+echo -n "" >/config/sshd/trusted_ca
+
+if [[ -n "$TRUSTED_CA" ]]; then
+    if ! grep -q "${TRUSTED_CA}" /config/sshd/trusted_ca; then
+        echo "$TRUSTED_CA" >> /config/sshd/trusted_ca
+        echo "Trusted CA from env variable added"
+    fi
+fi
+
+if [[ -n "$TRUSTED_CA_URL" ]]; then
+    TRUSTED_CA_DOWNLOADED=$(curl -s "$TRUSTED_CA_URL")
+    if ! grep -q "$TRUSTED_CA_DOWNLOADED" /config/sshd/trusted_ca; then
+        echo "$TRUSTED_CA_DOWNLOADED" >> /config/sshd/trusted_ca
+        echo "Trusted CA downloaded from '$TRUSTED_CA_URL' added"
+    fi
+fi
+
+if [[ -n "$TRUSTED_CA_FILE" ]] && [[ -f "$TRUSTED_CA_FILE" ]]; then
+    TRUSTED_CA2=$(cat "$TRUSTED_CA_FILE")
+    if ! grep -q "$TRUSTED_CA2" /config/sshd/trusted_ca; then
+        echo "$TRUSTED_CA2" >> /config/sshd/trusted_ca
+        echo "Trusted CA from file added"
+    fi
+fi
+
+if [[ -d "$TRUSTED_CA_DIR" ]]; then
+    for F in "${TRUSTED_CA_DIR}"/*; do
+        TRUSTED_CAN=$(cat "$F")
+        if ! grep -q "$TRUSTED_CAN" /config/sshd/trusted_ca; then
+            echo "$TRUSTED_CAN" >> /config/sshd/trusted_ca
+            echo "Trusted CA from file '$F' added"
+        fi
+    done
+fi
+
+if [[ -s /config/sshd/trusted_ca ]]; then
+    # Trusted CA exists and is not empty
+    sed -i '/^TrustedUserCAKeys/c\TrustedUserCAKeys /config/sshd/trusted_ca' /config/sshd/sshd_config
+    sed -i '/^#TrustedUserCAKeys/c\TrustedUserCAKeys /config/sshd/trusted_ca' /config/sshd/sshd_config
+
+    if ! grep -q "^TrustedUserCAKeys" /config/sshd/sshd_config; then
+        # TrustedUserCAKeys is not in the file, adding it at the end of the file
+        echo "TrustedUserCAKeys /config/sshd/trusted_ca" >>/config/sshd/sshd_config
+    fi
+else
+    # Trusted CA is empty, commenting parameter
+    sed -i 's/^TrustedUserCAKeys/#TrustedUserCAKeys' /config/sshd/sshd_config
+fi
+
