@@ -64,27 +64,41 @@ Development Container info:
 
       </details>
       <details>
-      <summary>Synology Screenshot</summary>
+      <summary>Synology DSM 6 Screenshot</summary>
 
-      *Example Synology Configuration*  
+      *Example Synology DSM 6 Configuration*  
       ![flac2mp3](.assets/lidarr-synology.png "Synology container settings")  
 
       </details>
 
    2. Start the container.
 
-2. Configure a custom script from Lidarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
-   `/usr/local/bin/flac2mp3.sh`
+2. Either:
+    1. Configure a custom script from Lidarr's *Settings* > *Connect* screen and type the following in the **Path** field:  
+        `/usr/local/bin/flac2mp3.sh`
 
-   <details>
-   <summary>Screenshot</summary>
+        <details>
+        <summary>Screenshot</summary>
 
-   *Example Custom Script*  
-   ![lidarr-flac2mp3](.assets/lidarr-custom-script.png "Lidarr Custom Script dialog")
+        *Example Custom Script*  
+        ![lidarr-flac2mp3](.assets/lidarr-custom-script.png "Lidarr Custom Script dialog")
 
-   </details>
+        </details>
 
-   This will use the defaults to create a 320Kbps MP3 file.
+    *or*
+
+    2. Configure an [import script](#import-mode "Import Mode") from Lidarr's *Settings* > *Media Management* > *Importing* > *Import Using Script* screen and type the following in the **Import Script Path** field:  
+        `/usr/local/bin/flac2mp3.sh`
+
+        <details>
+        <summary>Screenshot</summary>
+
+        *Example Import Script*  
+        ![flac2mp3 import script](.assets/lidarr-import.png "Lidarr Import Script dialog")
+
+        </details>
+
+  This will use the defaults to create a 320Kbps MP3 file.
 
 > [!IMPORTANT]
 > For any other setting, you **must** use one of the supported methods to pass arguments to the script.  See the [Command-Line Syntax](#command-line-syntax) section below.
@@ -93,10 +107,10 @@ Development Container info:
 New file(s) will be placed in the same directory as the original FLAC file(s) (unless redirected with the `--output` option below) with permissions preserved. Existing files with the same track name will be overwritten. Owner is preserved if the script is executed as root.
 
 > [!TIP]
-> By default, if you've configured Lidarr's **Recycle Bin** path correctly, the original audio file will be moved there.  
+> By default, if you've configured Lidarr's **Recycle Bin** path correctly, the original audio file will be moved there, unless you're in Import mode.  
 
 > [!CAUTION]
-> If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.  This behavior may be modified with the `--keep-file` option.
+> If you have *not* configured the Recycle Bin, the original FLAC audio file(s) will be deleted and permanently lost.  This behavior may be modified with the `--keep-file` option.  When in Import mode, the source audio track is always deleted.
 
 ## Command-Line Syntax
 > [!NOTE]
@@ -105,8 +119,20 @@ New file(s) will be placed in the same directory as the original FLAC file(s) (u
 ### Options and Arguments
 The script may be called with optional command-line arguments.
 
-The syntax for the command-line is:  
-`flac2mp3 [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} "<options>" {-e|--extension} <extension>] [{-f|--file} <audio_file>] [{-k|--keep-file}] [{-o|--output} <directory>] [{-r|--regex} '<regex>'] [{-t|--tags} <taglist>] [{-l|--log} <log_file>] [{-c|--config} <config_file>] [{-d|--debug} [<level>]]`  
+The syntax for the command-line is:
+
+```shell
+flac2mp3.sh [{-b|--bitrate} <bitrate> | {-v|--quality} <quality> | {-a|--advanced} "<options>" {-e|--extension} <extension>]
+            [{-f|--file} <audio_file>]
+            [{-k|--keep-file}]
+            [{-o|--output} <directory>]
+            [{-r|--regex} '<regex>']
+            [{-t|--tags} <taglist>]
+            [{-l|--log} <log_file>]
+            [{-c|--config} <config_file>]
+            [{-d|--debug} [<level>]]
+            [--no-ansi]
+```
 
 <details>
 <summary>Table of Command-Line Arguments</summary>
@@ -115,18 +141,19 @@ Option|Argument|Description
 ---|---|---
 `-b`, `--bitrate`|`<bitrate>`|Sets the output quality in constant bits per second (CBR).<br/>Examples: 160k, 240k, 300000<br/>**Note:** May not be specified with `-v`, `-a`, or `-e`.
 `-v`, `--quality`|`<quality>`|Sets the output variable bit rate (VBR).<br/>Specify a value between 0 and 9, with 0 being the highest quality.<br/>See the [FFmpeg MP3 Encoding Guide](https://trac.ffmpeg.org/wiki/Encode/MP3) for more details.<br/>**Note:** May not be specified with `-b`, `-a`, or `-e`.
-`-a`, `--advanced`<!-- markdownlint-disable-line MD013 -->|`"<options>"`|Advanced ffmpeg options.<br />The specified `options` replace all script defaults and are sent directly to ffmpeg.<br/>The `options` value must be enclosed in quotes.<br/>See [FFmpeg Options](https://ffmpeg.org/ffmpeg.html#Options) for details on valid options, and [Guidelines for high quality audio encoding](https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio) for suggested usage.<br/>**Note:** Requires the `-e` option to also be specified. May not be specified with `-v` or `-b`.<br/>![warning] **WARNING:** You must specify an audio codec (by including a `-c:a <codec>` ffmpeg option) or the resulting file will contain no audio!<br/>![warning] **WARNING:** Invalid `options` could result in script failure!
+`-a`, `--advanced`|`"<options>"`|Advanced ffmpeg options.<br />The specified `options` replace all script defaults and are sent directly to ffmpeg.<br/>The `options` value must be enclosed in quotes.<br/>See [FFmpeg Options](https://ffmpeg.org/ffmpeg.html#Options) for details on valid options, and [Guidelines for high quality audio encoding](https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio) for suggested usage.<br/>**Note:** Requires the `-e` option to also be specified. May not be specified with `-v` or `-b`.<br/>![warning] **WARNING:** You must specify an audio codec (by including a `-c:a <codec>` ffmpeg option) or the resulting file will contain no audio!<br/>![warning] **WARNING:** Invalid `options` could result in script failure!
 `-e`, `--extension`|`<extension>`|Sets the output file extension.<br/>The extension may be prefixed by a dot (".") or not.<br/>Example: .ogg<br/>**Note:** Requires the `-a` option to also be specified. May not be specified with `-v` or `-b`.
 `-f`, `--file`|`<audio_file>`|If included, the script enters **[Batch Mode](#batch-mode)** and converts the specified audio file.<br/>![note] **Do not** use this argument when called from Lidarr!
 `-o`, `--output`|`<directory>`|Converted audio file(s) are saved to `directory` instead of being located in the same directory as the source audio file.<br/>The path will be created if it does not exist.
-`-k`, `--keep-file`| |Do not delete the source file or move it to the Lidarr Recycle bin.<br/>**Note:** This also disables importing the new files into Lidarr after conversion.
+`-k`, `--keep-file`||Do not delete the source file or move it to the Lidarr Recycle bin.<br/>**Note:** This also disables importing the new files into Lidarr after conversion.
 `-r`, `--regex`|`'<regex>'`|Sets the regular expression used to select input files.<br/>The `regex` value should be enclosed in single quotes and escaped properly.<br/>Defaults to `[.]flac$`.
+`-t`, `--tags`|`<taglist>`|Comma separated list of metadata tags to apply automated corrections to.<br/>See [Metadata Corrections](#metadata-corrections) section.
 `-l`, `--log`|`<log_file>`|The log filename<br/>Default of /config/log/flac2mp3.txt
 `-c`, `--config`|`<config_file>`|Lidar XML configuration file<br/>Default is `/config/config.xml`
-`-t`, `--tags`|`<taglist>`|Comma separated list of metadata tags to apply automated corrections to.<br/>See [Metadata Corrections](#metadata-corrections) section.
 `-d`, `--debug`|`[<level>]`|Enables debug logging. Level is optional.<br/>Default of 1 (low).<br/>2 includes JSON and FFmpeg output.<br/>3 contains even more JSON output.
-`--help`| |Display help and exit.
-`--version`| |Display version and exit.
+`--no-ansi`||Force disable ANSI color codes in terminal output
+`--help`||Display help and exit.
+`--version`||Display version and exit.
 
 </details>
 
@@ -273,15 +300,26 @@ In a `docker run` command, it would be:
 
 </details>
 <details>
-<summary>Synology Screenshot</summary>
+<summary>Synology DSM 6 Screenshot</summary>
 
-*Example Synology Configuration*  
+*Example Synology DSM 6 Configuration*  
 ![flac2mp3](.assets/lidarr-synology-2.png "Synology container settings")
 
 </details>
 
-## Triggers
-The only events/notification triggers that are supported are **On Release Import** and **On Upgrade**. The script will log an error if executed by any other trigger.
+## Custom Script Triggers
+The only events/notification triggers that are supported in Custom Script mode are **On Release Import** and **On Upgrade**. The script will log an error if executed by any other trigger.
+
+## Import Mode
+When entered in Lidarr's *Import Script Path* field, the script is placed in Import mode.  In this mode, Lidarr will run the script to pickup the downloaded audio tracks  from your download client instead of using the built-in functionality.
+This mode allows the script to process the audio tracks before the files are fully added to the library, gaining some efficiency by converting and moving the tracks at the same time.
+However, because the Lidarr database is not updated before the conversion step, this introduces some inherent limitations.
+
+### Script Execution Differences in Import Mode
+In Import mode, the script behaves similarly to Custom Script mode but with the following differences:
+* *The script will execute once per imported track.*<br/>Lidarr calls the script for each track, so importing an album with 10 tracks will execute the script 10 times.
+* *Outdated Lidarr entries might exist.*<br/>A manual Refresh & Scan will replace any outdated entries with the correct filenames.  The script cannot correct this due to the database update timing.
+* *Original audio files are deleted.*<br/>The Recycle Bin function is not available.
 
 ## Batch Mode
 Batch mode allows the script to be executed independently of Lidarr.  It converts the file specified on the command-line and ignores any environment variables that are normally expected to be set by the music management program.
