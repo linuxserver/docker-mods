@@ -6,10 +6,9 @@ ARG MOD_VERSION
 
 RUN \
   if [ -z "${MOD_VERSION}" ]; then \
-    MOD_VERSION=$(curl -sL https://julialang.org/downloads/manual-downloads/ \
-      | grep 'Current stable release:' \
-      | sed 's|.*Current stable release: v||' \
-      | sed 's| (.*||'); \
+    MOD_VERSION=$(curl -sX GET https://api.github.com/repos/JuliaLang/julia/releases \
+      | jq -r '.[] | select(.prerelease != true) | .tag_name' \
+      | sed 's|^v||g' | sort -rV | head -1); \
   fi && \
   JULIA_MIN_VERSION=$(echo "${MOD_VERSION}" | cut -d. -f 1,2) && \
   mkdir -p /root-layer/julia-bins && \
