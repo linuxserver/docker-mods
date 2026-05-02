@@ -16,6 +16,7 @@ E.g., to install `rsync`, `git` and `nginx` OS packages and `apprise` python pac
 
 ## Notes:
 - Package names entered should match the names in the relevant distro repo: https://pkgs.alpinelinux.org/packages or https://packages.ubuntu.com/
+- To install a specific version of a package include it in the name e.g. `apprise==1.10.0`. Note that `apt` requires a single `=`, while `apk` and `pip` use double `==`.
 - Setting the env var `INSTALL_PIP_PACKAGES` will result in automatic install of the `python3-dev` and `python3-pip` OS packages, updating of `pip` to the latest version and installation of the latest `setuptools` and `wheel` packages to set up the necessary environment.
 - Any other OS dependency such as `make` or `git`, which may be needed by the pip install process, should be manually added to `INSTALL_PACKAGES`.
 - The OS packages defined will be installed first, followed by the pip packages.
