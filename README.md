@@ -73,6 +73,7 @@ e.g. `resolver  127.0.0.11 valid=30s ipv6=off;`
 
 ## Versions
 
+* **08.05.26:** - Make a pointless change.
 * **11.09.24:** - Move versioning to mod tags. Bundle tarball at build time.
 * **05.06.24:** - Add lua-resty-string.
 * **06.02.24:** - Add AppSec support.
