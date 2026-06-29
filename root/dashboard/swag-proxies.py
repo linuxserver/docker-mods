@@ -4,6 +4,7 @@ import glob
 import json
 import os
 import re
+import resource
 import socket
 import sys
 import urllib3
@@ -69,12 +70,21 @@ def is_available(url):
     finally:
         s.close()
 
+def get_max_workers(default=50, reserve=10):
+    try:
+        max_procs, _ = resource.getrlimit(resource.RLIMIT_NPROC)
+        if max_procs == resource.RLIM_INFINITY:
+            return default
+        return max(1, min(default, max_procs - reserve))
+    except (AttributeError, ValueError, OSError):
+        return default
+
 
 urllib3.disable_warnings()
 fast = (len(sys.argv) > 1)
 apps, auths = find_apps(fast)
 discovered_apps = collections.defaultdict(dict)
-with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+with concurrent.futures.ThreadPoolExecutor(max_workers=get_max_workers()) as executor:
     futures = {executor.submit(is_available, app): app for app in apps.keys()}
     for future in concurrent.futures.as_completed(futures):
         app = futures[future]
