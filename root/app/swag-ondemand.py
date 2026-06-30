@@ -20,8 +20,8 @@ class ContainerThread(threading.Thread):
         super().__init__()
         self.daemon = True
         self.ondemand_containers = {}
-        self.init_docker_hosts()
         self.docker_hosts = []
+        self.init_docker_hosts()
 
     def init_docker_hosts(self):
         try:
