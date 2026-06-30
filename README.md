@@ -28,6 +28,7 @@ This mod gives SWAG the ability to start containers on-demand when accessed thro
   - `SWAG_ONDEMAND_STOP_THRESHOLD` - duration of inactivity in seconds before stopping on-demand containers, defaults to `600` (10 minutes).
   - `SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP` - sleep time in seconds between querying containers, defaults to `5.0`.
   - `SWAG_ONDEMAND_LOG_READER_SLEEP` - sleep time in seconds between log reads, defaults to `1.0`.
+  - `SWAG_ONDEMAND_REMOTE1...20` - the remote API of other hosts for ondemand to manage, such as: tcp://otherhost:2375. can add up to 20.
 
 ### Loading Page:
 
