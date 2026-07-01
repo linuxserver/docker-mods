@@ -10,7 +10,7 @@ class OnDemandContainer:
 
 @dataclass
 class DockerHost:
-    docker_client: docker.DockerClient
-    docker_host_url: str
+    client: docker.DockerClient
+    url: str
     is_connected: bool = False
-    ondemand_containers: dict = field(default_factory=dict)
+    ondemand_containers: dict[str, OnDemandContainer] = field(default_factory=dict)
