@@ -69,18 +69,19 @@ class ContainerThread(threading.Thread):
     
     def process_containers(self):
         for docker_host in self.docker_hosts:
-            docker_client = docker_host["docker_client"]
-            docker_host["is_connected"] = True
-            if not is_docker_connected(docker_client):
+            if not is_docker_connected(docker_host["docker_client"]):
                 if docker_host["is_connected"]:
                     docker_host_url = docker_host["docker_host_url"]
                     logging.warning(f"Lost connection to {docker_host_url}")
                 docker_host["is_connected"] = False
                 continue
 
-            docker_host["is_connected"] = True
+            if not docker_host["is_connected"]:
+                logging.info(f"Connection to {docker_host_url} has been restored")
+                docker_host["is_connected"] = True
+
             ondemand_containers = docker_host["ondemand_containers"]
-            containers = docker_client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
+            containers = docker_host["docker_client"].containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
             container_names = {container.name for container in containers}
 
             for container_name in list(ondemand_containers.keys()):
@@ -110,12 +111,11 @@ class ContainerThread(threading.Thread):
                 inactive_seconds = (datetime.now() - ondemand_containers[container_name]["last_accessed"]).total_seconds()
                 if inactive_seconds < STOP_THRESHOLD:
                     continue
-                docker_client = docker_host["docker_client"]
-                if not is_docker_connected(docker_client):
+                if not is_docker_connected(docker_host["docker_client"]):
                     docker_host_url = docker_host["docker_host_url"]
                     logging.warning(f"Failed to stop {container_name}, docker host {docker_host_url} is unavailable")
                     continue
-                docker_client.containers.get(container_name).stop()
+                docker_host["docker_client"].containers.get(container_name).stop()
                 logging.info(f"Stopped {container_name} after {STOP_THRESHOLD}s of inactivity")
 
     def start_containers(self):
@@ -134,12 +134,11 @@ class ContainerThread(threading.Thread):
                     accessed = True
                 if not accessed or ondemand_containers[container_name]["status"] == "running":
                     continue
-                docker_client = docker_host["docker_client"]
-                if not is_docker_connected(docker_client):
+                if not is_docker_connected(docker_host["docker_client"]):
                     docker_host_url = docker_host["docker_host_url"]
                     logging.warning(f"Failed to start {container_name}, docker host {docker_host_url} is unavailable")
                     continue
-                docker_client.containers.get(container_name).start()
+                docker_host["docker_client"].containers.get(container_name).start()
                 logging.info(f"Started {container_name}")
                 ondemand_containers[container_name]["status"] = "running"
 
