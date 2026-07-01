@@ -27,7 +27,7 @@ class ContainerThread(threading.Thread):
             self.docker_hosts.append(DockerHost(client=client, url=url))
     
         remote_hosts_env_vars = { key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX) }
-        for i in range(1, 20):
+        for i in range(1, 21):
             if f"{REMOTE_HOSTS_PREFIX}{i}" not in remote_hosts_env_vars:
                 break
             
