@@ -49,12 +49,6 @@ class ContainerThread(threading.Thread):
                     docker_host_url = f"tcp://{docker_host_url}:2375"
                 remote_host["docker_host"] = docker_host_url
                 remote_host["docker_client"] = docker.DockerClient(base_url=docker_host_url)
-                if f"{REMOTE_HOSTS_PREFIX}{i}_MAC" in remote_hosts_env_vars:
-                    remote_host["mac"] = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}_MAC"]
-                if f"{REMOTE_HOSTS_PREFIX}{i}_IP" in remote_hosts_env_vars:
-                    remote_host["ip"] = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}_IP"]
-                if f"{REMOTE_HOSTS_PREFIX}{i}_URLS" in remote_hosts_env_vars:
-                    remote_host["urls"] = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}_URLS"]
                 self.docker_hosts.append(remote_host)
         except Exception:
             pass
