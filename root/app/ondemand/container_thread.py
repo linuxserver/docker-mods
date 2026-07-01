@@ -1,45 +1,20 @@
+import helper
+from shared_state import last_accessed_urls, last_accessed_urls_lock
+
 from datetime import datetime
-import docker
 import logging
 import os
-import requests
 import threading
 import time
-from typing import Optional
 
-ACCESS_LOG_FILE = "/config/log/nginx/access.log"
-LOG_FILE = "/config/log/ondemand/ondemand.log"
 CONTAINER_QUERY_SLEEP = float(os.environ.get("SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP", "5.0"))
-LOG_READER_SLEEP = float(os.environ.get("SWAG_ONDEMAND_LOG_READER_SLEEP", "1.0"))
 STOP_THRESHOLD = int(os.environ.get("SWAG_ONDEMAND_STOP_THRESHOLD", "600"))
 REMOTE_HOSTS_PREFIX = "SWAG_ONDEMAND_REMOTE"
 
-last_accessed_urls = set()
-last_accessed_urls_lock = threading.Lock()
 
-
-def get_docker_client(docker_host_url: str, from_env: bool = False) -> tuple[Optional[docker.DockerClient], str]:
-    try:
-        if docker_host_url:
-            if not docker_host_url.startswith("tcp://"):
-                docker_host_url = f"tcp://{docker_host_url}:2375"
-            return docker.DockerClient(base_url=docker_host_url), docker_host_url
-        elif from_env:
-            return docker.from_env(), "unix://var/run/docker.sock"
-        else:
-            return None, ""
-    except (docker.errors.DockerException, requests.exceptions.ConnectionError):
-        return None, ""
-    
-def is_docker_connected(client: docker.DockerClient) -> bool:
-    try:
-        return client.ping()
-    except (docker.errors.DockerException, requests.exceptions.ConnectionError):
-        return False
-    
 class ContainerThread(threading.Thread):
     def __init__(self):
-        super().__init__()
+        super().__init__(name="ContainerThread")
         self.daemon = True
         self.docker_hosts = []
         self.init_docker_hosts()
@@ -48,7 +23,7 @@ class ContainerThread(threading.Thread):
         docker_host = { "is_connected": False }
         docker_host["ondemand_containers"] = {}
         docker_host_url = os.environ.get("DOCKER_HOST", None)
-        docker_host["docker_client"], docker_host["docker_host_url"] = get_docker_client(docker_host_url, True)
+        docker_host["docker_client"], docker_host["docker_host_url"] = helper.get_docker_client(docker_host_url, True)
         if docker_host["docker_client"]:
             self.docker_hosts.append(docker_host)
     
@@ -59,7 +34,7 @@ class ContainerThread(threading.Thread):
             if f"{REMOTE_HOSTS_PREFIX}{i}" not in remote_hosts_env_vars:
                 break
             docker_host_url = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}"]
-            remote_host["docker_client"], remote_host["docker_host_url"] = get_docker_client(docker_host_url)
+            remote_host["docker_client"], remote_host["docker_host_url"] = helper.get_docker_client(docker_host_url)
             if not remote_host["docker_client"]:
                 continue
             self.docker_hosts.append(remote_host)
@@ -69,7 +44,7 @@ class ContainerThread(threading.Thread):
     
     def process_containers(self):
         for docker_host in self.docker_hosts:
-            if not is_docker_connected(docker_host["docker_client"]):
+            if not helper.is_docker_connected(docker_host["docker_client"]):
                 if docker_host["is_connected"]:
                     logging.warning(f"Lost connection to {docker_host['docker_host_url']}")
                 docker_host["is_connected"] = False
@@ -110,7 +85,7 @@ class ContainerThread(threading.Thread):
                 inactive_seconds = (datetime.now() - ondemand_containers[container_name]["last_accessed"]).total_seconds()
                 if inactive_seconds < STOP_THRESHOLD:
                     continue
-                if not is_docker_connected(docker_host["docker_client"]):
+                if not helper.is_docker_connected(docker_host["docker_client"]):
                     logging.warning(f"Failed to stop {container_name}, docker host {docker_host['docker_host_url']} is unavailable")
                     continue
                 docker_host["docker_client"].containers.get(container_name).stop()
@@ -132,7 +107,7 @@ class ContainerThread(threading.Thread):
                     accessed = True
                 if not accessed or ondemand_containers[container_name]["status"] == "running":
                     continue
-                if not is_docker_connected(docker_host["docker_client"]):
+                if not helper.is_docker_connected(docker_host["docker_client"]):
                     logging.warning(f"Failed to start {container_name}, docker host {docker_host['docker_host_url']} is unavailable")
                     continue
                 docker_host["docker_client"].containers.get(container_name).start()
@@ -148,59 +123,3 @@ class ContainerThread(threading.Thread):
                 time.sleep(CONTAINER_QUERY_SLEEP)
             except Exception as e:
                 logging.exception(e)
-
-class LogReaderThread(threading.Thread):
-    def __init__(self):
-        super().__init__()
-        self.daemon = True
-
-    def tail(self, f):
-        f.seek(0,2)
-        inode = os.fstat(f.fileno()).st_ino
-
-        while True:
-            line = f.readline()
-            if not line:
-                time.sleep(LOG_READER_SLEEP)
-                if os.stat(ACCESS_LOG_FILE).st_ino != inode:
-                    f.close()
-                    f = open(ACCESS_LOG_FILE, 'r')
-                    inode = os.fstat(f.fileno()).st_ino
-                continue
-            yield line
-
-    def run(self):
-        while True:
-            try:
-                if not os.path.exists(ACCESS_LOG_FILE):
-                    time.sleep(1)
-                    continue
-
-                logfile = open(ACCESS_LOG_FILE, "r")
-                for line in self.tail(logfile):
-                    if '" 302 ' in line:
-                        continue
-                    for part in line.split():
-                        if not part.startswith("http"):
-                            continue
-                        with last_accessed_urls_lock:
-                            last_accessed_urls.add(part)
-                        break
-            except Exception as e:
-                logging.exception(e)
-                time.sleep(1)
-
-if __name__ == "__main__":
-    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-    logging.basicConfig(filename=LOG_FILE,
-                    filemode='a',
-                    format='%(asctime)s - %(threadName)s - %(levelname)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.INFO)
-    logging.info("Starting swag-ondemand...")
-
-    ContainerThread().start()
-    LogReaderThread().start()
-
-    while True:
-        time.sleep(1)

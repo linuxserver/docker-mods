@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bash
 
-result=$(exec s6-setuidgid abc python3 /app/swag-ondemand.py)
+result=$(exec s6-setuidgid abc python3 /app/ondemand/main.py)
 if [ $? -ne 0 ]; then
     echo "***** Error: swag-ondemand failed to run *****"
     echo "${result}"
