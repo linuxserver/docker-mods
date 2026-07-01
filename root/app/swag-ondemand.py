@@ -69,7 +69,7 @@ class ContainerThread(threading.Thread):
     def process_containers(self):
         for docker_host in self.docker_hosts:
             docker_client = docker_host["docker_client"]
-            if not self.is_docker_connected(docker_client):
+            if not is_docker_connected(docker_client):
                 continue
 
             ondemand_containers = docker_host["ondemand_containers"]
@@ -104,7 +104,7 @@ class ContainerThread(threading.Thread):
                 if inactive_seconds < STOP_THRESHOLD:
                     continue
                 docker_client = ondemand_containers[container_name]["docker_client"]
-                if not self.is_docker_connected(docker_client):
+                if not is_docker_connected(docker_client):
                     continue
                 docker_client.containers.get(container_name).stop()
                 logging.info(f"Stopped {container_name} after {STOP_THRESHOLD}s of inactivity")
@@ -126,7 +126,7 @@ class ContainerThread(threading.Thread):
                 if not accessed or ondemand_containers[container_name]["status"] == "running":
                     continue
                 docker_client = ondemand_containers[container_name]["docker_client"]
-                if not self.is_docker_connected(docker_client):
+                if not is_docker_connected(docker_client):
                     continue
                 docker_client.containers.get(container_name).start()
                 logging.info(f"Started {container_name}")
