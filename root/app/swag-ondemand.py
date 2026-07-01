@@ -2,8 +2,10 @@ from datetime import datetime
 import docker
 import logging
 import os
+import requests
 import threading
 import time
+from typing import Optional
 
 ACCESS_LOG_FILE = "/config/log/nginx/access.log"
 LOG_FILE = "/config/log/ondemand/ondemand.log"
@@ -15,6 +17,25 @@ REMOTE_HOSTS_PREFIX = "SWAG_ONDEMAND_REMOTE"
 last_accessed_urls = set()
 last_accessed_urls_lock = threading.Lock()
 
+def get_docker_client(docker_host_url: str, from_env: bool = False) -> Optional[docker.DockerClient]:
+    try:
+        if docker_host_url:
+            if not docker_host_url.startswith("tcp://"):
+                docker_host_url = f"tcp://{docker_host_url}:2375"
+            return docker.DockerClient(base_url=docker_host_url)
+        elif from_env:
+            return docker.from_env()
+        else:
+            return None
+    except (docker.errors.DockerException, requests.exceptions.ConnectionError):
+        return None
+    
+def is_docker_connected(client: docker.DockerClient) -> bool:
+    try:
+        return client.ping()
+    except (docker.errors.DockerException, requests.exceptions.ConnectionError):
+        return False
+    
 class ContainerThread(threading.Thread):
     def __init__(self):
         super().__init__()
@@ -23,44 +44,27 @@ class ContainerThread(threading.Thread):
         self.init_docker_hosts()
 
     def init_docker_hosts(self):
-        try:
-            docker_host = {}
-            docker_host["ondemand_containers"] = {}
-            docker_host_url = os.environ.get("DOCKER_HOST", None)
-            if docker_host_url:
-                if not docker_host_url.startswith("tcp://"):
-                    docker_host_url = f"tcp://{docker_host_url}:2375"
-                docker_host["docker_client"] = docker.DockerClient(base_url=docker_host_url)
-            else:
-                docker_host["docker_client"] = docker.from_env()
+        docker_host = {}
+        docker_host["ondemand_containers"] = {}
+        docker_host_url = os.environ.get("DOCKER_HOST", None)
+        docker_host["docker_client"] = get_docker_client(docker_host_url, True)
+        if docker_host["docker_client"]:
             self.docker_hosts.append(docker_host)
-        except Exception:
-            pass
     
-        try:
-            remote_hosts_env_vars = { key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX) }
-            for i in range(1, 20):
-                remote_host = {}
-                remote_host["ondemand_containers"] = {}
-                if f"{REMOTE_HOSTS_PREFIX}{i}" not in remote_hosts_env_vars:
-                    break
-                docker_host_url = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}"]
-                if not docker_host_url.startswith("tcp://"):
-                    docker_host_url = f"tcp://{docker_host_url}:2375"
-                remote_host["docker_host"] = docker_host_url
-                remote_host["docker_client"] = docker.DockerClient(base_url=docker_host_url)
-                self.docker_hosts.append(remote_host)
-        except Exception:
-            pass
+        remote_hosts_env_vars = { key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX) }
+        for i in range(1, 20):
+            remote_host = {}
+            remote_host["ondemand_containers"] = {}
+            if f"{REMOTE_HOSTS_PREFIX}{i}" not in remote_hosts_env_vars:
+                break
+            docker_host_url = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}"]
+            remote_host["docker_client"] = get_docker_client(docker_host_url)
+            if not remote_host["docker_client"]:
+                continue
+            self.docker_hosts.append(remote_host)
 
         if not self.docker_hosts:
             logging.error("Failed to connect to any docker host")
-    
-    def is_docker_connected(self, client: docker.DockerClient) -> bool:
-        try:
-            return client.ping()
-        except Exception:
-            return False
     
     def process_containers(self):
         for docker_host in self.docker_hosts:
