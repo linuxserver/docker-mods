@@ -49,13 +49,13 @@ class ContainerThread(threading.Thread):
             if not docker_host.is_connected:
                 continue
 
-            containers = docker_host.client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
+            containers = docker_host.get_containers()
             container_names = {container.name for container in containers}
 
             for container_name in list(docker_host.ondemand_containers.keys()):
                 if container_name not in container_names:
                     docker_host.ondemand_containers.pop(container_name)
-                    logging.info(f"Stopped monitoring {container_name}")
+                    logging.info(f"Stopped monitoring {container_name} on {docker_host.url}")
 
             for container in containers:
                 default_url = container.labels.get("swag_url", f"{container.name}.").rstrip("*")
@@ -63,12 +63,12 @@ class ContainerThread(threading.Thread):
                 
                 if container.name not in docker_host.ondemand_containers:
                     last_accessed = datetime.now()
-                    logging.info(f"Started monitoring {container.name} for urls: {container_urls}")
+                    logging.info(f"Started monitoring {container.name} on {docker_host.url} for urls: {container_urls}")
                 else:
                     existing_container = docker_host.ondemand_containers[container.name]
                     last_accessed = existing_container.last_accessed
                     if container_urls != existing_container.urls:
-                        logging.info(f"Updated urls for {container.name} to: {container_urls}")
+                        logging.info(f"Updated urls for {container.name} on {docker_host.url} to: {container_urls}")
                 
                 docker_host.ondemand_containers[container.name] = OnDemandContainer(
                     status=container.status,
@@ -87,7 +87,7 @@ class ContainerThread(threading.Thread):
                     continue
                 
                 docker_host.get_container(container_name).stop()
-                logging.info(f"Stopped {container_name} after {STOP_THRESHOLD}s of inactivity")
+                logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
 
     def start_containers(self, last_accessed_urls_combined: str):
         for docker_host in self.docker_hosts:
@@ -103,7 +103,7 @@ class ContainerThread(threading.Thread):
                     continue
                 
                 docker_host.get_container(container_name).start()
-                logging.info(f"Started {container_name}")
+                logging.info(f"Started {container_name} on {docker_host.url}")
                 container.status = "running"
 
     def send_wol(self, last_accessed_urls_combined: str):
@@ -113,6 +113,7 @@ class ContainerThread(threading.Thread):
             for wol_url in docker_host.wol_urls.split(","):
                 if wol_url in last_accessed_urls_combined:
                     wakeonlan.send_magic_packet(docker_host.wol_mac, ip_address=docker_host.wol_broadcast, port=docker_host.wol_port, interface=docker_host.wol_interface)
+                    logging.info(f"Sent a WoL packet to mac {docker_host.wol_mac} via broadcast {docker_host.wol_broadcast} on port {docker_host.wol_port} on interface {docker_host.wol_interface or 'default'} activated by {wol_url}")
                     break
 
     def run(self):

@@ -27,12 +27,13 @@ class DockerHost:
     def init_docker_client(self):
         try:
             self.was_connected = self.is_connected
-            if self.client:
+            if self.client.ping():
                 return
             if self.url:
                 self.client = docker.DockerClient(base_url=self.url)
             else:
                 self.client = docker.from_env()
+                self.url = "unix:///var/run/docker.sock"
             self.is_connected = True
             if not self.was_connected:
                 logging.info(f"Connection to {self.url} has been restored")
@@ -47,4 +48,11 @@ class DockerHost:
             return self.client.containers.get(container_name)
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
             logging.warning(f"Failed to get {container_name}, docker host {self.url} is unavailable")
+            return None
+
+    def get_containers(self):
+        try:
+            return self.client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError):
+            logging.warning(f"Failed to get containers, docker host {self.url} is unavailable")
             return None
