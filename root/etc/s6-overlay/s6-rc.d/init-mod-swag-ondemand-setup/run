@@ -7,14 +7,16 @@ if [ ! -S /var/run/docker.sock ] && [ -z "$DOCKER_HOST" ]; then
     exit 0
 fi
 
-echo '**** Checking if docker-py is already installed ****'
-if ! pip list 2>&1 | grep -q "docker"; then
-    echo "**** Adding docker-py to package install lists ****"
-    echo "\
-        docker" >> /mod-pip-packages-to-install.list
-else
-    echo "**** docker-py already installed, skipping ****"
-fi
+for pkg in $(cat /app/ondemand/requirements.txt); do
+    echo "**** Checking if $pkg are already installed ****"
+    if ! pip list 2>&1 | grep -iq "$pkg"; then
+        echo "**** Adding $pkg to package install lists ****"
+        echo "\
+            $pkg" >> /mod-pip-packages-to-install.list
+    else
+        echo "**** $pkg already installed, skipping ****"
+    fi
+done
 
 if [ ! -f /config/nginx/ondemand.conf ]; then
     cp /defaults/ondemand.conf /config/nginx/ondemand.conf
