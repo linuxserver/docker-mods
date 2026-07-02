@@ -94,19 +94,20 @@ class ContainerThread(threading.Thread):
                     continue
                 
                 container.stop()
+                ondemand_container.status = "exited"
                 logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
 
     def start_containers(self, last_accessed_urls_combined: str):
         for docker_host in self.docker_hosts:
-            for container_name, container in docker_host.ondemand_containers.items():
+            for container_name, ondemand_container in docker_host.ondemand_containers.items():
                 accessed = False
-                for ondemand_url in container.urls.split(","):
+                for ondemand_url in ondemand_container.urls.split(","):
                     if ondemand_url in last_accessed_urls_combined:
-                        container.last_accessed = datetime.now()
+                        ondemand_container.last_accessed = datetime.now()
                         accessed = True
                         break
                 
-                if not accessed or container.status == "running":
+                if not accessed or ondemand_container.status == "running":
                     continue
                 
                 container = docker_host.get_container(container_name)
@@ -114,8 +115,8 @@ class ContainerThread(threading.Thread):
                     continue
 
                 container.start()
+                ondemand_container.status = "running"
                 logging.info(f"Started {container_name} on {docker_host.url}")
-                container.status = "running"
 
     def send_wol(self, last_accessed_urls_combined: str):
         for docker_host in self.docker_hosts:
