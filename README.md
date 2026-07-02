@@ -28,6 +28,7 @@ This mod gives SWAG the ability to start containers on-demand when accessed thro
   - `SWAG_ONDEMAND_STOP_THRESHOLD` - duration of inactivity in seconds before stopping on-demand containers, defaults to `600` (10 minutes).
   - `SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP` - sleep time in seconds between querying containers, defaults to `5.0`.
   - `SWAG_ONDEMAND_LOG_READER_SLEEP` - sleep time in seconds between log reads, defaults to `1.0`.
+  - `SWAG_ONDEMAND_DOCKER_API_TIMEOUT` - the timeout for docker's API. Defaults to `5`.
   - `SWAG_ONDEMAND_REMOTE1` - the remote API of other hosts for ondemand to manage. For example: `tcp://otherhost:2375`.
   - `SWAG_ONDEMAND_REMOTE1_WOL_MAC` - Required for WoL, specifies which MAC address to send the WoL packet to. For example: `00:00:0A:BB:28:FC`.
   - `SWAG_ONDEMAND_REMOTE1_WOL_URLS` - Required for WoL, specifies which URL prefixes would trigger WoL. Same syntax as `swag_ondemand_urls` below. For example: `https://somecontainer.`.
@@ -37,7 +38,7 @@ This mod gives SWAG the ability to start containers on-demand when accessed thro
 
 **You can increment the number for up to 20 remote hosts. For example: `SWAG_ONDEMAND_REMOTE2`, `SWAG_ONDEMAND_REMOTE3`, etc.**
 
- **For WoL to work in a container, you need to either set `network_mode: host` or broadcast to the IP of the remote host and set a static ARP on the router. For example: in opnsense add an entry under Interfaces > Neighbors > Static Assignments.**
+**For WoL to work in a container, you need to either set `network_mode: host` or broadcast to the IP of the remote host and set a static ARP on the router. For example: in opnsense add an entry under Interfaces > Neighbors > Static Assignments.**
 
 ### Loading Page:
 
