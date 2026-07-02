@@ -91,7 +91,7 @@ class ContainerThread(threading.Thread):
                 
                 container = docker_host.get_container(container_name)
                 if not container:
-                    container
+                    continue
                 
                 container.stop()
                 logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
@@ -111,7 +111,7 @@ class ContainerThread(threading.Thread):
                 
                 container = docker_host.get_container(container_name)
                 if not container:
-                    container
+                    continue
 
                 container.start()
                 logging.info(f"Started {container_name} on {docker_host.url}")
