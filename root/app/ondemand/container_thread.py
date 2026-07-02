@@ -102,9 +102,7 @@ class ContainerThread(threading.Thread):
                 if not accessed or container.status == "running":
                     continue
                 
-                container_obj = docker_host.get_container(container_name)
-                self.handle_wol(docker_host, container_name)
-                container_obj.start()
+                docker_host.get_container(container_name).start()
                 logging.info(f"Started {container_name}")
                 container.status = "running"
 
