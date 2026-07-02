@@ -9,6 +9,7 @@ import time
 import wakeonlan
 
 CONTAINER_QUERY_SLEEP = float(os.environ.get("SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP", "5.0"))
+DOCKER_API_TIMEOUT = int(os.environ.get("SWAG_ONDEMAND_DOCKER_API_TIMEOUT", "5"))
 STOP_THRESHOLD = int(os.environ.get("SWAG_ONDEMAND_STOP_THRESHOLD", "600"))
 REMOTE_HOSTS_PREFIX = "SWAG_ONDEMAND_REMOTE"
 
@@ -44,7 +45,7 @@ class ContainerThread(threading.Thread):
     
     def process_containers(self):
         for docker_host in self.docker_hosts:
-            docker_host.init_docker_client()
+            docker_host.init_client(DOCKER_API_TIMEOUT)
 
             if not docker_host.is_connected:
                 continue

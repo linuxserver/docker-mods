@@ -24,15 +24,15 @@ class DockerHost:
     was_connected: bool = False
     ondemand_containers: dict[str, OnDemandContainer] = field(default_factory=dict)
 
-    def init_docker_client(self):
+    def init_client(self, timeout: int):
         try:
             self.was_connected = self.is_connected
             if self.client and self.client.ping():
                 return
             if self.url:
-                self.client = docker.DockerClient(base_url=self.url)
+                self.client = docker.DockerClient(base_url=self.url, timeout=timeout)
             else:
-                self.client = docker.from_env()
+                self.client = docker.from_env(timeout=timeout)
                 self.url = "unix:///var/run/docker.sock"
             self.is_connected = True
             if not self.was_connected:
