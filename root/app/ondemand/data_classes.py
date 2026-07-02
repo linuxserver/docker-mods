@@ -37,7 +37,7 @@ class DockerHost:
             self.is_connected = True
             if not self.was_connected:
                 logging.info(f"Connection to {self.url} has been restored")
-        except (docker.errors.DockerException, requests.exceptions.ConnectionError):
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
             self.client = None
             self.is_connected = False
             if self.was_connected:
@@ -45,6 +45,8 @@ class DockerHost:
 
     def get_container(self, container_name: str):
         try:
+            if not self.client:
+                return None
             return self.client.containers.get(container_name)
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
             logging.warning(f"Failed to get {container_name}, docker host {self.url} is unavailable")
@@ -52,6 +54,8 @@ class DockerHost:
 
     def get_containers(self):
         try:
+            if not self.client:
+                return None
             return self.client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
             logging.warning(f"Failed to get containers, docker host {self.url} is unavailable")
