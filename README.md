@@ -37,6 +37,8 @@ This mod gives SWAG the ability to start containers on-demand when accessed thro
 
 **You can increment the number for up to 20 remote hosts. For example: `SWAG_ONDEMAND_REMOTE2`, `SWAG_ONDEMAND_REMOTE3`, etc.**
 
+ **For WoL to work in a container, you need to either set `network_mode: host` or broadcast to the IP of the remote host and set a static ARP on the router. For example: in opnsense add an entry under Interfaces > Neighbors > Static Assignments.**
+
 ### Loading Page:
 
 ![loading-page](.assets/loading-page.png)
