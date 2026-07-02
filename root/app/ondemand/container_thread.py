@@ -50,6 +50,9 @@ class ContainerThread(threading.Thread):
                 continue
 
             containers = docker_host.get_containers()
+            if not containers:
+                continue
+
             container_names = {container.name for container in containers}
 
             for container_name in list(docker_host.ondemand_containers.keys()):
@@ -78,15 +81,19 @@ class ContainerThread(threading.Thread):
 
     def stop_containers(self):
         for docker_host in self.docker_hosts:
-            for container_name, container in docker_host.ondemand_containers.items():
-                if container.status != "running":
+            for container_name, ondemand_container in docker_host.ondemand_containers.items():
+                if ondemand_container.status != "running":
                     continue
                 
-                inactive_seconds = (datetime.now() - container.last_accessed).total_seconds()
+                inactive_seconds = (datetime.now() - ondemand_container.last_accessed).total_seconds()
                 if inactive_seconds < STOP_THRESHOLD:
                     continue
                 
-                docker_host.get_container(container_name).stop()
+                container = docker_host.get_container(container_name)
+                if not container:
+                    container
+                
+                container.stop()
                 logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
 
     def start_containers(self, last_accessed_urls_combined: str):
@@ -102,7 +109,11 @@ class ContainerThread(threading.Thread):
                 if not accessed or container.status == "running":
                     continue
                 
-                docker_host.get_container(container_name).start()
+                container = docker_host.get_container(container_name)
+                if not container:
+                    container
+
+                container.start()
                 logging.info(f"Started {container_name} on {docker_host.url}")
                 container.status = "running"
 
