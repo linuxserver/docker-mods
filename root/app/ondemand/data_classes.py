@@ -24,16 +24,19 @@ class DockerHost:
     was_connected: bool = False
     ondemand_containers: dict[str, OnDemandContainer] = field(default_factory=dict)
 
-    def init_client(self, timeout: int):
+    def check_connection(self, timeout: int):
         try:
             self.was_connected = self.is_connected
             if self.client and self.client.ping():
+                self.is_connected = True
                 return
+            
             if self.url:
                 self.client = docker.DockerClient(base_url=self.url, timeout=timeout)
             else:
                 self.client = docker.from_env(timeout=timeout)
                 self.url = "unix:///var/run/docker.sock"
+            
             self.is_connected = True
             if not self.was_connected:
                 logging.info(f"Connection to {self.url} has been restored")
@@ -41,22 +44,27 @@ class DockerHost:
             self.client = None
             self.is_connected = False
             if self.was_connected:
-                logging.warning(f"Lost connection to {self.url}")
+                logging.warning(f"Lost connection to {self.url} during health check")
+
+    def handle_disconnect(self):
+        self.client = None
+        self.is_connected = False
+        logging.warning(f"Lost connection to {self.url} during runtime operation")
 
     def get_container(self, container_name: str):
         try:
-            if not self.client:
+            if not self.client or not self.is_connected:
                 return None
             return self.client.containers.get(container_name)
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
-            logging.warning(f"Failed to get {container_name}, docker host {self.url} is unavailable")
+            self.handle_disconnect()
             return None
 
     def get_containers(self):
         try:
-            if not self.client:
+            if not self.client or not self.is_connected:
                 return None
-            return self.client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
+            return self.client.containers.list(all=True, filters={"label": ["swag_ondemand=enable"]})
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
-            logging.warning(f"Failed to get containers, docker host {self.url} is unavailable")
+            self.handle_disconnect()
             return None

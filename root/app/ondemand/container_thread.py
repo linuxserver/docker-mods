@@ -9,7 +9,6 @@ import time
 import wakeonlan
 
 CONTAINER_QUERY_SLEEP = float(os.environ.get("SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP", "5.0"))
-DOCKER_API_TIMEOUT = int(os.environ.get("SWAG_ONDEMAND_DOCKER_API_TIMEOUT", "5"))
 STOP_THRESHOLD = int(os.environ.get("SWAG_ONDEMAND_STOP_THRESHOLD", "600"))
 REMOTE_HOSTS_PREFIX = "SWAG_ONDEMAND_REMOTE"
 
@@ -27,7 +26,7 @@ class ContainerThread(threading.Thread):
             docker_host_url = f"tcp://{docker_host_url}:2375"
         self.docker_hosts.append(DockerHost(url=docker_host_url))
     
-        remote_hosts_env_vars = { key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX) }
+        remote_hosts_env_vars = {key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX)}
         for i in range(1, 21):
             if f"{REMOTE_HOSTS_PREFIX}{i}" not in remote_hosts_env_vars:
                 break
@@ -42,11 +41,9 @@ class ContainerThread(threading.Thread):
             remote_host.wol_port = int(remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_PORT", "9"))
             remote_host.wol_interface = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_INTERFACE", None)
             self.docker_hosts.append(remote_host)
-    
+
     def process_containers(self):
         for docker_host in self.docker_hosts:
-            docker_host.init_client(DOCKER_API_TIMEOUT)
-
             if not docker_host.is_connected:
                 continue
 
@@ -82,6 +79,8 @@ class ContainerThread(threading.Thread):
 
     def stop_containers(self):
         for docker_host in self.docker_hosts:
+            if not docker_host.is_connected:
+                continue
             for container_name, ondemand_container in docker_host.ondemand_containers.items():
                 if ondemand_container.status != "running":
                     continue
@@ -100,6 +99,8 @@ class ContainerThread(threading.Thread):
 
     def start_containers(self, last_accessed_urls_combined: str):
         for docker_host in self.docker_hosts:
+            if not docker_host.is_connected:
+                continue
             for container_name, ondemand_container in docker_host.ondemand_containers.items():
                 accessed = False
                 for ondemand_url in ondemand_container.urls.split(","):
@@ -125,7 +126,12 @@ class ContainerThread(threading.Thread):
                 continue
             for wol_url in docker_host.wol_urls.split(","):
                 if wol_url in last_accessed_urls_combined:
-                    wakeonlan.send_magic_packet(docker_host.wol_mac, ip_address=docker_host.wol_broadcast, port=docker_host.wol_port, interface=docker_host.wol_interface)
+                    wakeonlan.send_magic_packet(
+                        docker_host.wol_mac, 
+                        ip_address=docker_host.wol_broadcast, 
+                        port=docker_host.wol_port, 
+                        interface=docker_host.wol_interface
+                    )
                     logging.info(f"Sent a WoL packet to mac {docker_host.wol_mac} via broadcast {docker_host.wol_broadcast} on port {docker_host.wol_port} on interface {docker_host.wol_interface or 'default'} activated by {wol_url}")
                     break
 
@@ -133,12 +139,14 @@ class ContainerThread(threading.Thread):
         while True:
             try:
                 self.process_containers()
+                
                 with last_accessed_urls_lock:
                     last_accessed_urls_combined = ",".join(last_accessed_urls)
                     last_accessed_urls.clear()
+                
                 self.send_wol(last_accessed_urls_combined)
                 self.start_containers(last_accessed_urls_combined)
                 self.stop_containers()
-                time.sleep(CONTAINER_QUERY_SLEEP)
             except Exception as e:
-                logging.exception(e)
+                logging.error(f"Error in container thread main loop: {e}")
+            time.sleep(CONTAINER_QUERY_SLEEP)
