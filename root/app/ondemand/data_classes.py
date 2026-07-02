@@ -44,7 +44,7 @@ class DockerHost:
 
     def get_container(self, container_name: str):
         try:
-            return self.docker_client.containers.get(container_name)
+            return self.client.containers.get(container_name)
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
             logging.warning(f"Failed to get {container_name}, docker host {self.url} is unavailable")
             return None
