@@ -17,4 +17,4 @@ class HealthcheckThread(threading.Thread):
         while True:
             for docker_host in self.docker_hosts:
                 docker_host.check_connection(DOCKER_API_TIMEOUT)
-            time.sleep(DOCKER_API_TIMEOUT)
+            time.sleep(1)
