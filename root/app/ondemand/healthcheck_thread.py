@@ -1,5 +1,7 @@
 from data_classes import DockerHost
 
+from concurrent.futures import ThreadPoolExecutor
+import logging
 import os
 import threading
 import time
@@ -14,7 +16,20 @@ class HealthcheckThread(threading.Thread):
         self.docker_hosts = docker_hosts
 
     def run(self):
-        while True:
-            for docker_host in self.docker_hosts:
-                docker_host.check_connection(DOCKER_API_TIMEOUT)
-            time.sleep(1)
+        max_workers = max(1, len(self.docker_hosts))
+        logging.info(f"Starting HealthcheckThread with a pool of {max_workers} workers.")
+
+        with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="HealthcheckWorker") as executor:
+            while True:
+                futures = [
+                    executor.submit(docker_host.check_connection, DOCKER_API_TIMEOUT)
+                    for docker_host in self.docker_hosts
+                ]
+                
+                for future in futures:
+                    try:
+                        future.result()
+                    except Exception as e:
+                        logging.exception(e)
+                
+                time.sleep(1)

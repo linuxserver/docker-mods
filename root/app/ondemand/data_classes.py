@@ -53,18 +53,20 @@ class DockerHost:
 
     def get_container(self, container_name: str):
         try:
-            if not self.client or not self.is_connected:
+            client = self.client
+            if not client or not self.is_connected:
                 return None
-            return self.client.containers.get(container_name)
+            return client.containers.get(container_name)
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
             self.handle_disconnect()
             return None
 
     def get_containers(self):
         try:
-            if not self.client or not self.is_connected:
+            client = self.client
+            if not client or not self.is_connected:
                 return None
-            return self.client.containers.list(all=True, filters={"label": ["swag_ondemand=enable"]})
+            return client.containers.list(all=True, filters={"label": ["swag_ondemand=enable"]})
         except (docker.errors.DockerException, requests.exceptions.ConnectionError):
             self.handle_disconnect()
             return None

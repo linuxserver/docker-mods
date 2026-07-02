@@ -98,6 +98,9 @@ class ContainerThread(threading.Thread):
                 logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
 
     def start_containers(self, last_accessed_urls_combined: str):
+        if not last_accessed_urls_combined:
+            return
+        
         for docker_host in self.docker_hosts:
             if not docker_host.is_connected:
                 continue
@@ -121,6 +124,9 @@ class ContainerThread(threading.Thread):
                 logging.info(f"Started {container_name} on {docker_host.url}")
 
     def send_wol(self, last_accessed_urls_combined: str):
+        if not last_accessed_urls_combined:
+            return
+        
         for docker_host in self.docker_hosts:
             if not docker_host.wol_mac or not docker_host.wol_urls or docker_host.is_connected:
                 continue
@@ -138,15 +144,14 @@ class ContainerThread(threading.Thread):
     def run(self):
         while True:
             try:
-                self.process_containers()
-                
                 with last_accessed_urls_lock:
                     last_accessed_urls_combined = ",".join(last_accessed_urls)
                     last_accessed_urls.clear()
                 
                 self.send_wol(last_accessed_urls_combined)
+                self.process_containers()
                 self.start_containers(last_accessed_urls_combined)
                 self.stop_containers()
             except Exception as e:
-                logging.error(f"Error in container thread main loop: {e}")
+                logging.exception(e)
             time.sleep(CONTAINER_QUERY_SLEEP)
