@@ -27,7 +27,7 @@ class DockerHost:
     def init_docker_client(self):
         try:
             self.was_connected = self.is_connected
-            if self.client.ping():
+            if self.client and self.client.ping():
                 return
             if self.url:
                 self.client = docker.DockerClient(base_url=self.url)
