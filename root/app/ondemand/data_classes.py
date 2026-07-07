@@ -10,6 +10,8 @@ class OnDemandContainer:
     status: str
     urls: str
     last_accessed: datetime
+    websocket: bool
+    terminated: bool = False
 
 @dataclass
 class DockerHost:
@@ -57,7 +59,7 @@ class DockerHost:
             if not client or not self.is_connected:
                 return None
             return client.containers.get(container_name)
-        except (docker.errors.DockerException, requests.exceptions.ConnectionError):
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
             self.handle_disconnect()
             return None
 
@@ -67,6 +69,6 @@ class DockerHost:
             if not client or not self.is_connected:
                 return None
             return client.containers.list(all=True, filters={"label": ["swag_ondemand=enable"]})
-        except (docker.errors.DockerException, requests.exceptions.ConnectionError):
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
             self.handle_disconnect()
             return None

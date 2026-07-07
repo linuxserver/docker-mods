@@ -1,4 +1,4 @@
-from shared_state import last_accessed_urls, last_accessed_urls_lock
+from shared_state import last_accessed_urls, last_accessed_urls_lock, websocket_terminated_urls, websocket_terminated_urls_lock
 
 import logging
 import os
@@ -43,8 +43,12 @@ class LogReaderThread(threading.Thread):
                     for part in line.split():
                         if not part.startswith("http"):
                             continue
-                        with last_accessed_urls_lock:
-                            last_accessed_urls.add(part)
+                        if '" 101 ' in line:
+                            with websocket_terminated_urls_lock:
+                                websocket_terminated_urls.add(part)
+                        else:
+                            with last_accessed_urls_lock:
+                                last_accessed_urls.add(part)
                         break
             except Exception as e:
                 logging.exception(e)
