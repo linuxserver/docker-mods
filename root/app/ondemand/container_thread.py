@@ -1,5 +1,5 @@
 from data_classes import DockerHost, OnDemandContainer
-from shared_state import last_accessed_urls, last_accessed_urls_lock
+from shared_state import last_accessed_urls, last_accessed_urls_lock, websocket_terminated_urls, websocket_terminated_urls_lock
 
 from datetime import datetime
 import logging
@@ -61,23 +61,25 @@ class ContainerThread(threading.Thread):
             for container in containers:
                 default_url = container.labels.get("swag_url", f"{container.name}.").rstrip("*")
                 container_urls = container.labels.get("swag_ondemand_urls", f"https://{default_url},http://{default_url}")
+                websocket = container.labels.get("swag_ondemand_websocket", "0").lower() in ("true", "1")
                 
-                if container.name not in docker_host.ondemand_containers:
-                    last_accessed = datetime.now()
-                    logging.info(f"Started monitoring {container.name} on {docker_host.url} for urls: {container_urls}")
-                else:
-                    existing_container = docker_host.ondemand_containers[container.name]
-                    last_accessed = existing_container.last_accessed
-                    if container_urls != existing_container.urls:
+                if container.name in docker_host.ondemand_containers:
+                    docker_host.ondemand_containers[container.name].status = container.status
+                    docker_host.ondemand_containers[container.name].websocket = websocket
+                    if container_urls != docker_host.ondemand_containers[container.name].urls:
+                        docker_host.ondemand_containers[container.name].urls = container_urls
                         logging.info(f"Updated urls for {container.name} on {docker_host.url} to: {container_urls}")
+                else:
+                    docker_host.ondemand_containers[container.name] = OnDemandContainer(
+                        status=container.status,
+                        urls=container_urls,
+                        last_accessed=datetime.now(),
+                        websocket=websocket
+                    )
+                    logging.info(f"Started monitoring {container.name} on {docker_host.url} for urls: {container_urls}")
                 
-                docker_host.ondemand_containers[container.name] = OnDemandContainer(
-                    status=container.status,
-                    urls=container_urls,
-                    last_accessed=last_accessed
-                )
 
-    def stop_containers(self):
+    def stop_containers(self, websocket_terminated_urls_combined: str):
         for docker_host in self.docker_hosts:
             if not docker_host.is_connected:
                 continue
@@ -85,6 +87,15 @@ class ContainerThread(threading.Thread):
                 if ondemand_container.status != "running":
                     continue
                 
+                if ondemand_container.websocket and not ondemand_container.terminated:
+                    for ondemand_url in ondemand_container.urls.split(","):
+                        if ondemand_url in websocket_terminated_urls_combined:
+                            ondemand_container.last_accessed = datetime.now()
+                            ondemand_container.terminated = True
+                            break
+                    if not ondemand_container.terminated:
+                        continue
+
                 inactive_seconds = (datetime.now() - ondemand_container.last_accessed).total_seconds()
                 if inactive_seconds < STOP_THRESHOLD:
                     continue
@@ -109,6 +120,7 @@ class ContainerThread(threading.Thread):
                 for ondemand_url in ondemand_container.urls.split(","):
                     if ondemand_url in last_accessed_urls_combined:
                         ondemand_container.last_accessed = datetime.now()
+                        ondemand_container.terminated = False
                         accessed = True
                         break
                 
@@ -148,10 +160,14 @@ class ContainerThread(threading.Thread):
                     last_accessed_urls_combined = ",".join(last_accessed_urls)
                     last_accessed_urls.clear()
                 
+                with websocket_terminated_urls_lock:
+                    websocket_terminated_urls_combined = ",".join(websocket_terminated_urls)
+                    websocket_terminated_urls.clear()
+                
                 self.send_wol(last_accessed_urls_combined)
                 self.process_containers()
                 self.start_containers(last_accessed_urls_combined)
-                self.stop_containers()
+                self.stop_containers(websocket_terminated_urls_combined)
             except Exception as e:
                 logging.exception(e)
             time.sleep(CONTAINER_QUERY_SLEEP)
