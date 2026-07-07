@@ -1,5 +1,4 @@
 from data_classes import DockerHost, OnDemandContainer
-import helper
 from shared_state import last_accessed_urls, last_accessed_urls_lock
 
 from datetime import datetime
@@ -7,6 +6,7 @@ import logging
 import os
 import threading
 import time
+import wakeonlan
 
 CONTAINER_QUERY_SLEEP = float(os.environ.get("SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP", "5.0"))
 STOP_THRESHOLD = int(os.environ.get("SWAG_ONDEMAND_STOP_THRESHOLD", "600"))
@@ -22,43 +22,41 @@ class ContainerThread(threading.Thread):
 
     def init_docker_hosts(self):
         docker_host_url = os.environ.get("DOCKER_HOST", None)
-        client, url = helper.get_docker_client(docker_host_url, True)
-        if client:
-            self.docker_hosts.append(DockerHost(client=client, url=url))
+        if docker_host_url and not docker_host_url.startswith("tcp://"):
+            docker_host_url = f"tcp://{docker_host_url}:2375"
+        self.docker_hosts.append(DockerHost(url=docker_host_url))
     
-        remote_hosts_env_vars = { key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX) }
+        remote_hosts_env_vars = {key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX)}
         for i in range(1, 21):
             if f"{REMOTE_HOSTS_PREFIX}{i}" not in remote_hosts_env_vars:
                 break
             
             docker_host_url = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}"]
-            client, url = helper.get_docker_client(docker_host_url)
-            
-            if client:
-                self.docker_hosts.append(DockerHost(client=client, url=url))
+            if docker_host_url and not docker_host_url.startswith("tcp://"):
+                docker_host_url = f"tcp://{docker_host_url}:2375"
+            remote_host = DockerHost(url=docker_host_url)
+            remote_host.wol_mac = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_MAC", None)
+            remote_host.wol_broadcast = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_BROADCAST", "255.255.255.255")
+            remote_host.wol_urls = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_URLS", None)
+            remote_host.wol_port = int(remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_PORT", "9"))
+            remote_host.wol_interface = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_INTERFACE", None)
+            self.docker_hosts.append(remote_host)
 
-        if not self.docker_hosts:
-            logging.error("Failed to connect to any docker host")
-    
     def process_containers(self):
         for docker_host in self.docker_hosts:
-            if not helper.is_docker_connected(docker_host.client):
-                if docker_host.is_connected:
-                    logging.warning(f"Lost connection to {docker_host.url}")
-                docker_host.is_connected = False
+            if not docker_host.is_connected:
                 continue
 
-            if not docker_host.is_connected:
-                logging.info(f"Connection to {docker_host.url} has been restored")
-                docker_host.is_connected = True
+            containers = docker_host.get_containers()
+            if not containers:
+                continue
 
-            containers = docker_host.client.containers.list(all=True, filters={ "label": ["swag_ondemand=enable"] })
             container_names = {container.name for container in containers}
 
             for container_name in list(docker_host.ondemand_containers.keys()):
                 if container_name not in container_names:
                     docker_host.ondemand_containers.pop(container_name)
-                    logging.info(f"Stopped monitoring {container_name}")
+                    logging.info(f"Stopped monitoring {container_name} on {docker_host.url}")
 
             for container in containers:
                 default_url = container.labels.get("swag_url", f"{container.name}.").rstrip("*")
@@ -66,12 +64,12 @@ class ContainerThread(threading.Thread):
                 
                 if container.name not in docker_host.ondemand_containers:
                     last_accessed = datetime.now()
-                    logging.info(f"Started monitoring {container.name} for urls: {container_urls}")
+                    logging.info(f"Started monitoring {container.name} on {docker_host.url} for urls: {container_urls}")
                 else:
                     existing_container = docker_host.ondemand_containers[container.name]
                     last_accessed = existing_container.last_accessed
                     if container_urls != existing_container.urls:
-                        logging.info(f"Updated urls for {container.name} to: {container_urls}")
+                        logging.info(f"Updated urls for {container.name} on {docker_host.url} to: {container_urls}")
                 
                 docker_host.ondemand_containers[container.name] = OnDemandContainer(
                     status=container.status,
@@ -81,52 +79,79 @@ class ContainerThread(threading.Thread):
 
     def stop_containers(self):
         for docker_host in self.docker_hosts:
-            for container_name, container in docker_host.ondemand_containers.items():
-                if container.status != "running":
+            if not docker_host.is_connected:
+                continue
+            for container_name, ondemand_container in docker_host.ondemand_containers.items():
+                if ondemand_container.status != "running":
                     continue
                 
-                inactive_seconds = (datetime.now() - container.last_accessed).total_seconds()
+                inactive_seconds = (datetime.now() - ondemand_container.last_accessed).total_seconds()
                 if inactive_seconds < STOP_THRESHOLD:
                     continue
                 
-                if not helper.is_docker_connected(docker_host.client):
-                    logging.warning(f"Failed to stop {container_name}, docker host {docker_host.url} is unavailable")
+                container = docker_host.get_container(container_name)
+                if not container:
                     continue
                 
-                docker_host.client.containers.get(container_name).stop()
-                logging.info(f"Stopped {container_name} after {STOP_THRESHOLD}s of inactivity")
+                container.stop()
+                ondemand_container.status = "exited"
+                logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
 
-    def start_containers(self):
-        with last_accessed_urls_lock:
-            last_accessed_urls_combined = ",".join(last_accessed_urls)
-            last_accessed_urls.clear()
-
+    def start_containers(self, last_accessed_urls_combined: str):
+        if not last_accessed_urls_combined:
+            return
+        
         for docker_host in self.docker_hosts:
-            for container_name, container in docker_host.ondemand_containers.items():
+            if not docker_host.is_connected:
+                continue
+            for container_name, ondemand_container in docker_host.ondemand_containers.items():
                 accessed = False
-                for ondemand_url in container.urls.split(","):
+                for ondemand_url in ondemand_container.urls.split(","):
                     if ondemand_url in last_accessed_urls_combined:
-                        container.last_accessed = datetime.now()
+                        ondemand_container.last_accessed = datetime.now()
                         accessed = True
                         break
                 
-                if not accessed or container.status == "running":
+                if not accessed or ondemand_container.status == "running":
                     continue
                 
-                if not helper.is_docker_connected(docker_host.client):
-                    logging.warning(f"Failed to start {container_name}, docker host {docker_host.url} is unavailable")
+                container = docker_host.get_container(container_name)
+                if not container:
                     continue
-                
-                docker_host.client.containers.get(container_name).start()
-                logging.info(f"Started {container_name}")
-                container.status = "running"
+
+                container.start()
+                ondemand_container.status = "running"
+                logging.info(f"Started {container_name} on {docker_host.url}")
+
+    def send_wol(self, last_accessed_urls_combined: str):
+        if not last_accessed_urls_combined:
+            return
+        
+        for docker_host in self.docker_hosts:
+            if not docker_host.wol_mac or not docker_host.wol_urls or docker_host.is_connected:
+                continue
+            for wol_url in docker_host.wol_urls.split(","):
+                if wol_url in last_accessed_urls_combined:
+                    wakeonlan.send_magic_packet(
+                        docker_host.wol_mac, 
+                        ip_address=docker_host.wol_broadcast, 
+                        port=docker_host.wol_port, 
+                        interface=docker_host.wol_interface
+                    )
+                    logging.info(f"Sent a WoL packet to mac {docker_host.wol_mac} via broadcast {docker_host.wol_broadcast} on port {docker_host.wol_port} on interface {docker_host.wol_interface or 'default'} activated by {wol_url}")
+                    break
 
     def run(self):
         while True:
             try:
+                with last_accessed_urls_lock:
+                    last_accessed_urls_combined = ",".join(last_accessed_urls)
+                    last_accessed_urls.clear()
+                
+                self.send_wol(last_accessed_urls_combined)
                 self.process_containers()
-                self.start_containers()
+                self.start_containers(last_accessed_urls_combined)
                 self.stop_containers()
-                time.sleep(CONTAINER_QUERY_SLEEP)
             except Exception as e:
                 logging.exception(e)
+            time.sleep(CONTAINER_QUERY_SLEEP)
