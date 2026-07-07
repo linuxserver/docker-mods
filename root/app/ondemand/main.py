@@ -1,4 +1,5 @@
 from container_thread import ContainerThread
+from healthcheck_thread import HealthcheckThread
 from log_reader_thread import LogReaderThread
 
 import logging
@@ -16,9 +17,14 @@ if __name__ == "__main__":
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
     logging.info("Starting swag-ondemand...")
+    
+    container_thread = ContainerThread()
+    healthcheck_thread = HealthcheckThread(container_thread.docker_hosts)
+    log_reader_thread = LogReaderThread()
 
-    ContainerThread().start()
-    LogReaderThread().start()
+    healthcheck_thread.start()
+    container_thread.start()
+    log_reader_thread.start()
 
     while True:
         time.sleep(1)
