@@ -1,9 +1,10 @@
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
+
 import docker
-import logging
 import requests
-from typing import Optional
+
 
 @dataclass
 class OnDemandContainer:
@@ -13,15 +14,16 @@ class OnDemandContainer:
     websocket: bool
     terminated: bool = False
 
+
 @dataclass
 class DockerHost:
     url: str
-    client: Optional[docker.DockerClient] = None
-    wol_mac: Optional[str] = None
+    client: docker.DockerClient | None = None
+    wol_mac: str | None = None
     wol_broadcast: str = "255.255.255.255"
     wol_port: int = 9
-    wol_interface: Optional[str] = None
-    wol_urls: Optional[str] = None
+    wol_interface: str | None = None
+    wol_urls: str | None = None
     is_connected: bool = False
     was_connected: bool = False
     ondemand_containers: dict[str, OnDemandContainer] = field(default_factory=dict)
@@ -32,17 +34,17 @@ class DockerHost:
             if self.client and self.client.ping():
                 self.is_connected = True
                 return
-            
+
             if self.url:
                 self.client = docker.DockerClient(base_url=self.url, timeout=timeout)
             else:
                 self.client = docker.from_env(timeout=timeout)
                 self.url = "unix:///var/run/docker.sock"
-            
+
             self.is_connected = True
             if not self.was_connected:
                 logging.info(f"Connection to {self.url} has been restored")
-        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):  # ty:ignore[possibly-missing-submodule]
             self.client = None
             self.is_connected = False
             if self.was_connected:
@@ -59,7 +61,7 @@ class DockerHost:
             if not client or not self.is_connected:
                 return None
             return client.containers.get(container_name)
-        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):  # ty:ignore[possibly-missing-submodule]
             self.handle_disconnect()
             return None
 
@@ -69,6 +71,6 @@ class DockerHost:
             if not client or not self.is_connected:
                 return None
             return client.containers.list(all=True, filters={"label": ["swag_ondemand=enable"]})
-        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):  # ty:ignore[possibly-missing-submodule]
             self.handle_disconnect()
             return None
