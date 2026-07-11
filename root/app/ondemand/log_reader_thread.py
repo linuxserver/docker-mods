@@ -1,9 +1,14 @@
-from shared_state import last_accessed_urls, last_accessed_urls_lock, websocket_terminated_urls, websocket_terminated_urls_lock
-
 import logging
 import os
 import threading
 import time
+
+from shared_state import (
+    last_accessed_urls,
+    last_accessed_urls_lock,
+    websocket_terminated_urls,
+    websocket_terminated_urls_lock,
+)
 
 ACCESS_LOG_FILE = "/config/log/nginx/access.log"
 LOG_READER_SLEEP = float(os.environ.get("SWAG_ONDEMAND_LOG_READER_SLEEP", "1.0"))
@@ -15,7 +20,7 @@ class LogReaderThread(threading.Thread):
         self.daemon = True
 
     def tail(self, f):
-        f.seek(0,2)
+        f.seek(0, 2)
         inode = os.fstat(f.fileno()).st_ino
 
         while True:
@@ -24,7 +29,7 @@ class LogReaderThread(threading.Thread):
                 time.sleep(LOG_READER_SLEEP)
                 if os.stat(ACCESS_LOG_FILE).st_ino != inode:
                     f.close()
-                    f = open(ACCESS_LOG_FILE, 'r')
+                    f = open(ACCESS_LOG_FILE, "r")
                     inode = os.fstat(f.fileno()).st_ino
                 continue
             yield line

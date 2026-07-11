@@ -1,12 +1,17 @@
-from data_classes import DockerHost, OnDemandContainer
-from shared_state import last_accessed_urls, last_accessed_urls_lock, websocket_terminated_urls, websocket_terminated_urls_lock
-
-from datetime import datetime
 import logging
 import os
 import threading
 import time
+from datetime import datetime
+
 import wakeonlan
+from data_classes import DockerHost, OnDemandContainer
+from shared_state import (
+    last_accessed_urls,
+    last_accessed_urls_lock,
+    websocket_terminated_urls,
+    websocket_terminated_urls_lock,
+)
 
 CONTAINER_QUERY_SLEEP = float(os.environ.get("SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP", "5.0"))
 STOP_THRESHOLD = int(os.environ.get("SWAG_ONDEMAND_STOP_THRESHOLD", "600"))
@@ -22,21 +27,24 @@ class ContainerThread(threading.Thread):
 
     def init_docker_hosts(self):
         docker_host_url = os.environ.get("DOCKER_HOST", None)
-        if docker_host_url and not docker_host_url.startswith("tcp://"):
-            docker_host_url = f"tcp://{docker_host_url}:2375"
-        self.docker_hosts.append(DockerHost(url=docker_host_url))
-    
+        if docker_host_url:
+            if not docker_host_url.startswith("tcp://"):
+                docker_host_url = f"tcp://{docker_host_url}:2375"
+            self.docker_hosts.append(DockerHost(url=docker_host_url))
+
         remote_hosts_env_vars = {key: value for key, value in os.environ.items() if key.startswith(REMOTE_HOSTS_PREFIX)}
         for i in range(1, 21):
             if f"{REMOTE_HOSTS_PREFIX}{i}" not in remote_hosts_env_vars:
                 break
-            
+
             docker_host_url = remote_hosts_env_vars[f"{REMOTE_HOSTS_PREFIX}{i}"]
             if docker_host_url and not docker_host_url.startswith("tcp://"):
                 docker_host_url = f"tcp://{docker_host_url}:2375"
             remote_host = DockerHost(url=docker_host_url)
             remote_host.wol_mac = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_MAC", None)
-            remote_host.wol_broadcast = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_BROADCAST", "255.255.255.255")
+            remote_host.wol_broadcast = remote_hosts_env_vars.get(
+                f"{REMOTE_HOSTS_PREFIX}{i}_WOL_BROADCAST", "255.255.255.255"
+            )
             remote_host.wol_urls = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_URLS", None)
             remote_host.wol_port = int(remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_PORT", "9"))
             remote_host.wol_interface = remote_hosts_env_vars.get(f"{REMOTE_HOSTS_PREFIX}{i}_WOL_INTERFACE", None)
@@ -60,9 +68,11 @@ class ContainerThread(threading.Thread):
 
             for container in containers:
                 default_url = container.labels.get("swag_url", f"{container.name}.").rstrip("*")
-                container_urls = container.labels.get("swag_ondemand_urls", f"https://{default_url},http://{default_url}")
+                container_urls = container.labels.get(
+                    "swag_ondemand_urls", f"https://{default_url},http://{default_url}"
+                )
                 websocket = container.labels.get("swag_ondemand_websocket", "0").lower() in ("true", "1")
-                
+
                 if container.name in docker_host.ondemand_containers:
                     docker_host.ondemand_containers[container.name].status = container.status
                     docker_host.ondemand_containers[container.name].websocket = websocket
@@ -71,13 +81,9 @@ class ContainerThread(threading.Thread):
                         logging.info(f"Updated urls for {container.name} on {docker_host.url} to: {container_urls}")
                 else:
                     docker_host.ondemand_containers[container.name] = OnDemandContainer(
-                        status=container.status,
-                        urls=container_urls,
-                        last_accessed=datetime.now(),
-                        websocket=websocket
+                        status=container.status, urls=container_urls, last_accessed=datetime.now(), websocket=websocket
                     )
                     logging.info(f"Started monitoring {container.name} on {docker_host.url} for urls: {container_urls}")
-                
 
     def stop_containers(self, websocket_terminated_urls_combined: str):
         for docker_host in self.docker_hosts:
@@ -86,7 +92,7 @@ class ContainerThread(threading.Thread):
             for container_name, ondemand_container in docker_host.ondemand_containers.items():
                 if ondemand_container.status != "running":
                     continue
-                
+
                 if ondemand_container.websocket and not ondemand_container.terminated:
                     for ondemand_url in ondemand_container.urls.split(","):
                         if ondemand_url in websocket_terminated_urls_combined:
@@ -99,11 +105,11 @@ class ContainerThread(threading.Thread):
                 inactive_seconds = (datetime.now() - ondemand_container.last_accessed).total_seconds()
                 if inactive_seconds < STOP_THRESHOLD:
                     continue
-                
+
                 container = docker_host.get_container(container_name)
                 if not container:
                     continue
-                
+
                 container.stop()
                 ondemand_container.status = "exited"
                 logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
@@ -111,7 +117,7 @@ class ContainerThread(threading.Thread):
     def start_containers(self, last_accessed_urls_combined: str):
         if not last_accessed_urls_combined:
             return
-        
+
         for docker_host in self.docker_hosts:
             if not docker_host.is_connected:
                 continue
@@ -123,10 +129,10 @@ class ContainerThread(threading.Thread):
                         ondemand_container.terminated = False
                         accessed = True
                         break
-                
+
                 if not accessed or ondemand_container.status == "running":
                     continue
-                
+
                 container = docker_host.get_container(container_name)
                 if not container:
                     continue
@@ -138,19 +144,23 @@ class ContainerThread(threading.Thread):
     def send_wol(self, last_accessed_urls_combined: str):
         if not last_accessed_urls_combined:
             return
-        
+
         for docker_host in self.docker_hosts:
             if not docker_host.wol_mac or not docker_host.wol_urls or docker_host.is_connected:
                 continue
             for wol_url in docker_host.wol_urls.split(","):
                 if wol_url in last_accessed_urls_combined:
                     wakeonlan.send_magic_packet(
-                        docker_host.wol_mac, 
-                        ip_address=docker_host.wol_broadcast, 
-                        port=docker_host.wol_port, 
-                        interface=docker_host.wol_interface
+                        docker_host.wol_mac,
+                        ip_address=docker_host.wol_broadcast,
+                        port=docker_host.wol_port,
+                        interface=docker_host.wol_interface,
                     )
-                    logging.info(f"Sent a WoL packet to mac {docker_host.wol_mac} via broadcast {docker_host.wol_broadcast} on port {docker_host.wol_port} on interface {docker_host.wol_interface or 'default'} activated by {wol_url}")
+                    logging.info(
+                        "Sent a WoL packet to mac {docker_host.wol_mac} via broadcast "
+                        "{docker_host.wol_broadcast} on port {docker_host.wol_port} on "
+                        "interface {docker_host.wol_interface or 'default'} activated by {wol_url}"
+                    )
                     break
 
     def run(self):
@@ -159,11 +169,11 @@ class ContainerThread(threading.Thread):
                 with last_accessed_urls_lock:
                     last_accessed_urls_combined = ",".join(last_accessed_urls)
                     last_accessed_urls.clear()
-                
+
                 with websocket_terminated_urls_lock:
                     websocket_terminated_urls_combined = ",".join(websocket_terminated_urls)
                     websocket_terminated_urls.clear()
-                
+
                 self.send_wol(last_accessed_urls_combined)
                 self.process_containers()
                 self.start_containers(last_accessed_urls_combined)
