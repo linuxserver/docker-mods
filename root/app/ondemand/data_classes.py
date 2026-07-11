@@ -44,7 +44,7 @@ class DockerHost:
             self.is_connected = True
             if not self.was_connected:
                 logging.info(f"Connection to {self.url} has been restored")
-        except docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout:
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):  # ty:ignore[possibly-missing-submodule]
             self.client = None
             self.is_connected = False
             if self.was_connected:
@@ -61,7 +61,7 @@ class DockerHost:
             if not client or not self.is_connected:
                 return None
             return client.containers.get(container_name)
-        except docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout:
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):  # ty:ignore[possibly-missing-submodule]
             self.handle_disconnect()
             return None
 
@@ -71,6 +71,6 @@ class DockerHost:
             if not client or not self.is_connected:
                 return None
             return client.containers.list(all=True, filters={"label": ["swag_ondemand=enable"]})
-        except docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout:
+        except (docker.errors.DockerException, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):  # ty:ignore[possibly-missing-submodule]
             self.handle_disconnect()
             return None
