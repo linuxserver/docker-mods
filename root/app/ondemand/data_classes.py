@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 import docker
 import requests
@@ -19,12 +18,12 @@ class OnDemandContainer:
 @dataclass
 class DockerHost:
     url: str
-    client: Optional[docker.DockerClient] = None
-    wol_mac: Optional[str] = None
+    client: docker.DockerClient | None = None
+    wol_mac: str | None = None
     wol_broadcast: str = "255.255.255.255"
     wol_port: int = 9
-    wol_interface: Optional[str] = None
-    wol_urls: Optional[str] = None
+    wol_interface: str | None = None
+    wol_urls: str | None = None
     is_connected: bool = False
     was_connected: bool = False
     ondemand_containers: dict[str, OnDemandContainer] = field(default_factory=dict)
