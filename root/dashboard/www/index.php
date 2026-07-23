@@ -291,7 +291,7 @@
         endif;
 
         $access_log = file_exists("/dashboard/logs") ? "/dashboard/logs/*.log" : "/config/log/nginx/access.log";
-        $goaccess = shell_exec("cat $access_log | /usr/bin/goaccess -a -o html --config-file=/dashboard/goaccess.conf $geodb $asndb -");
+        $goaccess = shell_exec("/usr/bin/goaccess $access_log -a -o html --config-file=/dashboard/goaccess.conf $geodb $asndb");
         $goaccess = str_replace("<div class='loading-container'>", "<div hidden>", $goaccess);
         $goaccess = str_replace("<title>Server&nbsp;Statistics", "<title>SWAG&nbsp;Dashboard", $goaccess);
         $goaccess = str_replace("<i class='fa fa-tachometer' aria-hidden='true'></i>", "<img src='/icon.svg' width='32' height='32'>&nbsp;SWAG&nbsp;", $goaccess);
