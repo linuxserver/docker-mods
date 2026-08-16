@@ -21,7 +21,7 @@ RUN \
     echo "**** Invalid tarball, could not download crowdsec bouncer ****"; \
     exit 1; \
   fi && \
-  apk add --no-cache build-base
+  apk add --no-cache build-base && \
   curl -sLo \
     /tmp/resty.tar.gz -L \
     "https://github.com/openresty/lua-resty-string/archive/refs/tags/v0.15.tar.gz" && \
