@@ -20,7 +20,7 @@ RUN \
   if ! tar -tzf /root-layer/crowdsec-nginx-bouncer.tgz >/dev/null 2>&1; then \
     echo "**** Invalid tarball, could not download crowdsec bouncer ****"; \
     exit 1; \
-  fi
+  fi && \
   apk add --no-cache build-base
   curl -sLo \
     /tmp/resty.tar.gz -L \
