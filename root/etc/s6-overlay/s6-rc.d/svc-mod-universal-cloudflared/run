@@ -1,9 +1,11 @@
 #!/usr/bin/with-contenv bash
 
+strip_secrets=(env -u CF_TUNNEL_PASSWORD -u CF_API_TOKEN -u CF_REMOTE_MANAGE_TOKEN)
+
 if [[ -n "${CF_REMOTE_MANAGE_TOKEN}" ]]; then
-    exec s6-setuidgid abc cloudflared tunnel --no-autoupdate run --token ${CF_REMOTE_MANAGE_TOKEN}
+    exec s6-setuidgid abc "${strip_secrets[@]}" cloudflared tunnel --no-autoupdate run --token ${CF_REMOTE_MANAGE_TOKEN}
 elif [[ ${#CF_ZONE_ID} -gt 0 ]] && [[ ${#CF_ACCOUNT_ID} -gt 0 ]] && [[ ${#CF_API_TOKEN} -gt 0 ]] && [[ ${#CF_TUNNEL_NAME} -gt 0 ]] && [[ ${#CF_TUNNEL_CONFIG} -gt 0 ]] && [[ ${#CF_TUNNEL_PASSWORD} -gt 31 ]]; then
-    exec s6-setuidgid abc cloudflared tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    exec s6-setuidgid abc "${strip_secrets[@]}" cloudflared tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
 else
     echo "**** Issues with cloudflared settings, sleeping ****"
     sleep infinity
