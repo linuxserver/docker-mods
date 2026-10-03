@@ -12,13 +12,24 @@ Version: {{VERSION}}
 ----------------
 EOF
 
-# Determine if setup is needed
-if [ ! -f /usr/bin/mkvmerge ]; then
-  echo "**** Adding striptracks deps to package install list ****"
-  echo "mkvtoolnix" >> /mod-repo-packages-to-install.list
+# Determine if packages need to be installed
+commands=(/usr/bin/mkvmerge /usr/bin/sqlite3)
+if [ -f /sbin/apk ]; then
+  # Alpine
+  packages=(mkvtoolnix sqlite)
 else
-  echo "**** striptracks deps already installed, skipping ****"
+  # Ubuntu/Debian ('sqlite' is SQLite 2.x, which cannot open SQLite 3 databases)
+  packages=(mkvtoolnix sqlite3)
 fi
+for index in "${!commands[@]}"
+do
+  if [ ! -f "${commands[$index]}" ]; then
+    echo "**** Adding striptracks dependency ${packages[$index]} to package install list ****"
+    echo "${packages[$index]}" >> /mod-repo-packages-to-install.list
+  else
+    echo "**** striptracks dependency ${packages[$index]} already installed, skipping ****"
+  fi
+done
 
 # Check ownership and attributes on each script file
 for file in /usr/local/bin/striptracks*.sh

@@ -237,6 +237,7 @@ striptracks.sh [{-a|--audio} <audio_languages>[{+|-}modifiers][=name] [{-s|--sub
                [--set-default-subs <subtitle_languages>[{+|-}modifiers][=name]]
                [{-l|--log} <log_file>]
                [{-c|--config} <config_file>]
+               [--database <database_file>]
                [{-p|--priority} {idle|low|medium|high}]
                [{-d|--debug} [<level>]]
                [--no-ansi]
@@ -257,6 +258,7 @@ Option|Argument|Description
 `--set-default-subs`|`<subtitle_languages>[{+\|-}modifiers][=name]`|Set the default subtitles track to the first track the matches, and all other tracks are marked as not default.<br/>Each code may optionally be followed by a plus (`+`) or minus (`-`) and one or more modifiers.<br/>Each code may optionally be followed by an equals (`=`) and a track name matching string.
 `-l`, `--log`|`<log_file>`|The log filename<br/>Default is `/config/log/striptracks.txt`
 `-c`, `--config`|`<config_file>`|Radarr/Sonarr XML configuration file<br/>Default is `/config/config.xml`
+`--database`|`<database_file>`|Radarr/Sonarr SQLite database file<br/>Default is `/config/radarr.db` or `/config/sonarr.db`
 `-p`, `--priority`|`idle`, `low`, `medium`, `high`|CPU and I/O process priority for mkvmerge<br/>Default is `medium`<br/>![notes] High priority can consume all system resources. When processing a large video file your system may become unresponsive!
 `-d`, `--debug`|`[<level>]`|Enables debug logging. Level is optional.<br/>Default is `1` (low)<br/>`2` includes JSON output<br/>`3` contains even more JSON output
 `--no-ansi`||Force disable ANSI color codes in terminal output
