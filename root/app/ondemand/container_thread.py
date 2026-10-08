@@ -62,6 +62,12 @@ class ContainerThread(threading.Thread):
                 default_url = container.labels.get("swag_url", f"{container.name}.").rstrip("*")
                 container_urls = container.labels.get("swag_ondemand_urls", f"https://{default_url},http://{default_url}")
                 websocket = container.labels.get("swag_ondemand_websocket", "0").lower() in ("true", "1")
+                try:
+                    stop_threshold = int(container.labels.get("swag_ondemand_stop_threshold", STOP_THRESHOLD))
+                except ValueError:
+                    stop_threshold = STOP_THRESHOLD
+                if stop_threshold <= 0:
+                    stop_threshold = STOP_THRESHOLD
                 
                 if container.name in docker_host.ondemand_containers:
                     docker_host.ondemand_containers[container.name].status = container.status
@@ -69,14 +75,18 @@ class ContainerThread(threading.Thread):
                     if container_urls != docker_host.ondemand_containers[container.name].urls:
                         docker_host.ondemand_containers[container.name].urls = container_urls
                         logging.info(f"Updated urls for {container.name} on {docker_host.url} to: {container_urls}")
+                    if stop_threshold != docker_host.ondemand_containers[container.name].stop_threshold:
+                        docker_host.ondemand_containers[container.name].stop_threshold = stop_threshold
+                        logging.info(f"Updated stop threshold for {container.name} on {docker_host.url} to: {stop_threshold}s")
                 else:
                     docker_host.ondemand_containers[container.name] = OnDemandContainer(
                         status=container.status,
                         urls=container_urls,
                         last_accessed=datetime.now(),
-                        websocket=websocket
+                        websocket=websocket,
+                        stop_threshold=stop_threshold
                     )
-                    logging.info(f"Started monitoring {container.name} on {docker_host.url} for urls: {container_urls}")
+                    logging.info(f"Started monitoring {container.name} on {docker_host.url} for urls: {container_urls}, stop threshold: {stop_threshold}s")
                 
 
     def stop_containers(self, websocket_terminated_urls_combined: str):
@@ -97,7 +107,7 @@ class ContainerThread(threading.Thread):
                         continue
 
                 inactive_seconds = (datetime.now() - ondemand_container.last_accessed).total_seconds()
-                if inactive_seconds < STOP_THRESHOLD:
+                if inactive_seconds < ondemand_container.stop_threshold:
                     continue
                 
                 container = docker_host.get_container(container_name)
@@ -106,7 +116,7 @@ class ContainerThread(threading.Thread):
                 
                 container.stop()
                 ondemand_container.status = "exited"
-                logging.info(f"Stopped {container_name} on {docker_host.url} after {STOP_THRESHOLD}s of inactivity")
+                logging.info(f"Stopped {container_name} on {docker_host.url} after {ondemand_container.stop_threshold}s of inactivity")
 
     def start_containers(self, last_accessed_urls_combined: str):
         if not last_accessed_urls_combined:
