@@ -11,6 +11,7 @@ class OnDemandContainer:
     urls: str
     last_accessed: datetime
     websocket: bool
+    stop_threshold: int
     terminated: bool = False
 
 @dataclass

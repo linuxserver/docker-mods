@@ -25,7 +25,7 @@ This mod gives SWAG the ability to start containers on-demand when accessed thro
     access_log /config/log/nginx/access.log main;
     ```
 - *Optional* - Additional environment variables
-  - `SWAG_ONDEMAND_STOP_THRESHOLD` - duration of inactivity in seconds before stopping on-demand containers, defaults to `600` (10 minutes).
+  - `SWAG_ONDEMAND_STOP_THRESHOLD` - duration of inactivity in seconds before stopping on-demand containers, defaults to `600` (10 minutes). Can be overridden per container with the `swag_ondemand_stop_threshold` label.
   - `SWAG_ONDEMAND_CONTAINER_QUERY_SLEEP` - sleep time in seconds between querying containers, defaults to `5.0`.
   - `SWAG_ONDEMAND_LOG_READER_SLEEP` - sleep time in seconds between log reads, defaults to `1.0`.
   - `SWAG_ONDEMAND_DOCKER_API_TIMEOUT` - the timeout for docker's API. Defaults to `5`.
@@ -81,12 +81,14 @@ Or set the following label if using `swag-auto-proxy`:
 - `swag_ondemand=enable` - required for on-demand.
 - `swag_ondemand_urls=https://wake.domain.com,https://app.domain.com/up` - *optional* - overrides the monitored URLs for starting the container on-demand. Defaults to using the value of the `swag_url` label, if you've already set it for `swag-auto-proxy`, or `https://somecontainer.,http://somecontainer.` otherwise.
 - `swag_ondemand_websocket=1` - required for apps that communicate over a websocket, such as selkies based apps.
+- `swag_ondemand_stop_threshold=300` - *optional* - overrides `SWAG_ONDEMAND_STOP_THRESHOLD` for this container. Must be a positive whole number of seconds, otherwise `SWAG_ONDEMAND_STOP_THRESHOLD` is used.
 
 ### URLs:
 - Accessed URLs need to start with one of `swag_ondemand_urls` to be matched, for example, setting `swag_ondemand_urls=https://plex.` will apply to `https://plex.domain.com` and `https://plex.domain.com/something`.
 - `swag_ondemand_urls` default to `https://somecontainer.,http://somecontainer.`, for example `https://plex.,http://plex.`.
 - `swag_ondemand_urls` don't need to be valid, it will work as long as it reaches swag and gets logged by nginx under `/config/log/nginx/access.log`.
 - The same URL can be set on multiple containers and all of them will be started when accessing that URL.
+- Containers sharing a URL are stopped independently, each according to its own stop threshold.
 
 ### Logging:
 The log file can be found under `/config/log/ondemand/ondemand.log`.
