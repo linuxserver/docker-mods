@@ -23,7 +23,10 @@ This mod gives SWAG the ability to auto-detect running containers via labels and
 
 In SWAG docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:swag-auto-proxy` and either add a volume mapping for `/var/run/docker.sock:/var/run/docker.sock:ro`, or set an environment var `DOCKER_HOST=remoteaddress`.
 
-## Security Consideration:
+## Security Considerations:
+
+This mod allows SWAG container to take action based on labels on other containers managed by the same docker socket. Make sure that you do not allow any other users to create containers managed by the same docker socket, otherwise they would be able to manipulate SWAG's actions. This includes securing any docker management guis and making sure they are not exposed publicly without auth.
+
 Mapping the `docker.sock`, especially in a publicly accessible container is a security liability. Since this mod only needs read-only access to the docker api, the recommended method is to proxy the `docker.sock` via a solution like [our docker socket proxy](https://github.com/linuxserver/docker-socket-proxy), limit the access, and set `DOCKER_HOST=` to point to the proxy address.
 
 Here's a sample compose yaml snippet for tecnativa/docker-socket-proxy:
