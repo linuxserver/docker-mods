@@ -1,5 +1,7 @@
 # HACS - Docker mod for Home Assistant
 
+# This mod is deprecated as HACS is now built into Home Assistant as Marketplace starting with version 2026.11: https://www.home-assistant.io/integrations/marketplace/
+
 This mod adds Home Assistant Community Store (HACS) to Home Assistant, to be installed during container start.
 
 In Home Assistant docker arguments, set an environment variable `DOCKER_MODS=linuxserver/mods:homeassistant-hacs`
